@@ -9,6 +9,7 @@ import { getEnrollmentBundleByStudentId, getOrCreateEnrollmentBundle } from "@/f
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { getTrainingClass } from "@/features/classes/service";
+import { issueContractForEnrollment } from "@/features/contracts/contract-service";
 
 const isoDate = (value?: string) => value ? new Date(`${value}T12:00:00.000Z`).toISOString() : undefined;
 
@@ -124,8 +125,10 @@ export async function advanceToSignature(actor: Profile, studentId: string) {
   if (!hasApprovedRequiredDocuments(bundle.documents)) throw new Error("documents_not_approved");
   if (bundle.enrollment.monthly_fee_cents == null || bundle.enrollment.approved_due_day == null || !bundle.enrollment.first_due_date || !bundle.enrollment.contract_start || !bundle.enrollment.contract_end) throw new Error("financial_review_incomplete");
   if (!canTransitionEnrollment(bundle.enrollment.status, "awaiting_signature")) throw new Error("invalid_enrollment_transition");
-  if (bundle.enrollment.status === "awaiting_signature") return;
+  const contract = await issueContractForEnrollment(actor, studentId);
+  if (bundle.enrollment.status === "awaiting_signature") return contract;
   const { tables, config } = createAppwriteAdminClient();
   await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, rowId: bundle.enrollment.$id, data: { status: "awaiting_signature", revision: bundle.enrollment.revision + 1, updated_at: new Date().toISOString() } });
   await recordReview(actor, studentId, bundle.enrollment.$id, "awaiting_signature");
+  return contract;
 }

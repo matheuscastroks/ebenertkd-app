@@ -24,6 +24,11 @@ describe("Appwrite infrastructure schema", () => {
       "enrollments",
       "student_documents",
       "enrollment_reviews",
+      "contract_templates",
+      "contract_versions",
+      "contracts",
+      "contract_signatures",
+      "cancellation_requests",
       "audit_events",
       "automation_runs"
     ]);
@@ -56,6 +61,11 @@ describe("Appwrite infrastructure schema", () => {
       key: "status_idx",
       type: "key",
       columns: ["status"]
+    });
+    expect(tables.find((table) => table.id === "contract_signatures")?.indexes).toContainEqual({
+      key: "contract_unique",
+      type: "unique",
+      columns: ["contract_id"]
     });
   });
 

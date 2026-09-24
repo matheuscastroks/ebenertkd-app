@@ -190,6 +190,113 @@ export const tables: TableDefinition[] = [
     ]
   },
   {
+    id: APPWRITE_IDS.tables.contractTemplates,
+    name: "Contract templates",
+    columns: [
+      { key: "name", kind: "varchar", size: 128, required: true },
+      { key: "draft_content", kind: "text", required: true },
+      { key: "published_version_id", kind: "varchar", size: 36, required: false },
+      { key: "created_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "updated_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [{ key: "name_idx", type: "key", columns: ["name"] }]
+  },
+  {
+    id: APPWRITE_IDS.tables.contractVersions,
+    name: "Contract versions",
+    columns: [
+      { key: "template_id", kind: "varchar", size: 36, required: true },
+      { key: "version", kind: "integer", required: true, min: 1 },
+      { key: "content", kind: "text", required: true },
+      { key: "content_hash", kind: "varchar", size: 64, required: true },
+      { key: "published_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "published_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "template_idx", type: "key", columns: ["template_id"] },
+      { key: "template_version_unique", type: "unique", columns: ["template_id", "version"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.contracts,
+    name: "Contracts",
+    columns: [
+      { key: "enrollment_id", kind: "varchar", size: 36, required: true },
+      { key: "student_id", kind: "varchar", size: 36, required: true },
+      { key: "version_id", kind: "varchar", size: 36, required: true },
+      { key: "version_number", kind: "integer", required: true, min: 1 },
+      { key: "status", kind: "enum", elements: ["pending_signature", "signed", "expired", "cancelled"], required: true },
+      { key: "content_snapshot", kind: "text", required: true },
+      { key: "content_hash", kind: "varchar", size: 64, required: true },
+      { key: "student_name", kind: "varchar", size: 128, required: true },
+      { key: "guardian_name", kind: "varchar", size: 128, required: false },
+      { key: "monthly_fee_cents", kind: "integer", required: true, min: 0 },
+      { key: "starts_at", kind: "datetime", required: true },
+      { key: "ends_at", kind: "datetime", required: true },
+      { key: "signature_id", kind: "varchar", size: 36, required: false },
+      { key: "pdf_file_id", kind: "varchar", size: 36, required: false },
+      { key: "pdf_hash", kind: "varchar", size: 64, required: false },
+      { key: "signed_at", kind: "datetime", required: false },
+      { key: "created_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "enrollment_idx", type: "key", columns: ["enrollment_id"] },
+      { key: "student_idx", type: "key", columns: ["student_id"] },
+      { key: "status_idx", type: "key", columns: ["status"] },
+      { key: "ends_at_idx", type: "key", columns: ["ends_at"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.contractSignatures,
+    name: "Contract signatures",
+    columns: [
+      { key: "contract_id", kind: "varchar", size: 36, required: true },
+      { key: "signer_profile_id", kind: "varchar", size: 36, required: true },
+      { key: "signer_account_id", kind: "varchar", size: 36, required: true },
+      { key: "signer_name", kind: "varchar", size: 128, required: true },
+      { key: "signature_data_url", kind: "text", required: true },
+      { key: "content_hash", kind: "varchar", size: 64, required: true },
+      { key: "ip_fingerprint", kind: "varchar", size: 64, required: false },
+      { key: "user_agent", kind: "varchar", size: 512, required: false },
+      { key: "accepted_at", kind: "datetime", required: true },
+      { key: "created_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "contract_unique", type: "unique", columns: ["contract_id"] },
+      { key: "signer_idx", type: "key", columns: ["signer_profile_id"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.cancellationRequests,
+    name: "Cancellation requests",
+    columns: [
+      { key: "contract_id", kind: "varchar", size: 36, required: true },
+      { key: "enrollment_id", kind: "varchar", size: 36, required: true },
+      { key: "student_id", kind: "varchar", size: 36, required: true },
+      { key: "requested_by_profile_id", kind: "varchar", size: 36, required: true },
+      { key: "target_exit_month", kind: "datetime", required: true },
+      { key: "notice_date", kind: "datetime", required: true },
+      { key: "suggested_fee_cents", kind: "integer", required: true, min: 0 },
+      { key: "decided_fee_cents", kind: "integer", required: false, min: 0 },
+      { key: "status", kind: "enum", elements: ["pending", "approved", "rejected"], required: true },
+      { key: "reason", kind: "text", required: false },
+      { key: "decision_notes", kind: "text", required: false },
+      { key: "decided_by_account_id", kind: "varchar", size: 36, required: false },
+      { key: "decided_at", kind: "datetime", required: false },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "contract_idx", type: "key", columns: ["contract_id"] },
+      { key: "student_idx", type: "key", columns: ["student_id"] },
+      { key: "status_idx", type: "key", columns: ["status"] }
+    ]
+  },
+  {
     id: APPWRITE_IDS.tables.auditEvents,
     name: "Audit events",
     columns: [

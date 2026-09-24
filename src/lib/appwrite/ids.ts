@@ -9,6 +9,11 @@ export const APPWRITE_IDS = {
     enrollments: "enrollments",
     studentDocuments: "student_documents",
     enrollmentReviews: "enrollment_reviews",
+    contractTemplates: "contract_templates",
+    contractVersions: "contract_versions",
+    contracts: "contracts",
+    contractSignatures: "contract_signatures",
+    cancellationRequests: "cancellation_requests",
     auditEvents: "audit_events",
     automationRuns: "automation_runs"
   },
