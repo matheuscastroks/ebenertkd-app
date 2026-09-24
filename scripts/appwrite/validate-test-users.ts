@@ -6,10 +6,10 @@ import { readServerAppwriteConfig } from "../../src/lib/appwrite/config";
 loadEnvConfig(process.cwd());
 
 const cases = [
-  { role: "admin", email: "admin.teste@ebenertkd.app", password: "Admin@Teste2026!", route: "/admin", marker: "Professor Teste" },
-  { role: "adult", email: "aluno.teste@ebenertkd.app", password: "Aluno@Teste2026!", route: "/aluno", marker: "Aluno Adulto Teste" },
-  { role: "guardian", email: "responsavel.teste@ebenertkd.app", password: "Resp@Teste2026!", route: "/responsavel", marker: "Responsável Teste" },
-  { role: "minor", email: "menor.teste@minor.ebenertkd.internal", password: "Menor@Teste2026!", route: "/aluno", marker: "Aluno Menor Teste" }
+  { role: "admin", email: "ricardo.almeida@ebenertkd.app", password: "Admin@Teste2026!", route: "/admin", marker: "Ricardo Almeida" },
+  { role: "adult", email: "camila.ferreira@ebenertkd.app", password: "Aluno@Teste2026!", route: "/aluno", marker: "Camila Ferreira" },
+  { role: "guardian", email: "juliana.mendes@ebenertkd.app", password: "Resp@Teste2026!", route: "/responsavel", marker: "Juliana Mendes" },
+  { role: "minor", email: "lucas.mendes@minor.ebenertkd.internal", password: "Menor@Teste2026!", route: "/aluno", marker: "Lucas Mendes" }
 ] as const;
 
 async function main() {

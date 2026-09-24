@@ -31,33 +31,33 @@ type ProfileRow = Models.Row & {
 const accounts: SeedAccount[] = [
   {
     key: "admin",
-    name: "Professor Teste",
-    email: "admin.teste@ebenertkd.app",
+    name: "Ricardo Almeida",
+    email: "ricardo.almeida@ebenertkd.app",
     password: "Admin@Teste2026!",
     role: "admin",
     capabilities: ["admin"]
   },
   {
     key: "adult",
-    name: "Aluno Adulto Teste",
-    email: "aluno.teste@ebenertkd.app",
+    name: "Camila Ferreira",
+    email: "camila.ferreira@ebenertkd.app",
     password: "Aluno@Teste2026!",
     role: "adult_student",
     capabilities: ["student"]
   },
   {
     key: "guardian",
-    name: "Responsável Teste",
-    email: "responsavel.teste@ebenertkd.app",
+    name: "Juliana Mendes",
+    email: "juliana.mendes@ebenertkd.app",
     password: "Resp@Teste2026!",
     role: "guardian",
     capabilities: ["guardian"]
   },
   {
     key: "minor",
-    name: "Aluno Menor Teste",
-    email: "menor.teste@minor.ebenertkd.internal",
-    username: "menor.teste",
+    name: "Lucas Mendes",
+    email: "lucas.mendes@minor.ebenertkd.internal",
+    username: "lucas.mendes",
     password: "Menor@Teste2026!",
     role: "minor_student",
     capabilities: ["student"]

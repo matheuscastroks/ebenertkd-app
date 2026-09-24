@@ -16,6 +16,7 @@
     "appwrite:ping": "tsx scripts/appwrite/ping.ts",
     "appwrite:create-admin": "tsx scripts/appwrite/create-admin.ts",
     "appwrite:seed-test-users": "tsx scripts/appwrite/seed-test-users.ts",
+    "appwrite:seed-demo-data": "tsx scripts/appwrite/seed-demo-data.ts",
     "appwrite:validate-test-users": "tsx scripts/appwrite/validate-test-users.ts",
     "appwrite:deploy-function": "tsx scripts/appwrite/deploy-function.ts"
   },
