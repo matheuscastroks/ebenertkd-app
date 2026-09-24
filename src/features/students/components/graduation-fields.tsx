@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BELT_OPTIONS, GUB_BELT_OPTIONS, GUB_OPTIONS, beltForGub, gubForBelt, type BeltOption, type GubOption } from "@/features/students/options";
 
 export function GraduationFields({ defaultBelt, defaultGub }: { defaultBelt?: string | null; defaultGub?: number | null }) {
@@ -12,28 +14,28 @@ export function GraduationFields({ defaultBelt, defaultGub }: { defaultBelt?: st
   const [belt, setBelt] = useState<BeltOption | "">(initialBelt ?? "");
 
   return <>
-    <label className="grid gap-2">
-      <span className="text-sm font-medium">Faixa atual *</span>
-      <select name="current_belt" value={belt} onChange={(event) => {
-        const nextBelt = event.target.value as BeltOption | "";
+    <Field>
+      <FieldLabel htmlFor="current-belt">Faixa atual *</FieldLabel>
+      <Select name="current_belt" value={belt} onValueChange={(value) => {
+        const nextBelt = value as BeltOption;
         setBelt(nextBelt);
-        setGub(nextBelt ? (gubForBelt(nextBelt) ?? "") : "");
-      }} required className="h-8 rounded-lg border bg-background px-2.5 text-sm">
-        <option value="">Selecione a faixa</option>
-        {GUB_BELT_OPTIONS.map(({ belt: option, gub: optionGub }) => <option key={option} value={option}>{option} · {optionGub}º GUB</option>)}
-      </select>
-    </label>
-    <label className="grid gap-2">
-      <span className="text-sm font-medium">GUB *</span>
-      <select name="gub" value={gub} onChange={(event) => {
-        const nextGub = event.target.value ? Number(event.target.value) as GubOption : "";
+        setGub(gubForBelt(nextBelt) ?? "");
+      }} required>
+        <SelectTrigger id="current-belt" className="w-full"><SelectValue placeholder="Selecione a faixa" /></SelectTrigger>
+        <SelectContent>{GUB_BELT_OPTIONS.map(({ belt: option, gub: optionGub }) => <SelectItem key={option} value={option}>{option} · {optionGub}º GUB</SelectItem>)}</SelectContent>
+      </Select>
+    </Field>
+    <Field>
+      <FieldLabel htmlFor="current-gub">GUB *</FieldLabel>
+      <Select name="gub" value={gub ? String(gub) : ""} onValueChange={(value) => {
+        const nextGub = Number(value) as GubOption;
         setGub(nextGub);
-        setBelt(nextGub ? (beltForGub(nextGub) ?? "") : "");
-      }} required className="h-8 rounded-lg border bg-background px-2.5 text-sm">
-        <option value="">Selecione o GUB</option>
-        {GUB_BELT_OPTIONS.map(({ belt: optionBelt, gub: option }) => <option key={option} value={option}>{option}º GUB · {optionBelt}</option>)}
-      </select>
-      <span className="text-xs text-muted-foreground">Faixa e GUB são sincronizados automaticamente.</span>
-    </label>
+        setBelt(beltForGub(nextGub) ?? "");
+      }} required>
+        <SelectTrigger id="current-gub" className="w-full"><SelectValue placeholder="Selecione o GUB" /></SelectTrigger>
+        <SelectContent>{GUB_BELT_OPTIONS.map(({ belt: optionBelt, gub: option }) => <SelectItem key={option} value={String(option)}>{option}º GUB · {optionBelt}</SelectItem>)}</SelectContent>
+      </Select>
+      <FieldDescription>Faixa e GUB são sincronizados automaticamente.</FieldDescription>
+    </Field>
   </>;
 }

@@ -1,8 +1,10 @@
-import { AlertCircle, LockKeyhole, Shield, UserRound } from "lucide-react";
+import { LockKeyhole, Shield, UserRound } from "lucide-react";
 import Link from "next/link";
 import { loginAdultAction, loginMinorAction } from "@/app/actions/auth";
-import { Button } from "@/components/ui/button";
+import { FeedbackAlert } from "@/components/shared/feedback-alert";
+import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
 export function LoginCard({
@@ -31,37 +33,24 @@ export function LoginCard({
           </div>
         </div>
 
-        {errorMessage ? (
-          <div className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
-            <AlertCircle className="mt-0.5 h-4 w-4" />
-            <span>{errorMessage}</span>
-          </div>
-        ) : null}
+        {errorMessage ? <FeedbackAlert tone="danger" title="Não foi possível entrar" description={errorMessage} /> : null}
 
         <form action={action} className="space-y-4">
           {isMinor ? (
-            <label className="grid gap-2">
-              <span className="text-sm font-medium">Nome de usuário</span>
-              <Input name="username" autoComplete="username" placeholder="ex.: joao.silva" required />
-            </label>
+            <Field><FieldLabel htmlFor="login-username">Nome de usuário</FieldLabel><Input id="login-username" name="username" autoComplete="username" placeholder="ex.: joao.silva" required /></Field>
           ) : (
-            <label className="grid gap-2">
-              <span className="text-sm font-medium">E-mail</span>
-              <Input name="email" type="email" autoComplete="email" placeholder="voce@exemplo.com" required />
-            </label>
+            <Field><FieldLabel htmlFor="login-email">E-mail</FieldLabel><Input id="login-email" name="email" type="email" autoComplete="email" placeholder="voce@exemplo.com" required /></Field>
           )}
 
-          <label className="grid gap-2">
-            <span className="text-sm font-medium">Senha</span>
+          <Field>
+            <FieldLabel htmlFor={`login-password-${type}`}>Senha</FieldLabel>
             <div className="relative">
               <LockKeyhole className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input name="password" type="password" autoComplete="current-password" className="pl-9" placeholder="Sua senha" required />
+              <Input id={`login-password-${type}`} name="password" type="password" autoComplete="current-password" className="pl-9" placeholder="Sua senha" required />
             </div>
-          </label>
+          </Field>
 
-          <Button type="submit" className="w-full">
-            Entrar
-          </Button>
+          <FormSubmitButton className="w-full" pendingLabel="Entrando…">Entrar</FormSubmitButton>
           {!isMinor ? <Link href="/recuperar" className="block text-center text-sm text-muted-foreground underline-offset-4 hover:underline">Esqueci minha senha</Link> : null}
         </form>
       </CardContent>

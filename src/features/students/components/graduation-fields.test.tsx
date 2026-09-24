@@ -7,14 +7,16 @@ describe("GraduationFields", () => {
   it("updates GUB when the belt changes", async () => {
     const user = userEvent.setup();
     render(<GraduationFields defaultBelt="Cinza" defaultGub={9} />);
-    await user.selectOptions(screen.getByLabelText("Faixa atual *"), "Azul");
-    expect(screen.getByRole("combobox", { name: /^GUB/ })).toHaveValue("4");
+    await user.click(screen.getByRole("combobox", { name: "Faixa atual *" }));
+    await user.click(screen.getByRole("option", { name: "Azul · 4º GUB" }));
+    expect(screen.getByRole("combobox", { name: /^GUB/ })).toHaveTextContent("4º GUB");
   });
 
   it("updates the belt when GUB changes", async () => {
     const user = userEvent.setup();
     render(<GraduationFields defaultBelt="Cinza" defaultGub={9} />);
-    await user.selectOptions(screen.getByRole("combobox", { name: /^GUB/ }), "2");
-    expect(screen.getByLabelText("Faixa atual *")).toHaveValue("Vermelha");
+    await user.click(screen.getByRole("combobox", { name: /^GUB/ }));
+    await user.click(screen.getByRole("option", { name: "2º GUB · Vermelha" }));
+    expect(screen.getByRole("combobox", { name: "Faixa atual *" })).toHaveTextContent("Vermelha");
   });
 });
