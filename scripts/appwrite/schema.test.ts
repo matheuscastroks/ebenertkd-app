@@ -40,6 +40,10 @@ describe("Appwrite infrastructure schema", () => {
       "payments",
       "payment_reversals",
       "billing_settings",
+      "notifications",
+      "notification_recipients",
+      "push_subscriptions",
+      "notification_deliveries",
       "audit_events",
       "automation_runs"
     ]);
@@ -107,6 +111,16 @@ describe("Appwrite infrastructure schema", () => {
       key: "charge_origin_unique",
       type: "unique",
       columns: ["enrollment_id", "charge_type", "competence", "origin_id"]
+    });
+    expect(tables.find((table) => table.id === "notifications")?.indexes).toContainEqual({
+      key: "dedupe_key_unique",
+      type: "unique",
+      columns: ["dedupe_key"]
+    });
+    expect(tables.find((table) => table.id === "push_subscriptions")?.indexes).toContainEqual({
+      key: "endpoint_hash_unique",
+      type: "unique",
+      columns: ["endpoint_hash"]
     });
   });
 

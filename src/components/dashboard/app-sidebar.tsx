@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Award, Building2, CalendarCheck2, ChevronRight, ClipboardList, FileSignature, LayoutDashboard, UserRound, UsersRound, WalletCards } from "lucide-react";
+import { Award, Bell, Building2, CalendarCheck2, ChevronRight, ClipboardList, FileSignature, LayoutDashboard, UserRound, UsersRound, WalletCards } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Sidebar,
@@ -28,6 +28,7 @@ export type AppSidebarNavItem = SidebarNavItem;
 
 const navIcons = {
   dashboard: LayoutDashboard,
+  notifications: Bell,
   enrollment: ClipboardList,
   students: UsersRound,
   classes: Building2,

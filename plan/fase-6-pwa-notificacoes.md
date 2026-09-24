@@ -19,11 +19,11 @@
 
 ### Entrega 6B — Caixa de avisos e Web Push
 
-- [ ] Criar schema, tipos, regras de acesso, serviços, ações e testes das notificações.
-- [ ] Adicionar `/avisos` à navegação de professor, aluno e responsável.
-- [ ] Implementar publicação por audiência e destinatários congelados.
-- [ ] Implementar opt-in por clique, múltiplos dispositivos, revogação e envio genérico.
-- [ ] Validar infraestrutura, aplicação e fluxo autenticado; commit `feat: add notification inbox and web push`.
+- [x] Criar schema, tipos, regras de acesso, serviços, ações e testes das notificações.
+- [x] Adicionar `/avisos` à navegação de professor, aluno e responsável.
+- [x] Implementar publicação por audiência e destinatários congelados.
+- [x] Implementar opt-in por clique, múltiplos dispositivos, revogação e envio genérico.
+- [x] Validar infraestrutura, aplicação e fluxo autenticado; commit `feat: add notification inbox and web push`.
 
 ### Entrega 6C — Automação financeira
 
@@ -48,12 +48,12 @@
 
 **Arquivos:** criar `src/features/notifications/types.ts`, `notification-service.ts`, `push-service.ts`, `src/app/(portal)/avisos/page.tsx`; alterar schema.
 
-- [ ] Criar `notifications`, `notification_recipients`, `push_subscriptions` e `notification_deliveries`.
-- [ ] Professor publica aviso geral, por turma ou individual; destinatários são congelados na publicação.
-- [ ] Caixa interna mostra histórico, lido/não lido e destino, respeitando família e papel.
-- [ ] Solicitar push apenas após clique explicativo; armazenar endpoint e chaves criptografadas/privadas por conta e dispositivo.
-- [ ] Remover inscrição em respostas 404/410; não considerar push enviado como lido.
-- [ ] Usar texto de tela bloqueada genérico, sem CPF, saúde, valor ou nome completo.
+- [x] Criar `notifications`, `notification_recipients`, `push_subscriptions` e `notification_deliveries`.
+- [x] Professor publica aviso geral, por turma ou individual; destinatários são congelados na publicação.
+- [x] Caixa interna mostra histórico, lido/não lido e destino, respeitando família e papel.
+- [x] Solicitar push apenas após clique explicativo; armazenar endpoint e chaves criptografadas/privadas por conta e dispositivo.
+- [x] Remover inscrição em respostas 404/410; não considerar push enviado como lido.
+- [x] Usar texto de tela bloqueada genérico, sem CPF, saúde, valor ou nome completo.
 
 ## 6.3 Lembretes automáticos
 

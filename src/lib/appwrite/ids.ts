@@ -25,6 +25,10 @@ export const APPWRITE_IDS = {
     payments: "payments",
     paymentReversals: "payment_reversals",
     billingSettings: "billing_settings",
+    notifications: "notifications",
+    notificationRecipients: "notification_recipients",
+    pushSubscriptions: "push_subscriptions",
+    notificationDeliveries: "notification_deliveries",
     auditEvents: "audit_events",
     automationRuns: "automation_runs"
   },

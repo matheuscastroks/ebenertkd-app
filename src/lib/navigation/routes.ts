@@ -2,6 +2,7 @@ import type { Profile } from "@/features/auth/types";
 
 export const ROUTES = {
   home: "/",
+  notifications: "/avisos",
   admin: "/admin",
   adminEnrollments: "/admin/matriculas",
   adminClasses: "/admin/turmas",
@@ -20,7 +21,7 @@ export const ROUTES = {
   guardianDependents: "/responsavel/dependentes"
 } as const;
 
-export type SidebarNavIcon = "dashboard" | "enrollment" | "students" | "classes" | "exams" | "attendance" | "family" | "contracts" | "billing";
+export type SidebarNavIcon = "dashboard" | "notifications" | "enrollment" | "students" | "classes" | "exams" | "attendance" | "family" | "contracts" | "billing";
 export type SidebarNavGroup = "Principal" | "Alunos" | "Operação" | "Financeiro" | "Documentos";
 
 export type SidebarNavItem = {
@@ -37,6 +38,7 @@ export type SidebarNavItem = {
 export function navigationForProfile(profile: Pick<Profile, "role" | "capabilities">, counts: { enrollments?: number } = {}): SidebarNavItem[] {
   if (profile.role === "admin") return [
     { label: "Visão geral", href: ROUTES.admin, exact: true, icon: "dashboard", group: "Principal" },
+    { label: "Avisos", href: ROUTES.notifications, icon: "notifications", group: "Principal" },
     { label: "Matrículas", href: ROUTES.adminEnrollments, icon: "students", group: "Alunos", badge: counts.enrollments },
     { label: "Turmas e horários", href: ROUTES.adminClasses, icon: "classes", group: "Operação" },
     { label: "Exames de faixa", href: ROUTES.adminExams, icon: "exams", group: "Operação" },
@@ -58,16 +60,19 @@ export function navigationForProfile(profile: Pick<Profile, "role" | "capabiliti
   ];
   if (profile.role === "guardian") return [
     { label: "Visão geral", href: ROUTES.guardian, exact: true, icon: "dashboard" },
+    { label: "Avisos", href: ROUTES.notifications, icon: "notifications" },
     { label: "Meus dependentes", href: ROUTES.guardianDependents, icon: "family" }
   ];
   if (profile.role === "minor_student") return [
     { label: "Visão geral", href: ROUTES.student, exact: true, icon: "dashboard" },
+    { label: "Avisos", href: ROUTES.notifications, icon: "notifications" },
     { label: "Minha matrícula", href: ROUTES.studentEnrollment, icon: "enrollment" },
     { label: "Minha frequência", href: ROUTES.studentAttendance, icon: "attendance" },
     { label: "Contratos", href: ROUTES.studentContracts, icon: "contracts" }
   ];
   const items: SidebarNavItem[] = [
     { label: "Visão geral", href: ROUTES.student, exact: true, icon: "dashboard" },
+    { label: "Avisos", href: ROUTES.notifications, icon: "notifications" },
     { label: "Minha matrícula", href: ROUTES.studentEnrollment, icon: "enrollment" },
     { label: "Minha frequência", href: ROUTES.studentAttendance, icon: "attendance" },
     { label: "Contratos", href: ROUTES.studentContracts, icon: "contracts" },

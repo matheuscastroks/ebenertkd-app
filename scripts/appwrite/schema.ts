@@ -522,6 +522,83 @@ export const tables: TableDefinition[] = [
     indexes: []
   },
   {
+    id: APPWRITE_IDS.tables.notifications,
+    name: "Notifications",
+    columns: [
+      { key: "kind", kind: "enum", elements: ["announcement", "payment_reminder", "system"], required: true },
+      { key: "title", kind: "varchar", size: 128, required: true },
+      { key: "body", kind: "text", required: true },
+      { key: "audience", kind: "enum", elements: ["all", "class", "profile", "system"], required: true },
+      { key: "audience_id", kind: "varchar", size: 36, required: false },
+      { key: "action_url", kind: "varchar", size: 512, required: false },
+      { key: "dedupe_key", kind: "varchar", size: 160, required: true },
+      { key: "created_by_account_id", kind: "varchar", size: 36, required: false },
+      { key: "published_at", kind: "datetime", required: true },
+      { key: "created_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "dedupe_key_unique", type: "unique", columns: ["dedupe_key"] },
+      { key: "published_at_idx", type: "key", columns: ["published_at"] },
+      { key: "audience_idx", type: "key", columns: ["audience", "audience_id"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.notificationRecipients,
+    name: "Notification recipients",
+    columns: [
+      { key: "notification_id", kind: "varchar", size: 36, required: true },
+      { key: "profile_id", kind: "varchar", size: 36, required: true },
+      { key: "account_id", kind: "varchar", size: 36, required: true },
+      { key: "read_at", kind: "datetime", required: false },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "notification_profile_unique", type: "unique", columns: ["notification_id", "profile_id"] },
+      { key: "profile_created_idx", type: "key", columns: ["profile_id", "created_at"] },
+      { key: "notification_idx", type: "key", columns: ["notification_id"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.pushSubscriptions,
+    name: "Push subscriptions",
+    columns: [
+      { key: "profile_id", kind: "varchar", size: 36, required: true },
+      { key: "account_id", kind: "varchar", size: 36, required: true },
+      { key: "endpoint_hash", kind: "varchar", size: 64, required: true },
+      { key: "subscription_ciphertext", kind: "text", required: true },
+      { key: "user_agent", kind: "varchar", size: 512, required: false },
+      { key: "status", kind: "enum", elements: ["active", "expired", "revoked"], required: true },
+      { key: "last_seen_at", kind: "datetime", required: true },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "endpoint_hash_unique", type: "unique", columns: ["endpoint_hash"] },
+      { key: "profile_status_idx", type: "key", columns: ["profile_id", "status"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.notificationDeliveries,
+    name: "Notification deliveries",
+    columns: [
+      { key: "notification_id", kind: "varchar", size: 36, required: true },
+      { key: "recipient_id", kind: "varchar", size: 36, required: true },
+      { key: "subscription_id", kind: "varchar", size: 36, required: true },
+      { key: "channel", kind: "enum", elements: ["push"], required: true },
+      { key: "status", kind: "enum", elements: ["pending", "sent", "failed", "expired", "skipped"], required: true },
+      { key: "attempts", kind: "integer", required: true, min: 0, max: 100 },
+      { key: "last_error", kind: "text", required: false },
+      { key: "delivered_at", kind: "datetime", required: false },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "recipient_subscription_unique", type: "unique", columns: ["recipient_id", "subscription_id"] },
+      { key: "notification_status_idx", type: "key", columns: ["notification_id", "status"] }
+    ]
+  },
+  {
     id: APPWRITE_IDS.tables.auditEvents,
     name: "Audit events",
     columns: [

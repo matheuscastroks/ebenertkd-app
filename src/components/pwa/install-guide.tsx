@@ -20,17 +20,21 @@ export function InstallGuide() {
   useEffect(() => {
     const alreadyInstalled = window.matchMedia("(display-mode: standalone)").matches;
     const wasDismissed = window.localStorage.getItem(DISMISS_KEY) === "true";
-    setDismissed(wasDismissed || alreadyInstalled);
-
     const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    setShowIosGuide(isIos && !alreadyInstalled);
+    const initialize = window.setTimeout(() => {
+      setDismissed(wasDismissed || alreadyInstalled);
+      setShowIosGuide(isIos && !alreadyInstalled);
+    }, 0);
 
     const handleInstallPrompt = (event: Event) => {
       event.preventDefault();
       setPrompt(event as InstallPromptEvent);
     };
     window.addEventListener("beforeinstallprompt", handleInstallPrompt);
-    return () => window.removeEventListener("beforeinstallprompt", handleInstallPrompt);
+    return () => {
+      window.clearTimeout(initialize);
+      window.removeEventListener("beforeinstallprompt", handleInstallPrompt);
+    };
   }, []);
 
   if (dismissed || (!prompt && !showIosGuide)) return null;
