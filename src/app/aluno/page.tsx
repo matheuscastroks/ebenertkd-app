@@ -11,10 +11,11 @@ export default async function StudentPage() {
   return <PhaseOnePanel name={profile.full_name} badge="Aluno adulto" title="Minha conta" description="Sua sessão está ativa e protegida pelo Appwrite." items={[
     { title: "Perfil", description: "Identidade única para cadastro, treinos e financeiro." },
     { title: "Segurança", description: "A senha pode ser recuperada pelo e-mail cadastrado." },
-    { title: "Em breve", description: "Ficha de saúde, documentos e graduação na Fase 2." }
+    { title: "Matrícula", description: "Preencha sua ficha, envie documentos e acompanhe a análise." }
   ]}>
-    <Card><CardHeader><CardTitle className="text-base">Também é responsável por um menor?</CardTitle></CardHeader><CardContent>
-      {guardian ? <Button asChild><Link href="/responsavel">Gerenciar dependentes</Link></Button> : <form action={enableGuardianAction}><Button type="submit">Ativar perfil de responsável</Button></form>}
+    <Card><CardHeader><CardTitle className="text-base">Ficha do aluno</CardTitle></CardHeader><CardContent className="flex flex-wrap gap-3">
+      <Button asChild><Link href="/matricula">Abrir minha matrícula</Link></Button>
+      {guardian ? <Button asChild variant="outline"><Link href="/responsavel">Gerenciar dependentes</Link></Button> : <form action={enableGuardianAction}><Button type="submit" variant="outline">Ativar perfil de responsável</Button></form>}
     </CardContent></Card>
   </PhaseOnePanel>;
 }
