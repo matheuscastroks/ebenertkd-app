@@ -78,8 +78,8 @@ export async function submitEnrollmentAction(formData: FormData) {
   const destination = enrollmentPath(actor, profileId);
   try {
     await persistEnrollment(actor, formData, true);
-  } catch {
-    redirect(`${destination}?error=submit`);
+  } catch (error) {
+    redirect(`${destination}?error=${error instanceof Error && error.message === "profile_photo_required" ? "photo" : "submit"}`);
   }
   redirect(`${destination}?submitted=1`);
 }

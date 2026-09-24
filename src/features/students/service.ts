@@ -73,8 +73,36 @@ export async function listEnrollmentsForReview(filters: { search?: string; statu
   if (filters.trainingClass?.trim()) queries.push(Query.equal("training_class", [filters.trainingClass.trim()]));
   const students = await tables.listRows<Student>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, queries });
   const rows = await Promise.all(students.rows.map(async (student) => {
-    const enrollments = await tables.listRows<Enrollment>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, queries: [Query.equal("student_id", [student.$id]), Query.limit(1)] });
-    return { student, enrollment: enrollments.rows[0] ?? null };
+    const [enrollments, photos] = await Promise.all([
+      tables.listRows<Enrollment>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, queries: [Query.equal("student_id", [student.$id]), Query.limit(1)] }),
+      tables.listRows<StudentDocument>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.studentDocuments, queries: [Query.equal("student_id", [student.$id]), Query.equal("document_type", ["profile_photo"]), Query.limit(1)] })
+    ]);
+    const photo = photos.rows[0];
+    return { student, enrollment: enrollments.rows[0] ?? null, profilePhotoDocumentId: photo?.status === "rejected" ? undefined : photo?.$id };
   }));
   return { rows: filters.status ? rows.filter((row) => row.enrollment?.status === filters.status) : rows, nextCursor: students.rows.length === 20 ? students.rows.at(-1)?.$id : undefined };
+}
+
+export async function listProfilePhotoDocumentIds(profileIds: string[]) {
+  const result = new Map<string, string>();
+  if (profileIds.length === 0) return result;
+  const { tables, config } = createAppwriteAdminClient();
+  const students = await tables.listRows<Student>({
+    databaseId: config.databaseId,
+    tableId: APPWRITE_IDS.tables.students,
+    queries: [Query.equal("profile_id", profileIds), Query.limit(100)]
+  });
+  if (students.rows.length === 0) return result;
+  const documents = await tables.listRows<StudentDocument>({
+    databaseId: config.databaseId,
+    tableId: APPWRITE_IDS.tables.studentDocuments,
+    queries: [Query.equal("student_id", students.rows.map((student) => student.$id)), Query.equal("document_type", ["profile_photo"]), Query.limit(100)]
+  });
+  const profileByStudent = new Map(students.rows.map((student) => [student.$id, student.profile_id]));
+  for (const document of documents.rows) {
+    if (document.status === "rejected") continue;
+    const profileId = profileByStudent.get(document.student_id);
+    if (profileId) result.set(profileId, document.$id);
+  }
+  return result;
 }

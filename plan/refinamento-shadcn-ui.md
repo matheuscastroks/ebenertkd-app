@@ -85,12 +85,12 @@ type SearchFieldProps = {
 - Modify: `src/app/responsavel/dependentes/page.tsx`
 - Test: `src/features/students/components/student-avatar.test.tsx`
 
-- [ ] Tornar `profile_photo` obrigatória para submissão, mantendo rascunho sem foto.
-- [ ] Criar `StudentAvatar` com `AvatarImage`, iniciais em `AvatarFallback`, tamanhos padronizados e endpoint autenticado já existente.
-- [ ] Exibir preview no cadastro e avatar nas listas, detalhes e seleção de dependente.
-- [ ] Testar foto disponível, carregamento quebrado, fallback e ausência de autorização.
-- [ ] Executar `npm test -- src/features/students/components/student-avatar.test.tsx && npm run typecheck`; esperar teste e tipagem aprovados.
-- [ ] Commit: `feat: use student photos as profile identity`.
+- [x] Tornar `profile_photo` obrigatória para submissão, mantendo rascunho sem foto.
+- [x] Criar `StudentAvatar` com `AvatarImage`, iniciais em `AvatarFallback`, tamanhos padronizados e endpoint autenticado já existente.
+- [x] Exibir preview no cadastro e avatar nas listas, detalhes e seleção de dependente.
+- [x] Testar foto disponível, carregamento quebrado, fallback e ausência de autorização.
+- [x] Executar `npm test -- src/features/students/components/student-avatar.test.tsx && npm run typecheck`; teste e tipagem aprovados.
+- [x] Commit: `feat: use student photos as profile identity`.
 
 ### Subfase 2: Formulários, datas e progresso
 
@@ -169,7 +169,7 @@ type SearchFieldProps = {
 - [ ] Nenhuma busca nova usa `Input` sem `InputGroup` e nome acessível.
 - [ ] Datas de dia usam `Calendar + Popover`; exceções estão documentadas no PR.
 - [ ] Toda fila potencialmente longa possui paginação por URL e alternativa mobile.
-- [ ] A foto do aluno aparece com `Avatar` em cadastro, listas e detalhes, respeitando autorização.
+- [x] A foto do aluno aparece com `Avatar` em cadastro, listas e detalhes, respeitando autorização.
 - [ ] Sidebar permanece montada durante loading e contém apenas destinos permitidos ao perfil.
 - [ ] Tooltip contém apenas informação complementar; avisos críticos continuam perceptíveis sem hover.
 - [ ] Testes, `npm run lint`, `npm run typecheck` e `npm run build` passam ao final de cada subfase.

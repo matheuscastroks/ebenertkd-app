@@ -1,4 +1,4 @@
-import { MAX_DOCUMENT_BYTES, canTransitionEnrollment, detectFileKind, hasApprovedRequiredDocuments, validateDocumentFile, validateSubmission } from "@/features/students/rules";
+import { MAX_DOCUMENT_BYTES, canRoleViewStudentDocument, canTransitionEnrollment, detectFileKind, hasApprovedRequiredDocuments, hasRequiredSubmissionPhoto, validateDocumentFile, validateSubmission } from "@/features/students/rules";
 import type { StudentDocument } from "@/features/students/types";
 import { DUE_DAY_OPTIONS, GUB_OPTIONS, beltForGub, graduationMatches, gubForBelt } from "@/features/students/options";
 
@@ -63,5 +63,19 @@ describe("enrollment rules", () => {
     const document = (document_type: StudentDocument["document_type"], status: StudentDocument["status"]) => ({ document_type, status }) as StudentDocument;
     expect(hasApprovedRequiredDocuments([document("profile_photo", "approved"), document("medical_certificate", "pending")])).toBe(false);
     expect(hasApprovedRequiredDocuments([document("profile_photo", "approved"), document("medical_certificate", "approved")])).toBe(true);
+  });
+
+  it("requires a current profile photo before submission", () => {
+    const document = (document_type: StudentDocument["document_type"], status: StudentDocument["status"]) => ({ document_type, status }) as StudentDocument;
+    expect(hasRequiredSubmissionPhoto([])).toBe(false);
+    expect(hasRequiredSubmissionPhoto([document("profile_photo", "rejected")])).toBe(false);
+    expect(hasRequiredSubmissionPhoto([document("profile_photo", "pending")])).toBe(true);
+    expect(hasRequiredSubmissionPhoto([document("profile_photo", "approved")])).toBe(true);
+  });
+
+  it("allows minors to view only their profile photo document", () => {
+    expect(canRoleViewStudentDocument("minor_student", "profile_photo")).toBe(true);
+    expect(canRoleViewStudentDocument("minor_student", "medical_certificate")).toBe(false);
+    expect(canRoleViewStudentDocument("admin", "medical_certificate")).toBe(true);
   });
 });

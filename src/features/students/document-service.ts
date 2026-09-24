@@ -6,7 +6,7 @@ import type { Profile } from "@/features/auth/types";
 import { writeAuditEvent } from "@/features/auth/service";
 import { canAccessStudent } from "@/features/students/access";
 import { recordReview } from "@/features/students/enrollment-service";
-import { validateDocumentFile } from "@/features/students/rules";
+import { canRoleViewStudentDocument, validateDocumentFile } from "@/features/students/rules";
 import { getEnrollmentBundleByStudentId } from "@/features/students/service";
 import type { DocumentType, StudentDocument } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
@@ -91,13 +91,13 @@ export async function uploadStudentDocument(
 }
 
 export async function downloadStudentDocument(actor: Profile, documentId: string) {
-  if (actor.role === "minor_student") throw new Error("sensitive_document_access_denied");
   const { storage, tables, config } = createAppwriteAdminClient();
   const document = await tables.getRow<StudentDocument>({
     databaseId: config.databaseId,
     tableId: APPWRITE_IDS.tables.studentDocuments,
     rowId: documentId
   });
+  if (!canRoleViewStudentDocument(actor.role, document.document_type)) throw new Error("sensitive_document_access_denied");
   const bundle = await getEnrollmentBundleByStudentId(document.student_id);
   if (!(await canAccessStudent(actor, bundle.student.profile_id))) throw new Error("student_access_denied");
   const buffer = await storage.getFileDownload({ bucketId: APPWRITE_IDS.bucket, fileId: document.file_id });

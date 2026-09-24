@@ -1,5 +1,6 @@
 import { studentSubmissionSchema } from "@/features/students/schemas";
 import type { DocumentType, EnrollmentStatus, StudentDocument } from "@/features/students/types";
+import type { AppRole } from "@/lib/auth/auth-utils";
 
 export const MAX_DOCUMENT_BYTES = 5 * 1024 * 1024;
 
@@ -26,6 +27,14 @@ export function hasApprovedRequiredDocuments(documents: StudentDocument[]) {
   return (["profile_photo", "medical_certificate"] as DocumentType[]).every((type) =>
     documents.some((document) => document.document_type === type && document.status === "approved")
   );
+}
+
+export function hasRequiredSubmissionPhoto(documents: StudentDocument[]) {
+  return documents.some((document) => document.document_type === "profile_photo" && document.status !== "rejected");
+}
+
+export function canRoleViewStudentDocument(role: AppRole, documentType: DocumentType) {
+  return role !== "minor_student" || documentType === "profile_photo";
 }
 
 export function detectFileKind(bytes: Uint8Array) {

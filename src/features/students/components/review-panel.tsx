@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { EnrollmentBundle } from "@/features/students/types";
 import { DUE_DAY_OPTIONS, beltForGub, type GubOption } from "@/features/students/options";
+import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { ROUTES } from "@/lib/navigation/routes";
 import { centsToReaisInput } from "@/lib/money";
 import { renewContractAction } from "@/app/actions/renewals";
@@ -21,8 +22,9 @@ const documentLabel = { profile_photo: "Foto do aluno", medical_certificate: "At
 export function ReviewPanel({ bundle, reviews, notice }: { bundle: EnrollmentBundle; reviews: Array<Record<string, unknown>>; notice?: string }) {
   const { student, enrollment, documents } = bundle;
   const currentBelt = student.gub ? beltForGub(student.gub as GubOption) : student.current_belt;
+  const profilePhoto = documents.find((document) => document.document_type === "profile_photo");
   return <div className="space-y-5">
-    <div className="flex flex-wrap items-start justify-between gap-3"><div><Link href={ROUTES.adminEnrollments} className="text-sm text-muted-foreground underline">Voltar para alunos</Link><h1 className="mt-2 text-2xl font-semibold">{student.full_name}</h1><p className="text-muted-foreground">CPF {student.cpf ?? "não informado"} · Faixa {currentBelt ?? "não informada"}</p></div><StatusBadge tone={enrollment.status === "active" ? "success" : enrollment.status === "cancelled" ? "danger" : "info"}>{enrollment.status.replaceAll("_", " ")}</StatusBadge></div>
+    <div className="flex flex-wrap items-start justify-between gap-3"><div className="flex items-center gap-4"><StudentAvatar name={student.full_name} photoDocumentId={profilePhoto?.$id} size="lg" /><div><Link href={ROUTES.adminEnrollments} className="text-sm text-muted-foreground underline">Voltar para alunos</Link><h1 className="mt-2 text-2xl font-semibold">{student.full_name}</h1><p className="text-muted-foreground">CPF {student.cpf ?? "não informado"} · Faixa {currentBelt ?? "não informada"}</p></div></div><StatusBadge tone={enrollment.status === "active" ? "success" : enrollment.status === "cancelled" ? "danger" : "info"}>{enrollment.status.replaceAll("_", " ")}</StatusBadge></div>
     {notice ? <FeedbackAlert tone={notice.includes("Não") ? "danger" : "success"} title={notice} /> : null}
     <div className="grid gap-5 lg:grid-cols-2">
       <Card><CardHeader><CardTitle>Ficha do aluno</CardTitle></CardHeader><CardContent className="grid gap-2 text-sm">

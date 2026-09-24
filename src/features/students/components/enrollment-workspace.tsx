@@ -46,8 +46,10 @@ export async function EnrollmentWorkspace({
     ? "Rascunho salvo."
     : query.submitted
       ? "Ficha enviada para análise."
-      : query.error
-        ? "Não foi possível salvar. Revise os campos e arquivos."
+      : query.error === "photo"
+        ? "Adicione a foto do aluno antes de enviar a ficha para análise."
+        : query.error
+          ? "Não foi possível salvar. Revise os campos e arquivos."
         : undefined;
 
   return (

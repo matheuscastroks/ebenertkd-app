@@ -4,7 +4,7 @@ import { ID, Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import { writeAuditEvent } from "@/features/auth/service";
 import { studentDraftSchema, studentSubmissionSchema, financialReviewSchema, type StudentDraftInput } from "@/features/students/schemas";
-import { canTransitionEnrollment, hasApprovedRequiredDocuments } from "@/features/students/rules";
+import { canTransitionEnrollment, hasApprovedRequiredDocuments, hasRequiredSubmissionPhoto } from "@/features/students/rules";
 import { getEnrollmentBundleByStudentId, getOrCreateEnrollmentBundle } from "@/features/students/service";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
@@ -18,6 +18,7 @@ export async function saveEnrollmentDraft(target: Profile, actor: Profile, input
   const parsed = (submit ? studentSubmissionSchema : studentDraftSchema).parse(input);
   const bundle = await getOrCreateEnrollmentBundle(target, actor);
   if (bundle.enrollment.status !== "draft") throw new Error("enrollment_locked");
+  if (submit && !hasRequiredSubmissionPhoto(bundle.documents)) throw new Error("profile_photo_required");
   const trainingClass = parsed.trainingClassId ? await getTrainingClass(parsed.trainingClassId) : null;
   if (trainingClass && trainingClass.status !== "active") throw new Error("training_class_inactive");
   const { tables, config } = createAppwriteAdminClient();

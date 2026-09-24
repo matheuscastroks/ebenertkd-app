@@ -5,18 +5,20 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { FeedbackAlert } from "@/components/shared/feedback-alert";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { listGuardianMinors } from "@/features/families/service";
+import { StudentAvatar } from "@/features/students/components/student-avatar";
+import { listProfilePhotoDocumentIds } from "@/features/students/service";
 import { requireCapability } from "@/lib/auth/session";
 import { guardianBillingPath, guardianContractsPath, guardianEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
 
 export default async function DependentsPage({ searchParams }: { searchParams: Promise<{ error?: string; created?: string }> }) {
   const guardian = await requireCapability("guardian");
   const [minors, params] = await Promise.all([listGuardianMinors(guardian), searchParams]);
+  const photoIds = await listProfilePhotoDocumentIds(minors.map((minor) => minor.$id));
   return (
     <PhaseOnePanel profile={guardian} activePath={ROUTES.guardianDependents} title="Meus dependentes" description="Crie o acesso do menor e administre somente as contas vinculadas a você." items={[
       { title: "Dependentes", description: `${minors.length} aluno(s) vinculado(s) à sua conta.` },
@@ -35,7 +37,7 @@ export default async function DependentsPage({ searchParams }: { searchParams: P
         </CardContent></Card>
         <div className="space-y-4">
           {minors.length === 0 ? <EmptyState title="Nenhum dependente cadastrado" description="Crie o acesso do primeiro aluno menor usando o formulário ao lado." /> : minors.map((minor) => (
-            <Card key={minor.$id}><CardHeader><div className="flex items-center gap-3"><Avatar><AvatarFallback>{minor.full_name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase()}</AvatarFallback></Avatar><div><CardTitle className="text-base">{minor.full_name}</CardTitle><p className="text-xs text-muted-foreground">Aluno menor</p></div></div></CardHeader><CardContent className="space-y-4">
+            <Card key={minor.$id}><CardHeader><div className="flex items-center gap-3"><StudentAvatar name={minor.full_name} photoDocumentId={photoIds.get(minor.$id)} /><div><CardTitle className="text-base">{minor.full_name}</CardTitle><p className="text-xs text-muted-foreground">Aluno menor</p></div></div></CardHeader><CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">Usuário: <strong className="text-foreground">{minor.username}</strong></p>
               <div className="flex flex-wrap gap-2"><Button asChild><Link href={guardianEnrollmentPath(minor.$id)}>Abrir ficha de matrícula</Link></Button><Button asChild variant="outline"><Link href={guardianContractsPath(minor.$id)}>Contratos</Link></Button><Button asChild variant="outline"><Link href={guardianBillingPath(minor.$id)}>Financeiro</Link></Button></div>
               <form action={resetMinorPasswordAction} className="flex flex-col gap-2 sm:flex-row sm:items-end">
