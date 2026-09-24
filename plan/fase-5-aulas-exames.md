@@ -10,6 +10,49 @@
 
 ---
 
+## Decisões de implementação
+
+- `training_classes` permanece como agregado simples de turma + horário recorrente; criar `classes` e `class_schedules` duplicaria dados já usados pela matrícula.
+- `class_enrollments` passa a registrar o vínculo histórico. `students.training_class_id` continua como leitura rápida e será sincronizado na ativação do contrato.
+- A fase será entregue em três commits independentes: núcleo de aulas, interface/histórico de chamada e exames/graduação.
+- Datas de aula usam `YYYY-MM-DD` no domínio e meio-dia UTC no Appwrite para evitar mudança de dia por fuso.
+
+## Sequência executável
+
+### Subfase 5A — Núcleo de aulas e presença
+
+**Arquivos:** alterar `src/lib/appwrite/ids.ts`, `scripts/appwrite/schema.ts`, `src/features/classes/types.ts`, `src/features/classes/schemas.ts`, `src/features/classes/service.ts`, `src/features/contracts/signature-service.ts`; criar `src/features/classes/lesson-service.ts`, `src/features/classes/attendance-service.ts` e testes de regras.
+
+- [x] Adicionar localização à turma e criar `class_enrollments`, `lessons` e `attendance_records` com chaves únicas.
+- [x] Sincronizar vínculo de turma somente quando a matrícula se torna ativa; encerramento preserva datas e histórico.
+- [x] Criar aula regular ou reposição de forma idempotente e impedir novas aulas em turma inativa.
+- [x] Validar lote de chamada completo, estados permitidos e justificativa em correções.
+- [x] Registrar correções no audit log e calcular frequência usando todos os registros do período.
+- [x] Testar regras, executar `infra:plan`, suíte, lint, typecheck e build.
+- [ ] Commit: `feat: add lesson and attendance domain`.
+
+### Subfase 5B — Chamada mobile e histórico
+
+**Arquivos:** criar rotas sob `src/app/admin/turmas/[classId]/`, ações em `src/app/actions/attendance.ts` e componentes em `src/features/classes/components/`; adicionar consultas do aluno e responsável.
+
+- [ ] Mostrar aulas de hoje, criar reposição e abrir uma chamada por URL compartilhável.
+- [ ] Renderizar uma linha por aluno com `Avatar` e controles grandes `Presente`, `Falta` e `Justificada`.
+- [ ] Salvar o lote uma vez, destacar conflitos e exigir motivo ao corrigir chamada concluída.
+- [ ] Exibir frequência mensal para professor e histórico isolado para aluno/responsável.
+- [ ] Validar teclado, 360 px, autorização e estados vazios.
+- [ ] Commit: `feat: add mobile attendance workflow`.
+
+### Subfase 5C — Exames e graduação
+
+**Arquivos:** criar `src/features/exams/`, ações e rotas sob `src/app/admin/exames/`; integrar `src/features/billing/charge-service.ts` e graduação do aluno.
+
+- [ ] Criar `exam_events`, `exam_participants` e `belt_history` com índices idempotentes.
+- [ ] Confirmar participante e gerar uma única `exam_fee`; tratar remoção conforme estado do pagamento.
+- [ ] Concluir evento transacionando resultado, histórico e faixa/GUB sem duplicação.
+- [ ] Implementar páginas de evento, participantes e resultado com valores em reais.
+- [ ] Testar cobrança, cancelamento, reexecução e ordem do histórico.
+- [ ] Commit: `feat: add belt exam management`.
+
 ## 5.1 Turmas e aulas
 
 **Arquivos:** criar `src/features/classes/types.ts`, `schemas.ts`, `class-service.ts`, `attendance-service.ts`; alterar `scripts/appwrite/schema.ts`.
@@ -47,4 +90,3 @@
 - [ ] Testar ordem do histórico e atualização coerente de faixa/GUB.
 - [ ] Rodar suíte, lint, typecheck e build.
 - [ ] Gate: professor executa chamada e exame completos; ficha, cobrança, pagamento e graduação permanecem consistentes.
-

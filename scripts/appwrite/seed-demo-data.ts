@@ -79,16 +79,16 @@ async function main() {
   const guardianByStudent = new Map(linksResult.rows.map((link) => [link.student_profile_id, profilesById.get(link.guardian_profile_id)]));
 
   const classDefinitions = [
-    { key: "adult-night", name: "Adulto noite", weekdays: ["Segunda", "Quarta", "Sexta"], start_time: "18:00", end_time: "19:30", capacity: 20 },
-    { key: "children-morning", name: "Infantil manhã", weekdays: ["Terça", "Quinta"], start_time: "09:00", end_time: "10:00", capacity: 16 },
-    { key: "youth-afternoon", name: "Juvenil tarde", weekdays: ["Terça", "Quinta", "Sábado"], start_time: "16:00", end_time: "17:15", capacity: 18 }
+    { key: "adult-night", name: "Adulto noite", weekdays: ["Segunda", "Quarta", "Sexta"], start_time: "18:00", end_time: "19:30", location: "Dojang principal", capacity: 20 },
+    { key: "children-morning", name: "Infantil manhã", weekdays: ["Terça", "Quinta"], start_time: "09:00", end_time: "10:00", location: "Sala infantil", capacity: 16 },
+    { key: "youth-afternoon", name: "Juvenil tarde", weekdays: ["Terça", "Quinta", "Sábado"], start_time: "16:00", end_time: "17:15", location: "Dojang principal", capacity: 18 }
   ] as const;
   const existingClasses = await tables.listRows<ClassRow>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.trainingClasses, queries: [Query.limit(100)] });
   const classes = new Map<string, SeedRow>();
   for (const definition of classDefinitions) {
     const existing = existingClasses.rows.find((item) => item.name === definition.name);
     const rowId = existing?.$id ?? demoId("class", definition.key);
-    const row = await upsertRow(APPWRITE_IDS.tables.trainingClasses, rowId, { name: definition.name, weekdays: [...definition.weekdays], start_time: definition.start_time, end_time: definition.end_time, capacity: definition.capacity, status: "active", created_by_account_id: admin.account_id, created_at: existing?.$createdAt ?? now, updated_at: now });
+    const row = await upsertRow(APPWRITE_IDS.tables.trainingClasses, rowId, { name: definition.name, weekdays: [...definition.weekdays], start_time: definition.start_time, end_time: definition.end_time, location: definition.location, capacity: definition.capacity, status: "active", created_by_account_id: admin.account_id, created_at: existing?.$createdAt ?? now, updated_at: now });
     classes.set(definition.key, row);
   }
 
@@ -128,6 +128,8 @@ async function main() {
     const contractEnd = `${monthOffset(now, 9)}-28T12:00:00.000Z`;
     const firstDueDate = demoDueDate(monthOffset(now, -1), scenario.dueDay);
     const enrollment = await upsertRow(APPWRITE_IDS.tables.enrollments, enrollmentId, { student_id: student.$id, status: "active", requested_due_day: scenario.dueDay, approved_due_day: scenario.dueDay, monthly_fee_cents: scenario.monthlyFeeCents, discount_cents: scenario.discountCents, first_due_date: firstDueDate, contract_start: contractStart, contract_end: contractEnd, revision: 2, submitted_at: contractStart, created_at: existingEnrollments.rows[0]?.$createdAt ?? now, updated_at: now }, ownerPermissions);
+
+    await upsertRow(APPWRITE_IDS.tables.classEnrollments, demoId("class-enrollment", scenario.key), { training_class_id: trainingClass.$id, enrollment_id: enrollment.$id, student_id: student.$id, status: "active", started_at: contractStart, created_at: contractStart, updated_at: now });
 
     const contractId = demoId("contract", scenario.key);
     const signer = guardian ?? profile;

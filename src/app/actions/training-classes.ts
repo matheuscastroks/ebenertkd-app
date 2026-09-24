@@ -11,6 +11,7 @@ function classInput(formData: FormData) {
     weekdays: formData.getAll("weekdays"),
     startTime: formData.get("start_time"),
     endTime: formData.get("end_time"),
+    location: formData.get("location") || undefined,
     capacity: formData.get("capacity") || undefined
   };
 }

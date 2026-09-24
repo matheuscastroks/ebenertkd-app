@@ -20,6 +20,9 @@ describe("Appwrite infrastructure schema", () => {
       "profiles",
       "guardian_student_links",
       "training_classes",
+      "class_enrollments",
+      "lessons",
+      "attendance_records",
       "students",
       "enrollments",
       "student_documents",
@@ -66,6 +69,21 @@ describe("Appwrite infrastructure schema", () => {
       key: "status_idx",
       type: "key",
       columns: ["status"]
+    });
+    expect(tables.find((table) => table.id === "class_enrollments")?.indexes).toContainEqual({
+      key: "class_enrollment_unique",
+      type: "unique",
+      columns: ["training_class_id", "enrollment_id"]
+    });
+    expect(tables.find((table) => table.id === "lessons")?.indexes).toContainEqual({
+      key: "class_date_time_unique",
+      type: "unique",
+      columns: ["training_class_id", "lesson_date", "start_time"]
+    });
+    expect(tables.find((table) => table.id === "attendance_records")?.indexes).toContainEqual({
+      key: "lesson_enrollment_unique",
+      type: "unique",
+      columns: ["lesson_id", "class_enrollment_id"]
     });
     expect(tables.find((table) => table.id === "contract_signatures")?.indexes).toContainEqual({
       key: "contract_unique",

@@ -77,6 +77,7 @@ export const tables: TableDefinition[] = [
       { key: "weekdays", kind: "varchar", size: 16, required: true, array: true },
       { key: "start_time", kind: "varchar", size: 5, required: true },
       { key: "end_time", kind: "varchar", size: 5, required: true },
+      { key: "location", kind: "varchar", size: 160, required: false },
       { key: "capacity", kind: "integer", required: false, min: 1, max: 500 },
       { key: "status", kind: "enum", elements: ["active", "inactive"], required: true },
       { key: "created_by_account_id", kind: "varchar", size: 36, required: true },
@@ -86,6 +87,65 @@ export const tables: TableDefinition[] = [
     indexes: [
       { key: "status_idx", type: "key", columns: ["status"] },
       { key: "name_idx", type: "key", columns: ["name"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.classEnrollments,
+    name: "Class enrollments",
+    columns: [
+      { key: "training_class_id", kind: "varchar", size: 36, required: true },
+      { key: "enrollment_id", kind: "varchar", size: 36, required: true },
+      { key: "student_id", kind: "varchar", size: 36, required: true },
+      { key: "status", kind: "enum", elements: ["active", "ended"], required: true },
+      { key: "started_at", kind: "datetime", required: true },
+      { key: "ended_at", kind: "datetime", required: false },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "class_enrollment_unique", type: "unique", columns: ["training_class_id", "enrollment_id"] },
+      { key: "class_status_idx", type: "key", columns: ["training_class_id", "status"] },
+      { key: "student_idx", type: "key", columns: ["student_id"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.lessons,
+    name: "Lessons",
+    columns: [
+      { key: "training_class_id", kind: "varchar", size: 36, required: true },
+      { key: "lesson_date", kind: "datetime", required: true },
+      { key: "start_time", kind: "varchar", size: 5, required: true },
+      { key: "end_time", kind: "varchar", size: 5, required: true },
+      { key: "lesson_type", kind: "enum", elements: ["regular", "makeup"], required: true },
+      { key: "status", kind: "enum", elements: ["open", "completed", "cancelled"], required: true },
+      { key: "created_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "class_date_time_unique", type: "unique", columns: ["training_class_id", "lesson_date", "start_time"] },
+      { key: "date_status_idx", type: "key", columns: ["lesson_date", "status"] },
+      { key: "class_idx", type: "key", columns: ["training_class_id"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.attendanceRecords,
+    name: "Attendance records",
+    columns: [
+      { key: "lesson_id", kind: "varchar", size: 36, required: true },
+      { key: "class_enrollment_id", kind: "varchar", size: 36, required: true },
+      { key: "enrollment_id", kind: "varchar", size: 36, required: true },
+      { key: "student_id", kind: "varchar", size: 36, required: true },
+      { key: "status", kind: "enum", elements: ["present", "absent", "excused"], required: true },
+      { key: "recorded_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "correction_reason", kind: "text", required: false },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "lesson_enrollment_unique", type: "unique", columns: ["lesson_id", "class_enrollment_id"] },
+      { key: "lesson_idx", type: "key", columns: ["lesson_id"] },
+      { key: "student_idx", type: "key", columns: ["student_id"] }
     ]
   },
   {

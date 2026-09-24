@@ -26,7 +26,7 @@ export async function createTrainingClass(actor: Profile, raw: unknown) {
   const input = trainingClassSchema.parse(raw);
   const { tables, config } = createAppwriteAdminClient();
   const now = new Date().toISOString();
-  const row = await tables.createRow<TrainingClass>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.trainingClasses, rowId: ID.unique(), permissions: [], data: { name: input.name, weekdays: input.weekdays, start_time: input.startTime, end_time: input.endTime, capacity: input.capacity, status: "active", created_by_account_id: actor.account_id, created_at: now, updated_at: now } });
+  const row = await tables.createRow<TrainingClass>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.trainingClasses, rowId: ID.unique(), permissions: [], data: { name: input.name, weekdays: input.weekdays, start_time: input.startTime, end_time: input.endTime, location: input.location, capacity: input.capacity, status: "active", created_by_account_id: actor.account_id, created_at: now, updated_at: now } });
   await writeAuditEvent("training_class.created", actor.account_id, "training_class", row.$id);
   return row;
 }
@@ -35,7 +35,7 @@ export async function updateTrainingClass(actor: Profile, classId: string, raw: 
   if (actor.role !== "admin") throw new Error("admin_required");
   const input = trainingClassSchema.parse(raw);
   const { tables, config } = createAppwriteAdminClient();
-  await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.trainingClasses, rowId: classId, data: { name: input.name, weekdays: input.weekdays, start_time: input.startTime, end_time: input.endTime, capacity: input.capacity, updated_at: new Date().toISOString() } });
+  await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.trainingClasses, rowId: classId, data: { name: input.name, weekdays: input.weekdays, start_time: input.startTime, end_time: input.endTime, location: input.location, capacity: input.capacity, updated_at: new Date().toISOString() } });
   await writeAuditEvent("training_class.updated", actor.account_id, "training_class", classId);
 }
 

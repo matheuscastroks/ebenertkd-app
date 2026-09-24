@@ -5,12 +5,13 @@ import { InputFile } from "node-appwrite/file";
 import type { Profile } from "@/features/auth/types";
 import { writeAuditEvent } from "@/features/auth/service";
 import { createFirstMonthlyCharge } from "@/features/billing/charge-service";
+import { ensureActiveClassEnrollment } from "@/features/classes/class-enrollment-service";
 import { buildSignedContractPdf } from "@/features/contracts/pdf";
 import { canSignContract, hashContent, privacyIpFingerprint } from "@/features/contracts/rules";
 import { signatureInputSchema } from "@/features/contracts/schemas";
 import { getContractForActor } from "@/features/contracts/contract-service";
 import type { Contract, ContractSignature } from "@/features/contracts/types";
-import type { Enrollment } from "@/features/students/types";
+import type { Enrollment, Student } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 
@@ -29,10 +30,12 @@ async function reconcileSignedContract(contract: Contract, signature: ContractSi
   const now = signature.accepted_at;
   await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contracts, rowId: contract.$id, data: { status: "signed", signature_id: signature.$id, pdf_file_id: contract.$id, pdf_hash: pdfHash, signed_at: now, updated_at: new Date().toISOString() } });
   const enrollment = await tables.getRow<Enrollment>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, rowId: contract.enrollment_id });
+  const student = await tables.getRow<Student>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, rowId: enrollment.student_id });
   if (enrollment.status === "awaiting_signature") {
     await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, rowId: contract.enrollment_id, data: { status: "active", updated_at: new Date().toISOString() } });
     await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, rowId: enrollment.student_id, data: { status: "active", updated_at: new Date().toISOString() } });
   } else if (enrollment.status !== "active") throw new Error("enrollment_not_awaiting_signature");
+  await ensureActiveClassEnrollment({ ...enrollment, status: "active" }, student);
   await createFirstMonthlyCharge(contract, enrollment);
   return { pdfHash };
 }
