@@ -11,6 +11,7 @@ import { getEnrollmentBundleByStudentId } from "@/features/students/service";
 import type { DocumentType, StudentDocument } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { notifyAdmins } from "@/features/notifications/notification-service";
 
 function filePermissions(target: Profile, actor: Profile) {
   const accountIds = new Set([target.account_id, actor.account_id]);
@@ -83,6 +84,7 @@ export async function uploadStudentDocument(
       student_id: studentId,
       document_type: documentType
     });
+    await notifyAdmins({ title: "Documento aguardando análise", body: `${bundle.student.full_name} enviou ${documentType === "profile_photo" ? "uma foto de perfil" : "um atestado médico"}.`, dedupeKey: `document-pending:${document.$id}:${document.updated_at}`, actionUrl: `/admin/matriculas/${studentId}` }).catch(() => undefined);
     return document;
   } catch (error) {
     await storage.deleteFile({ bucketId: APPWRITE_IDS.bucket, fileId: createdFile.$id }).catch(() => undefined);

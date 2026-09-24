@@ -9,6 +9,7 @@ import type { PaymentProof } from "@/features/billing/types";
 import { detectFileKind, MAX_DOCUMENT_BYTES } from "@/features/students/rules";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { notifyAdmins } from "@/features/notifications/notification-service";
 
 function validateProof(file: File, bytes: Uint8Array) {
   if (file.size < 1 || file.size > MAX_DOCUMENT_BYTES) throw new Error("invalid_size");
@@ -38,6 +39,7 @@ export async function uploadPaymentProof(actor: Profile, chargeId: string, file:
     if (previous.rows[0]?.status === "pending") await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.paymentProofs, rowId: previous.rows[0].$id, data: { status: "superseded", updated_at: now } });
     await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: charge.$id, data: { status: "proof_under_review", updated_at: now } });
     await writeAuditEvent("billing.proof.uploaded", actor.account_id, "payment_proof", proof.$id, { charge_id: charge.$id, version });
+    await notifyAdmins({ title: "Comprovante aguardando análise", body: `${bundle.student.full_name} enviou um comprovante de pagamento.`, dedupeKey: `payment-proof-pending:${proof.$id}`, actionUrl: "/admin/financeiro" }).catch(() => undefined);
     return proof;
   } catch (error) {
     await storage.deleteFile({ bucketId: APPWRITE_IDS.bucket, fileId: fileRow.$id }).catch(() => undefined);

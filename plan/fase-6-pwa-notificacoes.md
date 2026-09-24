@@ -27,10 +27,10 @@
 
 ### Entrega 6C — Automação financeira
 
-- [ ] Implementar calendário puro e testável de lembretes.
-- [ ] Integrar geração idempotente e entrega à Function diária.
-- [ ] Integrar avisos operacionais relevantes ao professor.
-- [ ] Validar reexecução, estados de cobrança e destinatários de menores; commit `feat: add automated payment reminders`.
+- [x] Implementar calendário puro e testável de lembretes.
+- [x] Integrar geração idempotente e entrega à Function diária.
+- [x] Integrar avisos operacionais relevantes ao professor.
+- [x] Validar reexecução, estados de cobrança e destinatários de menores; commit `feat: add automated payment reminders`.
 
 ---
 
@@ -59,16 +59,16 @@
 
 **Arquivos:** criar `src/features/notifications/payment-reminders.ts`; integrar à Function `daily-operations`.
 
-- [ ] Criar etapas `due_minus_3`, `due_today`, `overdue_plus_3`, `overdue_weekly_N`.
-- [ ] Enviar para adulto ou responsáveis vinculados ao menor; nunca enviar finanças à conta do menor.
-- [ ] Suspender em `proof_under_review`; encerrar em `paid`/`cancelled`; rejeição gera aviso imediato e reinicia somente etapas futuras.
-- [ ] Deduplicar por cobrança+destinatário+etapa; novas tentativas atualizam a mesma entrega.
-- [ ] Notificar professor sobre cadastro submetido, documento pendente, comprovante e falha de automação.
+- [x] Criar etapas `due_minus_3`, `due_today`, `overdue_plus_3`, `overdue_weekly_N`.
+- [x] Enviar para adulto ou responsáveis vinculados ao menor; nunca enviar finanças à conta do menor.
+- [x] Suspender em `proof_under_review`; encerrar em `paid`/`cancelled`; rejeição gera aviso imediato e reinicia somente etapas futuras.
+- [x] Deduplicar por cobrança+destinatário+etapa; novas tentativas atualizam a mesma entrega.
+- [x] Notificar professor sobre cadastro submetido, documento pendente, comprovante e falha de automação.
 
 ## Testes e aceite
 
 - [ ] Testar atualização do SW, navegação sem rede, ausência de cache sensível e permissão push negada.
 - [ ] Testar inscrição expirada, múltiplos dispositivos, responsável de dois filhos e usuário sem push.
-- [ ] Testar calendário de lembretes, análise, rejeição, pagamento e reexecução do cron.
+- [x] Testar calendário de lembretes, análise, rejeição, pagamento e reexecução do cron.
 - [ ] Validar Android/Chrome e iPhone/Safari instalado; registrar modelo, SO e resultado.
 - [ ] Gate: toda mensagem fica na caixa interna e push nunca é duplicado nem vaza dado sensível.

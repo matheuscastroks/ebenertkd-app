@@ -11,6 +11,7 @@ import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { getTrainingClass } from "@/features/classes/service";
 import { issueContractForEnrollment } from "@/features/contracts/contract-service";
 import { beltForGub, type GubOption } from "@/features/students/options";
+import { notifyAdmins } from "@/features/notifications/notification-service";
 
 const isoDate = (value?: string) => value ? new Date(`${value}T12:00:00.000Z`).toISOString() : undefined;
 
@@ -72,6 +73,7 @@ export async function saveEnrollmentDraft(target: Profile, actor: Profile, input
     }
   });
   await writeAuditEvent(submit ? "enrollment.submitted" : "enrollment.draft_saved", actor.account_id, "enrollment", enrollment.$id, { student_id: student.$id });
+  if (submit) await notifyAdmins({ title: "Nova matrícula para análise", body: `${student.full_name} concluiu o cadastro.`, dedupeKey: `enrollment-submitted:${enrollment.$id}:${enrollment.revision}`, actionUrl: `/admin/matriculas/${student.$id}` }).catch(() => undefined);
   return getEnrollmentBundleByStudentId(student.$id);
 }
 

@@ -111,3 +111,24 @@ export async function listNotificationAudienceOptions() {
   ]);
   return { profiles: profiles.rows, classes: classes.rows };
 }
+
+export async function notificationProfilesForStudent(studentId: string, financial = false) {
+  const { tables, config } = createAppwriteAdminClient();
+  const student = await tables.getRow<Student>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, rowId: studentId });
+  const profile = await tables.getRow<Profile>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.profiles, rowId: student.profile_id });
+  const family = await addGuardians([profile]);
+  return financial && profile.role === "minor_student" ? family.filter((item) => item.role !== "minor_student") : family;
+}
+
+export async function notifyAdmins(input: { title: string; body: string; dedupeKey: string; actionUrl: string }) {
+  const { tables, config } = createAppwriteAdminClient();
+  const admins = await tables.listRows<Profile>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.profiles, queries: [Query.equal("role", ["admin"]), Query.equal("status", ["active"]), Query.limit(100)] });
+  if (!admins.rows.length) return;
+  return createNotification({ kind: "system", title: input.title, body: input.body, audience: "system", actionUrl: input.actionUrl, dedupeKey: input.dedupeKey, recipientProfiles: admins.rows });
+}
+
+export async function notifyStudentFinancial(input: { studentId: string; title: string; body: string; dedupeKey: string; actionUrl?: string }) {
+  const recipients = await notificationProfilesForStudent(input.studentId, true);
+  if (!recipients.length) return;
+  return createNotification({ kind: "payment_reminder", title: input.title, body: input.body, audience: "system", actionUrl: input.actionUrl ?? "/avisos", dedupeKey: input.dedupeKey, recipientProfiles: recipients });
+}

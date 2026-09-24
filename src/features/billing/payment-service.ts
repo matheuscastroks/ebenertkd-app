@@ -7,6 +7,7 @@ import { manualPaymentSchema, proofDecisionSchema, reversalSchema } from "@/feat
 import type { Charge, Payment, PaymentProof, PaymentReversal } from "@/features/billing/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { notifyStudentFinancial } from "@/features/notifications/notification-service";
 
 async function confirmedPayment(chargeId: string) {
   const { tables, config } = createAppwriteAdminClient();
@@ -40,6 +41,7 @@ export async function decidePaymentProof(actor: Profile, raw: unknown) {
       const row = await tables.updateRow<PaymentProof>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.paymentProofs, rowId: proof.$id, data: { status: "rejected", rejection_reason: input.reason, reviewed_by_account_id: actor.account_id, reviewed_at: now, updated_at: now }, transactionId });
       await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: charge.$id, data: { status: effectiveChargeStatus("pending", charge.due_date, now), updated_at: now }, transactionId });
       await tables.createRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.auditEvents, rowId: ID.unique(), data: { actor_account_id: actor.account_id, event_type: "billing.proof.rejected", entity_type: "payment_proof", entity_id: proof.$id, metadata: JSON.stringify({ charge_id: charge.$id, reason: input.reason }), created_at: now }, permissions: [], transactionId });
+      await notifyStudentFinancial({ studentId: charge.student_id, title: "Comprovante recusado", body: `O comprovante de ${charge.description} não foi aceito. Motivo: ${input.reason}`, dedupeKey: `payment-proof-rejected:${proof.$id}:${proof.version}`, actionUrl: "/avisos" }).catch(() => undefined);
       return row;
     });
     return { proof: updated, payment: null };
