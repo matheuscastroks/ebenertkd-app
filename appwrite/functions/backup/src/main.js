@@ -2,6 +2,7 @@ import { AppwriteException, Client, Query, Storage, TablesDB, Users } from "node
 import { backupIdsToDelete, buildManifest } from "./backup-rules.js";
 import { encryptBuffer, sha256 } from "./crypto.js";
 import { deleteBackupFolder, findOrCreateBackupFolder, getAccessToken, listBackupFolders, markBackupComplete, uploadEncryptedObject } from "./drive.js";
+import { safeErrorMessage } from "./safe-error.js";
 
 const databaseId = process.env.APPWRITE_DATABASE_ID ?? "ebenertkd";
 const bucketId = process.env.APPWRITE_STORAGE_BUCKET_ID ?? "private-files";
@@ -133,7 +134,7 @@ async function main({ req, res, log, error }) {
     log(`Backup ${backupId} completed with ${manifest.totals.objects} objects.`);
     return res.json({ ok: true, idempotencyKey, ...details });
   } catch (cause) {
-    const message = cause instanceof Error ? cause.message : String(cause);
+    const message = safeErrorMessage(cause);
     if (run?.$id) await tables.updateRow({ databaseId, tableId: "automation_runs", rowId: run.$id, data: { status: "failed", finished_at: new Date().toISOString(), details: JSON.stringify({ backupId, error: message.slice(0, 240) }) } }).catch(() => undefined);
     await notifyAdmins(tables, "Falha no backup diário", "A cópia externa não foi concluída. Consulte o painel do sistema.", `backup-failed:${date}`).catch(() => undefined);
     error(message);

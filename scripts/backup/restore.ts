@@ -4,6 +4,7 @@ import path from "node:path";
 import { Client, Query, Storage, TablesDB, Users } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
 import type { BackupManifest, BackupObjectDescriptor } from "../../src/lib/backup/manifest";
+import { safeErrorMessage } from "../../src/lib/security/safe-error";
 import { tables as schemaTables } from "../appwrite/schema";
 import {
   assertEmptyTarget,
@@ -261,6 +262,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(error instanceof Error ? error.message : error);
+  console.error(safeErrorMessage(error));
   process.exitCode = 1;
 });

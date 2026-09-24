@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { backupIdsToDelete, buildManifest } from "../../appwrite/functions/backup/src/backup-rules.js";
 import { decryptBuffer, encryptBuffer, sha256 } from "../../appwrite/functions/backup/src/crypto.js";
+import { safeErrorMessage } from "../../appwrite/functions/backup/src/safe-error.js";
 
 describe("backup function primitives", () => {
   const key = Buffer.alloc(32, 9);
@@ -23,5 +24,11 @@ describe("backup function primitives", () => {
     const object = { name: "users.json.enc", kind: "users", records: 2, bytes: 20, plaintextSha256: sha256("users"), ciphertextSha256: sha256("cipher") };
     expect(buildManifest({ objects: [object] }).totals).toEqual({ objects: 1, records: 2, bytes: 20 });
     expect(backupIdsToDelete([{ id: "pending", date: "2026-01-01", complete: false }])).toEqual([]);
+  });
+
+  it("redacts secrets before operational errors are persisted", () => {
+    const message = safeErrorMessage("token=abc123 email pessoa@example.com");
+    expect(message).not.toContain("abc123");
+    expect(message).not.toContain("pessoa@example.com");
   });
 });

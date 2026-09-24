@@ -20,7 +20,8 @@
     "appwrite:validate-test-users": "tsx scripts/appwrite/validate-test-users.ts",
     "appwrite:deploy-function": "tsx scripts/appwrite/deploy-function.ts",
     "appwrite:run-daily": "tsx scripts/appwrite/run-daily.ts",
-    "backup:restore": "tsx scripts/backup/restore.ts"
+    "backup:restore": "tsx scripts/backup/restore.ts",
+    "release:preflight": "tsx scripts/release/preflight.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

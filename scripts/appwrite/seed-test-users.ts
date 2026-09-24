@@ -3,6 +3,7 @@ import { Client, ID, Permission, Query, Role, TablesDB, Users, type Models } fro
 import { APPWRITE_IDS } from "../../src/lib/appwrite/ids";
 import { readServerAppwriteConfig } from "../../src/lib/appwrite/config";
 import type { AppCapability, AppRole } from "../../src/lib/auth/auth-utils";
+import { testPersonas } from "./test-personas";
 
 loadEnvConfig(process.cwd());
 
@@ -28,41 +29,7 @@ type ProfileRow = Models.Row & {
   updated_at: string;
 };
 
-const accounts: SeedAccount[] = [
-  {
-    key: "admin",
-    name: "Ricardo Almeida",
-    email: "ricardo.almeida@ebenertkd.app",
-    password: "Admin@Teste2026!",
-    role: "admin",
-    capabilities: ["admin"]
-  },
-  {
-    key: "adult",
-    name: "Camila Ferreira",
-    email: "camila.ferreira@ebenertkd.app",
-    password: "Aluno@Teste2026!",
-    role: "adult_student",
-    capabilities: ["student"]
-  },
-  {
-    key: "guardian",
-    name: "Juliana Mendes",
-    email: "juliana.mendes@ebenertkd.app",
-    password: "Resp@Teste2026!",
-    role: "guardian",
-    capabilities: ["guardian"]
-  },
-  {
-    key: "minor",
-    name: "Lucas Mendes",
-    email: "lucas.mendes@minor.ebenertkd.internal",
-    username: "lucas.mendes",
-    password: "Menor@Teste2026!",
-    role: "minor_student",
-    capabilities: ["student"]
-  }
-];
+const accounts: SeedAccount[] = testPersonas();
 
 async function main() {
 const config = readServerAppwriteConfig();
@@ -168,7 +135,7 @@ if (existingLinks.rows[0]) {
 console.log("Test users are ready:");
 for (const account of accounts) {
   const login = account.username ?? account.email;
-  console.log(`- ${account.key}: ${login} | ${account.password}`);
+  console.log(`- ${account.key}: ${login}`);
 }
 }
 

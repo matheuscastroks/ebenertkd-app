@@ -1,6 +1,7 @@
 import { createDecipheriv, createHash } from "node:crypto";
 import { AppwriteException, Client, Query, TablesDB } from "node-appwrite";
 import webpush from "web-push";
+import { safeErrorMessage } from "./safe-error.js";
 
 const databaseId = process.env.APPWRITE_DATABASE_ID ?? "ebenertkd";
 const eventId = (value) => createHash("sha256").update(value).digest("hex").slice(0, 36);
@@ -85,7 +86,7 @@ async function deliverPush(tables, notification, recipient) {
     } catch (cause) {
       const expired = cause?.statusCode === 404 || cause?.statusCode === 410;
       if (expired) await tables.updateRow({ databaseId, tableId: "push_subscriptions", rowId: subscription.$id, data: { status: "expired", updated_at: new Date().toISOString() } });
-      await tables.updateRow({ databaseId, tableId: "notification_deliveries", rowId, data: { status: expired ? "expired" : "failed", attempts: delivery.attempts + 1, last_error: String(cause?.message ?? cause).slice(0, 1000), updated_at: new Date().toISOString() } });
+      await tables.updateRow({ databaseId, tableId: "notification_deliveries", rowId, data: { status: expired ? "expired" : "failed", attempts: delivery.attempts + 1, last_error: safeErrorMessage(cause), updated_at: new Date().toISOString() } });
     }
   }
 }
@@ -199,7 +200,7 @@ async function main({ req, res, log, error }) {
   } catch (cause) {
     if (cause instanceof AppwriteException && cause.code === 409) return res.json({ ok: true, duplicate: true, idempotencyKey });
     await notifyAdmins(tables, { title: "Falha na automação diária", body: "A rotina diária não foi concluída. Consulte os registros da função.", dedupeKey: `daily-operations-failed:${day}` }).catch(() => undefined);
-    error(`${step}: ${cause instanceof Error ? cause.message : String(cause)}`);
+    error(`${step}: ${safeErrorMessage(cause)}`);
     return res.json({ ok: false }, 500);
   }
 }

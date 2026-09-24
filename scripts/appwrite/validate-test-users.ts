@@ -2,15 +2,11 @@ import { loadEnvConfig } from "@next/env";
 import { Account, Client, Query, TablesDB } from "node-appwrite";
 import { APPWRITE_IDS, APPWRITE_SESSION_COOKIE } from "../../src/lib/appwrite/ids";
 import { readServerAppwriteConfig } from "../../src/lib/appwrite/config";
+import { testPersonas } from "./test-personas";
 
 loadEnvConfig(process.cwd());
 
-const cases = [
-  { role: "admin", email: "ricardo.almeida@ebenertkd.app", password: "Admin@Teste2026!", route: "/admin", marker: "Ricardo Almeida" },
-  { role: "adult", email: "camila.ferreira@ebenertkd.app", password: "Aluno@Teste2026!", route: "/aluno", marker: "Camila Ferreira" },
-  { role: "guardian", email: "juliana.mendes@ebenertkd.app", password: "Resp@Teste2026!", route: "/responsavel", marker: "Juliana Mendes" },
-  { role: "minor", email: "lucas.mendes@minor.ebenertkd.internal", password: "Menor@Teste2026!", route: "/aluno", marker: "Lucas Mendes" }
-] as const;
+const cases = testPersonas().map((persona) => ({ ...persona, marker: persona.name }));
 
 async function main() {
   const config = readServerAppwriteConfig();
@@ -43,7 +39,7 @@ async function main() {
       throw new Error(`${testCase.role} failed: HTTP ${response.status} ${response.headers.get("location") ?? ""}`);
     }
     await new Account(sessionClient).deleteSession({ sessionId: "current" });
-    console.log(`- ${testCase.role}: ${testCase.route} OK`);
+    console.log(`- ${testCase.key}: ${testCase.route} OK`);
   }
 }
 

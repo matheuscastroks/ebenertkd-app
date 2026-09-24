@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
+import { securityHeaders } from "./src/lib/security/headers";
 
 const nextConfig: NextConfig = {
+  async headers() {
+    return [{
+      source: "/(.*)",
+      headers: securityHeaders(process.env.NODE_ENV === "production", process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
+    }];
+  },
   async redirects() {
     return [
       { source: "/admin/alunos/:path*", destination: "/admin/matriculas/:path*", permanent: true },
