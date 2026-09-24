@@ -1,0 +1,25 @@
+import { PhaseOnePanel } from "@/components/dashboard/phase-one-panel";
+import { requireProfile } from "@/lib/auth/session";
+import { promoteMinorAction } from "@/app/actions/auth";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+
+export default async function AdminPage() {
+  const profile = await requireProfile("admin");
+  return <PhaseOnePanel name={profile.full_name} badge="Admin" title="Painel administrativo" description="Acesso administrativo validado pelo Appwrite." items={[
+    { title: "Contas", description: "Papéis e sessões estão isolados por perfil." },
+    { title: "Auditoria", description: "Criações e ações sensíveis geram eventos internos." },
+    { title: "Próxima etapa", description: "Cadastro e aprovação das fichas dos alunos." }
+  ]}>
+    <Card><CardHeader><CardTitle className="text-base">Transição para conta adulta</CardTitle></CardHeader><CardContent>
+      <form action={promoteMinorAction} className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+        <Input name="minor_profile_id" placeholder="ID do perfil do aluno" required />
+        <Input name="email" type="email" placeholder="Novo e-mail do aluno" required />
+        <Button type="submit">Converter conta</Button>
+        <label className="flex items-center gap-2 text-sm md:col-span-3"><input type="checkbox" name="retain_guardian_access" /> Manter o vínculo de consulta do responsável</label>
+      </form>
+      <p className="mt-3 text-xs text-muted-foreground">A conversão remove o usuário infantil, encerra as sessões e envia ao novo e-mail o link para definir outra senha.</p>
+    </CardContent></Card>
+  </PhaseOnePanel>;
+}
