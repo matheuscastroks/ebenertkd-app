@@ -16,6 +16,7 @@ Este diretório transforma o planejamento do sistema da academia em fases execut
 | [7](./fase-7-backup-operacao.md) | Backup, restauração e observabilidade | 0–6 | Restauração ensaiada com sucesso |
 | [8](./fase-8-homologacao.md) | Segurança, piloto e lançamento | 0–7 | Professor opera sem console técnico |
 | [9](./fase-9-ui-ux.md) | Refinamento de experiência | 8 | Fluxos do piloto melhorados sem regressão |
+| [10](./fase-10-jornada-gamificada.md) | Jornada gamificada, check-in e aprendizagem | 5, 6 e 9 | Ciclo piloto justo, auditável e sem rastreamento contínuo |
 
 O contrato transversal de componentes e as subfases de correção estão em [Refinamento shadcn/ui](./refinamento-shadcn-ui.md). Ele é obrigatório para qualquer tela criada ou alterada, independentemente da fase funcional em execução.
 
@@ -44,3 +45,4 @@ O código funcional das fases 0–6 está implementado. A Fase 7 possui backup, 
 - [ ] Fase 7
 - [ ] Fase 8
 - [ ] Fase 9
+- [ ] Fase 10
