@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/app/actions/training-classes", () => ({ setTrainingClassStatusAction: vi.fn() }));
 vi.mock("@/components/ui/switch", () => ({
   Switch: ({ onCheckedChange, ...props }: React.ComponentProps<"button"> & { onCheckedChange?: () => void }) => (
-    <button type="button" role="switch" onClick={onCheckedChange} {...props} />
+    <button type="button" role="switch" aria-checked={Boolean(props.defaultChecked)} onClick={onCheckedChange} {...props} />
   ),
 }));
 

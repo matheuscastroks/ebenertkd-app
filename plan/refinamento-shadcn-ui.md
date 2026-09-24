@@ -154,14 +154,14 @@ type SearchFieldProps = {
 - Modify: `src/lib/navigation/routes.ts`
 - Test: `src/components/dashboard/app-sidebar.test.tsx`
 
-- [ ] Manter `SidebarProvider` somente nos layouts persistentes e `SidebarInset` como wrapper do painel.
-- [ ] Compor `SidebarHeader`, `SidebarContent`, `SidebarGroup`, `SidebarGroupLabel`, `SidebarMenu`, `SidebarMenuItem`, `SidebarMenuButton`, `SidebarFooter`, `SidebarRail` e `SidebarTrigger` conforme a documentação oficial.
-- [ ] Adotar `SidebarMenuSub` e `Collapsible` apenas para hierarquia real: exemplo “Contratos” com “Modelo” e “Cancelamentos”.
-- [ ] Usar `SidebarMenuBadge` para contagens acionáveis, como matrículas pendentes, sem buscar dados no Client Component.
-- [ ] Garantir menus diferentes para professor, aluno adulto, menor e responsável; nenhum link apenas oculto pode substituir autorização de servidor.
-- [ ] Testar item ativo em rotas filhas, modo ícone, tooltip, atalho, mobile/Sheet e persistência durante loading.
-- [ ] Executar `npm test -- src/components/dashboard && npm run build`; esperar testes da navegação e build de produção aprovados.
-- [ ] Commit: `refactor: complete role-based sidebar navigation`.
+- [x] Manter `SidebarProvider` somente nos layouts persistentes e `SidebarInset` como wrapper do painel.
+- [x] Compor `SidebarHeader`, `SidebarContent`, `SidebarGroup`, `SidebarGroupLabel`, `SidebarMenu`, `SidebarMenuItem`, `SidebarMenuButton`, `SidebarFooter`, `SidebarRail` e `SidebarTrigger` conforme a documentação oficial.
+- [x] Adotar `SidebarMenuSub` e `Collapsible` apenas para hierarquia real: contratos e financeiro possuem destinos filhos explícitos.
+- [x] Usar `SidebarMenuBadge` para matrículas que exigem análise, com contagem consultada no Server Component do layout.
+- [x] Garantir menus diferentes para professor, aluno adulto, menor e responsável; autorização de servidor permanece independente da visibilidade do link.
+- [x] Testar item ativo em rotas filhas, modo ícone, tooltip, atalho, mobile/Sheet e persistência estrutural durante loading; desktop e mobile também foram validados no navegador.
+- [x] Executar `npm test -- src/components/dashboard && npm run build`; 99 testes e build de produção aprovados.
+- [x] Commit: `refactor: complete role-based sidebar navigation`.
 
 ## Gate de aceite
 
@@ -170,6 +170,6 @@ type SearchFieldProps = {
 - [x] Datas de dia usam `Calendar + Popover`; `type="month"` permanece apenas para competência e mês de saída.
 - [x] Toda fila potencialmente longa possui paginação por URL e alternativa mobile.
 - [x] A foto do aluno aparece com `Avatar` em cadastro, listas e detalhes, respeitando autorização.
-- [ ] Sidebar permanece montada durante loading e contém apenas destinos permitidos ao perfil.
+- [x] Sidebar permanece montada durante loading e contém apenas destinos permitidos ao perfil.
 - [x] Tooltip contém apenas informação complementar; avisos críticos continuam perceptíveis sem hover.
-- [ ] Testes, `npm run lint`, `npm run typecheck` e `npm run build` passam ao final de cada subfase.
+- [x] Testes, `npm run lint`, `npm run typecheck` e `npm run build` passam ao final de cada subfase.

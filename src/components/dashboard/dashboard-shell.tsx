@@ -9,14 +9,12 @@ type DashboardShellProps = {
   title: string;
   subtitle: string;
   badge: string;
-  profileName: string;
-  navItems: AppSidebarNavItem[];
   breadcrumbs?: BreadcrumbEntry[];
   headerActions?: ReactNode;
   children: ReactNode;
 };
 
-type DashboardFrameProps = Pick<DashboardShellProps, "badge" | "profileName" | "navItems" | "children">;
+type DashboardFrameProps = Pick<DashboardShellProps, "badge" | "children"> & { profileName: string; navItems: AppSidebarNavItem[] };
 
 export function DashboardFrame({ badge, profileName, navItems, children }: DashboardFrameProps) {
   return (
@@ -35,8 +33,6 @@ export function DashboardShell({
   title,
   subtitle,
   badge,
-  profileName,
-  navItems,
   breadcrumbs,
   headerActions,
   children

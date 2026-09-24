@@ -66,6 +66,16 @@ export async function getEnrollmentBundleByStudentId(studentId: string) {
 
 export const ENROLLMENTS_PAGE_SIZE = 20;
 
+export async function countEnrollmentsRequiringReview() {
+  const { tables, config } = createAppwriteAdminClient();
+  const result = await tables.listRows<Enrollment>({
+    databaseId: config.databaseId,
+    tableId: APPWRITE_IDS.tables.enrollments,
+    queries: [Query.equal("status", ["submitted", "under_review"]), Query.limit(1)]
+  });
+  return result.total;
+}
+
 export async function listEnrollmentsForReview(filters: { search?: string; status?: string; belt?: string; trainingClass?: string; page?: number } = {}) {
   const { tables, config } = createAppwriteAdminClient();
   const requestedPage = Math.max(1, Math.trunc(filters.page ?? 1));

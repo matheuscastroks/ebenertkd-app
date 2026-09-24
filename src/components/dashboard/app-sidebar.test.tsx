@@ -28,4 +28,28 @@ describe("AppSidebar", () => {
     expect(screen.getByText("Ricardo Almeida")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Visão geral" })).toHaveAttribute("data-active", "true");
   });
+
+  it("renders hierarchical destinations and actionable counts", () => {
+    render(
+      <TooltipProvider>
+        <SidebarProvider>
+          <AppSidebar
+            badge="Professor"
+            profileName="Ricardo Almeida"
+            navItems={[
+              { label: "Matrículas", href: "/admin/matriculas", group: "Alunos", icon: "students", badge: 3 },
+              { label: "Contratos", href: "/admin/contratos", group: "Documentos", icon: "contracts", active: true, children: [
+                { label: "Visão geral", href: "/admin/contratos", exact: true },
+                { label: "Modelo", href: "/admin/contratos/modelo", active: true },
+                { label: "Cancelamentos", href: "/admin/contratos/cancelamentos" }
+              ] }
+            ]}
+          />
+        </SidebarProvider>
+      </TooltipProvider>
+    );
+    expect(screen.getByLabelText("3 pendentes")).toHaveTextContent("3");
+    expect(screen.getByRole("button", { name: "Alternar submenu de Contratos" })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("link", { name: "Modelo" })).toHaveAttribute("data-active", "true");
+  });
 });

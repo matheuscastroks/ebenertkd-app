@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Building2, ClipboardList, FileSignature, LayoutDashboard, UserRound, UsersRound, WalletCards } from "lucide-react";
+import { Building2, ChevronRight, ClipboardList, FileSignature, LayoutDashboard, UserRound, UsersRound, WalletCards } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Sidebar,
   SidebarContent,
@@ -9,21 +10,21 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarRail
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogoutButton } from "@/components/dashboard/logout-button";
+import type { SidebarNavItem } from "@/lib/navigation/routes";
 
-export type AppSidebarNavItem = {
-  label: string;
-  href: string;
-  active?: boolean;
-  group?: "Principal" | "Alunos" | "Operação" | "Financeiro" | "Documentos";
-  icon?: "dashboard" | "enrollment" | "students" | "classes" | "family" | "contracts" | "billing";
-};
+export type AppSidebarNavItem = SidebarNavItem;
 
 const navIcons = {
   dashboard: LayoutDashboard,
@@ -34,6 +35,38 @@ const navIcons = {
   contracts: FileSignature,
   billing: WalletCards
 };
+
+function NavigationItem({ item }: { item: AppSidebarNavItem }) {
+  const Icon = navIcons[item.icon ?? "dashboard"];
+  if (!item.children?.length) return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild isActive={item.active} tooltip={item.label}>
+        <Link href={item.href}><Icon aria-hidden="true" /><span>{item.label}</span></Link>
+      </SidebarMenuButton>
+      {item.badge ? <SidebarMenuBadge aria-label={`${item.badge} pendente${item.badge === 1 ? "" : "s"}`}>{item.badge}</SidebarMenuBadge> : null}
+    </SidebarMenuItem>
+  );
+
+  return (
+    <Collapsible key={`${item.href}-${item.active}`} asChild defaultOpen={item.active} className="group/collapsible">
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild isActive={item.active} tooltip={item.label}>
+          <Link href={item.href}><Icon aria-hidden="true" /><span>{item.label}</span></Link>
+        </SidebarMenuButton>
+        <CollapsibleTrigger asChild>
+          <SidebarMenuAction aria-label={`Alternar submenu de ${item.label}`}>
+            <ChevronRight aria-hidden="true" className="transition-transform group-data-[state=open]/collapsible:rotate-90" />
+          </SidebarMenuAction>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            {item.children.map((child) => <SidebarMenuSubItem key={child.href}><SidebarMenuSubButton asChild isActive={child.active}><Link href={child.href}><span>{child.label}</span></Link></SidebarMenuSubButton></SidebarMenuSubItem>)}
+          </SidebarMenuSub>
+        </CollapsibleContent>
+      </SidebarMenuItem>
+    </Collapsible>
+  );
+}
 
 export function AppSidebar({
   badge,
@@ -66,18 +99,7 @@ export function AppSidebar({
           <SidebarGroupLabel>{group}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.filter((item) => (item.group ?? "Principal") === group).map((item) => {
-                const Icon = navIcons[item.icon ?? "dashboard"];
-                return (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={item.active} tooltip={item.label}>
-                    <Link href={item.href}>
-                      <Icon className="h-4 w-4" />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              );})}
+              {navItems.filter((item) => (item.group ?? "Principal") === group).map((item) => <NavigationItem key={item.href} item={item} />)}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>)}

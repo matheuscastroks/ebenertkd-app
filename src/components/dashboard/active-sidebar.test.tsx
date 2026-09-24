@@ -18,7 +18,10 @@ describe("ActiveSidebar", () => {
             profileName="Ricardo Almeida"
             navItems={[
               { label: "Visão geral", href: "/admin" },
-              { label: "Financeiro", href: "/admin/financeiro", icon: "billing" }
+              { label: "Financeiro", href: "/admin/financeiro", icon: "billing", children: [
+                { label: "Visão geral", href: "/admin/financeiro", exact: true },
+                { label: "Configuração PIX", href: "/admin/financeiro/configuracoes" }
+              ] }
             ]}
           />
         </SidebarProvider>
@@ -26,6 +29,7 @@ describe("ActiveSidebar", () => {
     );
 
     expect(screen.getByRole("link", { name: "Financeiro" })).toHaveAttribute("data-active", "true");
-    expect(screen.getByRole("link", { name: "Visão geral" })).not.toHaveAttribute("data-active", "true");
+    expect(screen.getByRole("link", { name: "Configuração PIX" })).toHaveAttribute("data-active", "true");
+    expect(screen.getAllByRole("link", { name: "Visão geral" })[0]).not.toHaveAttribute("data-active", "true");
   });
 });
