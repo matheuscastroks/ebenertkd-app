@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, CreditCard, LayoutDashboard, ShieldCheck, UserRound } from "lucide-react";
+import { Bell, Building2, ClipboardList, LayoutDashboard, ShieldCheck, UserRound, UsersRound } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -10,7 +10,8 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem
+  SidebarMenuItem,
+  SidebarRail
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 
@@ -18,6 +19,15 @@ export type AppSidebarNavItem = {
   label: string;
   href: string;
   active?: boolean;
+  icon?: "dashboard" | "enrollment" | "students" | "classes" | "family";
+};
+
+const navIcons = {
+  dashboard: LayoutDashboard,
+  enrollment: ClipboardList,
+  students: UsersRound,
+  classes: Building2,
+  family: UserRound
 };
 
 export function AppSidebar({
@@ -32,14 +42,15 @@ export function AppSidebar({
   asideCopy: string;
 }) {
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary font-display text-sm font-bold text-primary-foreground">E</div>
+          <div className="min-w-0 flex-1 space-y-1 group-data-[collapsible=icon]:hidden">
             <p className="text-sm font-semibold">Ebenert KD</p>
             <p className="text-xs text-muted-foreground">{badge}</p>
           </div>
-          <Badge variant="outline" className="rounded-md">
+          <Badge variant="outline" className="rounded-md group-data-[collapsible=icon]:hidden">
             PWA
           </Badge>
         </div>
@@ -50,25 +61,25 @@ export function AppSidebar({
           <SidebarGroupLabel>Navegação</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item, index) => (
+              {navItems.map((item) => {
+                const Icon = navIcons[item.icon ?? "dashboard"];
+                return (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={item.active}>
+                  <SidebarMenuButton asChild isActive={item.active} tooltip={item.label}>
                     <Link href={item.href}>
-                      {index === 0 && <LayoutDashboard className="h-4 w-4" />}
-                      {index === 1 && <UserRound className="h-4 w-4" />}
-                      {index === 2 && <CreditCard className="h-4 w-4" />}
+                      <Icon className="h-4 w-4" />
                       <span>{item.label}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+              );})}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="rounded-lg border bg-muted/50 p-3">
+        <div className="rounded-lg border bg-muted/50 p-3 group-data-[collapsible=icon]:hidden">
           <div className="mb-2 flex items-center gap-2">
             <Bell className="h-4 w-4 text-muted-foreground" />
             <p className="text-sm font-medium">{asideTitle}</p>
@@ -80,7 +91,7 @@ export function AppSidebar({
           </div>
         </div>
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 }
-

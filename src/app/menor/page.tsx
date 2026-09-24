@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export default async function MinorPage() {
   const profile = await requireProfile("minor_student");
-  return <PhaseOnePanel name={profile.full_name} badge="Aluno" title="Meu treino" description="Área individual do aluno menor, sem informações financeiras ou de outros dependentes." items={[
+  return <PhaseOnePanel profile={profile} activePath="/menor" title="Meu treino" description="Área individual do aluno menor, sem informações financeiras ou de outros dependentes." items={[
     { title: "Minha graduação", description: "Consulte o status da sua ficha e sua faixa atual." },
     { title: "Meus treinos", description: "Presença e agenda serão liberadas nas fases seguintes." },
     { title: "Privacidade", description: "Você só acessa informações do seu próprio perfil." }

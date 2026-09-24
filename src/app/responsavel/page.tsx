@@ -11,7 +11,7 @@ export default async function GuardianPage({ searchParams }: { searchParams: Pro
   const guardian = await requireCapability("guardian");
   const [minors, params] = await Promise.all([listGuardianMinors(guardian), searchParams]);
   return (
-    <PhaseOnePanel name={guardian.full_name} badge="Responsável" title="Meus dependentes" description="Crie o acesso do menor e administre somente as contas vinculadas a você." items={[
+    <PhaseOnePanel profile={guardian} activePath="/responsavel" title="Meus dependentes" description="Crie o acesso do menor e administre somente as contas vinculadas a você." items={[
       { title: "Dependentes", description: `${minors.length} aluno(s) vinculado(s) à sua conta.` },
       { title: "Acesso do menor", description: "O menor entra com nome de usuário e senha, sem usar e-mail." },
       { title: "Privacidade", description: "Financeiro e dados de outros dependentes não aparecem no acesso do menor." }

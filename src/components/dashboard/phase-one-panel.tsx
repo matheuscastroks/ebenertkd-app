@@ -1,22 +1,19 @@
 import type { ReactNode } from "react";
-import { DashboardShell } from "@/components/dashboard/dashboard-shell";
-import { LogoutButton } from "@/components/dashboard/logout-button";
+import { PortalShell } from "@/components/dashboard/portal-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Profile } from "@/features/auth/types";
 
-export function PhaseOnePanel({ name, badge, title, description, items, children }: {
-  name: string; badge: string; title: string; description: string;
+export function PhaseOnePanel({ profile, activePath, title, description, items, children }: {
+  profile: Profile; activePath: string; title: string; description: string;
   items: Array<{ title: string; description: string }>;
   children?: ReactNode;
 }) {
   return (
-    <DashboardShell title={`${title} · ${name}`} subtitle={description} badge={badge}
-      navItems={[{ label: "Visão geral", href: "#", active: true }]}
-      asideTitle="Fase 1" asideCopy="Acesso seguro e perfis separados. Os cadastros completos entram na próxima fase."
-      headerActions={<LogoutButton />}>
+    <PortalShell profile={profile} activePath={activePath} title={`${title} · ${profile.full_name}`} subtitle={description}>
       <section className="grid gap-4 md:grid-cols-3">
         {items.map((item) => <Card key={item.title}><CardHeader><CardTitle className="text-base">{item.title}</CardTitle></CardHeader><CardContent className="text-sm text-muted-foreground">{item.description}</CardContent></Card>)}
       </section>
       {children}
-    </DashboardShell>
+    </PortalShell>
   );
 }

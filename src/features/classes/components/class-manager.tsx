@@ -1,0 +1,18 @@
+import { createTrainingClassAction, setTrainingClassStatusAction, updateTrainingClassAction } from "@/app/actions/training-classes";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { WEEKDAYS, type TrainingClass } from "@/features/classes/types";
+
+function WeekdayFields({ selected = [] }: { selected?: string[] }) {
+  return <div className="flex flex-wrap gap-2">{WEEKDAYS.map((day) => <label key={day} className="flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium"><input type="checkbox" name="weekdays" value={day} defaultChecked={selected.includes(day)} />{day.slice(0, 3)}</label>)}</div>;
+}
+
+function Fields({ trainingClass }: { trainingClass?: TrainingClass }) {
+  return <><label className="grid gap-2"><span className="text-sm font-medium">Nome da turma</span><Input name="name" defaultValue={trainingClass?.name} placeholder="Ex.: Infantil - noite" required /></label><div className="grid gap-2"><span className="text-sm font-medium">Dias da semana</span><WeekdayFields selected={trainingClass?.weekdays} /></div><div className="grid gap-3 sm:grid-cols-3"><label className="grid gap-2"><span className="text-sm font-medium">Início</span><Input name="start_time" type="time" defaultValue={trainingClass?.start_time} required /></label><label className="grid gap-2"><span className="text-sm font-medium">Término</span><Input name="end_time" type="time" defaultValue={trainingClass?.end_time} required /></label><label className="grid gap-2"><span className="text-sm font-medium">Limite de alunos</span><Input name="capacity" type="number" min="1" max="500" defaultValue={trainingClass?.capacity ?? ""} placeholder="Sem limite" /></label></div></>;
+}
+
+export function ClassManager({ classes, notice }: { classes: TrainingClass[]; notice?: string }) {
+  return <div className="space-y-5">{notice ? <p className="rounded-lg border bg-muted/50 p-3 text-sm">{notice}</p> : null}<Card><CardHeader><CardTitle>Nova turma</CardTitle><CardDescription>Cadastre somente horários que podem ser escolhidos pelos alunos.</CardDescription></CardHeader><CardContent><form action={createTrainingClassAction} className="space-y-4"><Fields /><Button type="submit">Criar turma</Button></form></CardContent></Card><section className="space-y-3"><div><h2 className="text-lg font-semibold">Turmas cadastradas</h2><p className="text-sm text-muted-foreground">Turmas inativas deixam de aparecer em novas matrículas.</p></div>{classes.length === 0 ? <Card><CardContent className="p-5 text-sm text-muted-foreground">Nenhuma turma cadastrada.</CardContent></Card> : classes.map((trainingClass) => <Card key={trainingClass.$id}><CardHeader><div className="flex items-center justify-between gap-3"><CardTitle>{trainingClass.name}</CardTitle><Badge variant="outline">{trainingClass.status === "active" ? "Ativa" : "Inativa"}</Badge></div></CardHeader><CardContent className="space-y-4"><form action={updateTrainingClassAction} className="space-y-4"><input type="hidden" name="class_id" value={trainingClass.$id} /><Fields trainingClass={trainingClass} /><Button type="submit" variant="outline">Salvar alterações</Button></form><form action={setTrainingClassStatusAction}><input type="hidden" name="class_id" value={trainingClass.$id} /><input type="hidden" name="status" value={trainingClass.status === "active" ? "inactive" : "active"} /><Button type="submit" variant={trainingClass.status === "active" ? "destructive" : "default"}>{trainingClass.status === "active" ? "Desativar turma" : "Reativar turma"}</Button></form></CardContent></Card>)}</section></div>;
+}

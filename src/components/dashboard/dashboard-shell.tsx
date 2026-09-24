@@ -33,7 +33,7 @@ export function DashboardShell({
         asideCopy={asideCopy}
       />
       <SidebarInset>
-        <main className="flex-1 p-4 md:p-6">
+        <div className="flex-1 p-4 md:p-6">
           <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
             <header className="flex flex-col gap-4 rounded-xl border bg-background p-4 md:flex-row md:items-center md:justify-between">
               <div className="flex items-start gap-3">
@@ -52,7 +52,7 @@ export function DashboardShell({
             </header>
             <div className="space-y-6">{children}</div>
           </div>
-        </main>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );

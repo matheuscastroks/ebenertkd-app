@@ -8,7 +8,7 @@ import Link from "next/link";
 
 export default async function AdminPage() {
   const profile = await requireProfile("admin");
-  return <PhaseOnePanel name={profile.full_name} badge="Admin" title="Painel administrativo" description="Acesso administrativo validado pelo Appwrite." items={[
+  return <PhaseOnePanel profile={profile} activePath="/admin" title="Painel administrativo" description="Acompanhe matrículas, turmas e a operação da academia." items={[
     { title: "Contas", description: "Papéis e sessões estão isolados por perfil." },
     { title: "Auditoria", description: "Criações e ações sensíveis geram eventos internos." },
     { title: "Próxima etapa", description: "Cadastro e aprovação das fichas dos alunos." }

@@ -8,7 +8,7 @@ import { requireProfile } from "@/lib/auth/session";
 export default async function StudentPage() {
   const profile = await requireProfile("adult_student");
   const guardian = profile.capabilities.includes("guardian");
-  return <PhaseOnePanel name={profile.full_name} badge="Aluno adulto" title="Minha conta" description="Sua sessão está ativa e protegida pelo Appwrite." items={[
+  return <PhaseOnePanel profile={profile} activePath="/aluno" title="Minha conta" description="Acompanhe sua matrícula e seus dados da academia." items={[
     { title: "Perfil", description: "Identidade única para cadastro, treinos e financeiro." },
     { title: "Segurança", description: "A senha pode ser recuperada pelo e-mail cadastrado." },
     { title: "Matrícula", description: "Preencha sua ficha, envie documentos e acompanhe a análise." }
