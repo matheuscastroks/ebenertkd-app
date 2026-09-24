@@ -4,6 +4,7 @@ import { promoteMinorAction } from "@/app/actions/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default async function AdminPage() {
   const profile = await requireProfile("admin");
@@ -12,6 +13,7 @@ export default async function AdminPage() {
     { title: "Auditoria", description: "Criações e ações sensíveis geram eventos internos." },
     { title: "Próxima etapa", description: "Cadastro e aprovação das fichas dos alunos." }
   ]}>
+    <Card><CardHeader><CardTitle className="text-base">Matrículas de alunos</CardTitle></CardHeader><CardContent><Button asChild><Link href="/admin/alunos">Abrir análise de matrículas</Link></Button></CardContent></Card>
     <Card><CardHeader><CardTitle className="text-base">Transição para conta adulta</CardTitle></CardHeader><CardContent>
       <form action={promoteMinorAction} className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
         <Input name="minor_profile_id" placeholder="ID do perfil do aluno" required />
