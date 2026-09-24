@@ -6,6 +6,7 @@ import { decideCancellation, requestCancellation } from "@/features/contracts/ca
 import { getContractForActor } from "@/features/contracts/contract-service";
 import { requireProfile } from "@/lib/auth/session";
 import { guardianContractPath, ROUTES, studentContractPath } from "@/lib/navigation/routes";
+import { reaisToCents } from "@/lib/money";
 
 export async function requestCancellationAction(formData: FormData) {
   const actor = await requireProfile();
@@ -23,7 +24,7 @@ export async function requestCancellationAction(formData: FormData) {
 export async function decideCancellationAction(formData: FormData) {
   const admin = await requireProfile("admin");
   try {
-    await decideCancellation(admin, { requestId: formData.get("request_id"), decision: formData.get("decision"), feeCents: formData.get("fee_cents") || 0, notes: formData.get("notes") });
+    await decideCancellation(admin, { requestId: formData.get("request_id"), decision: formData.get("decision"), feeCents: reaisToCents(formData.get("fee_reais") || 0), notes: formData.get("notes") });
   } catch {
     redirect(`${ROUTES.adminCancellations}?error=decision`);
   }

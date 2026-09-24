@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { reviewStudentDocument } from "@/features/students/document-service";
 import { advanceToSignature, saveFinancialReview } from "@/features/students/enrollment-service";
 import { requireProfile } from "@/lib/auth/session";
+import { reaisToCents } from "@/lib/money";
 import { adminEnrollmentPath } from "@/lib/navigation/routes";
 
 const reviewPath = (studentId: string, query = "") => `${adminEnrollmentPath(studentId)}${query}`;
@@ -28,8 +29,8 @@ export async function saveFinancialReviewAction(formData: FormData) {
   const studentId = String(formData.get("student_id") ?? "");
   try {
     await saveFinancialReview(admin, studentId, {
-      monthlyFeeCents: formData.get("monthly_fee_cents"),
-      discountCents: formData.get("discount_cents") || 0,
+      monthlyFeeCents: reaisToCents(formData.get("monthly_fee_reais")),
+      discountCents: reaisToCents(formData.get("discount_reais") || 0),
       approvedDueDay: formData.get("approved_due_day"),
       firstDueDate: formData.get("first_due_date"),
       contractStart: formData.get("contract_start"),

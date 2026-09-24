@@ -8,6 +8,7 @@ import { uploadPaymentProof } from "@/features/billing/proof-service";
 import { saveBillingSettings } from "@/features/billing/settings-service";
 import { requireProfile } from "@/lib/auth/session";
 import { guardianBillingPath, ROUTES } from "@/lib/navigation/routes";
+import { reaisToCents } from "@/lib/money";
 
 export async function saveBillingSettingsAction(formData: FormData) {
   const actor = await requireProfile("admin");
@@ -37,7 +38,7 @@ export async function decidePaymentProofAction(formData: FormData) {
 
 export async function recordManualPaymentAction(formData: FormData) {
   const actor = await requireProfile("admin");
-  try { await recordManualPayment(actor, { chargeId: formData.get("charge_id"), amountCents: formData.get("amount_cents"), paidAt: formData.get("paid_at"), notes: formData.get("notes") }); }
+  try { await recordManualPayment(actor, { chargeId: formData.get("charge_id"), amountCents: reaisToCents(formData.get("amount_reais")), paidAt: formData.get("paid_at"), notes: formData.get("notes") }); }
   catch { redirect(`${ROUTES.adminBilling}?error=payment`); }
   revalidatePath(ROUTES.adminBilling); redirect(`${ROUTES.adminBilling}?updated=payment`);
 }
@@ -51,7 +52,7 @@ export async function reversePaymentAction(formData: FormData) {
 
 export async function adjustChargeAction(formData: FormData) {
   const actor = await requireProfile("admin");
-  try { await adjustCharge(actor, { chargeId: formData.get("charge_id"), amountCents: formData.get("amount_cents"), dueDate: formData.get("due_date"), reason: formData.get("reason") }); }
+  try { await adjustCharge(actor, { chargeId: formData.get("charge_id"), amountCents: reaisToCents(formData.get("amount_reais")), dueDate: formData.get("due_date"), reason: formData.get("reason") }); }
   catch { redirect(`${ROUTES.adminBilling}?error=adjustment`); }
   revalidatePath(ROUTES.adminBilling); redirect(`${ROUTES.adminBilling}?updated=adjustment`);
 }
