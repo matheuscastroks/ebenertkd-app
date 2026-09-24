@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import { Check, CircleSlash2, ShieldCheck } from "lucide-react";
 import { saveAttendanceAction } from "@/app/actions/attendance";
-import { FeedbackAlert } from "@/components/shared/feedback-alert";
+import { EmptyState } from "@/components/shared/empty-state";
+import { OperationToast } from "@/components/shared/operation-toast";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { Button } from "@/components/ui/button";
@@ -40,16 +41,16 @@ export function AttendanceSheet({ classId, lessonId, lessonCompleted, rows, noti
     <input type="hidden" name="class_id" value={classId} />
     <input type="hidden" name="lesson_id" value={lessonId} />
     {Object.entries(statuses).map(([id, status]) => <input key={id} type="hidden" name={`attendance:${id}`} value={status} />)}
-    {notice === "saved" ? <FeedbackAlert tone="success" title="Chamada salva" description="A frequência desta aula foi atualizada." /> : null}
-    {notice === "reason" ? <FeedbackAlert tone="warning" title="Informe o motivo da correção" description="Chamadas concluídas exigem uma justificativa para qualquer alteração." /> : null}
-    {notice === "error" ? <FeedbackAlert tone="danger" title="Não foi possível salvar a chamada" description="Confira se todos os alunos receberam um status e tente novamente." /> : null}
+    {notice === "saved" ? <OperationToast tone="success" title="Chamada salva" description="A frequência desta aula foi atualizada." clearParams={["saved"]} /> : null}
+    {notice === "reason" ? <OperationToast tone="warning" title="Informe o motivo da correção" description="Chamadas concluídas exigem uma justificativa para qualquer alteração." clearParams={["error"]} /> : null}
+    {notice === "error" ? <OperationToast tone="error" title="Não foi possível salvar a chamada" description="Confira se todos os alunos receberam um status e tente novamente." clearParams={["error"]} /> : null}
 
     <div className="sticky top-3 z-10 space-y-3 rounded-xl border bg-background/95 p-4 shadow-sm backdrop-blur">
       <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-medium">{selectedCount} de {rows.length} alunos marcados</p><p className="text-sm text-muted-foreground">A chamada é salva em um único lote.</p></div><Button type="button" variant="outline" onClick={() => setStatuses(Object.fromEntries(rows.map((row) => [row.classEnrollmentId, "present"]))) }>Marcar todos presentes</Button></div>
       <Progress value={rows.length ? (selectedCount / rows.length) * 100 : 0} aria-label={`${selectedCount} de ${rows.length} alunos marcados`} />
     </div>
 
-    {rows.length === 0 ? <FeedbackAlert tone="info" title="Turma sem alunos ativos" description="Ative uma matrícula vinculada a esta turma antes de realizar a chamada." /> : rows.map((row) => <Card key={row.classEnrollmentId}>
+    {rows.length === 0 ? <EmptyState title="Turma sem alunos ativos" description="Ative uma matrícula vinculada a esta turma antes de realizar a chamada." /> : rows.map((row) => <Card key={row.classEnrollmentId}>
       <CardContent className="space-y-4 p-4">
         <div className="flex items-center gap-3"><StudentAvatar name={row.studentName} photoDocumentId={row.photoDocumentId} size="lg" /><div className="min-w-0"><p className="truncate font-medium">{row.studentName}</p><p className="text-sm text-muted-foreground">{row.belt ?? "Graduação não informada"}</p></div></div>
         <Separator />

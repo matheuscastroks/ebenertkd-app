@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createMinorAction, resetMinorPasswordAction, revokeMinorSessionsAction } from "@/app/actions/family";
 import { PhaseOnePanel } from "@/components/dashboard/phase-one-panel";
 import { EmptyState } from "@/components/shared/empty-state";
-import { FeedbackAlert } from "@/components/shared/feedback-alert";
+import { OperationToast } from "@/components/shared/operation-toast";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ export default async function DependentsPage({ searchParams }: { searchParams: P
     ]}>
       <section className="grid gap-5 lg:grid-cols-[0.85fr_1.15fr]">
         <Card><CardHeader><CardTitle className="text-base">Adicionar dependente</CardTitle></CardHeader><CardContent>
-          <div className="mb-4 space-y-3">{params.created === "1" ? <FeedbackAlert tone="success" title="Acesso do menor criado" /> : null}{params.error ? <FeedbackAlert tone="danger" title="Não foi possível concluir" description="Revise os dados e tente outro nome de usuário." /> : null}</div>
+          {params.created === "1" ? <OperationToast tone="success" title="Acesso do menor criado" clearParams={["created"]} /> : null}{params.error ? <OperationToast tone="error" title="Não foi possível concluir" description="Revise os dados e tente outro nome de usuário." clearParams={["error"]} /> : null}
           <form action={createMinorAction} className="space-y-4">
             <Field><FieldLabel htmlFor="minor-name">Nome completo</FieldLabel><Input id="minor-name" name="full_name" autoComplete="name" required /></Field>
             <Field><FieldLabel htmlFor="minor-username">Nome de usuário</FieldLabel><Input id="minor-username" name="username" placeholder="ex.: maria.silva" autoComplete="username" minLength={3} required /><FieldDescription>Será usado pelo aluno para entrar sem e-mail.</FieldDescription></Field>

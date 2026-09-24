@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { advanceToSignatureAction, reviewDocumentAction, saveFinancialReviewAction } from "@/app/actions/enrollment-review";
-import { FeedbackAlert } from "@/components/shared/feedback-alert";
+import { OperationToast } from "@/components/shared/operation-toast";
 import { DateField } from "@/components/shared/date-field";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -28,7 +28,7 @@ export function ReviewPanel({ bundle, reviews, notice }: { bundle: EnrollmentBun
   const profilePhoto = documents.find((document) => document.document_type === "profile_photo");
   return <div className="space-y-5">
     <div className="flex flex-wrap items-start justify-between gap-3"><div className="flex items-center gap-4"><StudentAvatar name={student.full_name} photoDocumentId={profilePhoto?.$id} size="lg" /><div><Link href={ROUTES.adminEnrollments} className="text-sm text-muted-foreground underline">Voltar para alunos</Link><h1 className="mt-2 text-2xl font-semibold">{student.full_name}</h1><p className="text-muted-foreground">CPF {student.cpf ?? "não informado"} · Faixa {currentBelt ?? "não informada"}</p></div></div><StatusBadge tone={enrollment.status === "active" ? "success" : enrollment.status === "cancelled" ? "danger" : "info"}>{enrollment.status.replaceAll("_", " ")}</StatusBadge></div>
-    {notice ? <FeedbackAlert tone={notice.includes("Não") ? "danger" : "success"} title={notice} /> : null}
+    {notice ? <OperationToast tone={notice.includes("Não") ? "error" : "success"} title={notice} clearParams={["updated", "error"]} /> : null}
     <Card><CardHeader><CardTitle>Dados para revisão</CardTitle><CardDescription>Abra somente a seção necessária; dados de saúde permanecem restritos à administração.</CardDescription></CardHeader><CardContent><Accordion type="multiple" defaultValue={["profile"]}>
       <AccordionItem value="profile"><AccordionTrigger>Ficha do aluno</AccordionTrigger><AccordionContent className="grid gap-2 text-sm"><p><strong>Nascimento:</strong> {dateValue(student.birth_date) || "—"}</p><p><strong>WhatsApp:</strong> {student.whatsapp || "—"}</p><p><strong>Endereço:</strong> {student.address || "—"}</p><p><strong>Contato de emergência:</strong> {student.emergency_contact_name || "—"} · {student.emergency_contact_phone || "—"}</p><p><strong>Início no TKD:</strong> {dateValue(student.started_at_tkd) || "—"} · GUB {student.gub ?? "—"}</p><p><strong>Turma:</strong> {student.training_class || "—"}</p></AccordionContent></AccordionItem>
       <AccordionItem value="health"><AccordionTrigger>Informações de saúde</AccordionTrigger><AccordionContent className="grid gap-2 text-sm"><p><strong>Condição:</strong> {student.health_condition === "yes" ? "Sim" : student.health_condition === "no" ? "Não" : "—"}</p><p><strong>Detalhes:</strong> {student.health_details || "—"}</p><p><strong>Medicamentos:</strong> {student.medications || "—"}</p><p><strong>Alergias:</strong> {student.allergies || "—"}</p><p><strong>Lesões:</strong> {student.injuries || "—"}</p></AccordionContent></AccordionItem>

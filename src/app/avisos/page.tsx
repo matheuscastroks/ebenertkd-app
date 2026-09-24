@@ -4,7 +4,7 @@ import { markNotificationReadAction } from "@/app/actions/notifications";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { PortalFrame } from "@/components/dashboard/portal-shell";
 import { EmptyState } from "@/components/shared/empty-state";
-import { FeedbackAlert } from "@/components/shared/feedback-alert";
+import { OperationToast } from "@/components/shared/operation-toast";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,8 +31,8 @@ export default async function NotificationsPage({ searchParams }: { searchParams
   return <PortalFrame profile={profile}><DashboardShell title="Avisos" subtitle="Comunicados da academia e lembretes importantes." badge={badge}>
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="space-y-5">
-        {params.published ? <FeedbackAlert tone="success" title="Aviso publicado" description="Os destinatários já podem consultar a mensagem nesta central." /> : null}
-        {params.error ? <FeedbackAlert tone="danger" title="Não foi possível publicar" description="Revise os destinatários e o conteúdo do aviso." /> : null}
+        {params.published ? <OperationToast tone="success" title="Aviso publicado" description="Os destinatários já podem consultar a mensagem nesta central." clearParams={["published"]} /> : null}
+        {params.error ? <OperationToast tone="error" title="Não foi possível publicar" description="Revise os destinatários e o conteúdo do aviso." clearParams={["error"]} /> : null}
         {profile.role === "admin" && options ? <AnnouncementForm profiles={options.profiles.map((item) => ({ id: item.$id, name: item.full_name }))} classes={options.classes.map((item) => ({ id: item.$id, name: item.name, startTime: item.start_time }))} /> : null}
         <section className="space-y-3" aria-labelledby="inbox-title">
           <div><h2 id="inbox-title" className="text-lg font-semibold">Caixa de entrada</h2><p className="text-sm text-muted-foreground">{items.filter((item) => !item.recipient.read_at).length} não lido(s).</p></div>

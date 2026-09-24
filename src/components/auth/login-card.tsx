@@ -1,7 +1,7 @@
 import { LockKeyhole, Shield, UserRound } from "lucide-react";
 import Link from "next/link";
 import { loginAdultAction, loginMinorAction } from "@/app/actions/auth";
-import { FeedbackAlert } from "@/components/shared/feedback-alert";
+import { OperationToast } from "@/components/shared/operation-toast";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -33,7 +33,7 @@ export function LoginCard({
           </div>
         </div>
 
-        {errorMessage ? <FeedbackAlert tone="danger" title="Não foi possível entrar" description={errorMessage} /> : null}
+        {errorMessage ? <OperationToast tone="error" title="Não foi possível entrar" description={errorMessage} clearParams={["error", "context", "message"]} /> : null}
 
         <form action={action} className="space-y-4">
           {isMinor ? (

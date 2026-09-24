@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CalendarCheck2, CircleHelp, Pencil } from "lucide-react";
 import { createTrainingClassAction, updateTrainingClassAction } from "@/app/actions/training-classes";
 import { EmptyState } from "@/components/shared/empty-state";
-import { FeedbackAlert } from "@/components/shared/feedback-alert";
+import { OperationToast } from "@/components/shared/operation-toast";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -27,7 +27,7 @@ function Fields({ trainingClass }: { trainingClass?: TrainingClass }) {
 
 export function ClassManager({ classes, notice }: { classes: TrainingClass[]; notice?: string }) {
   return <div className="space-y-5">
-    {notice ? <FeedbackAlert tone={notice.toLowerCase().includes("não") ? "danger" : "success"} title={notice} /> : null}
+    {notice ? <OperationToast tone={notice.toLowerCase().includes("não") ? "error" : "success"} title={notice} clearParams={["created", "updated", "error"]} /> : null}
     <Card><CardHeader><CardTitle>Nova turma</CardTitle><CardDescription>Cadastre somente horários que podem ser escolhidos pelos alunos.</CardDescription></CardHeader><CardContent><form action={createTrainingClassAction} className="space-y-4"><Fields /><FormSubmitButton pendingLabel="Criando turma…">Criar turma</FormSubmitButton></form></CardContent></Card>
     <section className="space-y-3">
       <div><h2 className="flex items-center gap-2 text-lg font-semibold">Turmas cadastradas<Tooltip><TooltipTrigger asChild><Button type="button" variant="ghost" size="icon-sm" aria-label="Sobre a disponibilidade das turmas"><CircleHelp aria-hidden="true" /></Button></TooltipTrigger><TooltipContent>Turmas inativas não aparecem em novas matrículas.</TooltipContent></Tooltip></h2><p className="text-sm text-muted-foreground">Ative, pause ou edite os horários oferecidos aos alunos.</p></div>

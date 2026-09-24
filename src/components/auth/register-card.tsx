@@ -1,6 +1,6 @@
 import { UserPlus } from "lucide-react";
 import { registerAdultAction } from "@/app/actions/auth";
-import { FeedbackAlert } from "@/components/shared/feedback-alert";
+import { OperationToast } from "@/components/shared/operation-toast";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -14,8 +14,8 @@ export function RegisterCard({ errorMessage, success }: { errorMessage?: string;
         <div className="rounded-full border p-2"><UserPlus className="h-4 w-4" /></div>
         <div><h2 className="text-lg font-semibold">Criar conta</h2><p className="text-sm text-muted-foreground">Cadastre-se como aluno adulto ou responsável.</p></div>
       </div>
-      {success ? <FeedbackAlert tone="success" title="Conta criada" description="Entre com seu e-mail e senha." /> : null}
-      {errorMessage ? <FeedbackAlert tone="danger" title="Não foi possível criar a conta" description={errorMessage} /> : null}
+      {success ? <OperationToast tone="success" title="Conta criada" description="Entre com seu e-mail e senha." clearParams={["registered", "context"]} /> : null}
+      {errorMessage ? <OperationToast tone="error" title="Não foi possível criar a conta" description={errorMessage} clearParams={["error", "context", "message"]} /> : null}
       {!success ? (
         <form action={registerAdultAction} className="space-y-4">
           <Field><FieldLabel htmlFor="register-name">Nome completo</FieldLabel><Input id="register-name" name="full_name" autoComplete="name" required /></Field>

@@ -5,15 +5,19 @@ import { promoteMinorAction } from "@/app/actions/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { OperationToast } from "@/components/shared/operation-toast";
 import Link from "next/link";
 
-export default async function AdminPage() {
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ promoted?: string; error?: string }> }) {
   const profile = await requireProfile("admin");
+  const query = await searchParams;
   return <PhaseOnePanel profile={profile} activePath="/admin" title="Painel administrativo" description="Acompanhe matrículas, turmas e a operação da academia." items={[
     { title: "Contas", description: "Papéis e sessões estão isolados por perfil." },
     { title: "Auditoria", description: "Criações e ações sensíveis geram eventos internos." },
     { title: "Próxima etapa", description: "Cadastro e aprovação das fichas dos alunos." }
   ]}>
+    {query.promoted ? <OperationToast tone="success" title="Conta convertida com sucesso" description="O aluno receberá as instruções no novo e-mail." clearParams={["promoted"]} /> : null}
+    {query.error ? <OperationToast tone="error" title="Não foi possível converter a conta" description="Confira o perfil e o e-mail informados." clearParams={["error"]} /> : null}
     <Card><CardHeader><CardTitle className="text-base">Matrículas de alunos</CardTitle></CardHeader><CardContent><Button asChild><Link href={ROUTES.adminEnrollments}>Abrir análise de matrículas</Link></Button></CardContent></Card>
     <Card><CardHeader><CardTitle className="text-base">Transição para conta adulta</CardTitle></CardHeader><CardContent>
       <form action={promoteMinorAction} className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">

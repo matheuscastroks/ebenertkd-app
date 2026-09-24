@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { RefreshCw } from "lucide-react";
-import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export function RegisterServiceWorker() {
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
@@ -36,16 +34,18 @@ export function RegisterServiceWorker() {
     return () => navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
   }, []);
 
-  if (!waitingWorker) return null;
+  useEffect(() => {
+    if (!waitingWorker) return;
+    toast.info("Atualização disponível", {
+      id: "pwa-update",
+      description: "Atualize para usar a versão mais recente do aplicativo.",
+      duration: Infinity,
+      action: {
+        label: "Atualizar",
+        onClick: () => waitingWorker.postMessage({ type: "SKIP_WAITING" })
+      }
+    });
+  }, [waitingWorker]);
 
-  return (
-    <Alert className="fixed right-4 bottom-4 z-50 w-[calc(100%-2rem)] max-w-sm bg-background shadow-lg">
-      <RefreshCw aria-hidden="true" />
-      <AlertTitle>Atualização disponível</AlertTitle>
-      <AlertDescription>Atualize para usar a versão mais recente do aplicativo.</AlertDescription>
-      <AlertAction>
-        <Button size="sm" onClick={() => waitingWorker.postMessage({ type: "SKIP_WAITING" })}>Atualizar</Button>
-      </AlertAction>
-    </Alert>
-  );
+  return null;
 }

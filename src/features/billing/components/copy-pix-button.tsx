@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 export function CopyPixButton({ value }: { value: string }) {
-  const [copied, setCopied] = useState(false);
-  return <Button type="button" size="sm" variant="outline" onClick={async () => { await navigator.clipboard.writeText(value); setCopied(true); window.setTimeout(() => setCopied(false), 2000); }}>{copied ? "Chave copiada" : "Copiar chave"}</Button>;
+  return <Button type="button" size="sm" variant="outline" onClick={async () => { try { await navigator.clipboard.writeText(value); toast.success("Chave PIX copiada"); } catch { toast.error("Não foi possível copiar a chave PIX"); } }}>Copiar chave</Button>;
 }

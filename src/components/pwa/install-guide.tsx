@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Download, Share, X } from "lucide-react";
-import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 type InstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -37,36 +35,32 @@ export function InstallGuide() {
     };
   }, []);
 
-  if (dismissed || (!prompt && !showIosGuide)) return null;
-
-  const dismiss = () => {
+  const dismiss = useCallback(() => {
     window.localStorage.setItem(DISMISS_KEY, "true");
     setDismissed(true);
-  };
+    toast.dismiss("pwa-install");
+  }, []);
 
-  const install = async () => {
+  const install = useCallback(async () => {
     if (!prompt) return;
     await prompt.prompt();
     const result = await prompt.userChoice;
     if (result.outcome === "accepted") dismiss();
     setPrompt(null);
-  };
+  }, [dismiss, prompt]);
 
-  return (
-    <Alert className="fixed right-4 bottom-4 z-40 w-[calc(100%-2rem)] max-w-sm bg-background shadow-lg">
-      {showIosGuide ? <Share aria-hidden="true" /> : <Download aria-hidden="true" />}
-      <AlertTitle>Instale o Ebenert KD</AlertTitle>
-      <AlertDescription>
-        {showIosGuide
-          ? "No Safari, toque em Compartilhar e depois em Adicionar à Tela de Início."
-          : "Acesse a academia com mais rapidez pela tela inicial do celular."}
-      </AlertDescription>
-      <AlertAction className="flex gap-1">
-        {prompt ? <Button size="sm" onClick={install}>Instalar</Button> : null}
-        <Button variant="ghost" size="icon-sm" aria-label="Dispensar orientação de instalação" onClick={dismiss}>
-          <X aria-hidden="true" />
-        </Button>
-      </AlertAction>
-    </Alert>
-  );
+  useEffect(() => {
+    if (dismissed || (!prompt && !showIosGuide)) return;
+    toast.info("Instale o Ebenert KD", {
+      id: "pwa-install",
+      description: showIosGuide
+        ? "No Safari, toque em Compartilhar e depois em Adicionar à Tela de Início."
+        : "Acesse a academia com mais rapidez pela tela inicial do celular.",
+      duration: Infinity,
+      action: prompt ? { label: "Instalar", onClick: install } : { label: "Entendi", onClick: dismiss },
+      cancel: prompt ? { label: "Agora não", onClick: dismiss } : undefined
+    });
+  }, [dismiss, dismissed, install, prompt, showIosGuide]);
+
+  return null;
 }

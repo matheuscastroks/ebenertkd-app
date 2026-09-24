@@ -6,6 +6,8 @@ import { AppwriteConnectionCheck } from "@/components/appwrite/appwrite-connecti
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -31,13 +33,16 @@ type RootLayoutProps = {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="pt-BR" className={cn("font-sans", geist.variable)}>
+    <html lang="pt-BR" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
       <body className={`${inter.variable} ${poppins.variable}`}>
-        <TooltipProvider>
-          <AppwriteConnectionCheck />
-          <RegisterServiceWorker />
-          {children}
-        </TooltipProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <TooltipProvider>
+            <AppwriteConnectionCheck />
+            <RegisterServiceWorker />
+            {children}
+            <Toaster richColors closeButton position="top-right" />
+          </TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,16 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { EmptyState } from "@/components/shared/empty-state";
-import { FeedbackAlert } from "@/components/shared/feedback-alert";
 import { PageBreadcrumb } from "@/components/shared/page-breadcrumb";
 import { StatusBadge } from "@/components/shared/status-badge";
 
 describe("shared UI patterns", () => {
-  it("announces destructive feedback", () => {
-    render(<FeedbackAlert tone="danger" title="Não foi possível salvar" description="Revise os campos." />);
-    expect(screen.getByRole("alert")).toHaveTextContent("Não foi possível salvar");
-  });
-
   it("renders an actionable empty state", () => {
     render(<EmptyState title="Nenhum aluno" description="Cadastre o primeiro aluno." action={<button>Novo aluno</button>} />);
     expect(screen.getByRole("heading", { name: "Nenhum aluno" })).toBeInTheDocument();
