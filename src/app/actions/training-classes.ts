@@ -43,7 +43,11 @@ export async function setTrainingClassStatusAction(formData: FormData) {
   const classId = String(formData.get("class_id") ?? "");
   const status = String(formData.get("status"));
   if (status !== "active" && status !== "inactive") redirect("/admin/turmas?error=status");
-  await setTrainingClassStatus(admin, classId, status);
+  try {
+    await setTrainingClassStatus(admin, classId, status);
+  } catch {
+    redirect("/admin/turmas?error=status");
+  }
   revalidatePath("/admin/turmas");
   redirect("/admin/turmas?updated=1");
 }

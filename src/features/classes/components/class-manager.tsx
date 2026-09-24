@@ -1,13 +1,17 @@
-import { createTrainingClassAction, setTrainingClassStatusAction, updateTrainingClassAction } from "@/app/actions/training-classes";
+import { CircleHelp, Pencil } from "lucide-react";
+import { createTrainingClassAction, updateTrainingClassAction } from "@/app/actions/training-classes";
 import { EmptyState } from "@/components/shared/empty-state";
 import { FeedbackAlert } from "@/components/shared/feedback-alert";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
+import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { ClassStatusToggle } from "@/features/classes/components/class-status-toggle";
 import { WEEKDAYS, type TrainingClass } from "@/features/classes/types";
 
 function WeekdayFields({ selected = [], idSuffix }: { selected?: string[]; idSuffix: string }) {
@@ -20,5 +24,15 @@ function Fields({ trainingClass }: { trainingClass?: TrainingClass }) {
 }
 
 export function ClassManager({ classes, notice }: { classes: TrainingClass[]; notice?: string }) {
-  return <div className="space-y-5">{notice ? <FeedbackAlert tone={notice.toLowerCase().includes("não") ? "danger" : "success"} title={notice} /> : null}<Card><CardHeader><CardTitle>Nova turma</CardTitle><CardDescription>Cadastre somente horários que podem ser escolhidos pelos alunos.</CardDescription></CardHeader><CardContent><form action={createTrainingClassAction} className="space-y-4"><Fields /><FormSubmitButton pendingLabel="Criando turma…">Criar turma</FormSubmitButton></form></CardContent></Card><section className="space-y-3"><div><h2 className="text-lg font-semibold">Turmas cadastradas</h2><p className="text-sm text-muted-foreground">Turmas inativas deixam de aparecer em novas matrículas.</p></div>{classes.length === 0 ? <EmptyState title="Nenhuma turma cadastrada" description="Crie uma turma para liberar horários na matrícula dos alunos." /> : classes.map((trainingClass) => <Card key={trainingClass.$id}><CardHeader><div className="flex items-center justify-between gap-3"><CardTitle>{trainingClass.name}</CardTitle><StatusBadge tone={trainingClass.status === "active" ? "success" : "neutral"}>{trainingClass.status === "active" ? "Ativa" : "Inativa"}</StatusBadge></div></CardHeader><CardContent className="space-y-4"><form action={updateTrainingClassAction} className="space-y-4"><input type="hidden" name="class_id" value={trainingClass.$id} /><Fields trainingClass={trainingClass} /><FormSubmitButton pendingLabel="Salvando…" variant="outline">Salvar alterações</FormSubmitButton></form><form action={setTrainingClassStatusAction}><input type="hidden" name="class_id" value={trainingClass.$id} /><input type="hidden" name="status" value={trainingClass.status === "active" ? "inactive" : "active"} /><Button type="submit" variant={trainingClass.status === "active" ? "destructive" : "default"}>{trainingClass.status === "active" ? "Desativar turma" : "Reativar turma"}</Button></form></CardContent></Card>)}</section></div>;
+  return <div className="space-y-5">
+    {notice ? <FeedbackAlert tone={notice.toLowerCase().includes("não") ? "danger" : "success"} title={notice} /> : null}
+    <Card><CardHeader><CardTitle>Nova turma</CardTitle><CardDescription>Cadastre somente horários que podem ser escolhidos pelos alunos.</CardDescription></CardHeader><CardContent><form action={createTrainingClassAction} className="space-y-4"><Fields /><FormSubmitButton pendingLabel="Criando turma…">Criar turma</FormSubmitButton></form></CardContent></Card>
+    <section className="space-y-3">
+      <div><h2 className="flex items-center gap-2 text-lg font-semibold">Turmas cadastradas<Tooltip><TooltipTrigger asChild><Button type="button" variant="ghost" size="icon-sm" aria-label="Sobre a disponibilidade das turmas"><CircleHelp aria-hidden="true" /></Button></TooltipTrigger><TooltipContent>Turmas inativas não aparecem em novas matrículas.</TooltipContent></Tooltip></h2><p className="text-sm text-muted-foreground">Ative, pause ou edite os horários oferecidos aos alunos.</p></div>
+      {classes.length === 0 ? <EmptyState title="Nenhuma turma cadastrada" description="Crie uma turma para liberar horários na matrícula dos alunos." /> : <div className="grid gap-3 lg:grid-cols-2">{classes.map((trainingClass) => {
+        const active = trainingClass.status === "active";
+        return <Card key={trainingClass.$id}><CardHeader><div className="flex items-start justify-between gap-3"><div><CardTitle>{trainingClass.name}</CardTitle><CardDescription className="mt-1">{trainingClass.weekdays.map((day) => day.slice(0, 3)).join(", ")} · {trainingClass.start_time}–{trainingClass.end_time}{trainingClass.capacity ? ` · até ${trainingClass.capacity} alunos` : ""}</CardDescription></div><div className="flex items-center gap-2"><StatusBadge tone={active ? "success" : "neutral"}>{active ? "Ativa" : "Inativa"}</StatusBadge><ClassStatusToggle classId={trainingClass.$id} active={active} /></div></div></CardHeader><CardContent><ResponsiveDialog trigger={<Button variant="outline"><Pencil aria-hidden="true" />Editar turma</Button>} title={`Editar ${trainingClass.name}`} description="Atualize nome, dias, horário e capacidade sem sair da lista."><form action={updateTrainingClassAction} className="space-y-4"><input type="hidden" name="class_id" value={trainingClass.$id} /><Fields trainingClass={trainingClass} /><FormSubmitButton pendingLabel="Salvando…">Salvar alterações</FormSubmitButton></form></ResponsiveDialog></CardContent></Card>;
+      })}</div>}
+    </section>
+  </div>;
 }

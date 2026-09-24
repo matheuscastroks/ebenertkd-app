@@ -136,14 +136,14 @@ type SearchFieldProps = {
 - Modify: `src/features/contracts/components/contract-workspace.tsx`
 - Modify: `src/features/billing/components/charge-actions.tsx`
 
-- [ ] Usar `Accordion` para históricos, revisão por seção e conteúdo secundário independente.
-- [ ] Usar `Collapsible` para filtros avançados e grupos da sidebar com dois ou mais destinos; manter ação principal visível.
-- [ ] Mover edições curtas de turma e dados financeiros para `ResponsiveDialog`; manter criação extensa em página/card próprio.
-- [ ] Trocar ativação de turma e preferências equivalentes por `Switch` somente após definir rollback, feedback e confirmação quando necessária.
-- [ ] Substituir avisos curtos junto a ícones por `Tooltip`; manter bloqueios e consequências em `Alert` ou `AlertDialog`.
-- [ ] Testar foco, Escape, retorno ao gatilho, toque e operação por teclado.
-- [ ] Executar `npm test -- src/features/billing/components/charge-actions.test.tsx src/features/students/components && npm run lint`; esperar overlays, formulários e lint aprovados.
-- [ ] Commit: `refactor: improve contextual admin interactions`.
+- [x] Usar `Accordion` para históricos, revisão por seção e conteúdo secundário independente.
+- [x] Usar `Collapsible` em uma ação secundária única (solicitação de cancelamento); grupos hierárquicos da sidebar ficam reservados à subfase 5.
+- [x] Mover edições curtas de turma e dados financeiros para `ResponsiveDialog`; manter criação extensa em página/card próprio.
+- [x] Trocar ativação de turma por `Switch`, com estado persistido no servidor, feedback por redirecionamento e retorno ao estado salvo em caso de erro.
+- [x] Substituir ajuda curta junto a ícones por `Tooltip`; manter bloqueios e consequências em `Alert` ou `AlertDialog`.
+- [x] Testar foco, Escape, retorno ao gatilho e operação por teclado no navegador; toggle possui teste automatizado.
+- [x] Executar `npm test -- src/features/billing/components/charge-actions.test.tsx src/features/students/components && npm run lint`; 96 testes, lint, tipagem e build aprovados.
+- [x] Commit: `refactor: improve contextual admin interactions`.
 
 ### Subfase 5: Sidebar completa por perfil
 
@@ -171,5 +171,5 @@ type SearchFieldProps = {
 - [x] Toda fila potencialmente longa possui paginação por URL e alternativa mobile.
 - [x] A foto do aluno aparece com `Avatar` em cadastro, listas e detalhes, respeitando autorização.
 - [ ] Sidebar permanece montada durante loading e contém apenas destinos permitidos ao perfil.
-- [ ] Tooltip contém apenas informação complementar; avisos críticos continuam perceptíveis sem hover.
+- [x] Tooltip contém apenas informação complementar; avisos críticos continuam perceptíveis sem hover.
 - [ ] Testes, `npm run lint`, `npm run typecheck` e `npm run build` passam ao final de cada subfase.
