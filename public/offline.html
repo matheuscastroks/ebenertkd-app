@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#115c5d" />
+    <title>Sem conexão — Ebenert KD</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; color: #172423; background: #fffaf3; font-family: system-ui, sans-serif; }
+      main { width: min(100%, 440px); padding: 28px; border: 1px solid #d8dfdc; border-radius: 18px; background: white; box-shadow: 0 18px 50px rgb(23 36 35 / 10%); }
+      .mark { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; color: white; background: #115c5d; font-weight: 800; }
+      h1 { margin: 22px 0 8px; font-size: 1.5rem; }
+      p { margin: 0 0 22px; color: #586765; line-height: 1.55; }
+      button { width: 100%; min-height: 44px; border: 0; border-radius: 10px; color: white; background: #115c5d; font: inherit; font-weight: 700; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="mark" aria-hidden="true">E</div>
+      <h1>Você está sem conexão</h1>
+      <p>Reconecte-se para consultar dados ou concluir operações. Nenhuma alteração foi registrada offline.</p>
+      <button type="button" onclick="window.location.reload()">Tentar novamente</button>
+    </main>
+  </body>
+</html>

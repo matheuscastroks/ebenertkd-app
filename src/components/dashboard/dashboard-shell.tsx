@@ -4,6 +4,7 @@ import { ActiveSidebar } from "@/components/dashboard/active-sidebar";
 import { PageBreadcrumb, type BreadcrumbEntry } from "@/components/shared/page-breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { InstallGuide } from "@/components/pwa/install-guide";
 
 type DashboardShellProps = {
   title: string;
@@ -25,6 +26,7 @@ export function DashboardFrame({ badge, profileName, navItems, children }: Dashb
           <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">{children}</div>
         </div>
       </SidebarInset>
+      <InstallGuide />
     </SidebarProvider>
   );
 }

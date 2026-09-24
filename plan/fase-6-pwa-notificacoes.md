@@ -4,9 +4,33 @@
 
 **Goal:** entregar instalação como PWA, caixa de avisos e lembretes push idempotentes para pagamentos e operação.
 
-**Architecture:** a caixa interna é a fonte confiável; push é um canal complementar. Inscrições são por dispositivo. A Function diária produz eventos por chave única e registra entrega, falha e expiração.
+**Architecture:** a caixa interna é a fonte confiável; push é um canal complementar. Inscrições são por dispositivo. A Function diária produz eventos por chave única e registra entrega, falha e expiração. O envio usa o padrão Web Push com VAPID diretamente, mantendo o Appwrite como persistência e execução agendada, sem adicionar Firebase apenas para notificações.
 
-**Tech Stack:** Web App Manifest, Service Worker, Web Push/VAPID, Appwrite TablesDB/Functions/Messaging, Vitest/Playwright.
+**Tech Stack:** Web App Manifest, Service Worker, Web Push/VAPID, Appwrite TablesDB/Functions, Vitest.
+
+## Ordem de implementação
+
+### Entrega 6A — Base PWA segura
+
+- [x] Consolidar manifesto, ícones, página offline e cache restrito ao shell público.
+- [x] Exibir atualização disponível sem remover a sidebar ou causar mudança de layout.
+- [x] Criar orientação de instalação responsiva com componentes shadcn já presentes.
+- [x] Validar lint, tipos, testes e build; commit `feat: harden pwa shell`.
+
+### Entrega 6B — Caixa de avisos e Web Push
+
+- [ ] Criar schema, tipos, regras de acesso, serviços, ações e testes das notificações.
+- [ ] Adicionar `/avisos` à navegação de professor, aluno e responsável.
+- [ ] Implementar publicação por audiência e destinatários congelados.
+- [ ] Implementar opt-in por clique, múltiplos dispositivos, revogação e envio genérico.
+- [ ] Validar infraestrutura, aplicação e fluxo autenticado; commit `feat: add notification inbox and web push`.
+
+### Entrega 6C — Automação financeira
+
+- [ ] Implementar calendário puro e testável de lembretes.
+- [ ] Integrar geração idempotente e entrega à Function diária.
+- [ ] Integrar avisos operacionais relevantes ao professor.
+- [ ] Validar reexecução, estados de cobrança e destinatários de menores; commit `feat: add automated payment reminders`.
 
 ---
 
@@ -14,11 +38,11 @@
 
 **Arquivos:** alterar `src/app/manifest.ts`, `public/sw.js`, `src/components/pwa/register-sw.tsx`; criar `src/components/pwa/install-guide.tsx`.
 
-- [ ] Completar manifesto com `id`, escopo, orientação, cores e ícones 192/512 maskable.
-- [ ] Versionar service worker e implementar atualização controlada; remover caches antigos na ativação.
-- [ ] Usar cache somente para shell e ativos públicos versionados; excluir rotas autenticadas, APIs, PDFs, saúde, comprovantes e contratos.
-- [ ] Em falha de rede, mostrar página de indisponibilidade e nunca confirmar operação localmente.
-- [ ] Orientar instalação por plataforma; no iOS, explicar tela inicial antes da permissão push.
+- [x] Completar manifesto com `id`, escopo, orientação, cores e ícones 192/512 maskable.
+- [x] Versionar service worker e implementar atualização controlada; remover caches antigos na ativação.
+- [x] Usar cache somente para shell e ativos públicos versionados; excluir rotas autenticadas, APIs, PDFs, saúde, comprovantes e contratos.
+- [x] Em falha de rede, mostrar página de indisponibilidade e nunca confirmar operação localmente.
+- [x] Orientar instalação por plataforma; no iOS, explicar tela inicial antes da permissão push.
 
 ## 6.2 Avisos e inscrições
 
@@ -48,4 +72,3 @@
 - [ ] Testar calendário de lembretes, análise, rejeição, pagamento e reexecução do cron.
 - [ ] Validar Android/Chrome e iPhone/Safari instalado; registrar modelo, SO e resultado.
 - [ ] Gate: toda mensagem fica na caixa interna e push nunca é duplicado nem vaza dado sensível.
-
