@@ -10,23 +10,66 @@
 
 ---
 
+## Ordem de implementação
+
+### Entrega 7A — Formato verificável e backup externo
+
+**Arquivos:** criar `src/lib/backup/manifest.ts`, `src/lib/backup/manifest.test.ts`, `appwrite/functions/backup/src/crypto.js`, `appwrite/functions/backup/src/drive.js`; substituir `appwrite/functions/backup/src/main.js`; alterar `scripts/appwrite/deploy-function.ts`.
+
+- [x] Testar manifesto, hashes, nonce único, detecção de referência ausente e retenção antes da implementação.
+- [x] Exportar usuários, todas as tabelas e todos os arquivos privados com paginação.
+- [x] Cifrar cada objeto em envelope AES-256-GCM e publicar `complete.json` por último.
+- [x] Usar upload retomável, pasta diária determinística e retenção somente de pastas completas.
+- [ ] Sincronizar segredos e escopos mínimos no deploy; commit `feat: add encrypted external backups`.
+
+### Entrega 7B — Restauração protegida
+
+**Arquivos:** criar `scripts/backup/restore.ts`, `scripts/backup/restore-rules.ts`, `scripts/backup/restore-rules.test.ts`; alterar `package.json` e criar `docs/operations.md`.
+
+- [ ] Exigir variáveis `RESTORE_APPWRITE_*`, ID digitado novamente e projeto de destino diferente da produção.
+- [ ] Baixar apenas backup completo, autenticar envelopes e comparar todos os hashes antes de gravar.
+- [ ] Exigir tabelas e bucket vazios; restaurar usuários, linhas e arquivos preservando IDs.
+- [ ] Produzir relatório sem senhas, listar contas que exigem redefinição e nunca enviar e-mail automaticamente.
+- [ ] Validar regras com fixture corrompida e destino inseguro; commit `feat: add guarded backup restore`.
+
+### Entrega 7C — Observabilidade operacional
+
+**Arquivos:** criar `src/features/operations/service.ts`, `src/app/admin/sistema/page.tsx`; alterar `src/lib/navigation/routes.ts`, `src/components/dashboard/app-sidebar.tsx` e testes de navegação.
+
+- [ ] Mostrar último cron, último backup completo, falhas recentes e tamanho do bucket.
+- [ ] Calcular níveis normal, atenção (70%) e crítico (85%) apenas quando a cota estiver configurada.
+- [ ] Documentar RPO de 24 horas, procedimento de teste e limitação de redefinição de senha.
+- [ ] Validar testes, lint, tipos, build e infraestrutura; commit `feat: add operations health dashboard`.
+
+### Segredos obrigatórios para publicação
+
+```text
+GOOGLE_DRIVE_CLIENT_ID
+GOOGLE_DRIVE_CLIENT_SECRET
+GOOGLE_DRIVE_REFRESH_TOKEN
+GOOGLE_DRIVE_FOLDER_ID
+BACKUP_ENCRYPTION_KEY (32 bytes em base64)
+```
+
+O refresh token deve pertencer a uma conta dedicada, usar somente `drive.file` e estar em modo de produção. A chave de recuperação deve ter uma cópia fora do Appwrite e do Google Drive.
+
 ## 7.1 Autorização e formato
 
 **Arquivos:** criar `appwrite/functions/backup/src/main.ts`, `src/lib/backup/manifest.ts`, `scripts/backup/restore.ts`, `docs/operations.md`.
 
 - [ ] Usar conta Google dedicada, pasta privada e escopo `drive.file`; colocar consentimento OAuth em produção para evitar refresh token de teste expirando em sete dias.
 - [ ] Guardar refresh token e chave de criptografia em secrets da Function; guardar cópia da chave de recuperação fora de Appwrite e Drive.
-- [ ] Definir manifesto versionado com schema, contagens, hashes, timestamps, versão da aplicação e lista de objetos.
-- [ ] Exportar todas as tabelas com paginação e todos os arquivos referenciados; detectar referências ausentes.
-- [ ] Cifrar arquivo por arquivo com nonce único e autenticação; nunca enviar dados em claro ao Drive.
+- [x] Definir manifesto versionado com schema, contagens, hashes, timestamps, versão da aplicação e lista de objetos.
+- [x] Exportar todas as tabelas com paginação e todos os arquivos referenciados; detectar referências ausentes.
+- [x] Cifrar arquivo por arquivo com nonce único e autenticação; nunca enviar dados em claro ao Drive.
 
 ## 7.2 Execução e retenção
 
-- [ ] Executar diariamente após a rotina operacional; usar lock por data e retomar upload incompleto.
-- [ ] Publicar marcador `complete` somente após conferir contagens e hashes do destino.
-- [ ] Manter sete diários e quatro semanais; excluir apenas backups completos fora da retenção.
-- [ ] Registrar duração, bytes, contagens, estado, erro sanitizado e último sucesso em `automation_runs`.
-- [ ] Alertar professor/mantenedor após uma falha e elevar criticidade após 24 horas sem cópia válida.
+- [x] Executar diariamente após a rotina operacional; usar lock por data e retomar upload incompleto.
+- [x] Publicar marcador `complete` somente após conferir contagens e hashes do destino.
+- [x] Manter sete diários e quatro semanais; excluir apenas backups completos fora da retenção.
+- [x] Registrar duração, bytes, contagens, estado, erro sanitizado e último sucesso em `automation_runs`.
+- [x] Alertar professor/mantenedor após uma falha e elevar criticidade após 24 horas sem cópia válida.
 
 ## 7.3 Restauração e operação
 
@@ -43,4 +86,3 @@
 - [ ] Restaurar conjunto fictício com adulto, responsável, dois menores, saúde, contrato, cobrança, comprovante, presença e exame.
 - [ ] Comparar contagens e hashes; documentar RPO de 24 horas e tempo observado de restauração.
 - [ ] Gate: restauração separada funciona e nenhuma cópia incompleta aparece como válida.
-

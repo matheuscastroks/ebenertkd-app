@@ -11,6 +11,7 @@ import {
 } from "node-appwrite";
 import { readServerAppwriteConfig } from "../../src/lib/appwrite/config";
 import type { ServerAppwriteConfig } from "../../src/lib/appwrite/config";
+import { APPWRITE_IDS } from "../../src/lib/appwrite/ids";
 import { bucket, functions, tables, type ColumnDefinition } from "./schema";
 
 loadEnvConfig(process.cwd());
@@ -199,12 +200,14 @@ async function reconcile() {
         runtime: Runtime.Node22,
         execute: [],
         schedule: fn.schedule,
-        timeout: 60,
+        timeout: fn.id === APPWRITE_IDS.functions.backup ? 900 : 60,
         enabled: true,
         logging: true,
         entrypoint: "src/main.js",
         commands: "npm install",
-        scopes: [ProjectKeyScopes.RowsRead, ProjectKeyScopes.RowsWrite]
+        scopes: fn.id === APPWRITE_IDS.functions.backup
+          ? [ProjectKeyScopes.UsersRead, ProjectKeyScopes.RowsRead, ProjectKeyScopes.RowsWrite, ProjectKeyScopes.BucketsRead, ProjectKeyScopes.FilesRead]
+          : [ProjectKeyScopes.RowsRead, ProjectKeyScopes.RowsWrite]
       });
     }
   }

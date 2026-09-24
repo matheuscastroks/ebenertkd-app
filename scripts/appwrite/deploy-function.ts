@@ -15,6 +15,17 @@ if (requested !== APPWRITE_IDS.functions.dailyOperations && requested !== APPWRI
   throw new Error(`Use: npm run appwrite:deploy-function -- <${APPWRITE_IDS.functions.dailyOperations}|${APPWRITE_IDS.functions.backup}>`);
 }
 
+async function syncVariables(functions: Functions, functionId: string, definitions: Array<{ key: string; value?: string; secret: boolean }>) {
+  const missing = definitions.filter((item) => !item.value).map((item) => item.key);
+  if (missing.length) throw new Error(`Missing function variables: ${missing.join(", ")}`);
+  const current = await functions.listVariables({ functionId });
+  for (const definition of definitions) {
+    const existing = current.variables.find((item) => item.key === definition.key);
+    if (existing) await functions.updateVariable({ functionId, variableId: existing.$id, value: definition.value!, secret: definition.secret });
+    else await functions.createVariable({ functionId, variableId: definition.key.toLowerCase().replaceAll("_", "-").slice(0, 36), key: definition.key, value: definition.value!, secret: definition.secret });
+  }
+}
+
 async function main() {
   const config = readServerAppwriteConfig();
   const client = new Client().setEndpoint(config.endpoint).setProject(config.projectId).setKey(config.apiKey);
@@ -26,23 +37,30 @@ async function main() {
   try {
     if (requested === APPWRITE_IDS.functions.dailyOperations) {
       const definition = await functions.get({ functionId: requested });
-      await functions.update({ functionId: requested, name: definition.name, scopes: [ProjectKeyScopes.RowsRead, ProjectKeyScopes.RowsWrite] });
-      const definitions = [
+      await syncVariables(functions, requested, [
         { key: "APPWRITE_DATABASE_ID", value: config.databaseId, secret: false },
         { key: "NEXT_PUBLIC_VAPID_PUBLIC_KEY", value: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY, secret: false },
         { key: "VAPID_PRIVATE_KEY", value: process.env.VAPID_PRIVATE_KEY, secret: true },
         { key: "VAPID_SUBJECT", value: process.env.VAPID_SUBJECT, secret: false },
         { key: "PUSH_SUBSCRIPTION_ENCRYPTION_KEY", value: process.env.PUSH_SUBSCRIPTION_ENCRYPTION_KEY, secret: true }
-      ];
-      const missing = definitions.filter((item) => !item.value).map((item) => item.key);
-      if (missing.length) throw new Error(`Missing function variables: ${missing.join(", ")}`);
-      const current = await functions.listVariables({ functionId: requested });
-      for (const definition of definitions) {
-        const existing = current.variables.find((item) => item.key === definition.key);
-        if (existing) await functions.updateVariable({ functionId: requested, variableId: existing.$id, value: definition.value!, secret: definition.secret });
-        else await functions.createVariable({ functionId: requested, variableId: definition.key.toLowerCase().replaceAll("_", "-").slice(0, 36), key: definition.key, value: definition.value!, secret: definition.secret });
-      }
+      ]);
+      await functions.update({ functionId: requested, name: definition.name, scopes: [ProjectKeyScopes.RowsRead, ProjectKeyScopes.RowsWrite] });
       process.stdout.write("Daily operations variables synchronized.\n");
+    }
+    if (requested === APPWRITE_IDS.functions.backup) {
+      const definition = await functions.get({ functionId: requested });
+      await syncVariables(functions, requested, [
+        { key: "APPWRITE_DATABASE_ID", value: config.databaseId, secret: false },
+        { key: "APPWRITE_STORAGE_BUCKET_ID", value: config.bucketId, secret: false },
+        { key: "APP_VERSION", value: process.env.npm_package_version ?? "0.1.0", secret: false },
+        { key: "GOOGLE_DRIVE_CLIENT_ID", value: process.env.GOOGLE_DRIVE_CLIENT_ID, secret: true },
+        { key: "GOOGLE_DRIVE_CLIENT_SECRET", value: process.env.GOOGLE_DRIVE_CLIENT_SECRET, secret: true },
+        { key: "GOOGLE_DRIVE_REFRESH_TOKEN", value: process.env.GOOGLE_DRIVE_REFRESH_TOKEN, secret: true },
+        { key: "GOOGLE_DRIVE_FOLDER_ID", value: process.env.GOOGLE_DRIVE_FOLDER_ID, secret: true },
+        { key: "BACKUP_ENCRYPTION_KEY", value: process.env.BACKUP_ENCRYPTION_KEY, secret: true }
+      ]);
+      await functions.update({ functionId: requested, name: definition.name, timeout: 900, scopes: [ProjectKeyScopes.UsersRead, ProjectKeyScopes.RowsRead, ProjectKeyScopes.RowsWrite, ProjectKeyScopes.BucketsRead, ProjectKeyScopes.FilesRead] });
+      process.stdout.write("Backup variables synchronized.\n");
     }
     execFileSync("tar", ["-czf", archive, "-C", source, "."], { stdio: "inherit" });
     const deployment = await functions.createDeployment({ functionId: requested, code: InputFile.fromPath(archive, `${requested}.tar.gz`), activate: true, entrypoint: "src/main.js", commands: "npm install" });
