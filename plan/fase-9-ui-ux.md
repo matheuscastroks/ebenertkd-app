@@ -8,6 +8,8 @@
 
 **Tech Stack:** React, Tailwind CSS, componentes existentes, Playwright, axe-core, Lighthouse.
 
+**Contrato de componentes:** toda implementação ou alteração de tela deve seguir [Refinamento shadcn/ui](./refinamento-shadcn-ui.md). O gate da fase não permite controles HTML improvisados quando já existir uma primitive adequada no projeto.
+
 ---
 
 ## 9.1 Pesquisa e métricas
@@ -34,6 +36,15 @@
 - [x] Mostrar contexto e consequência antes de assinatura, aprovação financeira, reprovação e cancelamento.
 - [x] Melhorar filtros persistentes, pesquisa, retorno ao item anterior e estados vazios orientativos.
 - [x] Usar movimento apenas para transição e feedback, respeitando `prefers-reduced-motion`.
+
+## 9.4 Adoção obrigatória do shadcn/ui
+
+- [ ] Exibir a foto privada do aluno com `Avatar` no cadastro, listas, detalhes e seleção de dependente.
+- [ ] Usar `Calendar + Popover` nos campos de data diária e preservar formato de domínio `YYYY-MM-DD`.
+- [ ] Consolidar `InputGroup` com lupa para buscas e `Pagination` por URL para filas extensas.
+- [ ] Aplicar `Accordion`/`Collapsible` somente à revelação progressiva, `Dialog` à edição contextual, `Switch` a booleanos imediatos e `Separator` à divisão visual sem containers extras.
+- [ ] Usar `Tooltip` para ajuda curta e warnings não bloqueantes; alertas críticos permanecem visíveis e acessíveis sem hover.
+- [ ] Completar a composição oficial da `Sidebar` por perfil, incluindo submenus apenas quando houver hierarquia real e badges apenas para contagens acionáveis.
 
 ## Testes e aceite
 

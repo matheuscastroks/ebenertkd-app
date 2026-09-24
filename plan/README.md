@@ -17,10 +17,14 @@ Este diretório transforma o planejamento do sistema da academia em fases execut
 | [8](./fase-8-homologacao.md) | Segurança, piloto e lançamento | 0–7 | Professor opera sem console técnico |
 | [9](./fase-9-ui-ux.md) | Refinamento de experiência | 8 | Fluxos do piloto melhorados sem regressão |
 
+O contrato transversal de componentes e as subfases de correção estão em [Refinamento shadcn/ui](./refinamento-shadcn-ui.md). Ele é obrigatório para qualquer tela criada ou alterada, independentemente da fase funcional em execução.
+
 ## Regras de execução
 
 - Trabalhar uma fase por vez e marcar os checkboxes somente após validação.
-- Usar valores monetários em centavos e datas de negócio em `America/Sao_Paulo`.
+- Antes de criar HTML ou componente visual próprio, consultar a matriz shadcn/ui; toda exceção deve explicar por que a primitive instalada não atende ao caso.
+- Manter primitives em `src/components/ui/`, composições reutilizáveis em `src/components/shared/` e regras de domínio em `src/features/`.
+- Armazenar valores monetários internamente em centavos, mas sempre receber e exibir reais na interface (`150` = `R$ 150,00`); usar datas de negócio em `America/Sao_Paulo`.
 - Colocar autorização e regras sensíveis no servidor; componentes não usam chave administrativa.
 - Toda operação crítica deve ser idempotente, auditável e coberta por teste de sucesso e falha.
 - Não antecipar escopo: integração bancária, WhatsApp, múltiplas academias e operação totalmente offline ficam fora deste ciclo.

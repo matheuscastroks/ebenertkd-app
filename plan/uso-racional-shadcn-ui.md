@@ -39,7 +39,7 @@ Fontes oficiais: [Components](https://ui.shadcn.com/docs/components), [Field](ht
 | Uso condicional | `Popover`, `Calendar`, `ButtonGroup`, `Switch` | Date picker não nativo, ações realmente acopladas e preferências booleanas com efeito imediato. |
 | Adiar | `InputOTP`, `HoverCard` | Somente quando houver autenticação por código; evitar hover como requisito em uma PWA touch-first. |
 
-`Sheet` já é dependência interna da sidebar no mobile e não deve criar uma segunda navegação. `Tabs` não substitui URLs nem esconde etapas obrigatórias do cadastro.
+`Sheet` já é dependência interna da sidebar no mobile e não deve criar uma segunda navegação. `Tabs` não substitui URLs nem esconde etapas obrigatórias do cadastro. Requisitos posteriores à primeira adoção estão detalhados em [Refinamento shadcn/ui](./refinamento-shadcn-ui.md), que passa a ser o contrato vigente para telas novas e refatoradas.
 
 ---
 
@@ -121,9 +121,9 @@ Cobrir `account_type`, GUB/faixa, turma, condição de saúde, vencimento e cons
 
 Usar `Field > FieldLabel + controle + FieldDescription/FieldError`; grupos usam `FieldSet` e `FieldLegend`. Cada controle recebe `id`, `name`, `autoComplete` quando aplicável e `aria-invalid` quando houver erro retornado.
 
-- [ ] **2.3 Substituir listas fechadas por `Select`**
+- [ ] **2.3 Substituir listas fechadas por `Select` e padronizar datas**
 
-Migrar tipo de conta, GUB/faixa, turma, saúde, vencimento e tipo de chave PIX. Manter `Input type="date"` e `type="month"`: `Calendar + Popover` só entra depois de teste real demonstrar problema no navegador móvel.
+Migrar tipo de conta, GUB/faixa, turma, saúde, vencimento e tipo de chave PIX. Datas diárias devem usar a composição compartilhada `Calendar + Popover`; competência e seleção exclusiva de mês podem manter o controle nativo quando ele for mais eficiente.
 
 - [ ] **2.4 Melhorar upload com `FileField` e `Attachment`**
 
@@ -374,7 +374,8 @@ Implementação concluída nos commits `4220ae6`, `e9de6d1`, `82054fd`, `d567f08
 
 - **Adotados:** `Alert`, `AlertDialog`, `Attachment`, `Avatar`, `Breadcrumb`, `Checkbox`, `Dialog`, `Drawer`, `Field`, `Pagination`, `Progress`, `Select`, `Skeleton`, `Spinner`, `Table`, `Tabs`, `Tooltip`, `Sidebar` e `Chart`.
 - **Uso indireto:** `Sheet` permanece como implementação mobile da sidebar; `Separator` e `Popover` continuam como dependências das composições existentes.
-- **Adiados racionalmente:** `InputOTP`, `HoverCard`, `AspectRatio`, `Switch` e `Calendar` não possuem necessidade atual que justifique interação ou hidratação adicional.
+- **Próximo ciclo obrigatório:** `Avatar` com foto privada, `Calendar + Popover`, `InputGroup`, paginação por URL e composição completa da sidebar. `Accordion`, `Collapsible`, `Separator`, `Switch`, `Tooltip` e `Dialog` entram somente nos casos definidos em [Refinamento shadcn/ui](./refinamento-shadcn-ui.md).
+- **Continuam adiados:** `InputOTP`, `HoverCard` e `AspectRatio` não possuem necessidade atual que justifique interação ou hidratação adicional.
 - **Validação automatizada:** 19 arquivos e 70 testes, ESLint, TypeScript e build de produção aprovados.
 - **Validação visual:** financeiro e matrículas inspecionados no navegador em desktop e 360 px; tabela responsiva, cards, gráfico e drawer financeiro aprovados sem erros da aplicação.
 - **Pendente de operação:** testes com professor/alunos, zoom de 200%, leitor de tela e breakpoints adicionais continuam na Fase 9 porque exigem homologação humana, não implementação estrutural.

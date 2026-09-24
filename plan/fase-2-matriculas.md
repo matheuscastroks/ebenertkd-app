@@ -28,6 +28,7 @@
 - [x] Salvar rascunho validado e permitir retomada; submissão exige todos os campos obrigatórios.
 - [x] Responsável seleciona o filho antes de editar; adulto edita a própria ficha; menor só consulta dados não sensíveis.
 - [x] Solicitar foto do aluno e atestado em JPEG/PNG/WebP/PDF; validar assinatura MIME, tamanho, extensão e proprietário no servidor.
+- [ ] Tornar a foto obrigatória na submissão final e tratá-la como identidade do aluno: preview no cadastro e `Avatar` com imagem privada/fallback nas listas, revisão e área do responsável.
 - [x] Entregar download autenticado por streaming; nunca salvar URL pública permanente.
 
 ## 2.3 Revisão do professor
