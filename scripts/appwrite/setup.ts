@@ -68,6 +68,14 @@ async function createColumn(tableId: string, column: ColumnDefinition) {
   if (column.kind === "datetime") {
     return tablesDb.createDatetimeColumn({ ...common, required: column.required });
   }
+  if (column.kind === "integer") {
+    return tablesDb.createIntegerColumn({
+      ...common,
+      required: column.required,
+      min: column.min,
+      max: column.max
+    });
+  }
   return tablesDb.createTextColumn({ ...common, required: column.required });
 }
 

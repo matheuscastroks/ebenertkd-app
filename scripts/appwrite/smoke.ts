@@ -18,7 +18,7 @@ async function run() {
   const suffix = Date.now().toString(36);
   const rowId = `smoke-${suffix}`;
   const fileId = `smoke-${suffix}`;
-  const payload = `ebenertkd-smoke-${suffix}`;
+  const payload = new Uint8Array(Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64"));
   let rowCreated = false;
   let fileCreated = false;
 
@@ -53,12 +53,12 @@ async function run() {
     await storage.createFile({
       bucketId: config.bucketId,
       fileId,
-      file: InputFile.fromPlainText(payload, "smoke.txt"),
+      file: InputFile.fromBuffer(payload, "smoke.png"),
       permissions: []
     });
     fileCreated = true;
     const downloaded = await storage.getFileDownload({ bucketId: config.bucketId, fileId });
-    if (Buffer.from(downloaded).toString("utf8") !== payload) {
+    if (!Buffer.from(downloaded).equals(Buffer.from(payload))) {
       throw new Error("Private file smoke download did not match upload.");
     }
 
@@ -79,4 +79,3 @@ run().catch((error) => {
   console.error(error instanceof Error ? error.message : error);
   process.exitCode = 1;
 });
-

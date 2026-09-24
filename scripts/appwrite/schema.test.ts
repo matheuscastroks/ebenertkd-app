@@ -19,6 +19,10 @@ describe("Appwrite infrastructure schema", () => {
     expect(tables.map((table) => table.id)).toEqual([
       "profiles",
       "guardian_student_links",
+      "students",
+      "enrollments",
+      "student_documents",
+      "enrollment_reviews",
       "audit_events",
       "automation_runs"
     ]);
@@ -36,6 +40,16 @@ describe("Appwrite infrastructure schema", () => {
       key: "idempotency_key_unique",
       type: "unique",
       columns: ["idempotency_key"]
+    });
+    expect(tables.find((table) => table.id === "students")?.indexes).toContainEqual({
+      key: "cpf_unique",
+      type: "unique",
+      columns: ["cpf"]
+    });
+    expect(tables.find((table) => table.id === "student_documents")?.indexes).toContainEqual({
+      key: "student_type_unique",
+      type: "unique",
+      columns: ["student_id", "document_type"]
     });
   });
 

@@ -1,0 +1,43 @@
+import { MAX_DOCUMENT_BYTES, canTransitionEnrollment, detectFileKind, hasApprovedRequiredDocuments, validateDocumentFile, validateSubmission } from "@/features/students/rules";
+import type { StudentDocument } from "@/features/students/types";
+
+describe("enrollment rules", () => {
+  it("allows the review path and rejects invalid jumps", () => {
+    expect(canTransitionEnrollment("draft", "submitted")).toBe(true);
+    expect(canTransitionEnrollment("under_review", "awaiting_signature")).toBe(true);
+    expect(canTransitionEnrollment("draft", "active")).toBe(false);
+  });
+
+  it("requires a complete student record before submission", () => {
+    expect(validateSubmission({ fullName: "Aluno Teste" }).success).toBe(false);
+    expect(validateSubmission({
+      fullName: "Aluno Teste", cpf: "529.982.247-25", birthDate: "2000-01-01", whatsapp: "11999999999",
+      address: "Rua de Teste, 100", emergencyContactName: "Contato Teste", emergencyContactRelationship: "Familiar",
+      emergencyContactPhone: "11988888888", startedAtTkd: "2025-01-01", currentBelt: "Branca", gub: 10,
+      healthCondition: "no", requestedDueDay: 10
+    }).success).toBe(true);
+  });
+
+  it("detects supported magic bytes", () => {
+    expect(detectFileKind(new Uint8Array([0xff, 0xd8, 0xff, 0x00]))).toBe("image/jpeg");
+    expect(detectFileKind(new TextEncoder().encode("%PDF-1.7"))).toBe("application/pdf");
+  });
+
+  it("rejects a disguised executable and PDF profile photo", () => {
+    expect(validateDocumentFile({ name: "foto.jpg", declaredType: "image/jpeg", size: 4, bytes: new Uint8Array([77, 90, 0, 0]), documentType: "profile_photo" }).valid).toBe(false);
+    const pdf = new TextEncoder().encode("%PDF-1.7");
+    expect(validateDocumentFile({ name: "foto.pdf", declaredType: "application/pdf", size: pdf.length, bytes: pdf, documentType: "profile_photo" }).valid).toBe(false);
+  });
+
+  it("rejects an excessive file and an extension that does not match its bytes", () => {
+    const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0x00]);
+    expect(validateDocumentFile({ name: "foto.jpg", declaredType: "image/jpeg", size: MAX_DOCUMENT_BYTES + 1, bytes: jpeg, documentType: "profile_photo" }).valid).toBe(false);
+    expect(validateDocumentFile({ name: "foto.png", declaredType: "image/jpeg", size: jpeg.length, bytes: jpeg, documentType: "profile_photo" }).valid).toBe(false);
+  });
+
+  it("requires both approved document types before signature", () => {
+    const document = (document_type: StudentDocument["document_type"], status: StudentDocument["status"]) => ({ document_type, status }) as StudentDocument;
+    expect(hasApprovedRequiredDocuments([document("profile_photo", "approved"), document("medical_certificate", "pending")])).toBe(false);
+    expect(hasApprovedRequiredDocuments([document("profile_photo", "approved"), document("medical_certificate", "approved")])).toBe(true);
+  });
+});
