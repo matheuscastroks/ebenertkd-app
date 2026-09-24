@@ -16,7 +16,35 @@ A chave administrativa precisa dos escopos de banco/tabelas/colunas/índices/lin
 
 Os recursos `daily-operations` e `backup` são criados pelo setup com cron diário. O código fica em `appwrite/functions/`. Conecte o repositório ao Appwrite ou publique cada diretório como deployment, mantendo `src/main.js` como entrypoint e `npm install` como comando de build.
 
-Ambas recebem uma chave dinâmica da execução com acesso a linhas e registram uma chave idempotente diária em `automation_runs`. Na Fase 0, a Function `backup` só comprova o agendamento; a exportação para Google Drive será implementada na Fase 7.
+Ambas recebem uma chave dinâmica da execução e registram uma chave idempotente diária em `automation_runs`. `daily-operations` processa cobranças e lembretes às 03:15; `backup` exporta e cifra os dados às 03:45. Publique com `npm run appwrite:deploy-function -- backup` somente depois de configurar os segredos exigidos.
+
+## Backup cifrado no Google Drive
+
+Use uma conta Google dedicada, pasta privada e credencial OAuth limitada a `drive.file`. Coloque a tela de consentimento em produção: refresh tokens emitidos para aplicativos em teste podem expirar em sete dias. Configure `GOOGLE_DRIVE_CLIENT_ID`, `GOOGLE_DRIVE_CLIENT_SECRET`, `GOOGLE_DRIVE_REFRESH_TOKEN`, `GOOGLE_DRIVE_FOLDER_ID` e uma `BACKUP_ENCRYPTION_KEY` aleatória de 32 bytes em base64.
+
+A chave cifra cada objeto com AES-256-GCM antes do upload e não deve ficar no Drive nem somente no Appwrite. Mantenha uma cópia em um gerenciador de senhas ou cofre externo. A política mantém sete cópias diárias e quatro semanais completas. O RPO esperado é de 24 horas; uma pasta incompleta nunca é considerada restaurável.
+
+Após publicar, execute manualmente a Function e confira no Drive a pasta diária marcada como `complete`. Também confira a execução `backup` em `automation_runs`. Nunca inclua tokens, chave de cifra ou conteúdo do backup em logs e tickets.
+
+## Ensaio de restauração
+
+Crie um projeto Appwrite separado e aplique nele o mesmo schema e bucket, sem usuários, linhas ou arquivos. Configure as variáveis `RESTORE_APPWRITE_*`, `RESTORE_STORAGE_QUOTA_BYTES` e `RESTORE_GOOGLE_DRIVE_FOLDER_ID` em `.env.local`.
+
+Primeiro faça somente a verificação:
+
+```bash
+npm run backup:restore -- --folder-id=ID_DA_PASTA
+```
+
+O comando baixa todos os objetos, autentica AES-GCM, compara hashes, valida a versão, verifica a cota e comprova que o destino está vazio antes de qualquer gravação. Depois de revisar o resultado, aplique com uma confirmação literal:
+
+```bash
+npm run backup:restore -- --folder-id=ID_DA_PASTA --apply --confirm-target=ID_DO_PROJETO_DE_TESTE
+```
+
+O script bloqueia o projeto de origem e o projeto configurado como produção. IDs, linhas, permissões e arquivos são preservados. Senhas e sessões não são copiadas: as contas recebem senhas aleatórias, e o relatório local em `reports/restore-*.json` lista os e-mails que precisam passar pelo fluxo normal de recuperação. O script não envia mensagens automaticamente.
+
+No ensaio trimestral, compare as contagens do relatório e abra fotos, atestados e comprovantes. Registre duração e divergências. Só considere o procedimento aprovado quando um conjunto com aluno adulto, responsável, menor, contrato, cobrança, presença e exame puder ser consultado no projeto separado.
 
 ## PWA e Web Push
 
@@ -28,3 +56,5 @@ O push será validado com as chaves VAPID de `.env.local`. No Chrome/Android, a 
 - Cookies de sessão são HTTP-only, `SameSite=Lax` e `Secure` em produção.
 - A rota `/api/diagnostics/session` retorna apenas ID da conta e estado de verificação para uma sessão válida.
 - Se uma chave administrativa for exposta, revogue-a, crie outra com os menores escopos necessários e atualize os secrets.
+- Se o backup falhar ou não houver cópia completa por mais de 24 horas, trate como incidente operacional antes de alterar a retenção.
+- Se a chave de criptografia for perdida, as cópias externas não poderão ser recuperadas.

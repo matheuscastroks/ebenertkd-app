@@ -19,7 +19,8 @@
     "appwrite:seed-demo-data": "tsx scripts/appwrite/seed-demo-data.ts",
     "appwrite:validate-test-users": "tsx scripts/appwrite/validate-test-users.ts",
     "appwrite:deploy-function": "tsx scripts/appwrite/deploy-function.ts",
-    "appwrite:run-daily": "tsx scripts/appwrite/run-daily.ts"
+    "appwrite:run-daily": "tsx scripts/appwrite/run-daily.ts",
+    "backup:restore": "tsx scripts/backup/restore.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

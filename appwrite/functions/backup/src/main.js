@@ -44,10 +44,10 @@ function sanitizedUsers(users) {
   return users.map((user) => ({ $id: user.$id, name: user.name, email: user.email, phone: user.phone, status: user.status, emailVerification: user.emailVerification, phoneVerification: user.phoneVerification, labels: user.labels, prefs: user.prefs, $createdAt: user.$createdAt, $updatedAt: user.$updatedAt }));
 }
 
-async function saveEncryptedObject(token, folderId, objects, { name, kind, records, plaintext }) {
+async function saveEncryptedObject(token, folderId, objects, { name, kind, records, plaintext, descriptorMetadata }) {
   const encrypted = encryptBuffer(plaintext);
   await uploadEncryptedObject(token, folderId, name, encrypted.envelope, { kind, plaintextSha256: encrypted.plaintextSha256, ciphertextSha256: encrypted.ciphertextSha256 });
-  objects.push({ name, kind, records, bytes: encrypted.plaintextBytes, plaintextSha256: encrypted.plaintextSha256, ciphertextSha256: encrypted.ciphertextSha256 });
+  objects.push({ name, kind, records, bytes: encrypted.plaintextBytes, plaintextSha256: encrypted.plaintextSha256, ciphertextSha256: encrypted.ciphertextSha256, ...(descriptorMetadata ? { metadata: descriptorMetadata } : {}) });
 }
 
 async function notifyAdmins(tables, title, body, dedupeKey) {
@@ -110,7 +110,7 @@ async function main({ req, res, log, error }) {
     const exportedFileIds = new Set();
     for (const file of files) {
       const contents = Buffer.from(await storage.getFileDownload({ bucketId, fileId: file.$id }));
-      await saveEncryptedObject(token, folder.id, objects, { name: `files/${file.$id}.bin.enc`, kind: "file", plaintext: contents });
+      await saveEncryptedObject(token, folder.id, objects, { name: `files/${file.$id}.bin.enc`, kind: "file", plaintext: contents, descriptorMetadata: { fileId: file.$id, name: file.name, mimeType: file.mimeType, sizeOriginal: file.sizeOriginal, permissions: file.$permissions } });
       exportedFileIds.add(file.$id);
     }
     const missingFileReferences = [...references].filter((fileId) => !exportedFileIds.has(fileId)).sort();

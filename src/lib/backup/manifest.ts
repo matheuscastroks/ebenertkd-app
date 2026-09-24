@@ -9,6 +9,7 @@ export type BackupObjectDescriptor = {
   bytes: number;
   plaintextSha256: string;
   ciphertextSha256: string;
+  metadata?: Record<string, unknown>;
 };
 
 export type BackupManifest = {

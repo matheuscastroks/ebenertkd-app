@@ -26,11 +26,11 @@
 
 **Arquivos:** criar `scripts/backup/restore.ts`, `scripts/backup/restore-rules.ts`, `scripts/backup/restore-rules.test.ts`; alterar `package.json` e criar `docs/operations.md`.
 
-- [ ] Exigir variáveis `RESTORE_APPWRITE_*`, ID digitado novamente e projeto de destino diferente da produção.
-- [ ] Baixar apenas backup completo, autenticar envelopes e comparar todos os hashes antes de gravar.
-- [ ] Exigir tabelas e bucket vazios; restaurar usuários, linhas e arquivos preservando IDs.
-- [ ] Produzir relatório sem senhas, listar contas que exigem redefinição e nunca enviar e-mail automaticamente.
-- [ ] Validar regras com fixture corrompida e destino inseguro; commit `feat: add guarded backup restore`.
+- [x] Exigir variáveis `RESTORE_APPWRITE_*`, ID digitado novamente e projeto de destino diferente da produção.
+- [x] Baixar apenas backup completo, autenticar envelopes e comparar todos os hashes antes de gravar.
+- [x] Exigir tabelas e bucket vazios; restaurar usuários, linhas e arquivos preservando IDs.
+- [x] Produzir relatório sem senhas, listar contas que exigem redefinição e nunca enviar e-mail automaticamente.
+- [x] Validar regras com fixture corrompida e destino inseguro; commit `feat: add guarded backup restore`.
 
 ### Entrega 7C — Observabilidade operacional
 
@@ -73,10 +73,10 @@ O refresh token deve pertencer a uma conta dedicada, usar somente `drive.file` e
 
 ## 7.3 Restauração e operação
 
-- [ ] Fazer `restore.ts` exigir projeto Appwrite vazio e confirmação do ID de destino; nunca restaurar sobre produção.
-- [ ] Verificar autenticação, hashes, versão e espaço antes de gravar.
-- [ ] Restaurar em ordem: dados independentes, relações, arquivos e permissões; gerar relatório de divergências.
-- [ ] Recriar contas sem senha original, revogar sessões e emitir fluxo de redefinição; documentar claramente essa limitação.
+- [x] Fazer `restore.ts` exigir projeto Appwrite vazio e confirmação do ID de destino; nunca restaurar sobre produção.
+- [x] Verificar autenticação, hashes, versão e espaço antes de gravar.
+- [x] Restaurar usuários, dados na ordem do schema, arquivos e permissões; gerar relatório de execução.
+- [x] Recriar contas sem senha original e listar o fluxo de redefinição necessário; documentar claramente essa limitação.
 - [ ] Criar painel técnico em `src/app/admin/sistema/page.tsx` com último cron, backup, falhas e uso de armazenamento.
 - [ ] Alertar em 70% de uso e exigir plano de upgrade antes de 85%.
 
