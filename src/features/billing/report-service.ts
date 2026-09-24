@@ -6,6 +6,7 @@ import { listCharges } from "@/features/billing/charge-service";
 import { listPayments } from "@/features/billing/payment-service";
 import type { PaymentProof } from "@/features/billing/types";
 import type { ChargeType } from "@/features/billing/types";
+import { buildBillingTrend } from "@/features/billing/chart-data";
 import type { Student } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
@@ -25,7 +26,8 @@ async function allRows<Row extends { $id: string }>(tableId: string, queries: st
 }
 
 export async function getBillingOverview(filters: BillingFilters = {}) {
-  const [rawCharges, payments] = await Promise.all([listCharges({ status: filters.status, competence: filters.competence, type: filters.type as ChargeType | undefined }), listPayments()]);
+  const [allCharges, payments] = await Promise.all([listCharges({ type: filters.type as ChargeType | undefined }), listPayments()]);
+  const rawCharges = allCharges.filter((charge) => (!filters.status || charge.status === filters.status) && (!filters.competence || charge.competence === filters.competence));
   const [students, proofs] = await Promise.all([
     allRows<Student>(APPWRITE_IDS.tables.students),
     allRows<PaymentProof>(APPWRITE_IDS.tables.paymentProofs, [Query.equal("status", ["pending"])])
@@ -38,7 +40,8 @@ export async function getBillingOverview(filters: BillingFilters = {}) {
   const now = new Date();
   const start = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-01`;
   const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)).toISOString().slice(0, 10);
-  return { charges, payments, names, proofsByCharge, summary: billingSummary(charges, payments, start, end) };
+  const trendCharges = allCharges.filter((charge) => allowedStudents.has(charge.student_id));
+  return { charges, payments, names, proofsByCharge, summary: billingSummary(charges, payments, start, end), trend: buildBillingTrend(trendCharges, payments, now.toISOString()) };
 }
 
 export async function exportBillingCsv(filters: BillingFilters = {}) {
