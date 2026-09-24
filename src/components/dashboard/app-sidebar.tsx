@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Award, Bell, Building2, CalendarCheck2, ChevronRight, ClipboardList, FileSignature, LayoutDashboard, UserRound, UsersRound, WalletCards } from "lucide-react";
+import { Activity, Award, Bell, Building2, CalendarCheck2, ChevronRight, ClipboardList, FileSignature, LayoutDashboard, UserRound, UsersRound, WalletCards } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Sidebar,
@@ -36,7 +36,8 @@ const navIcons = {
   attendance: CalendarCheck2,
   family: UserRound,
   contracts: FileSignature,
-  billing: WalletCards
+  billing: WalletCards,
+  system: Activity
 };
 
 function NavigationItem({ item }: { item: AppSidebarNavItem }) {

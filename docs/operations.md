@@ -46,6 +46,10 @@ O script bloqueia o projeto de origem e o projeto configurado como produção. I
 
 No ensaio trimestral, compare as contagens do relatório e abra fotos, atestados e comprovantes. Registre duração e divergências. Só considere o procedimento aprovado quando um conjunto com aluno adulto, responsável, menor, contrato, cobrança, presença e exame puder ser consultado no projeto separado.
 
+## Painel operacional
+
+Administradores acessam `/admin/sistema` pela seção **Sistema** da sidebar. A tela apresenta a última rotina diária, o último backup, falhas recentes, prontidão das configurações e uso do bucket. Configure `APPWRITE_STORAGE_QUOTA_BYTES` com a cota real em bytes: abaixo de 70% o estado é normal, de 70% a 84,9% exige atenção e a partir de 85% é crítico. Backup ou rotina sem sucesso há mais de 24 horas também aparecem como críticos.
+
 ## PWA e Web Push
 
 O push será validado com as chaves VAPID de `.env.local`. No Chrome/Android, a permissão deve ser solicitada após uma ação do usuário. No iOS/iPadOS 16.4 ou superior, o site precisa ser adicionado à Tela de Início antes de solicitar a permissão. Push será complementar à caixa interna de avisos e não será tratado como comprovante de leitura.

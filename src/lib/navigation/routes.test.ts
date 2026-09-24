@@ -11,6 +11,7 @@ describe("navigationForProfile", () => {
       ROUTES.adminContractTemplate,
       ROUTES.adminCancellations,
     ]);
+    expect(items.find((item) => item.href === ROUTES.adminSystem)).toMatchObject({ group: "Sistema", icon: "system" });
   });
 
   it("keeps financial links away from minors and adds dependents only for guardians", () => {

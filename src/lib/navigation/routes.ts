@@ -13,6 +13,7 @@ export const ROUTES = {
   adminCancellations: "/admin/contratos/cancelamentos",
   adminBilling: "/admin/financeiro",
   adminBillingSettings: "/admin/financeiro/configuracoes",
+  adminSystem: "/admin/sistema",
   student: "/aluno",
   studentEnrollment: "/aluno/matricula",
   studentContracts: "/aluno/contratos",
@@ -21,8 +22,8 @@ export const ROUTES = {
   guardianDependents: "/responsavel/dependentes"
 } as const;
 
-export type SidebarNavIcon = "dashboard" | "notifications" | "enrollment" | "students" | "classes" | "exams" | "attendance" | "family" | "contracts" | "billing";
-export type SidebarNavGroup = "Principal" | "Alunos" | "Operação" | "Financeiro" | "Documentos";
+export type SidebarNavIcon = "dashboard" | "notifications" | "enrollment" | "students" | "classes" | "exams" | "attendance" | "family" | "contracts" | "billing" | "system";
+export type SidebarNavGroup = "Principal" | "Alunos" | "Operação" | "Financeiro" | "Documentos" | "Sistema";
 
 export type SidebarNavItem = {
   label: string;
@@ -56,7 +57,8 @@ export function navigationForProfile(profile: Pick<Profile, "role" | "capabiliti
         { label: "Modelo", href: ROUTES.adminContractTemplate },
         { label: "Cancelamentos", href: ROUTES.adminCancellations }
       ]
-    }
+    },
+    { label: "Sistema e operação", href: ROUTES.adminSystem, icon: "system", group: "Sistema" }
   ];
   if (profile.role === "guardian") return [
     { label: "Visão geral", href: ROUTES.guardian, exact: true, icon: "dashboard" },

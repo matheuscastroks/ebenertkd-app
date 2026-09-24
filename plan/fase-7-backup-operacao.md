@@ -36,10 +36,10 @@
 
 **Arquivos:** criar `src/features/operations/service.ts`, `src/app/admin/sistema/page.tsx`; alterar `src/lib/navigation/routes.ts`, `src/components/dashboard/app-sidebar.tsx` e testes de navegação.
 
-- [ ] Mostrar último cron, último backup completo, falhas recentes e tamanho do bucket.
-- [ ] Calcular níveis normal, atenção (70%) e crítico (85%) apenas quando a cota estiver configurada.
-- [ ] Documentar RPO de 24 horas, procedimento de teste e limitação de redefinição de senha.
-- [ ] Validar testes, lint, tipos, build e infraestrutura; commit `feat: add operations health dashboard`.
+- [x] Mostrar último cron, último backup completo, falhas recentes e tamanho do bucket.
+- [x] Calcular níveis normal, atenção (70%) e crítico (85%) apenas quando a cota estiver configurada.
+- [x] Documentar RPO de 24 horas, procedimento de teste e limitação de redefinição de senha.
+- [x] Validar testes, lint, tipos, build e infraestrutura; commit `feat: add operations health dashboard`.
 
 ### Segredos obrigatórios para publicação
 
@@ -77,8 +77,8 @@ O refresh token deve pertencer a uma conta dedicada, usar somente `drive.file` e
 - [x] Verificar autenticação, hashes, versão e espaço antes de gravar.
 - [x] Restaurar usuários, dados na ordem do schema, arquivos e permissões; gerar relatório de execução.
 - [x] Recriar contas sem senha original e listar o fluxo de redefinição necessário; documentar claramente essa limitação.
-- [ ] Criar painel técnico em `src/app/admin/sistema/page.tsx` com último cron, backup, falhas e uso de armazenamento.
-- [ ] Alertar em 70% de uso e exigir plano de upgrade antes de 85%.
+- [x] Criar painel técnico em `src/app/admin/sistema/page.tsx` com último cron, backup, falhas e uso de armazenamento.
+- [x] Alertar em 70% de uso e exigir plano de upgrade antes de 85%.
 
 ## Testes e aceite
 
