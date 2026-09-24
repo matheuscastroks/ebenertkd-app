@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, Building2, ClipboardList, FileSignature, LayoutDashboard, ShieldCheck, UserRound, UsersRound, WalletCards } from "lucide-react";
+import { Building2, ClipboardList, FileSignature, LayoutDashboard, UserRound, UsersRound, WalletCards } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -14,11 +14,14 @@ import {
   SidebarRail
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { LogoutButton } from "@/components/dashboard/logout-button";
 
 export type AppSidebarNavItem = {
   label: string;
   href: string;
   active?: boolean;
+  group?: "Principal" | "Alunos" | "Operação" | "Financeiro" | "Documentos";
   icon?: "dashboard" | "enrollment" | "students" | "classes" | "family" | "contracts" | "billing";
 };
 
@@ -35,14 +38,14 @@ const navIcons = {
 export function AppSidebar({
   badge,
   navItems,
-  asideTitle,
-  asideCopy
+  profileName
 }: {
   badge: string;
   navItems: AppSidebarNavItem[];
-  asideTitle: string;
-  asideCopy: string;
+  profileName: string;
 }) {
+  const groups = Array.from(new Set(navItems.map((item) => item.group ?? "Principal")));
+  const initials = profileName.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -59,11 +62,11 @@ export function AppSidebar({
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Navegação</SidebarGroupLabel>
+        {groups.map((group) => <SidebarGroup key={group}>
+          <SidebarGroupLabel>{group}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => {
+              {navItems.filter((item) => (item.group ?? "Principal") === group).map((item) => {
                 const Icon = navIcons[item.icon ?? "dashboard"];
                 return (
                 <SidebarMenuItem key={item.href}>
@@ -77,20 +80,14 @@ export function AppSidebar({
               );})}
             </SidebarMenu>
           </SidebarGroupContent>
-        </SidebarGroup>
+        </SidebarGroup>)}
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="rounded-lg border bg-muted/50 p-3 group-data-[collapsible=icon]:hidden">
-          <div className="mb-2 flex items-center gap-2">
-            <Bell className="h-4 w-4 text-muted-foreground" />
-            <p className="text-sm font-medium">{asideTitle}</p>
-          </div>
-          <p className="text-xs leading-5 text-muted-foreground">{asideCopy}</p>
-          <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-            <ShieldCheck className="h-4 w-4" />
-            Estrutura pronta para permissões e notificações.
-          </div>
+        <div className="flex items-center gap-3 rounded-lg border bg-muted/40 p-2">
+          <Avatar size="sm"><AvatarFallback>{initials}</AvatarFallback></Avatar>
+          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden"><p className="truncate text-sm font-medium">{profileName}</p><p className="text-xs text-muted-foreground">{badge}</p></div>
+          <div className="group-data-[collapsible=icon]:hidden"><LogoutButton compact /></div>
         </div>
       </SidebarFooter>
       <SidebarRail />

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { AppSidebar, type AppSidebarNavItem } from "@/components/dashboard/app-sidebar";
+import { PageBreadcrumb, type BreadcrumbEntry } from "@/components/shared/page-breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
@@ -7,9 +8,9 @@ type DashboardShellProps = {
   title: string;
   subtitle: string;
   badge: string;
+  profileName: string;
   navItems: AppSidebarNavItem[];
-  asideTitle: string;
-  asideCopy: string;
+  breadcrumbs?: BreadcrumbEntry[];
   headerActions?: ReactNode;
   children: ReactNode;
 };
@@ -18,9 +19,9 @@ export function DashboardShell({
   title,
   subtitle,
   badge,
+  profileName,
   navItems,
-  asideTitle,
-  asideCopy,
+  breadcrumbs,
   headerActions,
   children
 }: DashboardShellProps) {
@@ -29,8 +30,7 @@ export function DashboardShell({
       <AppSidebar
         badge={badge}
         navItems={navItems}
-        asideTitle={asideTitle}
-        asideCopy={asideCopy}
+        profileName={profileName}
       />
       <SidebarInset>
         <div className="flex-1 p-4 md:p-6">
@@ -39,6 +39,7 @@ export function DashboardShell({
               <div className="flex items-start gap-3">
                 <SidebarTrigger />
                 <div className="space-y-1">
+                  {breadcrumbs ? <PageBreadcrumb items={breadcrumbs} /> : null}
                   <div className="flex items-center gap-2">
                     <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
                     <Badge variant="outline">{badge}</Badge>
