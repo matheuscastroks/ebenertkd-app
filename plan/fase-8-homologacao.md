@@ -26,11 +26,11 @@
 
 **Arquivos:** criar `playwright.config.ts`, `tests/e2e/public-access.spec.ts`, `tests/e2e/role-access.spec.ts`, `.github/workflows/ci.yml`; alterar `package.json`.
 
-- [ ] Configurar Playwright com servidor local, traces em falha e projetos desktop/mobile sem depender de dados reais.
-- [ ] Cobrir login público, redirecionamento sem sessão e matriz autenticada opcional por credenciais do ambiente isolado.
-- [ ] Configurar CI com instalação limpa, auditoria de produção, lint, tipos, Vitest, build e E2E público.
-- [ ] Manter E2E autenticado separado e bloqueado sem `E2E_*`; nunca apontar fixtures para produção.
-- [ ] Commit `test: add release quality gates`.
+- [x] Configurar Playwright com servidor local, traces em falha e projetos desktop/mobile sem depender de dados reais.
+- [x] Cobrir login público, redirecionamento sem sessão e matriz autenticada opcional por credenciais do ambiente isolado.
+- [x] Configurar CI com instalação limpa, auditoria de produção, lint, tipos, Vitest, build e E2E público.
+- [x] Manter E2E autenticado separado e bloqueado sem `E2E_*`; nunca apontar fixtures para produção.
+- [x] Commit `test: add release quality gates`.
 
 ### Entrega 8C — Roteiro de homologação e lançamento
 
@@ -53,7 +53,7 @@
 
 **Arquivos:** criar `playwright.config.ts`, `tests/e2e/`, `tests/security/`, `.github/workflows/ci.yml`, `docs/release-checklist.md`.
 
-- [ ] Configurar CI para instalação limpa, lint, typecheck, testes, build e E2E contra ambiente isolado.
+- [x] Configurar CI para instalação limpa, lint, typecheck, testes, build e E2E público; habilitar a matriz autenticada somente com ambiente isolado.
 - [ ] Criar fixtures descartáveis para professor, adulto, responsável, dois menores e usuário externo.
 - [ ] Cobrir cadastro→aprovação→contrato→cobrança→comprovante→aprovação e turma→chamada→exame.
 - [ ] Testar matriz de autorização por API, ação e download; URL conhecida nunca substitui permissão.

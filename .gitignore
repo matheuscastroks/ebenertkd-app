@@ -8,3 +8,5 @@ coverage
 dist
 *.log
 *.tsbuildinfo
+playwright-report
+test-results
