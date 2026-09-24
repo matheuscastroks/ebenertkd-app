@@ -6,6 +6,7 @@ import { resolveStudentProfile } from "@/features/students/access";
 import { uploadStudentDocument } from "@/features/students/document-service";
 import { saveEnrollmentDraft } from "@/features/students/enrollment-service";
 import { requireProfile } from "@/lib/auth/session";
+import type { BeltOption } from "@/features/students/options";
 
 function enrollmentInput(formData: FormData) {
   const value = (key: string) => String(formData.get(key) ?? "");
@@ -19,8 +20,8 @@ function enrollmentInput(formData: FormData) {
     emergencyContactRelationship: value("emergency_contact_relationship"),
     emergencyContactPhone: value("emergency_contact_phone"),
     startedAtTkd: value("started_at_tkd"),
-    currentBelt: value("current_belt"),
-    trainingClass: value("training_class"),
+    currentBelt: (value("current_belt") || undefined) as BeltOption | undefined,
+    trainingClassId: value("training_class_id"),
     gub: value("gub") ? Number(value("gub")) : undefined,
     healthCondition: (value("health_condition") || undefined) as "yes" | "no" | undefined,
     healthDetails: value("health_details") || undefined,

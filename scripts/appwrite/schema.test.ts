@@ -19,6 +19,7 @@ describe("Appwrite infrastructure schema", () => {
     expect(tables.map((table) => table.id)).toEqual([
       "profiles",
       "guardian_student_links",
+      "training_classes",
       "students",
       "enrollments",
       "student_documents",
@@ -50,6 +51,11 @@ describe("Appwrite infrastructure schema", () => {
       key: "student_type_unique",
       type: "unique",
       columns: ["student_id", "document_type"]
+    });
+    expect(tables.find((table) => table.id === "training_classes")?.indexes).toContainEqual({
+      key: "status_idx",
+      type: "key",
+      columns: ["status"]
     });
   });
 

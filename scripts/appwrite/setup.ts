@@ -118,13 +118,38 @@ async function reconcile() {
       }
     }
 
-    const remoteColumns = new Set(remote?.columns.map((item) => item.key) ?? []);
+    const remoteColumns = new Map(remote?.columns.map((item) => [item.key, item]) ?? []);
     for (const column of table.columns) {
-      if (remoteColumns.has(column.key)) continue;
-      changes.push(`create column ${table.id}.${column.key}`);
-      if (mode === "apply") {
-        await createColumn(table.id, column);
-        await waitForColumn(table.id, column.key);
+      const remoteColumn = remoteColumns.get(column.key);
+      if (!remoteColumn) {
+        changes.push(`create column ${table.id}.${column.key}`);
+        if (mode === "apply") {
+          await createColumn(table.id, column);
+          await waitForColumn(table.id, column.key);
+        }
+        continue;
+      }
+      if (column.kind === "integer") {
+        const current = remoteColumn as typeof remoteColumn & { min?: number | bigint; max?: number | bigint };
+        const currentMin = current.min == null ? undefined : Number(current.min);
+        const currentMax = current.max == null ? undefined : Number(current.max);
+        const minChanged = column.min !== undefined && currentMin !== column.min;
+        const maxChanged = column.max !== undefined && currentMax !== column.max;
+        if (minChanged || maxChanged) {
+          changes.push(`update column ${table.id}.${column.key}`);
+          if (mode === "apply") {
+            await tablesDb.updateIntegerColumn({
+              databaseId: config.databaseId,
+              tableId: table.id,
+              key: column.key,
+              required: column.required,
+              xdefault: null as unknown as number,
+              min: column.min,
+              max: column.max
+            });
+            await waitForColumn(table.id, column.key);
+          }
+        }
       }
     }
 

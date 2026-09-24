@@ -1,7 +1,12 @@
 import { MAX_DOCUMENT_BYTES, canTransitionEnrollment, detectFileKind, hasApprovedRequiredDocuments, validateDocumentFile, validateSubmission } from "@/features/students/rules";
 import type { StudentDocument } from "@/features/students/types";
+import { DUE_DAY_OPTIONS, GUB_OPTIONS } from "@/features/students/options";
 
 describe("enrollment rules", () => {
+  it("exposes only the allowed GUB and due-day choices", () => {
+    expect(GUB_OPTIONS).toEqual([9, 8, 7, 6, 5, 4, 3, 2, 1]);
+    expect(DUE_DAY_OPTIONS).toEqual([5, 10, 15, 20, 25, 30]);
+  });
   it("allows the review path and rejects invalid jumps", () => {
     expect(canTransitionEnrollment("draft", "submitted")).toBe(true);
     expect(canTransitionEnrollment("under_review", "awaiting_signature")).toBe(true);
@@ -13,9 +18,15 @@ describe("enrollment rules", () => {
     expect(validateSubmission({
       fullName: "Aluno Teste", cpf: "529.982.247-25", birthDate: "2000-01-01", whatsapp: "11999999999",
       address: "Rua de Teste, 100", emergencyContactName: "Contato Teste", emergencyContactRelationship: "Familiar",
-      emergencyContactPhone: "11988888888", startedAtTkd: "2025-01-01", currentBelt: "Branca", gub: 10,
-      healthCondition: "no", requestedDueDay: 10
+      emergencyContactPhone: "11988888888", startedAtTkd: "2025-01-01", currentBelt: "Branca", gub: 9,
+      healthCondition: "no", trainingClassId: "class-test", requestedDueDay: 10
     }).success).toBe(true);
+    expect(validateSubmission({
+      fullName: "Aluno Teste", cpf: "52998224725", birthDate: "2000-01-01", whatsapp: "11999999999",
+      address: "Rua de Teste, 100", emergencyContactName: "Contato Teste", emergencyContactRelationship: "Familiar",
+      emergencyContactPhone: "11988888888", startedAtTkd: "2025-01-01", currentBelt: "Branca", gub: 10,
+      healthCondition: "no", trainingClassId: "class-test", requestedDueDay: 12
+    }).success).toBe(false);
   });
 
   it("detects supported magic bytes", () => {

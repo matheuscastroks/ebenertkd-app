@@ -4,6 +4,7 @@ export const APPWRITE_IDS = {
   tables: {
     profiles: "profiles",
     guardianStudentLinks: "guardian_student_links",
+    trainingClasses: "training_classes",
     students: "students",
     enrollments: "enrollments",
     studentDocuments: "student_documents",

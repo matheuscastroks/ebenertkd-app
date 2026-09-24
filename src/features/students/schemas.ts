@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { isValidCpf, normalizeCpf } from "@/lib/auth/auth-utils";
+import { BELT_OPTIONS, DUE_DAY_OPTIONS } from "@/features/students/options";
 
 const optionalText = z.string().trim().max(2000).optional().transform((value) => value || undefined);
 const requiredText = (min = 2, max = 255) => z.string().trim().min(min).max(max);
@@ -14,16 +15,16 @@ export const studentDraftSchema = z.object({
   emergencyContactRelationship: z.string().trim().max(64).optional(),
   emergencyContactPhone: z.string().trim().max(24).optional(),
   startedAtTkd: z.string().optional(),
-  currentBelt: z.string().trim().max(64).optional(),
-  trainingClass: z.string().trim().max(64).optional(),
-  gub: z.coerce.number().int().min(1).max(10).optional(),
+  currentBelt: z.enum(BELT_OPTIONS).optional(),
+  trainingClassId: z.string().trim().max(36).optional(),
+  gub: z.coerce.number().int().min(1).max(9).optional(),
   healthCondition: z.enum(["yes", "no"]).optional(),
   healthDetails: optionalText,
   medications: optionalText,
   allergies: optionalText,
   injuries: optionalText,
   guardianContact: z.string().trim().max(160).optional(),
-  requestedDueDay: z.coerce.number().int().min(1).max(28).optional()
+  requestedDueDay: z.coerce.number().int().refine((value) => DUE_DAY_OPTIONS.includes(value as (typeof DUE_DAY_OPTIONS)[number])).optional()
 });
 
 export const studentSubmissionSchema = studentDraftSchema.extend({
@@ -35,16 +36,17 @@ export const studentSubmissionSchema = studentDraftSchema.extend({
   emergencyContactRelationship: requiredText(2, 64),
   emergencyContactPhone: requiredText(8, 24),
   startedAtTkd: requiredText(10, 10),
-  currentBelt: requiredText(3, 64),
-  gub: z.coerce.number().int().min(1).max(10),
+  currentBelt: z.enum(BELT_OPTIONS),
+  trainingClassId: requiredText(1, 36),
+  gub: z.coerce.number().int().min(1).max(9),
   healthCondition: z.enum(["yes", "no"]),
-  requestedDueDay: z.coerce.number().int().min(1).max(28)
+  requestedDueDay: z.coerce.number().int().refine((value) => DUE_DAY_OPTIONS.includes(value as (typeof DUE_DAY_OPTIONS)[number]))
 });
 
 export const financialReviewSchema = z.object({
   monthlyFeeCents: z.coerce.number().int().min(0),
   discountCents: z.coerce.number().int().min(0).default(0),
-  approvedDueDay: z.coerce.number().int().min(1).max(28),
+  approvedDueDay: z.coerce.number().int().refine((value) => DUE_DAY_OPTIONS.includes(value as (typeof DUE_DAY_OPTIONS)[number])),
   firstDueDate: requiredText(10, 10),
   contractStart: requiredText(10, 10),
   contractEnd: requiredText(10, 10)

@@ -70,6 +70,25 @@ export const tables: TableDefinition[] = [
     ]
   },
   {
+    id: APPWRITE_IDS.tables.trainingClasses,
+    name: "Training classes",
+    columns: [
+      { key: "name", kind: "varchar", size: 96, required: true },
+      { key: "weekdays", kind: "varchar", size: 16, required: true, array: true },
+      { key: "start_time", kind: "varchar", size: 5, required: true },
+      { key: "end_time", kind: "varchar", size: 5, required: true },
+      { key: "capacity", kind: "integer", required: false, min: 1, max: 500 },
+      { key: "status", kind: "enum", elements: ["active", "inactive"], required: true },
+      { key: "created_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "status_idx", type: "key", columns: ["status"] },
+      { key: "name_idx", type: "key", columns: ["name"] }
+    ]
+  },
+  {
     id: APPWRITE_IDS.tables.students,
     name: "Students",
     columns: [
@@ -84,8 +103,9 @@ export const tables: TableDefinition[] = [
       { key: "emergency_contact_phone", kind: "varchar", size: 24, required: false },
       { key: "started_at_tkd", kind: "datetime", required: false },
       { key: "current_belt", kind: "varchar", size: 64, required: false },
+      { key: "training_class_id", kind: "varchar", size: 36, required: false },
       { key: "training_class", kind: "varchar", size: 64, required: false },
-      { key: "gub", kind: "integer", required: false, min: 1, max: 10 },
+      { key: "gub", kind: "integer", required: false, min: 1, max: 9 },
       { key: "health_condition", kind: "enum", elements: ["yes", "no"], required: false },
       { key: "health_details", kind: "text", required: false },
       { key: "medications", kind: "text", required: false },
@@ -101,6 +121,7 @@ export const tables: TableDefinition[] = [
       { key: "cpf_unique", type: "unique", columns: ["cpf"] },
       { key: "status_idx", type: "key", columns: ["status"] },
       { key: "name_idx", type: "key", columns: ["full_name"] },
+      { key: "class_id_idx", type: "key", columns: ["training_class_id"] },
       { key: "class_idx", type: "key", columns: ["training_class"] }
     ]
   },
@@ -110,8 +131,8 @@ export const tables: TableDefinition[] = [
     columns: [
       { key: "student_id", kind: "varchar", size: 36, required: true },
       { key: "status", kind: "enum", elements: ["draft", "submitted", "under_review", "awaiting_signature", "active", "paused", "cancelled", "awaiting_renewal"], required: true },
-      { key: "requested_due_day", kind: "integer", required: false, min: 1, max: 28 },
-      { key: "approved_due_day", kind: "integer", required: false, min: 1, max: 28 },
+      { key: "requested_due_day", kind: "integer", required: false, min: 5, max: 30 },
+      { key: "approved_due_day", kind: "integer", required: false, min: 5, max: 30 },
       { key: "monthly_fee_cents", kind: "integer", required: false, min: 0 },
       { key: "discount_cents", kind: "integer", required: false, min: 0 },
       { key: "first_due_date", kind: "datetime", required: false },

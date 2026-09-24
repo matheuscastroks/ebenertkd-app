@@ -16,6 +16,7 @@ export type Student = Models.Row & {
   emergency_contact_phone?: string | null;
   started_at_tkd?: string | null;
   current_belt?: string | null;
+  training_class_id?: string | null;
   training_class?: string | null;
   gub?: number | null;
   health_condition?: "yes" | "no" | null;
