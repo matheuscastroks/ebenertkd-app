@@ -102,13 +102,13 @@ type SearchFieldProps = {
 - Modify: `src/app/admin/contratos/cancelamentos/page.tsx`
 - Test: `src/components/shared/date-field.test.tsx`
 
-- [ ] Compor `DateField` com `Field`, `Popover`, `Calendar`, botão com ícone e input oculto `YYYY-MM-DD`.
-- [ ] Migrar nascimento, início no taekwondo, primeiro vencimento e vigência; preservar `type="month"` para competência e mês de saída.
-- [ ] Manter `Progress` visível no cadastro e incluir foto/documentos no cálculo dos requisitos.
-- [ ] Usar `Separator` entre ações, resumo e campos relacionados quando um novo `Card` não acrescentar hierarquia.
-- [ ] Testar teclado, locale pt-BR, limites de data, valor enviado e retomada de rascunho.
-- [ ] Executar `npm test -- src/components/shared/date-field.test.tsx src/features/students/components/enrollment-form.test.tsx && npm run lint`; esperar testes e lint aprovados.
-- [ ] Commit: `refactor: standardize dates and enrollment progress`.
+- [x] Compor `DateField` com `Field`, `Popover`, `Calendar`, botão com ícone e input oculto `YYYY-MM-DD`.
+- [x] Migrar nascimento, início no taekwondo, primeiro vencimento e vigência; preservar `type="month"` para competência e mês de saída.
+- [x] Manter `Progress` visível no cadastro e incluir foto/documentos no cálculo dos requisitos.
+- [x] Usar `Separator` entre ações, resumo e campos relacionados quando um novo `Card` não acrescentar hierarquia.
+- [x] Testar teclado, locale pt-BR, limites de data, valor enviado e retomada de rascunho; testes automatizados e verificação no navegador aprovados.
+- [x] Executar `npm test -- src/components/shared/date-field.test.tsx src/features/students/components/enrollment-form.test.tsx && npm run lint`; testes, lint, tipagem e build aprovados.
+- [x] Commit: `refactor: standardize dates and enrollment progress`.
 
 ### Subfase 3: Busca, paginação e densidade administrativa
 
@@ -167,7 +167,7 @@ type SearchFieldProps = {
 
 - [ ] Nenhum formulário novo usa `<label>` solto ou erro distante do campo.
 - [ ] Nenhuma busca nova usa `Input` sem `InputGroup` e nome acessível.
-- [ ] Datas de dia usam `Calendar + Popover`; exceções estão documentadas no PR.
+- [x] Datas de dia usam `Calendar + Popover`; `type="month"` permanece apenas para competência e mês de saída.
 - [ ] Toda fila potencialmente longa possui paginação por URL e alternativa mobile.
 - [x] A foto do aluno aparece com `Avatar` em cadastro, listas e detalhes, respeitando autorização.
 - [ ] Sidebar permanece montada durante loading e contém apenas destinos permitidos ao perfil.
