@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Building2, ChevronRight, ClipboardList, FileSignature, LayoutDashboard, UserRound, UsersRound, WalletCards } from "lucide-react";
+import { Building2, CalendarCheck2, ChevronRight, ClipboardList, FileSignature, LayoutDashboard, UserRound, UsersRound, WalletCards } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Sidebar,
@@ -31,6 +31,7 @@ const navIcons = {
   enrollment: ClipboardList,
   students: UsersRound,
   classes: Building2,
+  attendance: CalendarCheck2,
   family: UserRound,
   contracts: FileSignature,
   billing: WalletCards

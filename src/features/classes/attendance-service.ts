@@ -4,10 +4,10 @@ import { createHash } from "node:crypto";
 import { Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import { writeAuditEvent } from "@/features/auth/service";
-import { assertCompleteAttendance, requiresCorrectionReason, type AttendanceStatus } from "@/features/classes/attendance-rules";
+import { assertCompleteAttendance, attendanceRate, requiresCorrectionReason, type AttendanceStatus } from "@/features/classes/attendance-rules";
 import { attendanceBatchSchema } from "@/features/classes/schemas";
 import type { AttendanceRecord, ClassEnrollment, Lesson } from "@/features/classes/types";
-import type { Student } from "@/features/students/types";
+import type { Student, StudentDocument } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 
@@ -23,11 +23,37 @@ export async function getAttendanceSheet(lessonId: string) {
   const lessonTime = new Date(lesson.lesson_date).getTime();
   const eligible = links.rows.filter((link) => new Date(link.started_at).getTime() <= lessonTime && (!link.ended_at || new Date(link.ended_at).getTime() >= lessonTime));
   const students = eligible.length === 0 ? [] : (await tables.listRows<Student>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, queries: [Query.equal("$id", eligible.map((link) => link.student_id)), Query.orderAsc("full_name"), Query.limit(500)] })).rows;
+  const photos = students.length === 0 ? [] : (await tables.listRows<StudentDocument>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.studentDocuments, queries: [Query.equal("student_id", students.map((student) => student.$id)), Query.equal("document_type", ["profile_photo"]), Query.limit(500)] })).rows;
   const studentById = new Map(students.map((student) => [student.$id, student]));
+  const photoByStudent = new Map(photos.filter((photo) => photo.status !== "rejected").map((photo) => [photo.student_id, photo.$id]));
   const attendanceByLink = new Map(attendance.rows.map((record) => [record.class_enrollment_id, record]));
   return {
     lesson,
-    rows: eligible.map((link) => ({ classEnrollment: link, student: studentById.get(link.student_id), attendance: attendanceByLink.get(link.$id) })).filter((row) => row.student !== undefined)
+    rows: eligible.map((link) => ({ classEnrollment: link, student: studentById.get(link.student_id), attendance: attendanceByLink.get(link.$id), photoDocumentId: photoByStudent.get(link.student_id) })).filter((row) => row.student !== undefined)
+  };
+}
+
+export async function getClassAttendanceSummary(classId: string, month: string) {
+  if (!/^\d{4}-\d{2}$/.test(month)) throw new Error("invalid_attendance_month");
+  const { tables, config } = createAppwriteAdminClient();
+  const lessons = await tables.listRows<Lesson>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.lessons, queries: [Query.equal("training_class_id", [classId]), Query.limit(500)] });
+  const completed = lessons.rows.filter((lesson) => lesson.status === "completed" && lesson.lesson_date.startsWith(month));
+  if (completed.length === 0) return { month, lessonCount: 0, rows: [] };
+  const attendance = await tables.listRows<AttendanceRecord>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.attendanceRecords, queries: [Query.equal("lesson_id", completed.map((lesson) => lesson.$id)), Query.limit(500)] });
+  const studentIds = [...new Set(attendance.rows.map((record) => record.student_id))];
+  if (studentIds.length === 0) return { month, lessonCount: completed.length, rows: [] };
+  const [students, photos] = await Promise.all([
+    tables.listRows<Student>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, queries: [Query.equal("$id", studentIds), Query.limit(500)] }),
+    tables.listRows<StudentDocument>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.studentDocuments, queries: [Query.equal("student_id", studentIds), Query.equal("document_type", ["profile_photo"]), Query.limit(500)] })
+  ]);
+  const photoByStudent = new Map(photos.rows.filter((photo) => photo.status !== "rejected").map((photo) => [photo.student_id, photo.$id]));
+  return {
+    month,
+    lessonCount: completed.length,
+    rows: students.rows.map((student) => {
+      const statuses = attendance.rows.filter((record) => record.student_id === student.$id).map((record) => record.status as AttendanceStatus);
+      return { student, photoDocumentId: photoByStudent.get(student.$id), ...attendanceRate(statuses) };
+    }).sort((a, b) => a.student.full_name.localeCompare(b.student.full_name, "pt-BR"))
   };
 }
 

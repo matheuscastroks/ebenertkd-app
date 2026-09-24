@@ -17,7 +17,7 @@ export default async function StudentPage() {
   return (
     <PhaseOnePanel profile={profile} activePath={ROUTES.student} title={minor ? "Meu treino" : "Minha conta"} description={minor ? "Acompanhe sua graduação e sua ficha individual." : "Acompanhe sua matrícula e seus dados da academia."} items={minor ? [
       { title: "Minha graduação", description: "Consulte o status da sua ficha e sua faixa atual." },
-      { title: "Meus treinos", description: "Presença e agenda serão liberadas nas fases seguintes." },
+      { title: "Meus treinos", description: "Consulte sua frequência e o histórico de chamadas." },
       { title: "Privacidade", description: "Você acessa apenas informações do seu próprio perfil." }
     ] : [
       { title: "Perfil", description: "Identidade única para cadastro, treinos e financeiro." },
@@ -26,6 +26,7 @@ export default async function StudentPage() {
     ]}>
       <Card><CardHeader><CardTitle className="text-base">Ficha do aluno</CardTitle></CardHeader><CardContent className="flex flex-wrap gap-3">
         <Button asChild><Link href={ROUTES.studentEnrollment}>{minor ? "Ver minha matrícula" : "Abrir minha matrícula"}</Link></Button>
+        <Button asChild variant="outline"><Link href={ROUTES.studentAttendance}>Minha frequência</Link></Button>
         {!minor && (guardian ? <Button asChild variant="outline"><Link href={ROUTES.guardianDependents}>Gerenciar dependentes</Link></Button> : <form action={enableGuardianAction}><Button type="submit" variant="outline">Ativar perfil de responsável</Button></form>)}
       </CardContent></Card>
     </PhaseOnePanel>

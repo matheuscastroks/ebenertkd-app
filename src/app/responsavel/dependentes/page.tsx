@@ -13,7 +13,7 @@ import { listGuardianMinors } from "@/features/families/service";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { listProfilePhotoDocumentIds } from "@/features/students/service";
 import { requireCapability } from "@/lib/auth/session";
-import { guardianBillingPath, guardianContractsPath, guardianEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
+import { guardianAttendancePath, guardianBillingPath, guardianContractsPath, guardianEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
 
 export default async function DependentsPage({ searchParams }: { searchParams: Promise<{ error?: string; created?: string }> }) {
   const guardian = await requireCapability("guardian");
@@ -39,7 +39,7 @@ export default async function DependentsPage({ searchParams }: { searchParams: P
           {minors.length === 0 ? <EmptyState title="Nenhum dependente cadastrado" description="Crie o acesso do primeiro aluno menor usando o formulário ao lado." /> : minors.map((minor) => (
             <Card key={minor.$id}><CardHeader><div className="flex items-center gap-3"><StudentAvatar name={minor.full_name} photoDocumentId={photoIds.get(minor.$id)} /><div><CardTitle className="text-base">{minor.full_name}</CardTitle><p className="text-xs text-muted-foreground">Aluno menor</p></div></div></CardHeader><CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">Usuário: <strong className="text-foreground">{minor.username}</strong></p>
-              <div className="flex flex-wrap gap-2"><Button asChild><Link href={guardianEnrollmentPath(minor.$id)}>Abrir ficha de matrícula</Link></Button><Button asChild variant="outline"><Link href={guardianContractsPath(minor.$id)}>Contratos</Link></Button><Button asChild variant="outline"><Link href={guardianBillingPath(minor.$id)}>Financeiro</Link></Button></div>
+              <div className="flex flex-wrap gap-2"><Button asChild><Link href={guardianEnrollmentPath(minor.$id)}>Abrir ficha de matrícula</Link></Button><Button asChild variant="outline"><Link href={guardianAttendancePath(minor.$id)}>Frequência</Link></Button><Button asChild variant="outline"><Link href={guardianContractsPath(minor.$id)}>Contratos</Link></Button><Button asChild variant="outline"><Link href={guardianBillingPath(minor.$id)}>Financeiro</Link></Button></div>
               <form action={resetMinorPasswordAction} className="flex flex-col gap-2 sm:flex-row sm:items-end">
                 <input type="hidden" name="minor_profile_id" value={minor.$id} />
                 <Field><FieldLabel htmlFor={`minor-new-password-${minor.$id}`}>Nova senha</FieldLabel><Input id={`minor-new-password-${minor.$id}`} name="password" type="password" autoComplete="new-password" minLength={8} required /></Field>

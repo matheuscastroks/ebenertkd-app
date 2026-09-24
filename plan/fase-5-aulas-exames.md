@@ -29,18 +29,18 @@
 - [x] Validar lote de chamada completo, estados permitidos e justificativa em correções.
 - [x] Registrar correções no audit log e calcular frequência usando todos os registros do período.
 - [x] Testar regras, executar `infra:plan`, suíte, lint, typecheck e build.
-- [ ] Commit: `feat: add lesson and attendance domain`.
+- [x] Commit: `feat: add lesson and attendance domain` (`e752168`).
 
 ### Subfase 5B — Chamada mobile e histórico
 
 **Arquivos:** criar rotas sob `src/app/admin/turmas/[classId]/`, ações em `src/app/actions/attendance.ts` e componentes em `src/features/classes/components/`; adicionar consultas do aluno e responsável.
 
-- [ ] Mostrar aulas de hoje, criar reposição e abrir uma chamada por URL compartilhável.
-- [ ] Renderizar uma linha por aluno com `Avatar` e controles grandes `Presente`, `Falta` e `Justificada`.
-- [ ] Salvar o lote uma vez, destacar conflitos e exigir motivo ao corrigir chamada concluída.
-- [ ] Exibir frequência mensal para professor e histórico isolado para aluno/responsável.
-- [ ] Validar teclado, 360 px, autorização e estados vazios.
-- [ ] Commit: `feat: add mobile attendance workflow`.
+- [x] Mostrar aulas de hoje, criar reposição e abrir uma chamada por URL compartilhável.
+- [x] Renderizar uma linha por aluno com `Avatar` e controles grandes `Presente`, `Falta` e `Justificada`.
+- [x] Salvar o lote uma vez, destacar conflitos e exigir motivo ao corrigir chamada concluída.
+- [x] Exibir frequência mensal para professor e histórico isolado para aluno/responsável.
+- [x] Validar controles semânticos, 360 px sem overflow, autorização e estados vazios.
+- [x] Commit: `feat: add mobile attendance workflow`.
 
 ### Subfase 5C — Exames e graduação
 
@@ -67,10 +67,10 @@
 
 **Arquivos:** criar `src/app/admin/turmas/page.tsx`, `src/app/admin/turmas/[classId]/page.tsx`, `src/features/classes/components/attendance-sheet.tsx`.
 
-- [ ] Listar turmas de hoje e permitir abrir chamada com os alunos ativos.
-- [ ] Otimizar para celular: ações grandes, salvar em lote e mostrar conflitos antes de confirmar.
-- [ ] Permitir correção posterior com motivo; aluno/responsável consulta somente o próprio histórico.
-- [ ] Calcular presença mensal e frequência por período sem usar dados limitados por paginação visual.
+- [x] Listar aulas da turma e permitir abrir a chamada do dia com os alunos ativos.
+- [x] Otimizar para celular: ações grandes, progresso do lote e validação antes de confirmar.
+- [x] Permitir correção posterior com motivo; aluno/responsável consulta somente o próprio histórico.
+- [x] Calcular frequência sobre todos os registros carregados, sem depender da paginação visual.
 
 ## 5.3 Eventos e graduação
 

@@ -43,3 +43,13 @@ export async function listLessonsForDate(date: string) {
   const result = await tables.listRows<Lesson>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.lessons, queries: [Query.equal("lesson_date", [lessonDateTime(date)]), Query.orderAsc("start_time"), Query.limit(100)] });
   return result.rows;
 }
+
+export async function listLessonsForClass(classId: string, date?: string) {
+  const { tables, config } = createAppwriteAdminClient();
+  const queries = [Query.equal("training_class_id", [classId]), Query.limit(500)];
+  const result = await tables.listRows<Lesson>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.lessons, queries });
+  const canonicalDate = date ? canonicalLessonDate(date) : undefined;
+  return result.rows
+    .filter((lesson) => !canonicalDate || lesson.lesson_date.slice(0, 10) === canonicalDate)
+    .sort((a, b) => `${b.lesson_date}:${b.start_time}`.localeCompare(`${a.lesson_date}:${a.start_time}`));
+}

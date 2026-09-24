@@ -5,6 +5,7 @@ export const ROUTES = {
   admin: "/admin",
   adminEnrollments: "/admin/matriculas",
   adminClasses: "/admin/turmas",
+  studentAttendance: "/aluno/frequencia",
   adminContracts: "/admin/contratos",
   adminContractTemplate: "/admin/contratos/modelo",
   adminCancellations: "/admin/contratos/cancelamentos",
@@ -18,7 +19,7 @@ export const ROUTES = {
   guardianDependents: "/responsavel/dependentes"
 } as const;
 
-export type SidebarNavIcon = "dashboard" | "enrollment" | "students" | "classes" | "family" | "contracts" | "billing";
+export type SidebarNavIcon = "dashboard" | "enrollment" | "students" | "classes" | "attendance" | "family" | "contracts" | "billing";
 export type SidebarNavGroup = "Principal" | "Alunos" | "Operação" | "Financeiro" | "Documentos";
 
 export type SidebarNavItem = {
@@ -60,11 +61,13 @@ export function navigationForProfile(profile: Pick<Profile, "role" | "capabiliti
   if (profile.role === "minor_student") return [
     { label: "Visão geral", href: ROUTES.student, exact: true, icon: "dashboard" },
     { label: "Minha matrícula", href: ROUTES.studentEnrollment, icon: "enrollment" },
+    { label: "Minha frequência", href: ROUTES.studentAttendance, icon: "attendance" },
     { label: "Contratos", href: ROUTES.studentContracts, icon: "contracts" }
   ];
   const items: SidebarNavItem[] = [
     { label: "Visão geral", href: ROUTES.student, exact: true, icon: "dashboard" },
     { label: "Minha matrícula", href: ROUTES.studentEnrollment, icon: "enrollment" },
+    { label: "Minha frequência", href: ROUTES.studentAttendance, icon: "attendance" },
     { label: "Contratos", href: ROUTES.studentContracts, icon: "contracts" },
     { label: "Financeiro", href: ROUTES.studentBilling, icon: "billing" }
   ];
@@ -74,6 +77,14 @@ export function navigationForProfile(profile: Pick<Profile, "role" | "capabiliti
 
 export function adminEnrollmentPath(studentId: string) {
   return `${ROUTES.adminEnrollments}/${encodeURIComponent(studentId)}`;
+}
+
+export function adminClassPath(classId: string) {
+  return `${ROUTES.adminClasses}/${encodeURIComponent(classId)}`;
+}
+
+export function adminLessonPath(classId: string, lessonId: string) {
+  return `${adminClassPath(classId)}/aulas/${encodeURIComponent(lessonId)}`;
 }
 
 export function guardianEnrollmentPath(profileId: string) {
@@ -94,4 +105,8 @@ export function guardianContractPath(profileId: string, contractId: string) {
 
 export function guardianBillingPath(profileId: string) {
   return `${ROUTES.guardianDependents}/${encodeURIComponent(profileId)}/financeiro`;
+}
+
+export function guardianAttendancePath(profileId: string) {
+  return `${ROUTES.guardianDependents}/${encodeURIComponent(profileId)}/frequencia`;
 }
