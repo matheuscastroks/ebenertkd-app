@@ -36,11 +36,11 @@
 
 **Arquivos:** criar `docs/release-checklist.md`, `docs/security-test-matrix.md`, `docs/pilot-script.md`; alterar este plano e `plan/README.md`.
 
-- [ ] Transformar desktop, Android, iPhone, operação do professor, reconciliação financeira e piloto em casos reproduzíveis com evidência esperada.
-- [ ] Registrar como bloqueadores: autorização incorreta, perda de dados, cobrança errada, ausência de recuperação e backup não restaurável.
-- [ ] Documentar privacidade, contrato/revisão jurídica, dados do piloto, rollback e monitoramento da primeira semana.
-- [ ] Executar regressão automatizada completa; manter aceites humanos e integrações externas desmarcados.
-- [ ] Commit `docs: add launch homologation runbook`.
+- [x] Transformar desktop, Android, iPhone, operação do professor, reconciliação financeira e piloto em casos reproduzíveis com evidência esperada.
+- [x] Registrar como bloqueadores: autorização incorreta, perda de dados, cobrança errada, ausência de recuperação e backup não restaurável.
+- [x] Documentar privacidade, contrato/revisão jurídica, dados do piloto, rollback e monitoramento da primeira semana.
+- [x] Executar regressão automatizada completa; manter aceites humanos e integrações externas desmarcados.
+- [x] Commit `docs: add launch homologation runbook`.
 
 ### Pendências externas que não bloqueiam 8A–8C
 
@@ -83,3 +83,7 @@
 - [ ] Totais financeiros reconciliados; push é complementar e avisos permanecem no portal.
 - [ ] Professor conclui roteiro operacional sem ajuda do desenvolvedor.
 - [ ] Backup restaurado e procedimento de incidente acessível.
+
+## Estado do preflight local — 24/09/2026
+
+O comando `npm run release:preflight` aprovou 6 de 12 verificações: projeto Appwrite, administrador de recuperação, PIX, turma, contrato e rotina diária. Permanecem bloqueadores esperados para lançamento: domínio local sem HTTPS, segredos de push/Drive incompletos, cota não configurada, contas demonstrativas presentes e backup sem sucesso recente. Esses itens não impedem o desenvolvimento, mas o checklist de lançamento não pode ser assinado enquanto persistirem.

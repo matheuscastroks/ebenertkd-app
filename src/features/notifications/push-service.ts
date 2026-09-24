@@ -8,6 +8,7 @@ import type { Profile } from "@/features/auth/types";
 import { decryptSubscription, encryptSubscription, endpointHash } from "@/features/notifications/subscription-crypto";
 import type { AppNotification, BrowserPushSubscription, NotificationDelivery, NotificationRecipient, PushSubscriptionRecord } from "@/features/notifications/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
+import { safeErrorMessage } from "@/lib/security/safe-error";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 
 const subscriptionSchema = z.object({
@@ -73,7 +74,7 @@ export async function deliverNotificationPush(notification: AppNotification, rec
       const statusCode = typeof error === "object" && error && "statusCode" in error ? Number(error.statusCode) : 0;
       const expired = statusCode === 404 || statusCode === 410;
       if (expired) await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.pushSubscriptions, rowId: subscription.$id, data: { status: "expired", updated_at: new Date().toISOString() } });
-      await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationDeliveries, rowId, data: { status: expired ? "expired" : "failed", attempts: delivery.attempts + 1, last_error: error instanceof Error ? error.message.slice(0, 1000) : "push_failed", updated_at: new Date().toISOString() } });
+      await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationDeliveries, rowId, data: { status: expired ? "expired" : "failed", attempts: delivery.attempts + 1, last_error: safeErrorMessage(error, "push_failed"), updated_at: new Date().toISOString() } });
     }
   }));
 }

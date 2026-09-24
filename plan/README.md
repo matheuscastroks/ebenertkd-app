@@ -32,6 +32,8 @@ O contrato transversal de componentes e as subfases de correção estão em [Ref
 
 ## Estado
 
+O código funcional das fases 0–6 está implementado. A Fase 7 possui backup, restore e painel implementados, mas seu gate operacional aguarda credenciais do Drive e ensaio de restauração. A Fase 8 está em homologação automatizada; dispositivos, revisão jurídica e piloto permanecem necessariamente humanos.
+
 - [ ] Fase 0
 - [ ] Fase 1
 - [ ] Fase 2
