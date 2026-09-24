@@ -10,6 +10,7 @@ import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { getTrainingClass } from "@/features/classes/service";
 import { issueContractForEnrollment } from "@/features/contracts/contract-service";
+import { beltForGub, type GubOption } from "@/features/students/options";
 
 const isoDate = (value?: string) => value ? new Date(`${value}T12:00:00.000Z`).toISOString() : undefined;
 
@@ -43,7 +44,7 @@ export async function saveEnrollmentDraft(target: Profile, actor: Profile, input
       emergency_contact_relationship: parsed.emergencyContactRelationship,
       emergency_contact_phone: parsed.emergencyContactPhone,
       started_at_tkd: isoDate(parsed.startedAtTkd),
-      current_belt: parsed.currentBelt,
+      current_belt: parsed.gub ? beltForGub(parsed.gub as GubOption) : parsed.currentBelt,
       training_class_id: trainingClass?.$id,
       training_class: trainingClass?.name,
       gub: parsed.gub,
@@ -116,7 +117,7 @@ export async function advanceToSignature(actor: Profile, studentId: string) {
     fullName: bundle.student.full_name, cpf: bundle.student.cpf ?? "", birthDate: bundle.student.birth_date?.slice(0, 10) ?? "",
     whatsapp: bundle.student.whatsapp ?? "", address: bundle.student.address ?? "", emergencyContactName: bundle.student.emergency_contact_name ?? "",
     emergencyContactRelationship: bundle.student.emergency_contact_relationship ?? "", emergencyContactPhone: bundle.student.emergency_contact_phone ?? "",
-    startedAtTkd: bundle.student.started_at_tkd?.slice(0, 10) ?? "", currentBelt: bundle.student.current_belt ?? "", trainingClassId: bundle.student.training_class_id ?? undefined, gub: bundle.student.gub,
+    startedAtTkd: bundle.student.started_at_tkd?.slice(0, 10) ?? "", currentBelt: bundle.student.gub ? beltForGub(bundle.student.gub as GubOption) : bundle.student.current_belt ?? "", trainingClassId: bundle.student.training_class_id ?? undefined, gub: bundle.student.gub,
     healthCondition: bundle.student.health_condition, healthDetails: bundle.student.health_details ?? undefined, medications: bundle.student.medications ?? undefined,
     allergies: bundle.student.allergies ?? undefined, injuries: bundle.student.injuries ?? undefined, guardianContact: bundle.student.guardian_contact ?? undefined,
     requestedDueDay: bundle.enrollment.requested_due_day

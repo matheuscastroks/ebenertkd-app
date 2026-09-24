@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { isValidCpf, normalizeCpf } from "@/lib/auth/auth-utils";
-import { BELT_OPTIONS, DUE_DAY_OPTIONS } from "@/features/students/options";
+import { BELT_OPTIONS, DUE_DAY_OPTIONS, graduationMatches } from "@/features/students/options";
 
 const optionalText = z.string().trim().max(2000).optional().transform((value) => value || undefined);
 const requiredText = (min = 2, max = 255) => z.string().trim().min(min).max(max);
 
-export const studentDraftSchema = z.object({
+const studentDraftObject = z.object({
   fullName: requiredText(3, 128),
   cpf: z.string().transform(normalizeCpf).refine((value) => !value || isValidCpf(value), "CPF inválido").optional(),
   birthDate: z.string().optional(),
@@ -27,7 +27,16 @@ export const studentDraftSchema = z.object({
   requestedDueDay: z.coerce.number().int().refine((value) => DUE_DAY_OPTIONS.includes(value as (typeof DUE_DAY_OPTIONS)[number])).optional()
 });
 
-export const studentSubmissionSchema = studentDraftSchema.extend({
+function validateGraduation(value: { gub?: number; currentBelt?: string }, context: z.RefinementCtx) {
+  if (!graduationMatches(value.gub, value.currentBelt)) {
+    context.addIssue({ code: "custom", path: ["gub"], message: "GUB e faixa não correspondem" });
+    context.addIssue({ code: "custom", path: ["currentBelt"], message: "GUB e faixa não correspondem" });
+  }
+}
+
+export const studentDraftSchema = studentDraftObject.superRefine(validateGraduation);
+
+export const studentSubmissionSchema = studentDraftObject.extend({
   cpf: z.string().transform(normalizeCpf).refine(isValidCpf, "CPF inválido"),
   birthDate: requiredText(10, 10),
   whatsapp: requiredText(8, 24),
@@ -41,7 +50,7 @@ export const studentSubmissionSchema = studentDraftSchema.extend({
   gub: z.coerce.number().int().min(1).max(9),
   healthCondition: z.enum(["yes", "no"]),
   requestedDueDay: z.coerce.number().int().refine((value) => DUE_DAY_OPTIONS.includes(value as (typeof DUE_DAY_OPTIONS)[number]))
-});
+}).superRefine(validateGraduation);
 
 export const financialReviewSchema = z.object({
   monthlyFeeCents: z.coerce.number().int().min(0),

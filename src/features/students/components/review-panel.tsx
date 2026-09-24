@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import type { EnrollmentBundle } from "@/features/students/types";
-import { DUE_DAY_OPTIONS } from "@/features/students/options";
+import { DUE_DAY_OPTIONS, beltForGub, type GubOption } from "@/features/students/options";
 import { ROUTES } from "@/lib/navigation/routes";
 import { renewContractAction } from "@/app/actions/renewals";
 
@@ -14,8 +14,9 @@ const documentLabel = { profile_photo: "Foto do aluno", medical_certificate: "At
 
 export function ReviewPanel({ bundle, reviews, notice }: { bundle: EnrollmentBundle; reviews: Array<Record<string, unknown>>; notice?: string }) {
   const { student, enrollment, documents } = bundle;
+  const currentBelt = student.gub ? beltForGub(student.gub as GubOption) : student.current_belt;
   return <div className="space-y-5">
-    <div className="flex flex-wrap items-start justify-between gap-3"><div><Link href={ROUTES.adminEnrollments} className="text-sm text-muted-foreground underline">Voltar para alunos</Link><h1 className="mt-2 text-2xl font-semibold">{student.full_name}</h1><p className="text-muted-foreground">CPF {student.cpf ?? "não informado"} · Faixa {student.current_belt ?? "não informada"}</p></div><Badge variant="outline">{enrollment.status.replaceAll("_", " ")}</Badge></div>
+    <div className="flex flex-wrap items-start justify-between gap-3"><div><Link href={ROUTES.adminEnrollments} className="text-sm text-muted-foreground underline">Voltar para alunos</Link><h1 className="mt-2 text-2xl font-semibold">{student.full_name}</h1><p className="text-muted-foreground">CPF {student.cpf ?? "não informado"} · Faixa {currentBelt ?? "não informada"}</p></div><Badge variant="outline">{enrollment.status.replaceAll("_", " ")}</Badge></div>
     {notice ? <p className="rounded-lg bg-muted p-3 text-sm">{notice}</p> : null}
     <div className="grid gap-5 lg:grid-cols-2">
       <Card><CardHeader><CardTitle>Ficha do aluno</CardTitle></CardHeader><CardContent className="grid gap-2 text-sm">

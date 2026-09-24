@@ -7,6 +7,7 @@ import { PortalShell } from "@/components/dashboard/portal-shell";
 import { listEnrollmentsForReview } from "@/features/students/service";
 import { requireProfile } from "@/lib/auth/session";
 import { adminEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
+import { beltForGub, type GubOption } from "@/features/students/options";
 
 export default async function EnrollmentsPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; belt?: string; turma?: string; cursor?: string }> }) {
   const admin = await requireProfile("admin");
@@ -24,7 +25,7 @@ export default async function EnrollmentsPage({ searchParams }: { searchParams: 
         </form>
         <div className="space-y-3">
           {result.rows.length === 0 ? <Card><CardContent className="p-5 text-sm text-muted-foreground">Nenhuma matrícula encontrada.</CardContent></Card> : result.rows.map(({ student, enrollment }) => (
-            <Card key={student.$id}><CardContent className="flex flex-wrap items-center justify-between gap-4 p-5"><div><p className="font-medium">{student.full_name}</p><p className="text-sm text-muted-foreground">{student.current_belt ?? "Faixa não informada"} · {student.training_class ?? "Turma não informada"} · vencimento solicitado: {enrollment?.requested_due_day ?? "—"}</p></div><div className="flex items-center gap-3"><Badge variant="outline">{enrollment?.status.replaceAll("_", " ") ?? "sem matrícula"}</Badge><Button asChild><Link href={adminEnrollmentPath(student.$id)}>Analisar</Link></Button></div></CardContent></Card>
+            <Card key={student.$id}><CardContent className="flex flex-wrap items-center justify-between gap-4 p-5"><div><p className="font-medium">{student.full_name}</p><p className="text-sm text-muted-foreground">{student.gub ? beltForGub(student.gub as GubOption) : student.current_belt ?? "Faixa não informada"} · {student.training_class ?? "Turma não informada"} · vencimento solicitado: {enrollment?.requested_due_day ?? "—"}</p></div><div className="flex items-center gap-3"><Badge variant="outline">{enrollment?.status.replaceAll("_", " ") ?? "sem matrícula"}</Badge><Button asChild><Link href={adminEnrollmentPath(student.$id)}>Analisar</Link></Button></div></CardContent></Card>
           ))}
         </div>
         {result.nextCursor ? <Button asChild variant="outline"><Link href={`${ROUTES.adminEnrollments}?cursor=${result.nextCursor}`}>Próxima página</Link></Button> : null}
