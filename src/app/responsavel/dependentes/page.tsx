@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { listGuardianMinors } from "@/features/families/service";
 import { requireCapability } from "@/lib/auth/session";
-import { guardianEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
+import { guardianContractsPath, guardianEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
 
 export default async function DependentsPage({ searchParams }: { searchParams: Promise<{ error?: string; created?: string }> }) {
   const guardian = await requireCapability("guardian");
@@ -32,7 +32,7 @@ export default async function DependentsPage({ searchParams }: { searchParams: P
           {minors.length === 0 ? <Card><CardContent className="p-6 text-sm text-muted-foreground">Nenhum dependente cadastrado.</CardContent></Card> : minors.map((minor) => (
             <Card key={minor.$id}><CardHeader><CardTitle className="text-base">{minor.full_name}</CardTitle></CardHeader><CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">Usuário: <strong className="text-foreground">{minor.username}</strong></p>
-              <Button asChild><Link href={guardianEnrollmentPath(minor.$id)}>Abrir ficha de matrícula</Link></Button>
+              <div className="flex flex-wrap gap-2"><Button asChild><Link href={guardianEnrollmentPath(minor.$id)}>Abrir ficha de matrícula</Link></Button><Button asChild variant="outline"><Link href={guardianContractsPath(minor.$id)}>Contratos</Link></Button></div>
               <form action={resetMinorPasswordAction} className="flex flex-col gap-2 sm:flex-row">
                 <input type="hidden" name="minor_profile_id" value={minor.$id} />
                 <Input name="password" type="password" minLength={8} placeholder="Nova senha" required />

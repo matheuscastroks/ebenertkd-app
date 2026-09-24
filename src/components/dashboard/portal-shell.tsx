@@ -10,7 +10,8 @@ function navigation(profile: Profile, activePath: string) {
   if (profile.role === "admin") return [
     { label: "Visão geral", href: ROUTES.admin, icon: "dashboard" as const, active: activePath === ROUTES.admin },
     { label: "Matrículas", href: ROUTES.adminEnrollments, icon: "students" as const, active: active(ROUTES.adminEnrollments) },
-    { label: "Turmas e horários", href: ROUTES.adminClasses, icon: "classes" as const, active: active(ROUTES.adminClasses) }
+    { label: "Turmas e horários", href: ROUTES.adminClasses, icon: "classes" as const, active: active(ROUTES.adminClasses) },
+    { label: "Contratos", href: ROUTES.adminContracts, icon: "contracts" as const, active: active(ROUTES.adminContracts) }
   ];
   if (profile.role === "guardian") return [
     { label: "Visão geral", href: ROUTES.guardian, icon: "dashboard" as const, active: activePath === ROUTES.guardian },
@@ -18,11 +19,13 @@ function navigation(profile: Profile, activePath: string) {
   ];
   if (profile.role === "minor_student") return [
     { label: "Visão geral", href: ROUTES.student, icon: "dashboard" as const, active: activePath === ROUTES.student },
-    { label: "Minha matrícula", href: ROUTES.studentEnrollment, icon: "enrollment" as const, active: active(ROUTES.studentEnrollment) }
+    { label: "Minha matrícula", href: ROUTES.studentEnrollment, icon: "enrollment" as const, active: active(ROUTES.studentEnrollment) },
+    { label: "Contratos", href: ROUTES.studentContracts, icon: "contracts" as const, active: active(ROUTES.studentContracts) }
   ];
   const items: AppSidebarNavItem[] = [
     { label: "Visão geral", href: ROUTES.student, icon: "dashboard" as const, active: activePath === ROUTES.student },
-    { label: "Minha matrícula", href: ROUTES.studentEnrollment, icon: "enrollment" as const, active: active(ROUTES.studentEnrollment) }
+    { label: "Minha matrícula", href: ROUTES.studentEnrollment, icon: "enrollment" as const, active: active(ROUTES.studentEnrollment) },
+    { label: "Contratos", href: ROUTES.studentContracts, icon: "contracts" as const, active: active(ROUTES.studentContracts) }
   ];
   if (profile.capabilities.includes("guardian")) items.push({ label: "Meus dependentes", href: ROUTES.guardianDependents, icon: "family" as const, active: active(ROUTES.guardianDependents) });
   return items;
