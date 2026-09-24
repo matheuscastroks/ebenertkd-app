@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
-import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { DashboardFrame, DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { LogoutButton } from "@/components/dashboard/logout-button";
 import type { Profile } from "@/features/auth/types";
 import type { AppSidebarNavItem } from "@/components/dashboard/app-sidebar";
 import type { BreadcrumbEntry } from "@/components/shared/page-breadcrumb";
 import { ROUTES } from "@/lib/navigation/routes";
 
-function navigation(profile: Profile, activePath: string) {
+function navigation(profile: Profile, activePath = "") {
   const active = (href: string) => href === activePath || activePath.startsWith(`${href}/`);
   if (profile.role === "admin") return [
     { label: "Visão geral", href: ROUTES.admin, icon: "dashboard" as const, group: "Principal" as const, active: activePath === ROUTES.admin },
@@ -32,6 +32,11 @@ function navigation(profile: Profile, activePath: string) {
   ];
   if (profile.capabilities.includes("guardian")) items.push({ label: "Meus dependentes", href: ROUTES.guardianDependents, icon: "family" as const, active: active(ROUTES.guardianDependents) });
   return items;
+}
+
+export function PortalFrame({ profile, children }: { profile: Profile; children: ReactNode }) {
+  const badge = profile.role === "admin" ? "Professor" : profile.role === "guardian" ? "Responsável" : profile.role === "minor_student" ? "Aluno" : "Aluno adulto";
+  return <DashboardFrame badge={badge} profileName={profile.full_name} navItems={navigation(profile)}>{children}</DashboardFrame>;
 }
 
 export function PortalShell({ profile, title, subtitle, activePath, breadcrumbs, children }: { profile: Profile; title: string; subtitle: string; activePath: string; breadcrumbs?: BreadcrumbEntry[]; children: ReactNode }) {
