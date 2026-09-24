@@ -149,6 +149,67 @@ export const tables: TableDefinition[] = [
     ]
   },
   {
+    id: APPWRITE_IDS.tables.examEvents,
+    name: "Exam events",
+    columns: [
+      { key: "name", kind: "varchar", size: 128, required: true },
+      { key: "event_date", kind: "datetime", required: true },
+      { key: "location", kind: "varchar", size: 160, required: false },
+      { key: "default_fee_cents", kind: "integer", required: true, min: 0 },
+      { key: "status", kind: "enum", elements: ["planned", "confirmed", "completed", "cancelled"], required: true },
+      { key: "created_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "date_idx", type: "key", columns: ["event_date"] },
+      { key: "status_idx", type: "key", columns: ["status"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.examParticipants,
+    name: "Exam participants",
+    columns: [
+      { key: "event_id", kind: "varchar", size: 36, required: true },
+      { key: "enrollment_id", kind: "varchar", size: 36, required: true },
+      { key: "student_id", kind: "varchar", size: 36, required: true },
+      { key: "target_belt", kind: "varchar", size: 64, required: true },
+      { key: "target_gub", kind: "integer", required: true, min: 1, max: 9 },
+      { key: "fee_cents", kind: "integer", required: true, min: 0 },
+      { key: "charge_id", kind: "varchar", size: 36, required: false },
+      { key: "status", kind: "enum", elements: ["registered", "approved", "failed", "absent", "cancelled"], required: true },
+      { key: "result_notes", kind: "text", required: false },
+      { key: "financial_decision", kind: "enum", elements: ["future_credit", "keep_charge"], required: false },
+      { key: "graded_at", kind: "datetime", required: false },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "event_student_unique", type: "unique", columns: ["event_id", "student_id"] },
+      { key: "event_status_idx", type: "key", columns: ["event_id", "status"] },
+      { key: "student_idx", type: "key", columns: ["student_id"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.beltHistory,
+    name: "Belt history",
+    columns: [
+      { key: "student_id", kind: "varchar", size: 36, required: true },
+      { key: "event_id", kind: "varchar", size: 36, required: true },
+      { key: "exam_participant_id", kind: "varchar", size: 36, required: true },
+      { key: "previous_belt", kind: "varchar", size: 64, required: true },
+      { key: "previous_gub", kind: "integer", required: true, min: 1, max: 9 },
+      { key: "new_belt", kind: "varchar", size: 64, required: true },
+      { key: "new_gub", kind: "integer", required: true, min: 1, max: 9 },
+      { key: "achieved_at", kind: "datetime", required: true },
+      { key: "created_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "participant_unique", type: "unique", columns: ["exam_participant_id"] },
+      { key: "student_achieved_idx", type: "key", columns: ["student_id", "achieved_at"] }
+    ]
+  },
+  {
     id: APPWRITE_IDS.tables.students,
     name: "Students",
     columns: [

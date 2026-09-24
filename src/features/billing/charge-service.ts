@@ -59,6 +59,27 @@ export async function createMonthlyCharge(contract: Contract, enrollment: Enroll
   });
 }
 
+export async function createExamCharge(input: { enrollment: Enrollment; participantId: string; eventName: string; eventDate: string; amountCents: number }) {
+  return createCharge({
+    enrollmentId: input.enrollment.$id,
+    studentId: input.enrollment.student_id,
+    type: "exam_fee",
+    competence: input.eventDate.slice(0, 7),
+    originId: input.participantId,
+    amountCents: input.amountCents,
+    dueDate: input.eventDate.slice(0, 10),
+    description: `Exame de faixa · ${input.eventName}`
+  });
+}
+
+export async function cancelUnpaidExamCharge(charge: Charge, participantId: string) {
+  if (!["pending", "overdue", "cancelled"].includes(charge.status)) throw new Error("exam_charge_not_cancellable");
+  if (charge.status === "cancelled") return charge;
+  const { tables, config } = createAppwriteAdminClient();
+  const now = new Date().toISOString();
+  return tables.updateRow<Charge>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: charge.$id, data: { status: "cancelled", cancelled_at: now, cancellation_reason: `Participação em exame cancelada: ${participantId}`, updated_at: now } });
+}
+
 export async function getChargeForActor(actor: Profile, chargeId: string) {
   const { tables, config } = createAppwriteAdminClient();
   const charge = await tables.getRow<Charge>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: chargeId });

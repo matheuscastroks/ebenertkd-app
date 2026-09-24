@@ -5,6 +5,7 @@ export const ROUTES = {
   admin: "/admin",
   adminEnrollments: "/admin/matriculas",
   adminClasses: "/admin/turmas",
+  adminExams: "/admin/exames",
   studentAttendance: "/aluno/frequencia",
   adminContracts: "/admin/contratos",
   adminContractTemplate: "/admin/contratos/modelo",
@@ -19,7 +20,7 @@ export const ROUTES = {
   guardianDependents: "/responsavel/dependentes"
 } as const;
 
-export type SidebarNavIcon = "dashboard" | "enrollment" | "students" | "classes" | "attendance" | "family" | "contracts" | "billing";
+export type SidebarNavIcon = "dashboard" | "enrollment" | "students" | "classes" | "exams" | "attendance" | "family" | "contracts" | "billing";
 export type SidebarNavGroup = "Principal" | "Alunos" | "Operação" | "Financeiro" | "Documentos";
 
 export type SidebarNavItem = {
@@ -38,6 +39,7 @@ export function navigationForProfile(profile: Pick<Profile, "role" | "capabiliti
     { label: "Visão geral", href: ROUTES.admin, exact: true, icon: "dashboard", group: "Principal" },
     { label: "Matrículas", href: ROUTES.adminEnrollments, icon: "students", group: "Alunos", badge: counts.enrollments },
     { label: "Turmas e horários", href: ROUTES.adminClasses, icon: "classes", group: "Operação" },
+    { label: "Exames de faixa", href: ROUTES.adminExams, icon: "exams", group: "Operação" },
     {
       label: "Financeiro", href: ROUTES.adminBilling, icon: "billing", group: "Financeiro",
       children: [
@@ -85,6 +87,10 @@ export function adminClassPath(classId: string) {
 
 export function adminLessonPath(classId: string, lessonId: string) {
   return `${adminClassPath(classId)}/aulas/${encodeURIComponent(lessonId)}`;
+}
+
+export function adminExamPath(eventId: string) {
+  return `${ROUTES.adminExams}/${encodeURIComponent(eventId)}`;
 }
 
 export function guardianEnrollmentPath(profileId: string) {

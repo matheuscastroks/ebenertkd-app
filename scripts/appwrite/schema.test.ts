@@ -23,6 +23,9 @@ describe("Appwrite infrastructure schema", () => {
       "class_enrollments",
       "lessons",
       "attendance_records",
+      "exam_events",
+      "exam_participants",
+      "belt_history",
       "students",
       "enrollments",
       "student_documents",
@@ -84,6 +87,16 @@ describe("Appwrite infrastructure schema", () => {
       key: "lesson_enrollment_unique",
       type: "unique",
       columns: ["lesson_id", "class_enrollment_id"]
+    });
+    expect(tables.find((table) => table.id === "exam_participants")?.indexes).toContainEqual({
+      key: "event_student_unique",
+      type: "unique",
+      columns: ["event_id", "student_id"]
+    });
+    expect(tables.find((table) => table.id === "belt_history")?.indexes).toContainEqual({
+      key: "participant_unique",
+      type: "unique",
+      columns: ["exam_participant_id"]
     });
     expect(tables.find((table) => table.id === "contract_signatures")?.indexes).toContainEqual({
       key: "contract_unique",

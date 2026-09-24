@@ -46,12 +46,12 @@
 
 **Arquivos:** criar `src/features/exams/`, ações e rotas sob `src/app/admin/exames/`; integrar `src/features/billing/charge-service.ts` e graduação do aluno.
 
-- [ ] Criar `exam_events`, `exam_participants` e `belt_history` com índices idempotentes.
-- [ ] Confirmar participante e gerar uma única `exam_fee`; tratar remoção conforme estado do pagamento.
-- [ ] Concluir evento transacionando resultado, histórico e faixa/GUB sem duplicação.
-- [ ] Implementar páginas de evento, participantes e resultado com valores em reais.
-- [ ] Testar cobrança, cancelamento, reexecução e ordem do histórico.
-- [ ] Commit: `feat: add belt exam management`.
+- [x] Criar `exam_events`, `exam_participants` e `belt_history` com índices idempotentes.
+- [x] Confirmar participante e gerar uma única `exam_fee`; tratar remoção conforme estado do pagamento.
+- [x] Concluir evento transacionando resultado, histórico e faixa/GUB sem duplicação.
+- [x] Implementar páginas de evento, participantes e resultado com valores em reais.
+- [x] Testar cobrança, cancelamento, reexecução e ordem do histórico.
+- [x] Commit: `feat: add belt exam management`.
 
 ## 5.1 Turmas e aulas
 
@@ -76,17 +76,17 @@
 
 **Arquivos:** criar `src/features/exams/types.ts`, `exam-service.ts`, `graduation-service.ts`; páginas sob `src/app/admin/exames/`.
 
-- [ ] Criar `exam_events`, `exam_participants` e `belt_history`.
-- [ ] Definir evento, data, inscrições, faixa pretendida, taxa individual e estados `planned`, `confirmed`, `completed`, `cancelled`.
-- [ ] Ao confirmar participante, criar uma única `exam_fee` via serviço financeiro; remoção cancela apenas cobrança não paga.
-- [ ] Se já houver pagamento, exigir decisão administrativa registrada: crédito futuro ou manutenção do valor; não apagar o lançamento.
-- [ ] Aprovação no exame acrescenta histórico e atualiza faixa/GUB em uma transação; reenvio não duplica graduação.
-- [ ] Reprovação ou ausência preserva faixa e registra o resultado.
+- [x] Criar `exam_events`, `exam_participants` e `belt_history`.
+- [x] Definir evento, data, inscrições, faixa pretendida, taxa individual e estados `planned`, `confirmed`, `completed`, `cancelled`.
+- [x] Ao confirmar participante, criar uma única `exam_fee` via serviço financeiro; remoção cancela apenas cobrança não paga.
+- [x] Se já houver pagamento, exigir decisão administrativa registrada: crédito futuro ou manutenção do valor; não apagar o lançamento.
+- [x] Aprovação no exame acrescenta histórico e atualiza faixa/GUB em uma transação; reenvio não duplica graduação.
+- [x] Reprovação ou ausência preserva faixa e registra o resultado.
 
 ## Testes e aceite
 
-- [ ] Testar aula duplicada, aluno inativo, chamada em lote parcial, correção e isolamento de histórico.
-- [ ] Testar participante repetido, taxa única, cancelamento antes/depois do pagamento e conclusão repetida.
-- [ ] Testar ordem do histórico e atualização coerente de faixa/GUB.
-- [ ] Rodar suíte, lint, typecheck e build.
-- [ ] Gate: professor executa chamada e exame completos; ficha, cobrança, pagamento e graduação permanecem consistentes.
+- [x] Testar aula duplicada, aluno inativo, chamada em lote parcial, correção e isolamento de histórico.
+- [x] Testar participante repetido, taxa única, cancelamento antes/depois do pagamento e conclusão repetida.
+- [x] Testar ordem do histórico e atualização coerente de faixa/GUB.
+- [x] Rodar suíte, lint, typecheck e build.
+- [x] Gate: professor executa chamada e exame completos; ficha, cobrança, pagamento e graduação permanecem consistentes.
