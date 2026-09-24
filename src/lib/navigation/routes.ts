@@ -6,9 +6,12 @@ export const ROUTES = {
   adminContracts: "/admin/contratos",
   adminContractTemplate: "/admin/contratos/modelo",
   adminCancellations: "/admin/contratos/cancelamentos",
+  adminBilling: "/admin/financeiro",
+  adminBillingSettings: "/admin/financeiro/configuracoes",
   student: "/aluno",
   studentEnrollment: "/aluno/matricula",
   studentContracts: "/aluno/contratos",
+  studentBilling: "/aluno/financeiro",
   guardian: "/responsavel",
   guardianDependents: "/responsavel/dependentes"
 } as const;
@@ -31,4 +34,8 @@ export function guardianContractsPath(profileId: string) {
 
 export function guardianContractPath(profileId: string, contractId: string) {
   return `${guardianContractsPath(profileId)}/${encodeURIComponent(contractId)}`;
+}
+
+export function guardianBillingPath(profileId: string) {
+  return `${ROUTES.guardianDependents}/${encodeURIComponent(profileId)}/financeiro`;
 }

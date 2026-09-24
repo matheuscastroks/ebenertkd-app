@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, Building2, ClipboardList, FileSignature, LayoutDashboard, ShieldCheck, UserRound, UsersRound } from "lucide-react";
+import { Bell, Building2, ClipboardList, FileSignature, LayoutDashboard, ShieldCheck, UserRound, UsersRound, WalletCards } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -19,7 +19,7 @@ export type AppSidebarNavItem = {
   label: string;
   href: string;
   active?: boolean;
-  icon?: "dashboard" | "enrollment" | "students" | "classes" | "family" | "contracts";
+  icon?: "dashboard" | "enrollment" | "students" | "classes" | "family" | "contracts" | "billing";
 };
 
 const navIcons = {
@@ -28,7 +28,8 @@ const navIcons = {
   students: UsersRound,
   classes: Building2,
   family: UserRound,
-  contracts: FileSignature
+  contracts: FileSignature,
+  billing: WalletCards
 };
 
 export function AppSidebar({
