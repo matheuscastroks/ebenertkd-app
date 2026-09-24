@@ -368,3 +368,13 @@ git commit -m "docs: complete shadcn UI adoption plan"
 - Nenhuma primitive contém regra de domínio, acesso ao Appwrite ou texto específico de aluno.
 - Testes, lint, typecheck e build passam ao fim de cada fase relevante.
 
+## Registro de implementação — 24/09/2026
+
+Implementação concluída nos commits `4220ae6`, `e9de6d1`, `82054fd`, `d567f08`, `c60022c` e `acf7ea1`.
+
+- **Adotados:** `Alert`, `AlertDialog`, `Attachment`, `Avatar`, `Breadcrumb`, `Checkbox`, `Dialog`, `Drawer`, `Field`, `Pagination`, `Progress`, `Select`, `Skeleton`, `Spinner`, `Table`, `Tabs`, `Tooltip`, `Sidebar` e `Chart`.
+- **Uso indireto:** `Sheet` permanece como implementação mobile da sidebar; `Separator` e `Popover` continuam como dependências das composições existentes.
+- **Adiados racionalmente:** `InputOTP`, `HoverCard`, `AspectRatio`, `Switch` e `Calendar` não possuem necessidade atual que justifique interação ou hidratação adicional.
+- **Validação automatizada:** 19 arquivos e 70 testes, ESLint, TypeScript e build de produção aprovados.
+- **Validação visual:** financeiro e matrículas inspecionados no navegador em desktop e 360 px; tabela responsiva, cards, gráfico e drawer financeiro aprovados sem erros da aplicação.
+- **Pendente de operação:** testes com professor/alunos, zoom de 200%, leitor de tela e breakpoints adicionais continuam na Fase 9 porque exigem homologação humana, não implementação estrutural.
