@@ -29,6 +29,11 @@ describe("Appwrite infrastructure schema", () => {
       "contracts",
       "contract_signatures",
       "cancellation_requests",
+      "charges",
+      "payment_proofs",
+      "payments",
+      "payment_reversals",
+      "billing_settings",
       "audit_events",
       "automation_runs"
     ]);
@@ -66,6 +71,11 @@ describe("Appwrite infrastructure schema", () => {
       key: "contract_unique",
       type: "unique",
       columns: ["contract_id"]
+    });
+    expect(tables.find((table) => table.id === "charges")?.indexes).toContainEqual({
+      key: "charge_origin_unique",
+      type: "unique",
+      columns: ["enrollment_id", "charge_type", "competence", "origin_id"]
     });
   });
 

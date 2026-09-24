@@ -3,6 +3,7 @@ import "server-only";
 import { ID, Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import { writeAuditEvent } from "@/features/auth/service";
+import { applyApprovedCancellation } from "@/features/billing/charge-service";
 import { getContractForActor } from "@/features/contracts/contract-service";
 import { cancellationDecisionSchema, cancellationRequestSchema } from "@/features/contracts/schemas";
 import type { CancellationRequest } from "@/features/contracts/types";
@@ -47,6 +48,7 @@ export async function decideCancellation(actor: Profile, raw: unknown) {
   const now = new Date().toISOString();
   const updated = await tables.updateRow<CancellationRequest>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.cancellationRequests, rowId: request.$id, data: { status: input.decision, decided_fee_cents: input.decision === "approved" ? input.feeCents : 0, decision_notes: input.notes, decided_by_account_id: actor.account_id, decided_at: now, updated_at: now } });
   if (input.decision === "approved") {
+    await applyApprovedCancellation(actor, request, input.feeCents);
     await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contracts, rowId: request.contract_id, data: { status: "cancelled", updated_at: now } });
     await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, rowId: request.enrollment_id, data: { status: "cancelled", updated_at: now } });
   }

@@ -297,6 +297,110 @@ export const tables: TableDefinition[] = [
     ]
   },
   {
+    id: APPWRITE_IDS.tables.charges,
+    name: "Charges",
+    columns: [
+      { key: "enrollment_id", kind: "varchar", size: 36, required: true },
+      { key: "student_id", kind: "varchar", size: 36, required: true },
+      { key: "contract_id", kind: "varchar", size: 36, required: false },
+      { key: "charge_type", kind: "enum", elements: ["monthly_fee", "enrollment_fee", "exam_fee", "exit_fee"], required: true },
+      { key: "competence", kind: "varchar", size: 7, required: true },
+      { key: "origin_id", kind: "varchar", size: 36, required: true },
+      { key: "amount_cents", kind: "integer", required: true, min: 0 },
+      { key: "due_date", kind: "datetime", required: true },
+      { key: "status", kind: "enum", elements: ["pending", "proof_under_review", "paid", "overdue", "cancelled"], required: true },
+      { key: "description", kind: "varchar", size: 255, required: true },
+      { key: "adjustment_reason", kind: "text", required: false },
+      { key: "cancelled_at", kind: "datetime", required: false },
+      { key: "cancellation_reason", kind: "text", required: false },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "charge_origin_unique", type: "unique", columns: ["enrollment_id", "charge_type", "competence", "origin_id"] },
+      { key: "student_idx", type: "key", columns: ["student_id"] },
+      { key: "status_idx", type: "key", columns: ["status"] },
+      { key: "competence_idx", type: "key", columns: ["competence"] },
+      { key: "due_date_idx", type: "key", columns: ["due_date"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.paymentProofs,
+    name: "Payment proofs",
+    columns: [
+      { key: "charge_id", kind: "varchar", size: 36, required: true },
+      { key: "file_id", kind: "varchar", size: 36, required: true },
+      { key: "original_name", kind: "varchar", size: 255, required: true },
+      { key: "mime_type", kind: "varchar", size: 96, required: true },
+      { key: "size_bytes", kind: "integer", required: true, min: 1, max: 5242880 },
+      { key: "version", kind: "integer", required: true, min: 1 },
+      { key: "status", kind: "enum", elements: ["pending", "approved", "rejected", "superseded"], required: true },
+      { key: "rejection_reason", kind: "text", required: false },
+      { key: "uploaded_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "reviewed_by_account_id", kind: "varchar", size: 36, required: false },
+      { key: "reviewed_at", kind: "datetime", required: false },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "charge_idx", type: "key", columns: ["charge_id"] },
+      { key: "charge_version_unique", type: "unique", columns: ["charge_id", "version"] },
+      { key: "status_idx", type: "key", columns: ["status"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.payments,
+    name: "Payments",
+    columns: [
+      { key: "charge_id", kind: "varchar", size: 36, required: true },
+      { key: "proof_id", kind: "varchar", size: 36, required: false },
+      { key: "method", kind: "enum", elements: ["pix_proof", "manual"], required: true },
+      { key: "amount_cents", kind: "integer", required: true, min: 0 },
+      { key: "paid_at", kind: "datetime", required: true },
+      { key: "status", kind: "enum", elements: ["confirmed", "reversed"], required: true },
+      { key: "recorded_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "notes", kind: "text", required: false },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "charge_idx", type: "key", columns: ["charge_id"] },
+      { key: "proof_unique", type: "unique", columns: ["proof_id"] },
+      { key: "paid_at_idx", type: "key", columns: ["paid_at"] },
+      { key: "status_idx", type: "key", columns: ["status"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.paymentReversals,
+    name: "Payment reversals",
+    columns: [
+      { key: "payment_id", kind: "varchar", size: 36, required: true },
+      { key: "charge_id", kind: "varchar", size: 36, required: true },
+      { key: "reason", kind: "text", required: true },
+      { key: "reversed_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "reversed_at", kind: "datetime", required: true },
+      { key: "created_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "payment_unique", type: "unique", columns: ["payment_id"] },
+      { key: "charge_idx", type: "key", columns: ["charge_id"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.billingSettings,
+    name: "Billing settings",
+    columns: [
+      { key: "pix_key", kind: "varchar", size: 320, required: true },
+      { key: "pix_key_type", kind: "enum", elements: ["cpf", "cnpj", "email", "phone", "random"], required: true },
+      { key: "beneficiary_name", kind: "varchar", size: 160, required: true },
+      { key: "instructions", kind: "text", required: false },
+      { key: "updated_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: []
+  },
+  {
     id: APPWRITE_IDS.tables.auditEvents,
     name: "Audit events",
     columns: [

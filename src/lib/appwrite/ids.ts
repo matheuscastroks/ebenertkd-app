@@ -14,6 +14,11 @@ export const APPWRITE_IDS = {
     contracts: "contracts",
     contractSignatures: "contract_signatures",
     cancellationRequests: "cancellation_requests",
+    charges: "charges",
+    paymentProofs: "payment_proofs",
+    payments: "payments",
+    paymentReversals: "payment_reversals",
+    billingSettings: "billing_settings",
     auditEvents: "audit_events",
     automationRuns: "automation_runs"
   },

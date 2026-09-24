@@ -4,6 +4,7 @@ import { AppwriteException, ID, Permission, Query, Role } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
 import type { Profile } from "@/features/auth/types";
 import { writeAuditEvent } from "@/features/auth/service";
+import { createFirstMonthlyCharge } from "@/features/billing/charge-service";
 import { buildSignedContractPdf } from "@/features/contracts/pdf";
 import { canSignContract, hashContent, privacyIpFingerprint } from "@/features/contracts/rules";
 import { signatureInputSchema } from "@/features/contracts/schemas";
@@ -32,6 +33,7 @@ async function reconcileSignedContract(contract: Contract, signature: ContractSi
     await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, rowId: contract.enrollment_id, data: { status: "active", updated_at: new Date().toISOString() } });
     await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, rowId: enrollment.student_id, data: { status: "active", updated_at: new Date().toISOString() } });
   } else if (enrollment.status !== "active") throw new Error("enrollment_not_awaiting_signature");
+  await createFirstMonthlyCharge(contract, enrollment);
   return { pdfHash };
 }
 
