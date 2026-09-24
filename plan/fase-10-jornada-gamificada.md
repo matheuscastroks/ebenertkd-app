@@ -59,7 +59,7 @@ Referências:
 ### 2.2 Operação do professor
 
 - Confirmar o endereço inicial `Rua Abélia, 197 — Jardim Guanabara` por pino no mapa antes de salvar latitude e longitude.
-- Configurar raio, precisão máxima e janela de check-in por unidade/turma.
+- Configurar raio, precisão máxima, antecedência e tolerância de atraso por unidade/turma. A janela efetiva sempre é calculada a partir da aula concreta vinculada ao aluno, nunca por um horário global.
 - Conciliar solicitações de check-in na chamada existente.
 - Configurar ciclos, regras de XP, catálogo de graduações, conteúdos e critérios de exame.
 - Validar competências técnicas e decidir elegibilidade para exame.
@@ -233,24 +233,58 @@ Seed sugerido para validação do professor, não regra definitiva:
 
 ### 5.1 Fluxo viável no PWA
 
-1. A Function diária agenda push genérico antes da aula: “Sua aula começa em breve. Abra o app para fazer check-in”.
-2. Ao abrir `/aluno/jornada/check-in`, o servidor confirma matrícula ativa e aula elegível.
-3. O aluno toca em **Verificar localização**; só então o navegador solicita permissão.
-4. O cliente envia latitude, longitude, `accuracy`, nonce e identificador da aula.
-5. O servidor usa seu próprio relógio, calcula distância por Haversine e valida raio, precisão, janela e nonce.
-6. O servidor descarta as coordenadas exatas e persiste apenas distância arredondada, precisão arredondada, resultado, horário e motivo.
-7. O professor vê a solicitação pré-selecionada na chamada e confirma a presença ao concluir a aula.
-8. Somente a chamada concluída gera XP.
+1. Uma Function `class-reminders`, executada a cada cinco minutos, consulta as aulas concretas da próxima faixa de tempo, cruza cada uma com `class_enrollments` ativos e envia o push no instante derivado de `lesson_date + start_time` em `America/Sao_Paulo`.
+2. Para uma aula das 19h, a política padrão gera uma janela das 18h45 às 19h30: 15 minutos de antecedência e 30 minutos de tolerância após o início. Para uma aula das 20h, a mesma regra gera 19h45–20h30 automaticamente.
+3. O push informa a turma e o horário: “Sua aula das 19h começou. Abra o app para fazer check-in”. Não inclui localização nem informação sensível na tela bloqueada.
+4. Ao abrir `/aluno/jornada/check-in?lesson={lessonId}`, o servidor confirma que aquela aula pertence a uma turma na qual o aluno possui vínculo ativo e que o horário atual está dentro da janela calculada.
+5. O aluno toca em **Verificar localização** na primeira utilização; depois da permissão, a tela pode iniciar a busca automaticamente quando for aberta por um push de aula elegível.
+6. Enquanto a tela estiver visível e a janela permanecer aberta, o cliente usa uma observação curta da posição para lidar com o aluno que ainda está chegando. A observação termina no primeiro resultado aceito, ao ocultar/fechar a tela ou ao expirar a janela.
+7. O cliente envia latitude, longitude, `accuracy`, nonce e identificador da aula.
+8. O servidor usa seu próprio relógio, recalcula a janela pela aula, mede distância por Haversine e valida raio, precisão e nonce.
+9. O servidor descarta as coordenadas exatas e persiste apenas distância arredondada, precisão arredondada, resultado, horário e motivo.
+10. O professor vê a solicitação pré-selecionada na chamada e confirma a presença ao concluir a aula.
+11. A interface pode mostrar “100 XP pendentes” imediatamente; somente a chamada concluída transforma isso em XP definitivo.
 
-Configuração inicial sugerida: raio de 120 m, precisão máxima de 80 m, abertura 30 minutos antes e fechamento 30 minutos após o término. Esses valores devem ser ajustáveis e testados no local.
+Configuração inicial sugerida: raio de 120 m, precisão máxima de 80 m, abertura 15 minutos antes e fechamento 30 minutos após o início. Antecedência e tolerância são propriedades da turma ou da unidade, mas os horários absolutos são sempre derivados de cada `Lesson`. Reposição, cancelamento ou alteração de horário usam os dados da aula concreta e invalidam qualquer agendamento anterior.
 
-### 5.2 Regras antifraude e privacidade
+### 5.2 Cálculo dinâmico da janela
+
+Criar uma função pura usada tanto pelo agendador quanto pelo endpoint de check-in:
+
+```ts
+type CheckinWindowPolicy = {
+  opensBeforeMinutes: number; // padrão: 15
+  closesAfterStartMinutes: number; // padrão: 30
+  timeZone: "America/Sao_Paulo";
+};
+
+type CheckinWindow = {
+  opensAt: string;
+  closesAt: string;
+};
+
+function calculateCheckinWindow(
+  lessonDate: string,
+  lessonStartTime: string,
+  policy: CheckinWindowPolicy,
+): CheckinWindow;
+```
+
+- Usar `Lesson.lesson_date` e `Lesson.start_time`, não apenas o horário recorrente de `TrainingClass`.
+- Deduplicar o lembrete por `lesson_id + account_id + reminder_stage`; reexecuções do cron não podem repetir o push.
+- Resolver a aula pelo vínculo ativo do aluno; conhecer um `lessonId` não autoriza check-in.
+- Se o aluno estiver em duas turmas com janelas simultâneas, exibir as duas aulas e exigir seleção explícita.
+- Aula cancelada fecha imediatamente a janela e cancela o lembrete ainda não entregue.
+- Mudança de horário recalcula push, nonce e janela; o agendamento antigo deixa de ser válido.
+- O servidor interpreta datas em `America/Sao_Paulo` e compara com horário de servidor.
+
+### 5.3 Regras antifraude e privacidade
 
 - Não confiar no relógio do aparelho, IP, estado do botão ou distância calculada no cliente.
 - Nonce assinado, uso único e validade de cinco minutos.
 - Limitar tentativas por conta/aula e registrar auditoria de recusas sem armazenar trajetória.
 - GPS simulado continua possível na Web; professor é a autoridade final.
-- Não executar `watchPosition`, não consultar localização fora da janela e não armazenar histórico de coordenadas.
+- `watchPosition` só pode existir na tela visível de check-in, durante a janela da aula selecionada, com descarte imediato das leituras recusadas; nunca executá-lo no service worker ou fora desse fluxo.
 - Permissão negada nunca impede chamada manual.
 - Para maior garantia em uma fase futura, combinar localização com QR rotativo exibido no dojang.
 - Geofencing verdadeiro em segundo plano exige avaliar aplicativo nativo/Capacitor; não prometer essa capacidade no PWA.
@@ -373,13 +407,19 @@ Usar componentes shadcn racionalmente:
 - Create: `src/features/checkin/components/checkin-card.tsx`
 - Modify: `src/features/classes/components/attendance-sheet.tsx`
 - Modify: `src/features/notifications/push-service.ts`
-- Modify: `appwrite/functions/daily-operations/src/main.js`
+- Modify: `src/lib/appwrite/ids.ts`
+- Modify: `scripts/appwrite/deploy-function.ts`
+- Create: `appwrite/functions/class-reminders/package.json`
+- Create: `appwrite/functions/class-reminders/src/main.js`
+- Create: `appwrite/functions/class-reminders/src/reminder-rules.js`
+- Create: `appwrite/functions/class-reminders/src/reminder-rules.test.js`
 
-- [ ] Testar Haversine, borda do raio, baixa precisão, janela, nonce expirado, replay e aluno de outra turma.
+- [ ] Testar Haversine, borda do raio, baixa precisão, janelas dinâmicas para aulas em horários diferentes, reposição, mudança de horário, nonce expirado, replay, sobreposição de turmas e aluno sem vínculo.
 - [ ] Implementar endpoint servidor que recebe coordenadas apenas para validação e persiste prova minimizada.
 - [ ] Criar UI que solicita permissão somente após clique e explica finalidade/retenção antes do prompt.
 - [ ] Exibir check-ins pendentes na chamada sem marcar automaticamente `present`.
-- [ ] Agendar push por horário com texto genérico; ao abrir, revalidar aula e localização.
+- [ ] Criar a Function `class-reminders` com cron `*/5 * * * *`, envio Web Push/VAPID já adotado pelo projeto e chave idempotente por aula, conta e etapa.
+- [ ] Agendar push por `Lesson` e vínculo ativo, usando `lesson_date + start_time` em `America/Sao_Paulo`; ao abrir, revalidar aula, janela dinâmica e localização.
 - [ ] Testar Android/Chrome e iPhone/Safari instalado no endereço real, incluindo permissão negada e GPS impreciso.
 - [ ] Commit: `feat: add privacy-aware class check-in`.
 
