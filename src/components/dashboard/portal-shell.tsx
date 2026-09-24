@@ -3,27 +3,28 @@ import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { LogoutButton } from "@/components/dashboard/logout-button";
 import type { Profile } from "@/features/auth/types";
 import type { AppSidebarNavItem } from "@/components/dashboard/app-sidebar";
+import { ROUTES } from "@/lib/navigation/routes";
 
 function navigation(profile: Profile, activePath: string) {
   const active = (href: string) => href === activePath || activePath.startsWith(`${href}/`);
   if (profile.role === "admin") return [
-    { label: "Visão geral", href: "/admin", icon: "dashboard" as const, active: activePath === "/admin" },
-    { label: "Matrículas", href: "/admin/alunos", icon: "students" as const, active: active("/admin/alunos") },
-    { label: "Turmas e horários", href: "/admin/turmas", icon: "classes" as const, active: active("/admin/turmas") }
+    { label: "Visão geral", href: ROUTES.admin, icon: "dashboard" as const, active: activePath === ROUTES.admin },
+    { label: "Matrículas", href: ROUTES.adminEnrollments, icon: "students" as const, active: active(ROUTES.adminEnrollments) },
+    { label: "Turmas e horários", href: ROUTES.adminClasses, icon: "classes" as const, active: active(ROUTES.adminClasses) }
   ];
   if (profile.role === "guardian") return [
-    { label: "Meus dependentes", href: "/responsavel", icon: "family" as const, active: active("/responsavel") },
-    { label: "Fichas de matrícula", href: "/matricula", icon: "enrollment" as const, active: active("/matricula") }
+    { label: "Visão geral", href: ROUTES.guardian, icon: "dashboard" as const, active: activePath === ROUTES.guardian },
+    { label: "Meus dependentes", href: ROUTES.guardianDependents, icon: "family" as const, active: active(ROUTES.guardianDependents) }
   ];
   if (profile.role === "minor_student") return [
-    { label: "Visão geral", href: "/menor", icon: "dashboard" as const, active: active("/menor") },
-    { label: "Minha matrícula", href: "/matricula", icon: "enrollment" as const, active: active("/matricula") }
+    { label: "Visão geral", href: ROUTES.student, icon: "dashboard" as const, active: activePath === ROUTES.student },
+    { label: "Minha matrícula", href: ROUTES.studentEnrollment, icon: "enrollment" as const, active: active(ROUTES.studentEnrollment) }
   ];
   const items: AppSidebarNavItem[] = [
-    { label: "Visão geral", href: "/aluno", icon: "dashboard" as const, active: active("/aluno") },
-    { label: "Minha matrícula", href: "/matricula", icon: "enrollment" as const, active: active("/matricula") }
+    { label: "Visão geral", href: ROUTES.student, icon: "dashboard" as const, active: activePath === ROUTES.student },
+    { label: "Minha matrícula", href: ROUTES.studentEnrollment, icon: "enrollment" as const, active: active(ROUTES.studentEnrollment) }
   ];
-  if (profile.capabilities.includes("guardian")) items.push({ label: "Meus dependentes", href: "/responsavel", icon: "family" as const, active: active("/responsavel") });
+  if (profile.capabilities.includes("guardian")) items.push({ label: "Meus dependentes", href: ROUTES.guardianDependents, icon: "family" as const, active: active(ROUTES.guardianDependents) });
   return items;
 }
 

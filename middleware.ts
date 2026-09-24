@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { APPWRITE_SESSION_COOKIE } from "@/lib/appwrite/ids";
 
-const protectedPrefixes = ["/admin", "/aluno", "/responsavel", "/menor"];
+const protectedPrefixes = ["/admin", "/aluno", "/responsavel"];
 
 export function middleware(request: NextRequest) {
   const protectedRoute = protectedPrefixes.some((prefix) => request.nextUrl.pathname.startsWith(prefix));
@@ -14,5 +14,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/aluno/:path*", "/responsavel/:path*", "/menor/:path*"]
+  matcher: ["/admin/:path*", "/aluno/:path*", "/responsavel/:path*"]
 };

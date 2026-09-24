@@ -9,7 +9,7 @@ const cases = [
   { role: "admin", email: "admin.teste@ebenertkd.app", password: "Admin@Teste2026!", route: "/admin", marker: "Professor Teste" },
   { role: "adult", email: "aluno.teste@ebenertkd.app", password: "Aluno@Teste2026!", route: "/aluno", marker: "Aluno Adulto Teste" },
   { role: "guardian", email: "responsavel.teste@ebenertkd.app", password: "Resp@Teste2026!", route: "/responsavel", marker: "Responsável Teste" },
-  { role: "minor", email: "menor.teste@minor.ebenertkd.internal", password: "Menor@Teste2026!", route: "/menor", marker: "Aluno Menor Teste" }
+  { role: "minor", email: "menor.teste@minor.ebenertkd.internal", password: "Menor@Teste2026!", route: "/aluno", marker: "Aluno Menor Teste" }
 ] as const;
 
 async function main() {

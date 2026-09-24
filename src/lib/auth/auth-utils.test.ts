@@ -1,4 +1,5 @@
 import { cpfToStudentEmail, normalizeCpf, resolveDashboardPath } from "@/lib/auth/auth-utils";
+import { adminEnrollmentPath, guardianEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
 
 describe("normalizeCpf", () => {
   it("removes punctuation from cpf input", () => {
@@ -27,6 +28,14 @@ describe("resolveDashboardPath", () => {
 
   it("separates guardian and minor dashboards", () => {
     expect(resolveDashboardPath("guardian")).toBe("/responsavel");
-    expect(resolveDashboardPath("minor_student")).toBe("/menor");
+    expect(resolveDashboardPath("minor_student")).toBe("/aluno");
+  });
+});
+
+describe("portal route contract", () => {
+  it("keeps enrollment URLs under their owning area", () => {
+    expect(ROUTES.studentEnrollment).toBe("/aluno/matricula");
+    expect(adminEnrollmentPath("student-1")).toBe("/admin/matriculas/student-1");
+    expect(guardianEnrollmentPath("profile-1")).toBe("/responsavel/dependentes/profile-1/matricula");
   });
 });

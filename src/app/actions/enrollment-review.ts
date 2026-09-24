@@ -5,8 +5,9 @@ import { redirect } from "next/navigation";
 import { reviewStudentDocument } from "@/features/students/document-service";
 import { advanceToSignature, saveFinancialReview } from "@/features/students/enrollment-service";
 import { requireProfile } from "@/lib/auth/session";
+import { adminEnrollmentPath } from "@/lib/navigation/routes";
 
-const reviewPath = (studentId: string, query = "") => `/admin/alunos/${encodeURIComponent(studentId)}${query}`;
+const reviewPath = (studentId: string, query = "") => `${adminEnrollmentPath(studentId)}${query}`;
 
 export async function reviewDocumentAction(formData: FormData) {
   const admin = await requireProfile("admin");

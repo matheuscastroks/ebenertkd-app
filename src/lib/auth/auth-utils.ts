@@ -1,3 +1,5 @@
+import { ROUTES } from "@/lib/navigation/routes";
+
 export type AppRole = "admin" | "adult_student" | "guardian" | "minor_student";
 export type AppCapability = "admin" | "student" | "guardian";
 
@@ -42,26 +44,8 @@ export function minorTechnicalEmail(username: string) {
   return `${normalizeUsername(username)}@minor.ebenertkd.internal`;
 }
 
-export const gubOptions = [
-  { value: 10, belt: "Branca", label: "10º GUB · Branca" },
-  { value: 9, belt: "Cinza / Branca ponta amarela", label: "9º GUB · Cinza ou branca com ponta amarela" },
-  { value: 8, belt: "Amarela", label: "8º GUB · Amarela" },
-  { value: 7, belt: "Laranja / Amarela ponta verde", label: "7º GUB · Laranja ou amarela com ponta verde" },
-  { value: 6, belt: "Verde", label: "6º GUB · Verde" },
-  { value: 5, belt: "Verde escuro / Verde ponta azul", label: "5º GUB · Verde escuro ou verde com ponta azul" },
-  { value: 4, belt: "Azul", label: "4º GUB · Azul" },
-  { value: 3, belt: "Azul escuro / Azul ponta vermelha", label: "3º GUB · Azul escuro ou azul com ponta vermelha" },
-  { value: 2, belt: "Vermelha", label: "2º GUB · Vermelha" },
-  { value: 1, belt: "Vermelho escuro / Vermelha ponta preta", label: "1º GUB · Vermelho escuro ou vermelha com ponta preta" }
-] as const;
-
-export function beltForGub(gub: number) {
-  return gubOptions.find((option) => option.value === gub)?.belt ?? "Branca";
-}
-
 export function resolveDashboardPath(role: AppRole) {
-  if (role === "admin") return "/admin";
-  if (role === "guardian") return "/responsavel";
-  if (role === "minor_student") return "/menor";
-  return "/aluno";
+  if (role === "admin") return ROUTES.admin;
+  if (role === "guardian") return ROUTES.guardian;
+  return ROUTES.student;
 }

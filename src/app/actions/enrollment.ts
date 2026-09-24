@@ -7,6 +7,8 @@ import { uploadStudentDocument } from "@/features/students/document-service";
 import { saveEnrollmentDraft } from "@/features/students/enrollment-service";
 import { requireProfile } from "@/lib/auth/session";
 import type { BeltOption } from "@/features/students/options";
+import type { Profile } from "@/features/auth/types";
+import { guardianEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
 
 function enrollmentInput(formData: FormData) {
   const value = (key: string) => String(formData.get(key) ?? "");
@@ -33,8 +35,13 @@ function enrollmentInput(formData: FormData) {
   };
 }
 
-async function persistEnrollment(formData: FormData, submit: boolean) {
-  const actor = await requireProfile();
+function enrollmentPath(actor: Profile, profileId: string) {
+  return actor.$id === profileId && actor.capabilities.includes("student")
+    ? ROUTES.studentEnrollment
+    : guardianEnrollmentPath(profileId);
+}
+
+async function persistEnrollment(actor: Profile, formData: FormData, submit: boolean) {
   const profileId = String(formData.get("target_profile_id") ?? "");
   const target = await resolveStudentProfile(actor, profileId);
   const draft = await saveEnrollmentDraft(target, actor, enrollmentInput(formData), false);
@@ -48,26 +55,31 @@ async function persistEnrollment(formData: FormData, submit: boolean) {
     }
   }
   if (submit) await saveEnrollmentDraft(target, actor, enrollmentInput(formData), true);
-  revalidatePath("/matricula");
-  return profileId;
+  const destination = enrollmentPath(actor, profileId);
+  revalidatePath(destination);
+  return destination;
 }
 
 export async function saveEnrollmentDraftAction(formData: FormData) {
-  let profileId = String(formData.get("target_profile_id") ?? "");
+  const actor = await requireProfile();
+  const profileId = String(formData.get("target_profile_id") ?? "");
+  const destination = enrollmentPath(actor, profileId);
   try {
-    profileId = await persistEnrollment(formData, false);
+    await persistEnrollment(actor, formData, false);
   } catch {
-    redirect(`/matricula?profile=${encodeURIComponent(profileId)}&error=save`);
+    redirect(`${destination}?error=save`);
   }
-  redirect(`/matricula?profile=${encodeURIComponent(profileId)}&saved=1`);
+  redirect(`${destination}?saved=1`);
 }
 
 export async function submitEnrollmentAction(formData: FormData) {
-  let profileId = String(formData.get("target_profile_id") ?? "");
+  const actor = await requireProfile();
+  const profileId = String(formData.get("target_profile_id") ?? "");
+  const destination = enrollmentPath(actor, profileId);
   try {
-    profileId = await persistEnrollment(formData, true);
+    await persistEnrollment(actor, formData, true);
   } catch {
-    redirect(`/matricula?profile=${encodeURIComponent(profileId)}&error=submit`);
+    redirect(`${destination}?error=submit`);
   }
-  redirect(`/matricula?profile=${encodeURIComponent(profileId)}&submitted=1`);
+  redirect(`${destination}?submitted=1`);
 }
