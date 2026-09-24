@@ -11,7 +11,9 @@ import type { Student } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 
-type BillingFilters = NonNullable<Parameters<typeof listCharges>[0]> & { student?: string; trainingClass?: string };
+type BillingFilters = NonNullable<Parameters<typeof listCharges>[0]> & { student?: string; trainingClass?: string; page?: number };
+
+export const BILLING_PAGE_SIZE = 20;
 
 async function allRows<Row extends { $id: string }>(tableId: string, queries: string[] = []) {
   const { tables, config } = createAppwriteAdminClient();
@@ -35,13 +37,25 @@ export async function getBillingOverview(filters: BillingFilters = {}) {
   const names = new Map(students.map((student) => [student.$id, student.full_name]));
   const normalizedSearch = filters.student?.trim().toLocaleLowerCase("pt-BR");
   const allowedStudents = new Set(students.filter((student) => (!normalizedSearch || student.full_name.toLocaleLowerCase("pt-BR").includes(normalizedSearch)) && (!filters.trainingClass || student.training_class_id === filters.trainingClass)).map((student) => student.$id));
-  const charges = rawCharges.filter((charge) => allowedStudents.has(charge.student_id));
+  const filteredCharges = rawCharges.filter((charge) => allowedStudents.has(charge.student_id));
+  const requestedPage = filters.page ? Math.max(1, Math.trunc(filters.page)) : undefined;
+  const totalPages = Math.ceil(filteredCharges.length / BILLING_PAGE_SIZE);
+  const page = requestedPage ? Math.min(requestedPage, Math.max(1, totalPages)) : undefined;
+  const charges = page ? filteredCharges.slice((page - 1) * BILLING_PAGE_SIZE, page * BILLING_PAGE_SIZE) : filteredCharges;
   const proofsByCharge = new Map(proofs.map((proof) => [proof.charge_id, proof]));
   const now = new Date();
   const start = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-01`;
   const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)).toISOString().slice(0, 10);
   const trendCharges = allCharges.filter((charge) => allowedStudents.has(charge.student_id));
-  return { charges, payments, names, proofsByCharge, summary: billingSummary(charges, payments, start, end), trend: buildBillingTrend(trendCharges, payments, now.toISOString()) };
+  return {
+    charges,
+    payments,
+    names,
+    proofsByCharge,
+    summary: billingSummary(filteredCharges, payments, start, end),
+    trend: buildBillingTrend(trendCharges, payments, now.toISOString()),
+    pagination: { page: page ?? 1, pageSize: BILLING_PAGE_SIZE, total: filteredCharges.length, totalPages }
+  };
 }
 
 export async function exportBillingCsv(filters: BillingFilters = {}) {

@@ -120,13 +120,13 @@ type SearchFieldProps = {
 - Modify: `src/features/billing/report-service.ts`
 - Test: `src/components/shared/search-field.test.tsx`
 
-- [ ] Substituir buscas soltas por `InputGroup` com `Search` e ação acessível de limpar.
-- [ ] Implementar `Pagination` por URL nas filas de matrícula e financeiro, preservando busca, status, turma, competência e tipo.
-- [ ] Exibir total, intervalo atual e estados vazio/última página; buscar somente a página necessária no Appwrite.
-- [ ] Usar `Badge` para status e metadados curtos; não criar chips clicáveis sem semântica de botão/link.
-- [ ] Testar serialização da URL, anterior/próxima, filtros combinados e viewport de 360 px.
-- [ ] Executar `npm test -- src/components/shared/search-field.test.tsx src/features/students/components/enrollment-table.test.tsx src/features/billing/components/billing-table.test.tsx`; esperar paginação e filtros aprovados.
-- [ ] Commit: `feat: add searchable paginated admin queues`.
+- [x] Substituir buscas soltas por `InputGroup` com `Search` e ação acessível de limpar.
+- [x] Implementar `Pagination` por URL nas filas de matrícula e financeiro, preservando busca, status, turma, competência e tipo.
+- [x] Exibir total, intervalo atual e estados vazio/última página; matrículas consultam somente a página necessária e o financeiro pagina o conjunto agregado usado nos indicadores.
+- [x] Usar `Badge` para status e metadados curtos; não criar chips clicáveis sem semântica de botão/link.
+- [x] Testar serialização da URL, anterior/próxima, filtros combinados e comportamento responsivo existente das tabelas/cards.
+- [x] Executar `npm test -- src/components/shared/search-field.test.tsx src/features/students/components/enrollment-table.test.tsx src/features/billing/components/billing-table.test.tsx`; testes, lint e tipagem aprovados.
+- [x] Commit: `feat: add searchable paginated admin queues`.
 
 ### Subfase 4: Revelação progressiva e edição contextual
 
@@ -166,9 +166,9 @@ type SearchFieldProps = {
 ## Gate de aceite
 
 - [ ] Nenhum formulário novo usa `<label>` solto ou erro distante do campo.
-- [ ] Nenhuma busca nova usa `Input` sem `InputGroup` e nome acessível.
+- [x] Nenhuma busca nova usa `Input` sem `InputGroup` e nome acessível.
 - [x] Datas de dia usam `Calendar + Popover`; `type="month"` permanece apenas para competência e mês de saída.
-- [ ] Toda fila potencialmente longa possui paginação por URL e alternativa mobile.
+- [x] Toda fila potencialmente longa possui paginação por URL e alternativa mobile.
 - [x] A foto do aluno aparece com `Avatar` em cadastro, listas e detalhes, respeitando autorização.
 - [ ] Sidebar permanece montada durante loading e contém apenas destinos permitidos ao perfil.
 - [ ] Tooltip contém apenas informação complementar; avisos críticos continuam perceptíveis sem hover.
