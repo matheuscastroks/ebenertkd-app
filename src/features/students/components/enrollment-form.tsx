@@ -129,7 +129,7 @@ export function EnrollmentForm({
 }) {
   const { student, enrollment, documents } = bundle;
   const today = new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" });
-  const locked = enrollment.status !== "draft";
+  const isDraft = enrollment.status === "draft";
   const selectableClasses = classes.filter(
     (item) => item.status === "active" || item.$id === student.training_class_id
   );
@@ -209,7 +209,7 @@ export function EnrollmentForm({
 
       <form className="space-y-5">
         <input type="hidden" name="target_profile_id" value={targetProfileId} />
-        <fieldset disabled={locked} className="space-y-5 disabled:opacity-70">
+        <fieldset className="space-y-5">
           {/* Seção 1: Dados pessoais (Grid 12 colunas) */}
           <Section
             number="1"
@@ -537,7 +537,7 @@ export function EnrollmentForm({
           </Section>
         </fieldset>
 
-        {!locked ? (
+        {isDraft ? (
           <div className="sticky bottom-3 z-10 flex flex-wrap gap-3 rounded-xl border bg-background/95 p-3 shadow-lg backdrop-blur">
             <FormSubmitButton
               variant="outline"
@@ -551,11 +551,16 @@ export function EnrollmentForm({
             </FormSubmitButton>
           </div>
         ) : (
-          <div className="rounded-lg bg-muted/60 p-4 text-sm">
-            <p className="font-medium">Ficha enviada</p>
-            <p className="mt-1 text-muted-foreground">
-              Alterações serão liberadas pela administração quando necessário.
+          <div className="sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-background/95 p-3 shadow-lg backdrop-blur">
+            <p className="text-xs text-muted-foreground">
+              Você pode atualizar suas informações cadastrais, de contato, emergência e saúde a qualquer momento.
             </p>
+            <FormSubmitButton
+              formAction={saveEnrollmentDraftAction}
+              pendingLabel="Salvando alterações…"
+            >
+              Salvar alterações
+            </FormSubmitButton>
           </div>
         )}
       </form>

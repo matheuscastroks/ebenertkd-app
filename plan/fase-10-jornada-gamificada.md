@@ -27,7 +27,8 @@
 
 ### 1.2 Fontes e implicações
 
-- A Kukkiwon reconhece Taegeuk 1–8 para praticantes Geup e Koryo em diante para Dan. A referência brasileira consultada relaciona fundamentos/Saju à branca e Taegeuk Il Jang até Pal Jang à progressão colorida; a academia, porém, usa cinza, laranja e tons intermediários. Portanto, a associação graduação–conteúdo não será hardcoded.
+- A Kukkiwon e a CBTKD reconhecem a progressão de Geup (10º ao 1º GUB) e Dan (1º Dan em diante, com Poom para menores de 15 anos). Na academia Ebener TKD, a convenção oficial segue estritamente: 10º GUB (Branca - Introductory Poomsae), 9º GUB (Ponta Amarela - Preliminary Poomsae), 8º GUB (Amarela - Taegeuk Il Jang), 7º GUB (Ponta Verde - Taegeuk Ee Jang), 6º GUB (Verde - Taegeuk Sam Jang), 5º GUB (Ponta Azul - Taegeuk Sa Jang), 4º GUB (Azul - Taegeuk Oh Jang), 3º GUB (Ponta Vermelha - Taegeuk Yuk Jang), 2º GUB (Vermelha - Taegeuk Chil Jang), 1º GUB (Ponta Preta - Taegeuk Pal Jang) e Faixa Preta / 1º Dan (Koryo), 2º Dan (Keumgang) e 3º Dan (Taebaek).
+- A avaliação do exame de graduação e as atividades gamificadas estruturam-se nos **4 Pilares Oficiais**: Poomsae (Formas), Kyorugi (Luta/Sparring), Gyeokpa (Quebramento) e Teoria, Princípios & Atitude.
 - A API de geolocalização exige HTTPS e permissão explícita. O PWA pode consultar `navigator.geolocation` com a tela ativa, mas o service worker não mantém rastreamento contínuo nem geofencing portátil com o aplicativo fechado.
 - Gamificação tende a ajudar atividade física no curto prazo, mas competição pura pode desmotivar quem fica no fim. A UI deve priorizar progresso pessoal, times e conquistas antes do ranking absoluto.
 - O YouTube permite detectar `YT.PlayerState.ENDED`, mas esse evento não prova domínio técnico. Assistir gera pouco XP; questionário e validação presencial do professor têm peso maior.
@@ -71,21 +72,51 @@ Referências:
 - Chat livre entre menores, compra de XP, recompensas financeiras e ranking entre turmas de idades muito diferentes.
 - Download de vídeos do YouTube ou tentativa de impedir avanço manual do player.
 
-## 3. Modelo motivacional
+## 3. Modelo motivacional e Atividades Gamificadas
 
-### 3.1 Fontes padrão de XP
+### 3.1 Os 4 Pilares de Avaliação e Atividades de XP
 
-| Evento confirmado | XP inicial | Regra |
+A gamificação da Ebener TKD é organizada diretamente sobre as quatro áreas avaliadas no exame de graduação, incentivando o aluno a se preparar com constância:
+
+#### Pilar 1: Poomsae (Formas)
+Sequência solo de movimentos avaliada em técnica, ritmo e potência marcial. Cada graduação estuda um Poomsae oficial.
+- **Atividade "Estudo em Vídeo da Forma":** Conclusão do vídeo instrutivo da forma correspondente à graduação no app (+15 XP).
+- **Atividade "Quiz Técnico da Forma":** Avaliação de conhecimento dos passos, bases (Ap Koobi, Dwit Koobi, etc.) e defesas/ataques (+30 XP).
+- **Atividade "Prática da Forma em Casa":** Check-in de treino solo registrado pelo aluno (+20 XP, máx 2x/semana).
+- **Atividade "Validação da Forma com o Professor":** Avaliação presencial no dojang da execução correta da forma (+100 XP por graduação).
+
+#### Pilar 2: Kyorugi (Luta / Sparring)
+Combate controlado com parceiro, demonstrando aplicação prática das técnicas, esquivas, chutes, trabalho de pernas e visão tática.
+- **Atividade "Treino de Luta e Movimentação":** Presença em treino específico com módulo prático de Kyorugi (+100 XP).
+- **Atividade "Desafio Tático de Esquiva e Chutes":** Conclusão de série técnica de combinações orientada pelo professor (+50 XP).
+- **Atividade "Fair Play e Autocontrole no Combate":** Reconhecimento do professor por conduta esportiva e respeito ao parceiro (+50 XP).
+
+#### Pilar 3: Gyeokpa (Quebramento)
+Teste de foco mental, impacto, precisão e potência em tábuas de quebramento adequadas ao nível do praticante.
+- **Atividade "Oficina de Precisão e Impacto":** Treino com foco nos aparadores/escudos de chute (+50 XP).
+- **Atividade "Desafio de Quebramento Técnico":** Execução bem-sucedida da técnica de quebramento da graduação (+100 XP).
+
+#### Pilar 4: Teoria, Princípios & Atitude
+Vocabulário em coreano, etiqueta marcial e os 5 Princípios do Taekwondo (Cortesia / *Ye-Ui*, Integridade / *Yom-Chi*, Perseverança / *In-Nae*, Autocontrole / *Guk-Gi*, Espírito Indomável / *Baekjulboolgool*).
+- **Atividade "Vocabulário Coreano Semanal":** Quizzes de termos marciais (nomes de chutes, defesas, contagem e saudações) (+30 XP).
+- **Atividade "Desafio dos 5 Princípios":** Aplicação prática dos princípios do Taekwondo no cotidiano (em casa e na escola) com validação (+40 XP).
+- **Atividade "Atitude Marcial & Dobok":** Apresentação com Dobok completo, faixa amarrada corretamente e pontualidade (+25 XP).
+
+### 3.2 Fontes padrão de XP e Missões Semanais
+
+| Evento / Atividade | XP | Regra / Frequência |
 | --- | ---: | --- |
-| Presença confirmada | 100 | Uma vez por aula concluída |
-| Sequência de 3 aulas | 25 | Uma vez por sequência |
-| Sequência de 6 aulas | 50 | Substitui o bônus de 3, sem duplicar |
-| Sequência de 12 aulas | 100 | Reinicia somente após falta não justificada |
-| Vídeo concluído | 10 | Primeira conclusão por aula digital |
-| Questionário aprovado | 30 | Primeira aprovação; tentativas extras não geram XP |
-| Competência validada pelo professor | 100 | Uma vez por competência e graduação |
-| Espírito de equipe | 25 | Concedido pelo professor, máximo semanal configurável |
-| Indicação convertida | 150 | Após matrícula e contrato ativos |
+| Presença confirmada em aula | 100 | Uma vez por aula concluída |
+| Meta semanal de consistência (2+ presenças na semana) | 50 | Bônus semanal por frequência regular (2-3x/semana) |
+| Sequência de 3 aulas seguidas | 25 | Uma vez por sequência |
+| Sequência de 6 aulas seguidas | 50 | Substitui o bônus de 3, sem duplicar |
+| Sequência de 12 aulas seguidas | 100 | Reinicia somente após falta não justificada |
+| Módulo de vídeo concluído (Poomsae / Técnica) | 15 | Primeira conclusão por aula digital |
+| Quiz aprovado (Teoria / Vocabulário coreano) | 30 | Primeira aprovação; tentativas extras não geram XP |
+| Desafio dos 5 Princípios | 40 | Uma vez por tema do ciclo |
+| Competência validada presencialmente pelo professor | 100 | Uma vez por competência (Poomsae, Kyorugi, Gyeokpa) |
+| Atitude e espírito marcial | 25 | Concedido pelo professor, máximo semanal configurável |
+| Indicação convertida (amigo matriculado) | 150 | Após matrícula e contrato ativos |
 | Indicado ativo por 30 dias | 150 | Evento separado e idempotente |
 
 Faltas e justificativas valem zero, nunca pontuação negativa. Regras ficam versionadas e editáveis apenas para ciclos futuros; alterar uma regra não reescreve o placar histórico.
@@ -213,21 +244,25 @@ O modelo atual suporta apenas GUB 9–1 e não representa branca, Poom ou Dan. E
 1. Criar catálogo configurável com `name`, `short_name`, `system`, `rank_number`, `order`, `color_token`, `required_module_id` e `active`.
 2. Adicionar `current_graduation_id` a `students` e `previous_graduation_id`/`new_graduation_id` a `belt_history`, mantendo `current_belt` e `gub` para compatibilidade durante uma versão.
 
-Seed sugerido para validação do professor, não regra definitiva:
+Catálogo oficial Ebener TKD (10º GUB a 3º Dan):
 
-| Graduação local atual | Conteúdo sugerido |
-| --- | --- |
-| Branca / introdutória | Saju tirigui e Saju are maki |
-| Cinza, 9º GUB | Fundamentos e Saju definidos pelo professor |
-| Amarela, 8º GUB | Taegeuk Il Jang |
-| Laranja, 7º GUB | Taegeuk I Jang |
-| Verde, 6º GUB | Taegeuk Sam Jang |
-| Verde escura, 5º GUB | Taegeuk Sa Jang |
-| Azul, 4º GUB | Taegeuk Oh Jang |
-| Azul escura, 3º GUB | Taegeuk Yuk Jang |
-| Vermelha, 2º GUB | Taegeuk Chil Jang |
-| Vermelha escura, 1º GUB | Taegeuk Pal Jang |
-| Preta / 1º Dan | Koryo |
+| Graduação oficial Ebener TKD | Nível / GUB | Poomsae oficial | Foco nos 4 Pilares |
+| --- | --- | --- | --- |
+| Branca | 10º GUB | Introductory Poomsae (Saju Jirugi / Saju Makki) | Posições fundamentais, respeito e etiqueta inicial |
+| Ponta Amarela | 9º GUB | Preliminary Poomsae | Ap Koobi, defesas baixas e chutes básicos |
+| Amarela | 8º GUB | Taegeuk Il Jang | Princípio Keon (Céu/Luz), coordenação e foco |
+| Ponta Verde | 7º GUB | Taegeuk Ee Jang | Princípio Tae (Alegria/Firmeza interior), esquivas |
+| Verde | 6º GUB | Taegeuk Sam Jang | Princípio Ri (Fogo/Sol), combinações de chutes |
+| Ponta Azul | 5º GUB | Taegeuk Sa Jang | Princípio Jin (Trovão), potência e quebramento inicial |
+| Azul | 4º GUB | Taegeuk Oh Jang | Princípio Son (Vento), movimentação e kyorugi tático |
+| Ponta Vermelha | 3º GUB | Taegeuk Yuk Jang | Princípio Gam (Água), fluidez e combinações avançadas |
+| Vermelha | 2º GUB | Taegeuk Chil Jang | Princípio Gan (Montanha), estabilidade e parada firme |
+| Ponta Preta | 1º GUB | Taegeuk Pal Jang | Princípio Gon (Terra), domínio técnico completo pré-Dan |
+| Faixa Preta | 1º Dan | Koryo | Rigor técnico, postura marcial e liderança no dojang |
+| Faixa Preta 2º Dan | 2º Dan | Keumgang | Diamante e montanha, precisão inabalável |
+| Faixa Preta 3º Dan | 3º Dan | Taebaek | Raiz mitológica, agilidade e excelência marcial |
+
+*Nota: Alunos menores de 15 anos recebem a graduação Poom (faixa preta júnior) conforme normas da Kukkiwon.*
 
 ## 5. Check-in por localização
 

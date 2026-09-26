@@ -29,6 +29,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
+import { EditStudentDialog } from "@/features/students/components/edit-student-dialog";
+import type { TrainingClass } from "@/features/classes/types";
 import {
   beltForGub,
   calculateDefaultContractDates,
@@ -71,10 +73,12 @@ const enrollmentStatusLabels: Record<string, string> = {
 export function ReviewPanel({
   bundle,
   reviews,
+  classes = [],
   notice
 }: {
   bundle: EnrollmentBundle;
   reviews: Array<Record<string, unknown>>;
+  classes?: TrainingClass[];
   notice?: string;
 }) {
   const { student, enrollment, documents } = bundle;
@@ -139,13 +143,18 @@ export function ReviewPanel({
       {/* 2. Card de Dados para Revisão (Design Polido e Estruturado) */}
       <Card className="overflow-hidden border-border/80">
         <CardHeader className="bg-muted/30 pb-4">
-          <div className="flex items-center gap-2">
-            <User className="size-5 text-primary" aria-hidden="true" />
-            <CardTitle className="text-lg">Ficha cadastral do aluno</CardTitle>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <User className="size-5 text-primary" aria-hidden="true" />
+              <div>
+                <CardTitle className="text-lg">Ficha cadastral do aluno</CardTitle>
+                <CardDescription>
+                  Conferência detalhada dos dados pessoais, contato, emergência, turma e cuidados de saúde.
+                </CardDescription>
+              </div>
+            </div>
+            <EditStudentDialog student={student} classes={classes} />
           </div>
-          <CardDescription>
-            Conferência detalhada dos dados pessoais, contato, emergência, turma e cuidados de saúde.
-          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
           {/* Bloco A: Identificação e Contato */}

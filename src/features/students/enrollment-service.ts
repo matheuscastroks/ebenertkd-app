@@ -18,8 +18,8 @@ const isoDate = (value?: string) => value ? new Date(`${value}T12:00:00.000Z`).t
 export async function saveEnrollmentDraft(target: Profile, actor: Profile, input: StudentDraftInput, submit: boolean) {
   const parsed = (submit ? studentSubmissionSchema : studentDraftSchema).parse(input);
   const bundle = await getOrCreateEnrollmentBundle(target, actor);
-  if (bundle.enrollment.status !== "draft") throw new Error("enrollment_locked");
-  if (submit && !hasRequiredSubmissionPhoto(bundle.documents)) throw new Error("profile_photo_required");
+  const isDraft = bundle.enrollment.status === "draft";
+  if (isDraft && submit && !hasRequiredSubmissionPhoto(bundle.documents)) throw new Error("profile_photo_required");
   const trainingClass = parsed.trainingClassId ? await getTrainingClass(parsed.trainingClassId) : null;
   if (trainingClass && trainingClass.status !== "active") throw new Error("training_class_inactive");
   const { tables, config } = createAppwriteAdminClient();
@@ -46,9 +46,9 @@ export async function saveEnrollmentDraft(target: Profile, actor: Profile, input
       emergency_contact_relationship: parsed.emergencyContactRelationship,
       emergency_contact_phone: parsed.emergencyContactPhone,
       started_at_tkd: isoDate(parsed.startedAtTkd),
-      current_belt: parsed.gub ? beltForGub(parsed.gub as GubOption) : parsed.currentBelt,
-      training_class_id: trainingClass?.$id,
-      training_class: trainingClass?.name,
+      current_belt: parsed.gub != null ? beltForGub(parsed.gub as GubOption) : parsed.currentBelt,
+      training_class_id: trainingClass?.$id ?? bundle.student.training_class_id,
+      training_class: trainingClass?.name ?? bundle.student.training_class,
       gub: parsed.gub,
       health_condition: parsed.healthCondition,
       health_details: parsed.healthDetails,
@@ -56,25 +56,90 @@ export async function saveEnrollmentDraft(target: Profile, actor: Profile, input
       allergies: parsed.allergies,
       injuries: parsed.injuries,
       guardian_contact: parsed.guardianContact,
-      status: submit ? "submitted" : "draft",
+      status: isDraft ? (submit ? "submitted" : "draft") : (bundle.student.status || bundle.enrollment.status),
       updated_at: now
     }
   });
+
+  const nextEnrollmentStatus = isDraft ? (submit ? "submitted" : "draft") : bundle.enrollment.status;
   const enrollment = await tables.updateRow({
     databaseId: config.databaseId,
     tableId: APPWRITE_IDS.tables.enrollments,
     rowId: bundle.enrollment.$id,
     data: {
-      requested_due_day: parsed.requestedDueDay,
-      status: submit ? "submitted" : "draft",
+      requested_due_day: parsed.requestedDueDay ?? bundle.enrollment.requested_due_day,
+      status: nextEnrollmentStatus,
       revision: bundle.enrollment.revision + 1,
-      submitted_at: submit ? now : bundle.enrollment.submitted_at,
+      submitted_at: isDraft && submit ? now : bundle.enrollment.submitted_at,
       updated_at: now
     }
   });
-  await writeAuditEvent(submit ? "enrollment.submitted" : "enrollment.draft_saved", actor.account_id, "enrollment", enrollment.$id, { student_id: student.$id });
-  if (submit) await notifyAdmins({ title: "Nova matrícula para análise", body: `${student.full_name} concluiu o cadastro.`, dedupeKey: `enrollment-submitted:${enrollment.$id}:${enrollment.revision}`, actionUrl: `/admin/matriculas/${student.$id}` }).catch(() => undefined);
+
+  const auditAction = isDraft ? (submit ? "enrollment.submitted" : "enrollment.draft_saved") : "student.updated";
+  await writeAuditEvent(auditAction, actor.account_id, "enrollment", enrollment.$id, { student_id: student.$id });
+  if (isDraft && submit) {
+    await notifyAdmins({
+      title: "Nova matrícula para análise",
+      body: `${student.full_name} concluiu o cadastro.`,
+      dedupeKey: `enrollment-submitted:${enrollment.$id}:${enrollment.revision}`,
+      actionUrl: `/admin/matriculas/${student.$id}`
+    }).catch(() => undefined);
+  }
   return getEnrollmentBundleByStudentId(student.$id);
+}
+
+export async function adminUpdateStudent(actor: Profile, studentId: string, input: StudentDraftInput) {
+  if (!actor.capabilities.includes("admin")) throw new Error("unauthorized");
+  const parsed = studentDraftSchema.parse(input);
+  const bundle = await getEnrollmentBundleByStudentId(studentId);
+  const { tables, config } = createAppwriteAdminClient();
+  const now = new Date().toISOString();
+
+  const trainingClass = parsed.trainingClassId ? await getTrainingClass(parsed.trainingClassId) : null;
+  if (trainingClass && trainingClass.status !== "active" && trainingClass.$id !== bundle.student.training_class_id) {
+    throw new Error("training_class_inactive");
+  }
+
+  if (parsed.cpf) {
+    const duplicates = await tables.listRows({
+      databaseId: config.databaseId,
+      tableId: APPWRITE_IDS.tables.students,
+      queries: [Query.equal("cpf", [parsed.cpf]), Query.notEqual("$id", [bundle.student.$id]), Query.limit(1)]
+    });
+    if (duplicates?.rows[0]) throw new Error("cpf_already_exists");
+  }
+
+  const updatedStudent = await tables.updateRow({
+    databaseId: config.databaseId,
+    tableId: APPWRITE_IDS.tables.students,
+    rowId: bundle.student.$id,
+    data: {
+      full_name: parsed.fullName,
+      cpf: parsed.cpf,
+      birth_date: isoDate(parsed.birthDate),
+      whatsapp: parsed.whatsapp,
+      address: parsed.address,
+      emergency_contact_name: parsed.emergencyContactName,
+      emergency_contact_relationship: parsed.emergencyContactRelationship,
+      emergency_contact_phone: parsed.emergencyContactPhone,
+      started_at_tkd: isoDate(parsed.startedAtTkd),
+      current_belt: parsed.gub != null ? beltForGub(parsed.gub as GubOption) : parsed.currentBelt,
+      training_class_id: trainingClass?.$id ?? bundle.student.training_class_id,
+      training_class: trainingClass?.name ?? bundle.student.training_class,
+      gub: parsed.gub,
+      health_condition: parsed.healthCondition,
+      health_details: parsed.healthDetails,
+      medications: parsed.medications,
+      allergies: parsed.allergies,
+      injuries: parsed.injuries,
+      guardian_contact: parsed.guardianContact,
+      updated_at: now
+    }
+  });
+
+  await recordReview(actor, studentId, bundle.enrollment.$id, "student_updated", "Dados cadastrais atualizados pelo professor", input);
+  await writeAuditEvent("student.updated_by_admin", actor.account_id, "student", studentId, { changes: input });
+  return updatedStudent;
 }
 
 export async function recordReview(actor: Profile, studentId: string, enrollmentId: string, action: string, notes?: string, snapshot?: unknown) {

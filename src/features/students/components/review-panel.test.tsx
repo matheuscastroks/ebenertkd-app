@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/app/actions/enrollment-review", () => ({
   advanceToSignatureAction: vi.fn(),
+  adminUpdateStudentAction: vi.fn(),
   reviewDocumentAction: vi.fn(),
   saveFinancialReviewAction: vi.fn()
 }));
@@ -63,6 +64,7 @@ describe("ReviewPanel", () => {
 
     // Structured student info check
     expect(screen.getByText("Ficha cadastral do aluno")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Editar dados" })).toBeInTheDocument();
     expect(screen.getByText("Identificação e Contato")).toBeInTheDocument();
     expect(screen.getByText("Sem restrições declaradas")).toBeInTheDocument();
 
