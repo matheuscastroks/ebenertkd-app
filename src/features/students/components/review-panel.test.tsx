@@ -66,6 +66,10 @@ describe("ReviewPanel", () => {
     expect(screen.getByText("Identificação e Contato")).toBeInTheDocument();
     expect(screen.getByText("Sem restrições declaradas")).toBeInTheDocument();
 
+    // Formatted phone numbers check
+    expect(screen.getByText("(11) 9 8888-7777")).toBeInTheDocument();
+    expect(screen.getByText("(11) 9 7777-6666")).toBeInTheDocument();
+
     // Photo check: shown as identification, NO "Aprovar" button for photo
     expect(screen.getByText("Foto do aluno (identificação)")).toBeInTheDocument();
     expect(screen.getByText("Cadastrada")).toBeInTheDocument();
@@ -76,6 +80,9 @@ describe("ReviewPanel", () => {
     expect(screen.queryByRole("button", { name: "Reprovar" })).not.toBeInTheDocument();
 
     // Form pre-filling check
+    const feeInput = document.querySelector('input[name="monthly_fee_reais"]');
+    expect(feeInput).toHaveValue(150);
+
     const startInput = document.querySelector('input[name="contract_start"]');
     const endInput = document.querySelector('input[name="contract_end"]');
     expect(startInput).toHaveValue();

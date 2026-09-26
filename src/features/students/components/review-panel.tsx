@@ -38,6 +38,7 @@ import {
 } from "@/features/students/options";
 import type { EnrollmentBundle } from "@/features/students/types";
 import { centsToReaisInput } from "@/lib/money";
+import { formatBrazilianPhone } from "@/lib/phone";
 import { ROUTES } from "@/lib/navigation/routes";
 import {
   Activity,
@@ -163,7 +164,9 @@ export function ReviewPanel({
               </div>
               <div className="rounded-lg border bg-muted/10 p-3">
                 <span className="text-xs text-muted-foreground block">WhatsApp</span>
-                <span className="font-medium text-foreground">{student.whatsapp || "—"}</span>
+                <span className="font-medium text-foreground">
+                  {formatBrazilianPhone(student.whatsapp) || "—"}
+                </span>
               </div>
               <div className="rounded-lg border bg-muted/10 p-3">
                 <span className="text-xs text-muted-foreground block">Contato do Responsável</span>
@@ -194,7 +197,9 @@ export function ReviewPanel({
               </div>
               <div className="rounded-lg border bg-muted/10 p-3">
                 <span className="text-xs text-muted-foreground block">Telefone</span>
-                <span className="font-medium text-foreground">{student.emergency_contact_phone || "—"}</span>
+                <span className="font-medium text-foreground">
+                  {formatBrazilianPhone(student.emergency_contact_phone) || "—"}
+                </span>
               </div>
             </div>
           </div>
@@ -446,7 +451,7 @@ export function ReviewPanel({
                 min="0"
                 step="0.01"
                 placeholder="Ex.: 150,00"
-                defaultValue={centsToReaisInput(enrollment.monthly_fee_cents)}
+                defaultValue={centsToReaisInput(enrollment.monthly_fee_cents ?? 15000)}
                 required
               />
             </Field>

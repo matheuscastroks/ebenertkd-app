@@ -83,7 +83,9 @@ describe("EnrollmentForm", () => {
 
     expect(screen.getByText("Ficha de matrícula")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Guilherme Santos")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("12345678901")).toBeInTheDocument();
+    // Verify formatted phone inputs:
+    expect(screen.getByDisplayValue("(11) 9 9999-9999")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("(11) 9 8888-8888")).toBeInTheDocument();
 
     // Verify translated document statuses:
     expect(screen.getByText("Aguardando análise")).toBeInTheDocument();

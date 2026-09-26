@@ -6,6 +6,7 @@ import { OperationToast } from "@/components/shared/operation-toast";
 import { DateField } from "@/components/shared/date-field";
 import { FileField } from "@/components/shared/file-field";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
+import { PhoneField } from "@/components/shared/phone-field";
 import { StatusBadge } from "@/components/shared/status-badge";
 import {
   Attachment,
@@ -256,20 +257,21 @@ export function EnrollmentForm({
           >
             <div className="grid gap-4 sm:grid-cols-12">
               <div className="sm:col-span-12 sm:col-span-6">
-                <Field
+                <PhoneField
+                  id="enrollment-whatsapp"
                   label="WhatsApp"
                   name="whatsapp"
                   defaultValue={student.whatsapp ?? ""}
                   required
-                  autoComplete="tel"
                 />
               </div>
               <div className="sm:col-span-12 sm:col-span-6">
-                <Field
+                <PhoneField
+                  id="enrollment-guardian-contact"
                   label="Contato do responsável"
                   name="guardian_contact"
                   defaultValue={student.guardian_contact ?? ""}
-                  autoComplete="tel"
+                  placeholder="(21) 9 6518-8988"
                 />
               </div>
               <FormField className="sm:col-span-12">
@@ -309,12 +311,12 @@ export function EnrollmentForm({
                 />
               </div>
               <div className="sm:col-span-6 lg:col-span-4">
-                <Field
+                <PhoneField
+                  id="enrollment-emergency-phone"
                   label="Telefone de emergência"
                   name="emergency_contact_phone"
                   defaultValue={student.emergency_contact_phone ?? ""}
                   required
-                  autoComplete="tel"
                 />
               </div>
             </div>
