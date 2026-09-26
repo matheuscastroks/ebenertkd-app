@@ -1,32 +1,29 @@
-import { PhaseOnePanel } from "@/components/dashboard/phase-one-panel";
+import { PortalShell } from "@/components/dashboard/portal-shell";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
-import { promoteMinorAction } from "@/app/actions/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { OperationToast } from "@/components/shared/operation-toast";
+import { MetricCard } from "@/components/shared/metric-card";
+import { getBillingOverview } from "@/features/billing/report-service";
+import { listTrainingClasses } from "@/features/classes/service";
+import { listExamEvents } from "@/features/exams/service";
+import { countEnrollmentsRequiringReview } from "@/features/students/service";
+import { CalendarDays, ClipboardCheck, UsersRound, WalletCards } from "lucide-react";
 import Link from "next/link";
 
-export default async function AdminPage({ searchParams }: { searchParams: Promise<{ promoted?: string; error?: string }> }) {
+const money = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value / 100);
+
+export default async function AdminPage() {
   const profile = await requireProfile("admin");
-  const query = await searchParams;
-  return <PhaseOnePanel profile={profile} activePath="/admin" title="Painel administrativo" description="Acompanhe matrículas, turmas e a operação da academia." items={[
-    { title: "Contas", description: "Papéis e sessões estão isolados por perfil." },
-    { title: "Auditoria", description: "Criações e ações sensíveis geram eventos internos." },
-    { title: "Próxima etapa", description: "Cadastro e aprovação das fichas dos alunos." }
-  ]}>
-    {query.promoted ? <OperationToast tone="success" title="Conta convertida com sucesso" description="O aluno receberá as instruções no novo e-mail." clearParams={["promoted"]} /> : null}
-    {query.error ? <OperationToast tone="error" title="Não foi possível converter a conta" description="Confira o perfil e o e-mail informados." clearParams={["error"]} /> : null}
-    <Card><CardHeader><CardTitle className="text-base">Matrículas de alunos</CardTitle></CardHeader><CardContent><Button asChild><Link href={ROUTES.adminEnrollments}>Abrir análise de matrículas</Link></Button></CardContent></Card>
-    <Card><CardHeader><CardTitle className="text-base">Transição para conta adulta</CardTitle></CardHeader><CardContent>
-      <form action={promoteMinorAction} className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
-        <Input name="minor_profile_id" placeholder="ID do perfil do aluno" required />
-        <Input name="email" type="email" placeholder="Novo e-mail do aluno" required />
-        <Button type="submit">Converter conta</Button>
-        <label className="flex items-center gap-2 text-sm md:col-span-3"><input type="checkbox" name="retain_guardian_access" /> Manter o vínculo de consulta do responsável</label>
-      </form>
-      <p className="mt-3 text-xs text-muted-foreground">A conversão remove o usuário infantil, encerra as sessões e envia ao novo e-mail o link para definir outra senha.</p>
-    </CardContent></Card>
-  </PhaseOnePanel>;
+  const [pending, classes, billing, exams] = await Promise.all([countEnrollmentsRequiringReview(), listTrainingClasses(), getBillingOverview({ page: 1 }), listExamEvents()]);
+  const upcomingExam = exams.filter((exam) => exam.status !== "cancelled" && exam.status !== "completed" && exam.event_date.slice(0, 10) >= new Date().toISOString().slice(0, 10)).sort((a, b) => a.event_date.localeCompare(b.event_date))[0];
+  return <PortalShell profile={profile} activePath={ROUTES.admin} title={`Olá, ${profile.full_name.split(" ")[0]}`} subtitle="Veja o que precisa da sua atenção hoje.">
+    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Resumo da academia">
+      <MetricCard label="Matrículas para analisar" value={pending} tone="warning" icon={<ClipboardCheck aria-hidden="true" />} />
+      <MetricCard label="Turmas ativas" value={classes.length} icon={<CalendarDays aria-hidden="true" />} />
+      <MetricCard label="Recebido no mês" value={money(billing.summary.receivedCents)} tone="success" icon={<WalletCards aria-hidden="true" />} />
+      <MetricCard label="Alunos que pagaram" value={billing.summary.distinctPayingStudents} tone="info" icon={<UsersRound aria-hidden="true" />} />
+    </section>
+    <Card><CardHeader><CardTitle className="text-base">Próximos passos</CardTitle></CardHeader><CardContent className="space-y-4"><div className="flex flex-wrap gap-2"><Button asChild><Link href={ROUTES.adminEnrollments}>Analisar matrículas</Link></Button><Button asChild variant="outline"><Link href={ROUTES.adminBilling}>Ver financeiro</Link></Button><Button asChild variant="outline"><Link href={ROUTES.adminClasses}>Gerenciar turmas</Link></Button></div><p className="text-sm text-muted-foreground">{upcomingExam ? `Próximo exame: ${upcomingExam.name} em ${new Date(upcomingExam.event_date).toLocaleDateString("pt-BR", { timeZone: "UTC" })}.` : "Nenhum exame de faixa agendado."}</p></CardContent></Card>
+  </PortalShell>;
 }

@@ -50,3 +50,5 @@ export type AttendanceRecord = Models.Row & {
   created_at: string;
   updated_at: string;
 };
+
+export type AttendanceCalendarEntry = { lesson: Lesson; trainingClass?: TrainingClass; record?: AttendanceRecord };

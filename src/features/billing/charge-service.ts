@@ -96,9 +96,15 @@ export async function listChargesForStudent(actor: Profile, profileId?: string) 
   const students = await tables.listRows({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, queries: [Query.equal("profile_id", [target.$id]), Query.limit(1)] });
   const student = students.rows[0];
   if (!student) return [];
-  const result = await tables.listRows<Charge>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, queries: [Query.equal("student_id", [student.$id]), Query.orderDesc("due_date"), Query.limit(100)] });
+  const rows: Charge[] = [];
+  let cursor: string | undefined;
+  do {
+    const result = await tables.listRows<Charge>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, queries: [Query.equal("student_id", [student.$id]), Query.orderDesc("due_date"), Query.limit(500), ...(cursor ? [Query.cursorAfter(cursor)] : [])] });
+    rows.push(...result.rows);
+    cursor = result.rows.length === 500 ? result.rows.at(-1)?.$id : undefined;
+  } while (cursor);
   const today = new Date().toISOString();
-  return result.rows.map((charge) => ({ ...charge, status: effectiveChargeStatus(charge.status, charge.due_date, today) }));
+  return rows.map((charge) => ({ ...charge, status: effectiveChargeStatus(charge.status, charge.due_date, today) }));
 }
 
 export async function listCharges(filters: { status?: Charge["status"]; competence?: string; type?: ChargeType } = {}) {

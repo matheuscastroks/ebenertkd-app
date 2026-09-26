@@ -13,8 +13,9 @@ import { reaisToCents } from "@/lib/money";
 export async function saveBillingSettingsAction(formData: FormData) {
   const actor = await requireProfile("admin");
   try { await saveBillingSettings(actor, { pixKey: formData.get("pix_key"), pixKeyType: formData.get("pix_key_type"), beneficiaryName: formData.get("beneficiary_name"), instructions: formData.get("instructions") || undefined }); }
-  catch { redirect(`${ROUTES.adminBillingSettings}?error=1`); }
-  revalidatePath(ROUTES.adminBillingSettings); redirect(`${ROUTES.adminBillingSettings}?updated=1`);
+  catch { return { ok: false as const }; }
+  revalidatePath(ROUTES.adminBilling);
+  return { ok: true as const };
 }
 
 export async function uploadPaymentProofAction(formData: FormData) {

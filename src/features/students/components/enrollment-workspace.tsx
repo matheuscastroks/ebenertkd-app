@@ -54,7 +54,7 @@ export async function EnrollmentWorkspace({
 
   return (
     <PortalShell profile={actor} activePath={activePath} title={`Matrícula · ${target.full_name}`} subtitle="Preencha os dados por etapa e salve para continuar depois.">
-      <div className="mx-auto max-w-5xl">
+      <div className="w-full min-w-0">
         <EnrollmentForm bundle={bundle} targetProfileId={target.$id} classes={classes} message={message} />
       </div>
     </PortalShell>

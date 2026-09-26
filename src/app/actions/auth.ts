@@ -23,6 +23,7 @@ import {
 } from "@/features/auth/service";
 import { resolveDashboardPath } from "@/lib/auth/auth-utils";
 import { APPWRITE_SESSION_COOKIE } from "@/lib/appwrite/ids";
+import { ROUTES } from "@/lib/navigation/routes";
 import { appwriteSessionCookie, createAppwriteSessionClient } from "@/lib/appwrite/session";
 import { getCurrentProfile } from "@/lib/auth/session";
 
@@ -76,13 +77,13 @@ export async function promoteMinorAction(formData: FormData) {
   const minorProfileId = String(formData.get("minor_profile_id") ?? "").trim();
   const parsedEmail = recoverySchema.safeParse({ email: formData.get("email") });
   const retainGuardianAccess = formData.get("retain_guardian_access") === "on";
-  if (!minorProfileId || !parsedEmail.success) redirect("/admin?error=promotion");
+  if (!minorProfileId || !parsedEmail.success) redirect(`${ROUTES.adminStudentAccess}?error=promotion`);
   try {
     await promoteMinorToAdult(minorProfileId, parsedEmail.data.email, admin.account_id, retainGuardianAccess);
   } catch {
-    redirect("/admin?error=promotion");
+    redirect(`${ROUTES.adminStudentAccess}?error=promotion`);
   }
-  redirect("/admin?promoted=1");
+  redirect(`${ROUTES.adminStudentAccess}?promoted=1`);
 }
 
 export async function registerAdultAction(formData: FormData) {

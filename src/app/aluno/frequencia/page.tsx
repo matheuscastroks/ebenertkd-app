@@ -1,11 +1,21 @@
+import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { AttendanceHistory } from "@/features/classes/components/attendance-history";
-import { getAttendanceHistory } from "@/features/classes/attendance-history-service";
+import { AttendanceCalendarSkeleton } from "@/features/classes/components/attendance-calendar-skeleton";
+import { currentAttendanceMonth, normalizeAttendanceMonth } from "@/features/classes/attendance-calendar-rules";
+import { getAttendanceCalendar } from "@/features/classes/attendance-calendar-service";
+import type { Profile } from "@/features/auth/types";
 import { requireCapability } from "@/lib/auth/session";
+import { toClientData } from "@/lib/client-data";
 import { ROUTES } from "@/lib/navigation/routes";
 
-export default async function StudentAttendancePage() {
+async function StudentAttendanceContent({ profile, month }: { profile: Profile; month: string }) {
+  const history = await getAttendanceCalendar(profile, month);
+  return <AttendanceHistory entries={toClientData(history.entries)} summary={history.summary} month={month} basePath={ROUTES.studentAttendance} />;
+}
+
+export default async function StudentAttendancePage({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
   const profile = await requireCapability("student");
-  const history = await getAttendanceHistory(profile);
-  return <PortalShell profile={profile} activePath={ROUTES.studentAttendance} title="Minha frequência" subtitle="Acompanhe suas presenças e faltas registradas pelo professor."><div className="mx-auto w-full max-w-4xl"><AttendanceHistory entries={history.entries} summary={history.summary} /></div></PortalShell>;
+  const month = normalizeAttendanceMonth((await searchParams).month, currentAttendanceMonth());
+  return <PortalShell profile={profile} activePath={ROUTES.studentAttendance} title="Minha frequência" subtitle="Veja suas aulas e chamadas mês a mês."><Suspense key={month} fallback={<AttendanceCalendarSkeleton />}><StudentAttendanceContent profile={profile} month={month} /></Suspense></PortalShell>;
 }

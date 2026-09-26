@@ -53,6 +53,25 @@ export async function listProofsForCharge(chargeId: string) {
   return result.rows;
 }
 
+export async function listLatestProofsForCharges(chargeIds: string[]) {
+  const latest = new Map<string, PaymentProof>();
+  if (chargeIds.length === 0) return latest;
+  const { tables, config } = createAppwriteAdminClient();
+  for (let start = 0; start < chargeIds.length; start += 50) {
+    const batch = chargeIds.slice(start, start + 50);
+    let cursor: string | undefined;
+    do {
+      const page = await tables.listRows<PaymentProof>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.paymentProofs, queries: [Query.equal("charge_id", batch), Query.limit(500), ...(cursor ? [Query.cursorAfter(cursor)] : [])] });
+      for (const proof of page.rows) {
+        const current = latest.get(proof.charge_id);
+        if (!current || proof.version > current.version) latest.set(proof.charge_id, proof);
+      }
+      cursor = page.rows.length === 500 ? page.rows.at(-1)?.$id : undefined;
+    } while (cursor);
+  }
+  return latest;
+}
+
 export async function downloadPaymentProof(actor: Profile, proofId: string) {
   if (actor.role === "minor_student") throw new Error("financial_access_denied");
   const { storage, tables, config } = createAppwriteAdminClient();

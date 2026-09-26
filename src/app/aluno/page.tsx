@@ -1,9 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { enableGuardianAction } from "@/app/actions/family";
-import { PhaseOnePanel } from "@/components/dashboard/phase-one-panel";
+import { PortalShell } from "@/components/dashboard/portal-shell";
+import { MetricCard } from "@/components/shared/metric-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { listChargesForStudent } from "@/features/billing/charge-service";
+import { getAttendanceHistory } from "@/features/classes/attendance-history-service";
+import { CalendarCheck2, ClipboardList, WalletCards } from "lucide-react";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
 
@@ -14,21 +18,21 @@ export default async function StudentPage() {
   const guardian = profile.capabilities.includes("guardian");
   const minor = profile.role === "minor_student";
 
-  return (
-    <PhaseOnePanel profile={profile} activePath={ROUTES.student} title={minor ? "Meu treino" : "Minha conta"} description={minor ? "Acompanhe sua graduação e sua ficha individual." : "Acompanhe sua matrícula e seus dados da academia."} items={minor ? [
-      { title: "Minha graduação", description: "Consulte o status da sua ficha e sua faixa atual." },
-      { title: "Meus treinos", description: "Consulte sua frequência e o histórico de chamadas." },
-      { title: "Privacidade", description: "Você acessa apenas informações do seu próprio perfil." }
-    ] : [
-      { title: "Perfil", description: "Identidade única para cadastro, treinos e financeiro." },
-      { title: "Segurança", description: "A senha pode ser recuperada pelo e-mail cadastrado." },
-      { title: "Matrícula", description: "Preencha sua ficha, envie documentos e acompanhe a análise." }
-    ]}>
-      <Card><CardHeader><CardTitle className="text-base">Ficha do aluno</CardTitle></CardHeader><CardContent className="flex flex-wrap gap-3">
-        <Button asChild><Link href={ROUTES.studentEnrollment}>{minor ? "Ver minha matrícula" : "Abrir minha matrícula"}</Link></Button>
-        <Button asChild variant="outline"><Link href={ROUTES.studentAttendance}>Minha frequência</Link></Button>
-        {!minor && (guardian ? <Button asChild variant="outline"><Link href={ROUTES.guardianDependents}>Gerenciar dependentes</Link></Button> : <form action={enableGuardianAction}><Button type="submit" variant="outline">Ativar perfil de responsável</Button></form>)}
-      </CardContent></Card>
-    </PhaseOnePanel>
-  );
+  const [attendance, charges] = await Promise.all([getAttendanceHistory(profile), minor ? Promise.resolve([]) : listChargesForStudent(profile)]);
+  const outstanding = charges.filter((charge) => charge.status === "pending" || charge.status === "overdue" || charge.status === "proof_under_review").sort((a, b) => a.due_date.localeCompare(b.due_date))[0];
+  const money = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value / 100);
+
+  return <PortalShell profile={profile} activePath={ROUTES.student} title={`Olá, ${profile.full_name.split(" ")[0]}`} subtitle="Seu treino e seus próximos passos em um só lugar.">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <MetricCard label="Faixa atual" value={attendance.student?.current_belt ?? "Não informada"} icon={<ClipboardList aria-hidden="true" />} />
+      <MetricCard label="Frequência registrada" value={attendance.summary.total ? `${attendance.summary.rate}%` : "Sem registros"} helper={attendance.summary.total ? `${attendance.summary.attended} presenças em ${attendance.summary.total} aulas` : "Acompanhe aqui após a primeira chamada."} tone="success" icon={<CalendarCheck2 aria-hidden="true" />} />
+      {!minor ? <MetricCard label="Próximo pagamento em aberto" value={outstanding ? money(outstanding.amount_cents) : "Tudo em dia"} helper={outstanding ? `Vence em ${new Date(outstanding.due_date).toLocaleDateString("pt-BR", { timeZone: "UTC" })}` : undefined} tone={outstanding ? "warning" : "success"} icon={<WalletCards aria-hidden="true" />} /> : null}
+    </div>
+    <Card><CardHeader><CardTitle className="text-base">O que você pode fazer agora</CardTitle></CardHeader><CardContent className="flex flex-wrap gap-3">
+      <Button asChild><Link href={ROUTES.studentEnrollment}>{attendance.student ? "Ver minha matrícula" : "Preencher minha matrícula"}</Link></Button>
+      <Button asChild variant="outline"><Link href={ROUTES.studentAttendance}>Ver frequência</Link></Button>
+      {!minor ? <Button asChild variant="outline"><Link href={ROUTES.studentBilling}>Ver pagamentos</Link></Button> : null}
+      {!minor && (guardian ? <Button asChild variant="outline"><Link href={ROUTES.guardianDependents}>Meus dependentes</Link></Button> : <form action={enableGuardianAction}><Button type="submit" variant="outline">Cadastrar dependente</Button></form>)}
+    </CardContent></Card>
+  </PortalShell>;
 }
