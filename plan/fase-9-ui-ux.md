@@ -1,8 +1,8 @@
 # Fase 9 — Refinamento de UI/UX Implementation Plan
 
-O detalhamento atual está em [Identidade e experiência de produto](./fase-9-produto-identidade-experiencia.md). Os problemas relatados pelo usuário autorizam priorizar essas correções agora, sem esperar o piloto geral. Checkboxes históricos abaixo não atestam que os novos critérios foram cumpridos.
+O plano vigente de revisão transversal está em [Revisão geral de produto e UX](./revisao-geral-produto-ux.md), com subfases R0–R6 e critérios de aceite por jornada. Ele complementa [Identidade e experiência de produto](./fase-9-produto-identidade-experiencia.md). Os problemas relatados pelo usuário autorizam priorizar essas correções antes do piloto geral. A base visual vigente é Neutral padrão do shadcn e Poppins. Checkboxes históricos abaixo não atestam que os novos critérios foram cumpridos.
 
-> **For agentic workers:** execute esta fase somente após o piloto. Mudanças visuais não podem alterar regras de negócio aprovadas.
+> **For agentic workers:** seguir a ordem R0–R6 da revisão geral; a homologação humana encerra o trabalho, mas não impede corrigir problemas já identificados. Mudanças visuais não podem alterar regras de negócio aprovadas.
 
 **Goal:** reduzir esforço e erros nos fluxos reais observados, melhorar acessibilidade e consolidar uma identidade visual adequada à academia.
 
