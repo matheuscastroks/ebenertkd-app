@@ -12,7 +12,7 @@ export async function PortalFrame({ profile, children }: { profile: Profile; chi
   return <DashboardFrame badge={badge} profileName={profile.full_name} navItems={navigationForProfile(profile, { enrollments, notifications })}>{children}</DashboardFrame>;
 }
 
-export function PortalShell({ profile, title, subtitle, breadcrumbs, children }: { profile: Profile; title: string; subtitle: string; activePath: string; breadcrumbs?: BreadcrumbEntry[]; children: ReactNode }) {
+export function PortalShell({ profile, title, subtitle, breadcrumbs, headerActions, children }: { profile: Profile; title: string; subtitle: string; activePath: string; breadcrumbs?: BreadcrumbEntry[]; headerActions?: ReactNode; children: ReactNode }) {
   const badge = profile.role === "admin" ? "Professor" : profile.role === "guardian" ? "Responsável" : "Aluno";
-  return <DashboardShell title={title} subtitle={subtitle} badge={badge} breadcrumbs={breadcrumbs}>{children}</DashboardShell>;
+  return <DashboardShell title={title} subtitle={subtitle} badge={badge} breadcrumbs={breadcrumbs} headerActions={headerActions}>{children}</DashboardShell>;
 }
