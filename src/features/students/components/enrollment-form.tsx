@@ -600,7 +600,7 @@ export function EnrollmentForm({
 
         {/* Barra de ação persistente (única no DOM, acessível em qualquer rolagem) */}
         {isDraft ? (
-          <div className="sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-background/95 p-4 shadow-lg backdrop-blur">
+          <div className="sticky bottom-20 z-10 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-background/95 p-4 shadow-lg backdrop-blur md:bottom-3">
             <p className="text-xs text-muted-foreground hidden sm:block">
               {completed === checklistItems.length
                 ? "Todos os campos essenciais estão preenchidos."
@@ -621,7 +621,7 @@ export function EnrollmentForm({
             </div>
           </div>
         ) : (
-          <div className="sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-background/95 p-4 shadow-lg backdrop-blur">
+          <div className="sticky bottom-20 z-10 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-background/95 p-4 shadow-lg backdrop-blur md:bottom-3">
             <p className="text-xs text-muted-foreground">
               Você pode atualizar suas informações cadastrais, de contato, emergência e saúde a qualquer momento.
             </p>

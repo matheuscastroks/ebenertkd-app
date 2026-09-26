@@ -51,13 +51,19 @@ A Fase 9 consolidou a maturidade de produto do Ebener TKD App, elevando a aplica
    - Inbox compacto com contagem autorizada de não-lidos, filtros e composição modal pelo professor.
    - Preferências por categoria com persistência no servidor.
 
+10. **Navegação Móvel Nativa e Gestos (9P.10):**
+    - **Bottom Navigation Bar (`MobileBottomNav`):** Barra inferior fixa em dispositivos móveis (`md:hidden`) com abas dinâmicas por perfil (Início, Treinos/Turmas, Financeiro/Dependentes, Avisos com badge numérico em tempo real e botão de abertura rápida do menu).
+    - **Detecção de Gesto Swipe (`MobileGestureDetector`):** Deslizar o dedo a partir da borda esquerda (`<= 40px`) abre a gaveta lateral em dispositivos touch; deslizar para a esquerda com o menu aberto fecha a gaveta. Event listeners de alta performance com `{ passive: true }`.
+    - **Espaçamento e Clearance:** Ajuste global de padding inferior nos layouts (`pb-20 md:pb-6`) e elevação de barras de ação flutuantes (`sticky bottom-20 md:bottom-3`) para evitar sobreposição de elementos na base da tela.
+    - **Dropdowns e Hierarquia na Sidebar:** Submenus colapsáveis para Matrículas (Fila, Acessos), Turmas (Grade, Exames), Financeiro (Visão geral, PIX), Contratos (Modelos, Cancelamentos) e acesso direto e destacado para Responsáveis (`/responsavel`).
+
 ---
 
 ## 2. Validação Multitela e Responsividade (9P.9)
 
 | Viewport | Dispositivo Alvo | Avaliação de Layout |
 | --- | --- | --- |
-| **360 × 640 px** | Mobile Pequeno | Layout linear fluido, botões em largura total, barra de ação flutuante na base com backdrop blur, navegação colapsável em Sheet/Gaveta. |
+| **360 × 640 px** | Mobile Pequeno | Layout linear fluido, botões em largura total, barra de ação flutuante na base com backdrop blur elevada acima da Bottom Nav, navegação com Bottom Navigation Bar e gaveta acionável por swipe da borda. |
 | **768 × 1024 px** | Tablet Portrait | Grade de campos em 2 colunas, métricas 2×2, sidebar recolhida com ícones acessíveis. |
 | **1280 × 800 px** | Desktop Padrão | Sidebar fixa, ficha de matrícula em 12 colunas (8 colunas de dados + 4 colunas de progresso sticky), painel de revisão em 2 colunas (7 + 5). |
 | **1536 × 900 px** | Telas Widescreen | Gutter equilibrado, contenção de largura máxima para leitura confortável de contratos e formulários sem dispersão visual. |
@@ -73,6 +79,6 @@ A Fase 9 consolidou a maturidade de produto do Ebener TKD App, elevando a aplica
 
 ---
 
-## 4. Conclusão da Fase 9
+## 4. Conclusão da Fase 9 e Próximos Passos de UI/UX
 
-Com todas as verificações aprovadas, testes automatizados passando (236+ testes de unidade e integração), typecheck rigoroso sem erros e build otimizado de produção, a **Fase 9 está concluída e homologada com sucesso**, liberando o projeto para o início da **Fase 10 (Jornada Gamificada)**.
+Com todas as verificações aprovadas, 240 testes automatizados passando (100% de cobertura dos fluxos), typecheck rigoroso sem erros e build otimizado de produção, a **Fase 9 foi consolidada com sucesso**. O foco contínuo da aplicação permanece no **refinamento extremo da experiência mobile e desktop**, mantendo a estabilidade de produção e usabilidade esportiva.

@@ -61,6 +61,6 @@ export function AttendanceSheet({ classId, lessonId, lessonCompleted, rows, noti
     </Card>)}
 
     {lessonCompleted && changed ? <Field><FieldLabel htmlFor="correction-reason">Motivo da correção</FieldLabel><Textarea id="correction-reason" name="correction_reason" required minLength={3} placeholder="Ex.: presença corrigida após conferência com o professor." /><FieldDescription>Este motivo fica registrado na trilha de auditoria.</FieldDescription></Field> : null}
-    <div className="sticky bottom-3 z-10 rounded-xl border bg-background/95 p-3 shadow-lg backdrop-blur"><FormSubmitButton className="h-11 w-full sm:w-auto" disabled={!complete || (lessonCompleted && changed === false)} pendingLabel="Salvando chamada…">{lessonCompleted ? "Salvar correção" : "Concluir chamada"}</FormSubmitButton></div>
+    <div className="sticky bottom-20 z-10 rounded-xl border bg-background/95 p-3 shadow-lg backdrop-blur md:bottom-3"><FormSubmitButton className="h-11 w-full sm:w-auto" disabled={!complete || (lessonCompleted && changed === false)} pendingLabel="Salvando chamada…">{lessonCompleted ? "Salvar correção" : "Concluir chamada"}</FormSubmitButton></div>
   </form>;
 }
