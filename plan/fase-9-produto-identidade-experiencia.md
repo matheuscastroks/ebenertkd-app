@@ -336,14 +336,14 @@ Cada tela e componente listado abaixo deve ser auditado e refinado seguindo os s
 ---
 
 ### Módulo 7: Gestão de Matrículas e Dependentes (Admin & Família)
-- [ ] **7.1 Fila de Matrículas no Admin (`src/app/admin/matriculas/page.tsx`, `src/features/students/components/enrollment-table.tsx`, `enrollment-filters.tsx`):**
-  - [ ] Abas por situação: Rascunhos, Aguardando análise, Aguardando assinatura, Ativas, Pausadas.
-  - [ ] No mobile, cards responsivos com foto do aluno, faixa, turma e botão direto de "Analisar".
-- [ ] **7.2 Acesso e Transição de Alunos Menores (`src/app/admin/matriculas/acessos/page.tsx`, `src/features/students/components/promote-minor-dialog.tsx`):**
-  - [ ] Lista de alunos que atingiram a maioridade com ação de liberar acesso independente por e-mail próprio.
-- [ ] **7.3 Gestão Familiar e Dependentes (`src/app/responsavel/dependentes/page.tsx`, `src/app/responsavel/dependentes/[profileId]/matricula/page.tsx`):**
-  - [ ] Painel do responsável com cartões de cada dependente, indicando status de matrícula, próxima aula e situação financeira.
-  - [ ] Fluxo simplificado de "Adicionar dependente" preenchendo automaticamente os dados do responsável.
+- [x] **7.1 Fila de Matrículas no Admin (`src/app/admin/matriculas/page.tsx`, `src/features/students/components/enrollment-table.tsx`, `enrollment-filters.tsx`):**
+  - [x] Abas por situação: Rascunhos, Aguardando análise, Aguardando assinatura, Ativas, Pausadas.
+  - [x] No mobile, cards responsivos com foto do aluno, faixa, turma e botão direto de "Analisar".
+- [x] **7.2 Acesso e Transição de Alunos Menores (`src/app/admin/matriculas/acessos/page.tsx`, `src/features/students/components/promote-minor-dialog.tsx`):**
+  - [x] Lista de alunos que atingiram a maioridade com ação de liberar acesso independente por e-mail próprio.
+- [x] **7.3 Gestão Familiar e Dependentes (`src/app/responsavel/dependentes/page.tsx`, `src/app/responsavel/dependentes/[profileId]/matricula/page.tsx`):**
+  - [x] Painel do responsável com cartões de cada dependente, indicando status de matrícula, próxima aula e situação financeira.
+  - [x] Fluxo simplificado de "Adicionar dependente" preenchendo automaticamente os dados do responsável.
 
 ---
 

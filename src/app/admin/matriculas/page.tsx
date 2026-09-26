@@ -10,6 +10,7 @@ import { listEnrollmentsForReview } from "@/features/students/service";
 import { requireProfile } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
 import { ROUTES } from "@/lib/navigation/routes";
+import { KeyRound } from "lucide-react";
 
 export default async function EnrollmentsPage({
   searchParams,
@@ -32,23 +33,34 @@ export default async function EnrollmentsPage({
       profile={admin}
       activePath={ROUTES.adminEnrollments}
       title="Matrículas"
-      subtitle="Analise cadastros, documentos e condições financeiras."
+      subtitle="Analise cadastros, documentação, atestados médicos e condições financeiras."
+      breadcrumbs={[{ label: "Matrículas" }]}
+      headerActions={
+        <Button asChild variant="outline" className="h-10 font-medium">
+          <Link href={ROUTES.adminStudentAccess}>
+            <KeyRound className="mr-2 size-4" />
+            Acessos dos alunos
+          </Link>
+        </Button>
+      }
     >
-      <div className="mx-auto max-w-6xl space-y-5">
+      <div className="w-full min-w-0 space-y-6">
         <EnrollmentFilters classes={toClientData(classes)} />
+
         {result.rows.length === 0 ? (
           <EmptyState
             title="Nenhuma matrícula encontrada"
-            description="Ajuste os filtros ou aguarde o envio de uma nova ficha."
+            description="Ajuste os filtros de busca ou aguarde o envio de uma nova ficha pelos alunos."
             action={
-              <Button asChild variant="outline">
-                <Link href={ROUTES.adminEnrollments}>Limpar filtros</Link>
+              <Button asChild variant="outline" className="h-11 font-medium">
+                <Link href={ROUTES.adminEnrollments}>Limpar todos os filtros</Link>
               </Button>
             }
           />
         ) : (
           <EnrollmentTable rows={result.rows} />
         )}
+
         <ListPagination
           basePath={ROUTES.adminEnrollments}
           params={{ q: filters.q, status: filters.status, belt: filters.belt, turma: filters.turma }}
