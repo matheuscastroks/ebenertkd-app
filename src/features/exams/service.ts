@@ -32,6 +32,11 @@ export async function listExamEvents() {
   return (await tables.listRows<ExamEvent>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examEvents, queries: [Query.orderDesc("event_date"), Query.limit(100)] })).rows;
 }
 
+export async function getExamEvent(eventId: string) {
+  const { tables, config } = createAppwriteAdminClient();
+  return tables.getRow<ExamEvent>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examEvents, rowId: eventId });
+}
+
 export async function cancelExamEvent(actor: Profile, eventId: string) {
   if (actor.role !== "admin") throw new Error("admin_required");
   const { tables, config } = createAppwriteAdminClient();
