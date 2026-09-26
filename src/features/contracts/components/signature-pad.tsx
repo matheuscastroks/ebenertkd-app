@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { signContractAction } from "@/app/actions/contract-signature";
 import { Button } from "@/components/ui/button";
+import { CheckCircle2, Eraser, FileSignature, Info } from "lucide-react";
+import { FormSubmitButton } from "@/components/shared/form-submit-button";
 
 export function SignaturePad({ contractId, content }: { contractId: string; content: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -29,6 +31,7 @@ export function SignaturePad({ contractId, content }: { contractId: string; cont
     const bounds = event.currentTarget.getBoundingClientRect();
     return { x: event.clientX - bounds.left, y: event.clientY - bounds.top };
   };
+
   const start = (event: React.PointerEvent<HTMLCanvasElement>) => {
     const context = event.currentTarget.getContext("2d");
     if (!context) return;
@@ -36,12 +39,13 @@ export function SignaturePad({ contractId, content }: { contractId: string; cont
     const current = point(event);
     context.beginPath();
     context.moveTo(current.x, current.y);
-    context.lineWidth = 2.25;
+    context.lineWidth = 2.5;
     context.lineCap = "round";
-    context.strokeStyle = "#171717";
+    context.strokeStyle = "#0f172a";
     setDrawing(true);
     setDrawn(true);
   };
+
   const move = (event: React.PointerEvent<HTMLCanvasElement>) => {
     if (!drawing) return;
     const context = event.currentTarget.getContext("2d");
@@ -49,17 +53,120 @@ export function SignaturePad({ contractId, content }: { contractId: string; cont
     context?.lineTo(current.x, current.y);
     context?.stroke();
   };
+
   const clear = () => {
     const canvas = canvasRef.current;
     canvas?.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
     setDrawn(false);
   };
 
-  return <form action={signContractAction} onSubmit={() => { if (signatureInputRef.current && canvasRef.current) signatureInputRef.current.value = canvasRef.current.toDataURL("image/png"); }} className="space-y-5"><input type="hidden" name="contract_id" value={contractId} /><input type="hidden" name="read_confirmed" value={read ? "true" : "false"} /><input ref={signatureInputRef} type="hidden" name="signature_data_url" />
-    <div ref={readingRef} onScroll={(event) => { const node = event.currentTarget; if (node.scrollTop + node.clientHeight >= node.scrollHeight - 8) setRead(true); }} className="h-80 overflow-y-auto rounded-xl border bg-muted/20 p-5 text-sm leading-7 whitespace-pre-wrap">{content}<div className="mt-8 border-t pt-4 text-xs font-medium text-muted-foreground">Fim do contrato</div></div>
-    <p className="text-xs text-muted-foreground">{read ? "Leitura concluída." : "Role até o final do contrato para habilitar a assinatura."}</p>
-    <div className="space-y-2"><div className="flex items-center justify-between"><span className="text-sm font-medium">Assine no quadro abaixo</span><Button type="button" variant="ghost" size="sm" onClick={clear}>Limpar</Button></div><canvas ref={canvasRef} onPointerDown={start} onPointerMove={move} onPointerUp={() => setDrawing(false)} onPointerCancel={() => setDrawing(false)} className="h-40 w-full touch-none rounded-xl border bg-white" /></div>
-    <label className="flex items-start gap-3 rounded-xl border p-4 text-sm"><input name="accepted" type="checkbox" required className="mt-1" /><span>Li o contrato, concordo com seus termos e reconheço esta assinatura eletrônica.</span></label>
-    <Button type="submit" disabled={!read || !drawn}>Assinar contrato</Button>
-  </form>;
+  return (
+    <form
+      action={signContractAction}
+      onSubmit={() => {
+        if (signatureInputRef.current && canvasRef.current) {
+          signatureInputRef.current.value = canvasRef.current.toDataURL("image/png");
+        }
+      }}
+      className="space-y-5"
+    >
+      <input type="hidden" name="contract_id" value={contractId} />
+      <input type="hidden" name="read_confirmed" value={read ? "true" : "false"} />
+      <input ref={signatureInputRef} type="hidden" name="signature_data_url" />
+
+      {/* Box de Leitura com Barra de Progresso/Status */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-xs">
+          <span className="font-semibold text-muted-foreground uppercase tracking-wider">
+            Texto integral do contrato
+          </span>
+          {read ? (
+            <span className="flex items-center gap-1 font-medium text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="size-3.5" /> Leitura confirmada
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 font-medium text-amber-600 dark:text-amber-400">
+              <Info className="size-3.5" /> Role até o fim para liberar a assinatura
+            </span>
+          )}
+        </div>
+
+        <div
+          ref={readingRef}
+          onScroll={(event) => {
+            const node = event.currentTarget;
+            if (node.scrollTop + node.clientHeight >= node.scrollHeight - 8) {
+              setRead(true);
+            }
+          }}
+          className="h-80 overflow-y-auto rounded-xl border border-border/80 bg-muted/20 p-5 text-xs sm:text-sm leading-relaxed font-mono whitespace-pre-wrap select-text"
+        >
+          {content}
+          <div className="mt-8 border-t border-border/60 pt-4 text-xs font-semibold text-muted-foreground text-center">
+            — Fim do instrumento contratual —
+          </div>
+        </div>
+      </div>
+
+      {/* Área de Assinatura */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold flex items-center gap-2">
+            <FileSignature className="size-4 text-primary" />
+            Assinatura manuscrita digital
+          </span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={clear}
+            className="h-9 px-3 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <Eraser className="mr-1.5 size-3.5" />
+            Limpar
+          </Button>
+        </div>
+
+        <div className="relative rounded-xl border-2 border-dashed border-border/80 bg-white dark:bg-zinc-950 overflow-hidden">
+          <canvas
+            ref={canvasRef}
+            onPointerDown={start}
+            onPointerMove={move}
+            onPointerUp={() => setDrawing(false)}
+            onPointerCancel={() => setDrawing(false)}
+            className="h-44 w-full touch-none cursor-crosshair"
+          />
+          {!drawn && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-xs text-muted-foreground/60 select-none">
+              Desenhe sua assinatura com o dedo ou mouse aqui
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Termo de Concordância */}
+      <label className="flex items-start gap-3 rounded-xl border border-border/80 bg-muted/10 p-4 text-xs sm:text-sm cursor-pointer select-none">
+        <input
+          name="accepted"
+          type="checkbox"
+          required
+          className="mt-0.5 size-4 rounded border-border accent-primary cursor-pointer"
+        />
+        <span className="text-foreground leading-normal">
+          Declaro que li atentamente o contrato, concordo com seus termos, normas da academia e reconheço a validade jurídica desta assinatura eletrônica.
+        </span>
+      </label>
+
+      {/* Botão de Envio */}
+      <FormSubmitButton
+        type="submit"
+        disabled={!read || !drawn}
+        className="h-11 w-full sm:w-auto font-medium"
+        pendingLabel="Gravando assinatura e emitindo PDF…"
+      >
+        <FileSignature className="mr-2 size-4" />
+        Assinar contrato agora
+      </FormSubmitButton>
+    </form>
+  );
 }

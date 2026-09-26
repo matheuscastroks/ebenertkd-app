@@ -305,20 +305,20 @@ Cada tela e componente listado abaixo deve ser auditado e refinado seguindo os s
 ---
 
 ### Módulo 5: Contratos e Assinatura Digital
-- [ ] **5.1 Visão Geral de Contratos no Admin (`src/app/admin/contratos/page.tsx`):**
-  - [ ] Lista de contratos emitidos com status (Pendente de assinatura, Assinado, Cancelado, Expirado).
-  - [ ] Ação rápida para visualizar PDF gerado, reenviar solicitação ou registrar cancelamento.
-- [ ] **5.2 Modelo de Contrato da Academia (`src/app/admin/contratos/modelo/page.tsx`):**
-  - [ ] Editor dos termos de adesão e regras do dojang com inserção de tags dinâmicas ({nome_aluno}, {valor_mensalidade}, etc.).
-  - [ ] Pré-visualização responsiva do documento formatado.
-- [ ] **5.3 Fila de Cancelamentos e Rescisões (`src/app/admin/contratos/cancelamentos/page.tsx`):**
-  - [ ] Lista de pedidos de encerramento com motivo informado pelo aluno/responsável.
-  - [ ] Modal de homologação do cancelamento com cálculo de eventuais pendências e data de encerramento.
-- [ ] **5.4 Assinatura Digital do Aluno e Responsável (`src/app/aluno/contratos/page.tsx`, `src/app/aluno/contratos/[contractId]/page.tsx`, `src/features/contracts/components/signature-pad.tsx`, páginas do responsável):**
-  - [ ] Visualização confortável do contrato antes da assinatura em qualquer dispositivo.
-  - [ ] Componente `SignaturePad`: desenho da assinatura suave no toque touch com alta resolução, botões "Limpar" e "Confirmar assinatura".
-  - [ ] Opção de assinar digitalmente com carimbo de data/hora, IP e hash do documento.
-  - [ ] Download imediato do contrato assinado em PDF.
+- [x] **5.1 Visão Geral de Contratos no Admin (`src/app/admin/contratos/page.tsx`):**
+  - [x] Lista de contratos emitidos com status (Pendente de assinatura, Assinado, Cancelado, Expirado).
+  - [x] Ação rápida para visualizar PDF gerado, reenviar solicitação ou registrar cancelamento.
+- [x] **5.2 Modelo de Contrato da Academia (`src/app/admin/contratos/modelo/page.tsx`):**
+  - [x] Editor dos termos de adesão e regras do dojang com inserção de tags dinâmicas ({nome_aluno}, {valor_mensalidade}, etc.).
+  - [x] Pré-visualização responsiva do documento formatado.
+- [x] **5.3 Fila de Cancelamentos e Rescisões (`src/app/admin/contratos/cancelamentos/page.tsx`):**
+  - [x] Lista de pedidos de encerramento com motivo informado pelo aluno/responsável.
+  - [x] Modal de homologação do cancelamento com cálculo de eventuais pendências e data de encerramento.
+- [x] **5.4 Assinatura Digital do Aluno e Responsável (`src/app/aluno/contratos/page.tsx`, `src/app/aluno/contratos/[contractId]/page.tsx`, `src/features/contracts/components/signature-pad.tsx`, páginas do responsável):**
+  - [x] Visualização confortável do contrato antes da assinatura em qualquer dispositivo.
+  - [x] Componente `SignaturePad`: desenho da assinatura suave no toque touch com alta resolução, botões "Limpar" e "Confirmar assinatura".
+  - [x] Opção de assinar digitalmente com carimbo de data/hora, IP e hash do documento.
+  - [x] Download imediato do contrato assinado em PDF.
 
 ---
 
