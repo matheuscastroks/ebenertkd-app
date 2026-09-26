@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
-import { Bell, Check, CheckCheck, CheckCircle2, ExternalLink, History, Loader2 } from "lucide-react";
+import { Bell, Check, CheckCheck, CheckCircle2, ExternalLink, History, Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -157,18 +157,26 @@ export function NotificationDrawer({
         className="flex w-full flex-col p-0 sm:max-w-md md:max-w-lg"
       >
         <SheetHeader className="border-b px-6 py-4">
-          <div className="flex items-center gap-2">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Bell className="size-5" aria-hidden="true" />
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Bell className="size-5" aria-hidden="true" />
+              </div>
+              <div>
+                <SheetTitle className="text-lg">Avisos</SheetTitle>
+                <SheetDescription className="text-xs">
+                  {unreadItems.length === 0
+                    ? "Tudo em dia por aqui"
+                    : `${unreadItems.length} ${unreadItems.length === 1 ? "aviso não lido" : "avisos não lidos"}`}
+                </SheetDescription>
+              </div>
             </div>
-            <div>
-              <SheetTitle className="text-lg">Avisos e Comunicados</SheetTitle>
-              <SheetDescription className="text-xs">
-                {unreadItems.length === 0
-                  ? "Tudo em dia por aqui"
-                  : `${unreadItems.length} ${unreadItems.length === 1 ? "aviso não lido" : "avisos não lidos"}`}
-              </SheetDescription>
-            </div>
+            <Button asChild size="sm" className="h-8 gap-1 text-xs">
+              <Link href="/avisos" onClick={() => onOpenChange(false)}>
+                <Plus className="size-3.5" aria-hidden="true" />
+                <span>Novo aviso</span>
+              </Link>
+            </Button>
           </div>
 
           {/* Abas: Avisos Recentes e Histórico */}
@@ -384,6 +392,14 @@ export function NotificationDrawer({
               </div>
             )
           )}
+        </div>
+        <div className="border-t bg-muted/20 px-6 py-3 flex items-center justify-between text-xs text-muted-foreground">
+          <span>Central de comunicados</span>
+          <Button asChild variant="link" size="sm" className="h-auto p-0 text-xs text-primary font-medium">
+            <Link href="/avisos" onClick={() => onOpenChange(false)}>
+              Abrir central completa &rarr;
+            </Link>
+          </Button>
         </div>
       </SheetContent>
     </Sheet>
