@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { Bell, Plus } from "lucide-react";
-import { DashboardShell } from "@/components/dashboard/dashboard-shell";
-import { PortalFrame } from "@/components/dashboard/portal-shell";
+import { PortalShell } from "@/components/dashboard/portal-shell";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import { listInbox, listNotificationAudienceOptions, listSentAnnouncements } fro
 import { hasActivePushSubscription } from "@/features/notifications/push-service";
 import type { Profile } from "@/features/auth/types";
 import { requireProfile } from "@/lib/auth/session";
+import { ROUTES } from "@/lib/navigation/routes";
 
 async function AsyncNotificationCenter({ profile }: { profile: Profile }) {
   const [items, sent] = await Promise.all([
@@ -78,47 +78,40 @@ export default async function NotificationsPage({
     requireProfile(),
     searchParams,
   ]);
-  const badge =
-    profile.role === "admin"
-      ? "Professor"
-      : profile.role === "guardian"
-        ? "Responsável"
-        : "Aluno";
 
   return (
-    <PortalFrame profile={profile}>
-      <DashboardShell
-        title="Avisos"
-        subtitle="Comunicados e lembretes da academia."
-        badge={badge}
-        headerActions={
-          <Suspense fallback={<div className="h-9 w-28 rounded-lg bg-muted/60 animate-pulse" />}>
-            <HeaderActionButtons profile={profile} />
-          </Suspense>
-        }
-      >
-        <div className="space-y-5">
-          {params.published ? (
-            <OperationToast
-              tone="success"
-              title="Aviso publicado"
-              description="Os destinatários já podem consultar a mensagem nesta central."
-              clearParams={["published"]}
-            />
-          ) : null}
-          {params.error ? (
-            <OperationToast
-              tone="error"
-              title="Não foi possível publicar"
-              description="Revise os destinatários e o conteúdo do aviso."
-              clearParams={["error"]}
-            />
-          ) : null}
-          <Suspense fallback={<ListItemsSkeleton count={4} />}>
-            <AsyncNotificationCenter profile={profile} />
-          </Suspense>
-        </div>
-      </DashboardShell>
-    </PortalFrame>
+    <PortalShell
+      profile={profile}
+      activePath={ROUTES.notifications}
+      title="Avisos"
+      subtitle="Comunicados e lembretes da academia."
+      headerActions={
+        <Suspense fallback={<div className="h-9 w-28 rounded-lg bg-muted/60 animate-pulse" />}>
+          <HeaderActionButtons profile={profile} />
+        </Suspense>
+      }
+    >
+      <div className="space-y-5">
+        {params.published ? (
+          <OperationToast
+            tone="success"
+            title="Aviso publicado"
+            description="Os destinatários já podem consultar a mensagem nesta central."
+            clearParams={["published"]}
+          />
+        ) : null}
+        {params.error ? (
+          <OperationToast
+            tone="error"
+            title="Não foi possível publicar"
+            description="Revise os destinatários e o conteúdo do aviso."
+            clearParams={["error"]}
+          />
+        ) : null}
+        <Suspense fallback={<ListItemsSkeleton count={4} />}>
+          <AsyncNotificationCenter profile={profile} />
+        </Suspense>
+      </div>
+    </PortalShell>
   );
 }
