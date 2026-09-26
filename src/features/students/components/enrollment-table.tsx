@@ -41,7 +41,7 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
   return (
     <ResponsiveDataView
       desktop={
-        <div className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs">
+        <div className="overflow-hidden rounded-xl border border-border/50 bg-card depth-raised">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40">
@@ -91,7 +91,7 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
       mobile={
         <div className="space-y-3">
           {rows.map(({ student, enrollment, profilePhotoDocumentId }) => (
-            <Card key={student.$id} className="border-border/80 shadow-xs">
+            <Card key={student.$id}>
               <CardContent className="space-y-4 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">

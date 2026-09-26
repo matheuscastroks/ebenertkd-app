@@ -76,7 +76,7 @@ async function UrgentTasksSection() {
       <div className="grid gap-4 md:grid-cols-2">
         {/* Matrículas Pendentes */}
         {pendingEnrollments.length > 0 ? (
-          <Card className="border-warning/40 bg-warning/5 dark:bg-warning/10 shadow-xs">
+          <Card variant="floating" className="border-warning/30">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -95,7 +95,7 @@ async function UrgentTasksSection() {
               {pendingEnrollments.slice(0, 3).map((item) => (
                 <div
                   key={item.student.$id}
-                  className="flex items-center justify-between gap-3 rounded-lg border bg-background/80 p-2.5 text-sm shadow-xs"
+                  className="flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-surface-recessed/60 p-2.5 text-sm depth-recessed"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <StudentAvatar
@@ -116,7 +116,7 @@ async function UrgentTasksSection() {
                       </div>
                     </div>
                   </div>
-                  <Button asChild size="sm" className="shrink-0 h-8 text-xs">
+                  <Button asChild size="sm" className="shrink-0 h-8 text-xs font-medium">
                     <Link href={`${ROUTES.adminEnrollments}/${item.student.$id}`}>Analisar</Link>
                   </Button>
                 </div>
@@ -127,7 +127,7 @@ async function UrgentTasksSection() {
 
         {/* Comprovantes PIX Pendentes */}
         {pendingProofs.length > 0 ? (
-          <Card className="border-warning/40 bg-warning/5 dark:bg-warning/10 shadow-xs">
+          <Card variant="floating" className="border-warning/30">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -146,7 +146,7 @@ async function UrgentTasksSection() {
               {pendingProofs.slice(0, 3).map((charge) => (
                 <div
                   key={charge.$id}
-                  className="flex items-center justify-between gap-3 rounded-lg border bg-background/80 p-2.5 text-sm shadow-xs"
+                  className="flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-surface-recessed/60 p-2.5 text-sm depth-recessed"
                 >
                   <div className="min-w-0 space-y-0.5">
                     <p className="truncate font-medium text-foreground text-xs sm:text-sm">
@@ -156,7 +156,7 @@ async function UrgentTasksSection() {
                       Valor: <strong className="text-foreground">{money(charge.amount_cents)}</strong>
                     </p>
                   </div>
-                  <Button asChild variant="outline" size="sm" className="shrink-0 h-8 text-xs">
+                  <Button asChild variant="outline" size="sm" className="shrink-0 h-8 text-xs font-medium">
                     <Link href={`${ROUTES.adminBilling}?status=proof_under_review`}>Conferir</Link>
                   </Button>
                 </div>
@@ -192,13 +192,13 @@ async function TodayClassesSection() {
       {classesToday.length > 0 ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {classesToday.map((classItem) => (
-            <Card key={classItem.$id} className="relative overflow-hidden border-border/80 shadow-xs">
+            <Card key={classItem.$id} className="relative overflow-hidden hover:border-primary/40 transition-colors">
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between gap-2">
                   <CardTitle className="text-base font-semibold truncate">
                     {classItem.name}
                   </CardTitle>
-                  <Badge variant="outline" className="text-xs shrink-0 font-normal">
+                  <Badge variant="secondary" className="text-xs shrink-0 font-medium">
                     {classItem.weekdays.map((d) => d.slice(0, 3)).join("/")}
                   </Badge>
                 </div>
@@ -289,7 +289,7 @@ async function ExamsAndShortcutsSection() {
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Card className="border-border/80 shadow-xs flex flex-col justify-between">
+      <Card className="flex flex-col justify-between hover:border-primary/30 transition-colors">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-base font-semibold">Próximo exame de faixa</CardTitle>
@@ -329,7 +329,7 @@ async function ExamsAndShortcutsSection() {
         </CardContent>
       </Card>
 
-      <Card className="border-border/80 shadow-xs flex flex-col justify-between">
+      <Card className="flex flex-col justify-between hover:border-primary/30 transition-colors">
         <CardHeader>
           <CardTitle className="text-base font-semibold">Operação e Comunicação</CardTitle>
           <CardDescription className="text-xs">

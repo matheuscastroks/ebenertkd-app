@@ -70,7 +70,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
   );
 
   return (
-    <div className="space-y-3 rounded-xl border bg-card p-4">
+    <div className="space-y-3 rounded-xl border border-border/50 bg-card p-4 depth-raised">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Field>
           <FieldLabel htmlFor="enrollment-search">Aluno</FieldLabel>

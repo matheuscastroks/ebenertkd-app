@@ -54,11 +54,11 @@ async function ExamEventsList() {
       {events.map((event) => (
         <Card
           key={event.$id}
-          className="flex flex-col justify-between border-border/80 shadow-sm transition-all hover:border-border"
+          className="flex flex-col justify-between hover:border-primary/40 transition-colors"
         >
           <CardHeader className="space-y-3 pb-3">
             <div className="flex items-start justify-between gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 depth-recessed">
                 <Award className="size-5" />
               </div>
               <StatusBadge tone={tones[event.status]}>{labels[event.status]}</StatusBadge>

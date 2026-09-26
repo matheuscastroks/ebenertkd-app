@@ -43,7 +43,7 @@ export function BillingFilters({ classes, settings }: { classes: TrainingClass[]
   const exportQuery = new URLSearchParams(searchParams.toString());
   exportQuery.delete("page");
 
-  return <div className="space-y-3 rounded-xl border bg-card p-4">
+  return <div className="space-y-3 rounded-xl border border-border/50 bg-card p-4 depth-raised">
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
       <Field><FieldLabel htmlFor="billing-student">Aluno</FieldLabel><InputGroup className="h-10"><InputGroupAddon><Search className="size-4" aria-hidden="true" /></InputGroupAddon><InputGroupInput ref={studentInput} id="billing-student" placeholder="Buscar pelo nome" defaultValue={searchParams.get("student") ?? ""} onChange={(event) => onStudentChange(event.target.value)} /></InputGroup></Field>
       <Field><FieldLabel htmlFor="billing-competence">Competência</FieldLabel><Input id="billing-competence" type="month" value={searchParams.get("competence") ?? ""} onChange={(event) => update("competence", event.target.value)} /></Field>
