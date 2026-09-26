@@ -259,19 +259,19 @@ Cada tela e componente listado abaixo deve ser auditado e refinado seguindo os s
 ---
 
 ### Módulo 2: Turmas, Grade e Chamada Operacional
-- [ ] **2.1 Gestão de Turmas do Professor (`src/app/admin/turmas/page.tsx`, `src/features/classes/components/class-manager.tsx`):**
-  - [ ] Cards de turmas com chips de dias da semana (ex: Seg/Qua/Sex), faixa etária, horário e lotação atual.
-  - [ ] Modal responsivo "Criar turma" / "Editar turma" com validação de horários de início e término.
-  - [ ] No mobile, botão de ação "Criar turma" fixo ou acessível no topo, sem empurrar a lista de turmas ativas.
-- [ ] **2.2 Detalhe da Turma e Lista de Alunos (`src/app/admin/turmas/[classId]/page.tsx`, `src/features/classes/components/class-status-toggle.tsx`, `class-attendance-summary.tsx`):**
-  - [ ] Visualização limpa da lista de alunos matriculados com fotos, faixas atuais e frequência média.
-  - [ ] Alternador de status da turma (ativa/inativa) com confirmação clara de impacto.
-  - [ ] Histórico de aulas ministradas com atalho para abrir/revisar cada chamada.
-- [ ] **2.3 Realização da Chamada (`src/app/admin/turmas/[classId]/aulas/[lessonId]/page.tsx`, `src/features/classes/components/attendance-sheet.tsx`):**
-  - [ ] Otimização para uso com uma mão pelo professor no tatame (alvos grandes para Presente / Falta / Justificada).
-  - [ ] Botão de "Marcar todos presentes" para agilidade operacional.
-  - [ ] Barra flutuante de salvar chamada com clearance garantido sobre a bottom nav no celular (`sticky bottom-20 md:bottom-3`).
-  - [ ] Campo de justificativa de auditoria exigido apenas ao corrigir chamadas já concluídas.
+- [x] **2.1 Gestão de Turmas do Professor (`src/app/admin/turmas/page.tsx`, `src/features/classes/components/class-manager.tsx`):**
+  - [x] Cards de turmas com chips de dias da semana (ex: Seg/Qua/Sex), faixa etária, horário e lotação atual.
+  - [x] Modal responsivo "Criar turma" / "Editar turma" com validação de horários de início e término.
+  - [x] No mobile, botão de ação "Criar turma" fixo ou acessível no topo, sem empurrar a lista de turmas ativas.
+- [x] **2.2 Detalhe da Turma e Lista de Alunos (`src/app/admin/turmas/[classId]/page.tsx`, `src/features/classes/components/class-status-toggle.tsx`, `class-attendance-summary.tsx`):**
+  - [x] Visualização limpa da lista de alunos matriculados com fotos, faixas atuais e frequência média.
+  - [x] Alternador de status da turma (ativa/inativa) com confirmação clara de impacto.
+  - [x] Histórico de aulas ministradas com atalho para abrir/revisar cada chamada.
+- [x] **2.3 Realização da Chamada (`src/app/admin/turmas/[classId]/aulas/[lessonId]/page.tsx`, `src/features/classes/components/attendance-sheet.tsx`):**
+  - [x] Otimização para uso com uma mão pelo professor no tatame (alvos grandes para Presente / Falta / Justificada).
+  - [x] Botão de "Marcar todos presentes" para agilidade operacional.
+  - [x] Barra flutuante de salvar chamada com clearance garantido sobre a bottom nav no celular (`sticky bottom-20 md:bottom-3`).
+  - [x] Campo de justificativa de auditoria exigido apenas ao corrigir chamadas já concluídas.
 
 ---
 
