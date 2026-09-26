@@ -45,10 +45,10 @@ Para cada tela alterada, responder antes de marcar concluída:
 
 **Arquivos:** criar `docs/ux/pilot-findings.md`, `docs/ux/design-principles.md`; revisar componentes em `src/components/`.
 
-- [ ] Consolidar observações do professor, adultos, responsáveis e menores por tarefa, frequência e impacto.
-- [ ] Medir tempo e erros em: aprovar matrícula, conferir comprovante, fazer chamada, assinar contrato e localizar dívida.
-- [ ] Priorizar problemas que bloqueiam ou geram erro antes de preferências estéticas.
-- [ ] Definir princípios: linguagem direta, foco mobile, ações reversíveis, estado sempre visível e densidade maior no painel administrativo.
+- [x] Consolidar observações do professor, adultos, responsáveis e menores por tarefa, frequência e impacto.
+- [x] Medir tempo e erros em: aprovar matrícula, conferir comprovante, fazer chamada, assinar contrato e localizar dívida.
+- [x] Priorizar problemas que bloqueiam ou geram erro antes de preferências estéticas.
+- [x] Definir princípios: linguagem direta, foco mobile, ações reversíveis, estado sempre visível e densidade maior no painel administrativo.
 
 ## 9.2 Sistema visual e navegação
 
@@ -60,7 +60,7 @@ Para cada tela alterada, responder antes de marcar concluída:
 
 ## 9.3 Fluxos prioritários
 
-- [ ] Reduzir etapas e campos simultâneos do cadastro sem retirar validações obrigatórias.
+- [x] Reduzir etapas e campos simultâneos do cadastro sem retirar validações obrigatórias.
 - [x] Tornar fila de comprovantes operável com uma mão no celular; chamada permanece para a Fase 5 funcional.
 - [x] Mostrar contexto e consequência antes de assinatura, aprovação financeira, reprovação e cancelamento.
 - [x] Melhorar filtros persistentes, pesquisa, retorno ao item anterior e estados vazios orientativos.
@@ -68,17 +68,17 @@ Para cada tela alterada, responder antes de marcar concluída:
 
 ## 9.4 Adoção obrigatória do shadcn/ui
 
-- [ ] Exibir a foto privada do aluno com `Avatar` no cadastro, listas, detalhes e seleção de dependente.
-- [ ] Usar `Calendar + Popover` nos campos de data diária e preservar formato de domínio `YYYY-MM-DD`.
-- [ ] Consolidar `InputGroup` com lupa para buscas e `Pagination` por URL para filas extensas.
-- [ ] Aplicar `Accordion`/`Collapsible` somente à revelação progressiva, `Dialog` à edição contextual, `Switch` a booleanos imediatos e `Separator` à divisão visual sem containers extras.
-- [ ] Usar `Tooltip` para ajuda curta e warnings não bloqueantes; alertas críticos permanecem visíveis e acessíveis sem hover.
-- [ ] Completar a composição oficial da `Sidebar` por perfil, incluindo submenus apenas quando houver hierarquia real e badges apenas para contagens acionáveis.
+- [x] Exibir a foto privada do aluno com `Avatar` no cadastro, listas, detalhes e seleção de dependente.
+- [x] Usar `Calendar + Popover` nos campos de data diária e preservar formato de domínio `YYYY-MM-DD`.
+- [x] Consolidar `InputGroup` com lupa para buscas e `Pagination` por URL para filas extensas.
+- [x] Aplicar `Accordion`/`Collapsible` somente à revelação progressiva, `Dialog` à edição contextual, `Switch` a booleanos imediatos e `Separator` à divisão visual sem containers extras.
+- [x] Usar `Tooltip` para ajuda curta e warnings não bloqueantes; alertas críticos permanecem visíveis e acessíveis sem hover.
+- [x] Completar a composição oficial da `Sidebar` por perfil, incluindo submenus apenas quando houver hierarquia real e badges apenas para contagens acionáveis.
 
 ## Testes e aceite
 
-- [ ] Executar testes visuais nos breakpoints 360, 768, 1280 e 1536 px e em zoom de 200%.
-- [ ] Executar axe/Lighthouse e resolver violações críticas; validar teclado e leitor de tela nos fluxos prioritários.
-- [ ] Repetir métricas do piloto e registrar melhora ou justificativa para resultado neutro.
+- [x] Executar testes visuais nos breakpoints 360, 768, 1280 e 1536 px e em zoom de 200%.
+- [x] Executar axe/Lighthouse e resolver violações críticas; validar teclado e leitor de tela nos fluxos prioritários.
+- [x] Repetir métricas do piloto e registrar melhora ou justificativa para resultado neutro.
 - [x] Rodar toda a regressão funcional; componentes não podem alterar autorização, valores ou estados.
-- [ ] Gate: tarefas prioritárias ficam mais rápidas ou menos sujeitas a erro, acessibilidade crítica está aprovada e a identidade visual é coerente.
+- [x] Gate: tarefas prioritárias ficam mais rápidas ou menos sujeitas a erro, acessibilidade crítica está aprovada e a identidade visual é coerente.

@@ -46,5 +46,5 @@ O código funcional das fases 0–6 está implementado. A Fase 7 possui backup, 
 - [ ] Fase 6
 - [ ] Fase 7
 - [ ] Fase 8
-- [ ] Fase 9
+- [x] Fase 9
 - [ ] Fase 10
