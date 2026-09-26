@@ -80,7 +80,7 @@ async function GuardianMinorsOverview({ guardian }: { guardian: Profile }) {
         );
 
         return (
-          <Card key={minor.$id} className="overflow-hidden border-border/80 shadow-xs">
+          <Card key={minor.$id} className="overflow-hidden hover:border-primary/40 transition-colors">
             <CardHeader className="space-y-4 pb-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
@@ -120,7 +120,7 @@ async function GuardianMinorsOverview({ guardian }: { guardian: Profile }) {
             </CardHeader>
 
             <CardContent className="space-y-4 pt-1">
-              <div className="rounded-xl border border-border/60 bg-muted/20 p-3.5 space-y-2 text-xs sm:text-sm">
+              <div className="rounded-xl border border-border/50 bg-surface-recessed/60 p-3.5 space-y-2 text-xs sm:text-sm depth-recessed">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground flex items-center gap-1.5">
                     <Clock className="size-3.5" />
@@ -169,7 +169,7 @@ async function GuardianMinorsOverview({ guardian }: { guardian: Profile }) {
               </div>
 
               {pendingContract ? (
-                <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-xs sm:text-sm">
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs sm:text-sm depth-raised">
                   <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 min-w-0">
                     <FileSignature className="size-4 shrink-0" />
                     <span className="truncate">Contrato de matrícula pendente</span>

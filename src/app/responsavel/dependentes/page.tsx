@@ -134,7 +134,7 @@ async function GuardianMinorsList({ guardian }: { guardian: Profile }) {
       {minors.map((minor) => (
         <Card
           key={minor.$id}
-          className="border-border/80 shadow-sm transition-all hover:border-border"
+          className="transition-all hover:border-primary/40"
         >
           <CardHeader className="pb-3">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -190,7 +190,7 @@ async function GuardianMinorsList({ guardian }: { guardian: Profile }) {
 
             {/* Gestão de Credenciais e Segurança */}
             <Collapsible>
-              <div className="rounded-xl border border-border/50 bg-muted/20 p-3">
+              <div className="rounded-xl border border-border/50 bg-surface-recessed/60 p-3.5 depth-recessed">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <KeyRound className="size-4 text-muted-foreground" />

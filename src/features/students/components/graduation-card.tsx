@@ -82,11 +82,11 @@ export function GraduationCard({
     : null;
 
   return (
-    <Card className="overflow-hidden border-border/80 shadow-xs">
+    <Card className="overflow-hidden">
       <CardHeader className="bg-muted/40 pb-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20 depth-recessed">
               <Award className="size-4" aria-hidden="true" />
             </div>
             <div>
@@ -200,7 +200,7 @@ export function GraduationCard({
 
       <CardContent className="space-y-4 pt-4">
         {/* Banner elegante da graduação atual */}
-        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 overflow-hidden rounded-xl border border-neutral-200/90 dark:border-neutral-800 bg-neutral-900 text-white dark:bg-neutral-950 p-4 shadow-sm">
+        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 overflow-hidden rounded-xl border border-white/10 dark:border-white/5 bg-neutral-900 text-white dark:bg-neutral-950 p-4 depth-floating">
           {/* Faixa marcial visual horizontal decorativa */}
           <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-primary via-amber-400 to-primary/40 pointer-events-none" />
 
@@ -295,7 +295,7 @@ export function GraduationCard({
 
         {/* Próximo Objetivo e Requisitos */}
         {nextStep && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border bg-muted/30 p-3 text-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-border/50 bg-surface-recessed/60 p-3.5 text-xs depth-recessed">
             <div className="space-y-0.5">
               <p className="text-muted-foreground">Próximo objetivo:</p>
               <p className="font-medium text-foreground">

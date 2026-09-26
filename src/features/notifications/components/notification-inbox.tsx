@@ -217,7 +217,7 @@ export function NotificationInbox({ items: initialItems }: { items: InboxItem[] 
             {unreadItems.map((item) => (
               <div
                 key={item.recipient.$id}
-                className="flex flex-col gap-2.5 rounded-xl border bg-card p-4 transition-all duration-150 hover:border-primary/30"
+                className="flex flex-col gap-2.5 rounded-xl border border-border/50 bg-card p-4 depth-raised transition-all duration-150 hover:border-primary/40"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
@@ -294,7 +294,7 @@ export function NotificationInbox({ items: initialItems }: { items: InboxItem[] 
             {historyItems.map((item) => (
               <div
                 key={item.recipient.$id}
-                className="flex flex-col gap-2 rounded-xl border bg-muted/20 p-4"
+                className="flex flex-col gap-2 rounded-xl border border-border/30 bg-surface-recessed/40 p-4 opacity-85 transition-opacity hover:opacity-100"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">

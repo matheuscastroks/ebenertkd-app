@@ -106,7 +106,7 @@ export function AttendanceHistory({
   return (
     <div className="space-y-6">
       {/* Resumo Mensal de Frequência */}
-      <Card className="border-border/80 shadow-xs">
+      <Card>
         <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5">
           <div className="space-y-1">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -146,7 +146,7 @@ export function AttendanceHistory({
       {/* Grade com Calendário e Detalhes do Dia */}
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,0.85fr)]">
         {/* Card do Calendário */}
-        <Card className="border-border/80 shadow-xs">
+        <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between gap-2">
               <div className="space-y-0.5">
@@ -233,7 +233,7 @@ export function AttendanceHistory({
         </Card>
 
         {/* Card de Detalhes do Dia Selecionado */}
-        <Card className="border-border/80 shadow-xs">
+        <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold">
               {selected
@@ -258,7 +258,7 @@ export function AttendanceHistory({
                 return (
                   <div
                     key={lesson.$id}
-                    className="flex items-center justify-between gap-3 rounded-lg border bg-muted/20 p-3.5"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-surface-recessed/60 p-3.5 depth-recessed"
                   >
                     <div className="space-y-1 min-w-0">
                       <p className="font-semibold text-sm truncate">
