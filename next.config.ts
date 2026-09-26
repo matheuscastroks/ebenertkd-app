@@ -22,7 +22,9 @@ const nextConfig: NextConfig = {
         hostname: "images.unsplash.com"
       }
     ]
-  }
+  },
+  devIndicators: false,
+  
 };
 
 export default nextConfig;
