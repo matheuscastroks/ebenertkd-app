@@ -235,7 +235,7 @@ export function GraduationCard({
               </p>
             ) : (
               <p className="text-xs text-amber-300">
-                <span>Grau de Mestre / Faixa Preta (Dan)</span>
+                <span>Faixa Preta (1º Dan)</span>
                 <span className="text-amber-500/50"> · </span>
                 <span>Forma: </span>
                 <span className="text-neutral-200 font-medium">{currentPoomsae}</span>

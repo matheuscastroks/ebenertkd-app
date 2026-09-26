@@ -22,7 +22,13 @@ describe("GraduationCard", () => {
 
   it("handles black belt graduation without next step", () => {
     render(<GraduationCard currentBelt="Preta" gub={0} />);
-    expect(screen.getByText("Grau de Mestre / Faixa Preta (Dan)")).toBeInTheDocument();
+    expect(screen.getByText("Faixa Preta (1º Dan)")).toBeInTheDocument();
     expect(screen.getByText("100% concluído")).toBeInTheDocument();
+  });
+
+  it("treats Preta and Preta 1º Dan as the exact same graduation", () => {
+    render(<GraduationCard currentBelt="Preta 1º Dan" gub={0} />);
+    expect(screen.getAllByText("Faixa Preta").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Faixa Preta (1º Dan)")).toBeInTheDocument();
   });
 });

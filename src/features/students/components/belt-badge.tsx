@@ -4,6 +4,7 @@ import { type BeltOption, type GubOption, beltForGub } from "@/features/students
 export type BeltVisualConfig = {
   name: string;
   gub?: number;
+  dan?: number;
   beltColor: string;
   tipColor: string;
   bgClass: string;
@@ -275,10 +276,11 @@ const BELT_CONFIGS: Record<string, BeltVisualConfig> = {
     textClass: "text-white",
     tipClass: "bg-neutral-950"
   },
-  // Dan: Faixa Preta (Black Belt)
+  // Dan: Faixa Preta (Black Belt / 1º Dan são a mesma coisa)
   "preta": {
     name: "Preta",
     gub: 0,
+    dan: 1,
     beltColor: "bg-neutral-950",
     tipColor: "bg-amber-400",
     bgClass: "bg-neutral-950",
@@ -288,8 +290,33 @@ const BELT_CONFIGS: Record<string, BeltVisualConfig> = {
     isBlackBelt: true
   },
   "preta 1º dan": {
-    name: "Preta 1º Dan",
+    name: "Preta",
     gub: 0,
+    dan: 1,
+    beltColor: "bg-neutral-950",
+    tipColor: "bg-amber-400",
+    bgClass: "bg-neutral-950",
+    borderClass: "border-neutral-800",
+    textClass: "text-amber-400",
+    tipClass: "bg-amber-400",
+    isBlackBelt: true
+  },
+  "preta 1 dan": {
+    name: "Preta",
+    gub: 0,
+    dan: 1,
+    beltColor: "bg-neutral-950",
+    tipColor: "bg-amber-400",
+    bgClass: "bg-neutral-950",
+    borderClass: "border-neutral-800",
+    textClass: "text-amber-400",
+    tipClass: "bg-amber-400",
+    isBlackBelt: true
+  },
+  "1st dan": {
+    name: "Preta",
+    gub: 0,
+    dan: 1,
     beltColor: "bg-neutral-950",
     tipColor: "bg-amber-400",
     bgClass: "bg-neutral-950",
@@ -301,6 +328,7 @@ const BELT_CONFIGS: Record<string, BeltVisualConfig> = {
   "preta 2º dan": {
     name: "Preta 2º Dan",
     gub: 0,
+    dan: 2,
     beltColor: "bg-neutral-950",
     tipColor: "bg-amber-400",
     bgClass: "bg-neutral-950",
@@ -312,6 +340,7 @@ const BELT_CONFIGS: Record<string, BeltVisualConfig> = {
   "preta 3º dan": {
     name: "Preta 3º Dan",
     gub: 0,
+    dan: 3,
     beltColor: "bg-neutral-950",
     tipColor: "bg-amber-400",
     bgClass: "bg-neutral-950",
@@ -405,7 +434,7 @@ export function BeltBadge({
 
       <span className="font-semibold tracking-tight">Faixa {config.name}</span>
 
-      {showGub && resolvedGub != null && (
+      {showGub && (resolvedGub != null || config.dan != null) && (
         <span
           className={cn(
             "rounded px-1 py-0.5 text-[10px] font-medium leading-none shrink-0",
@@ -414,7 +443,11 @@ export function BeltBadge({
               : "bg-neutral-200/80 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400"
           )}
         >
-          {resolvedGub > 0 ? `${resolvedGub}º GUB` : "Dan"}
+          {resolvedGub && resolvedGub > 0
+            ? `${resolvedGub}º GUB`
+            : config.dan
+              ? `${config.dan}º Dan`
+              : "1º Dan"}
         </span>
       )}
     </div>

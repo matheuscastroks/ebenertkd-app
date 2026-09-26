@@ -35,7 +35,6 @@ export const BELT_OPTIONS = [
   "Vermelha",
   "Ponta Preta",
   "Preta",
-  "Preta 1º Dan",
   "Preta 2º Dan",
   "Preta 3º Dan"
 ] as const;
@@ -45,9 +44,19 @@ export function beltForGub(gub: number) {
   return GUB_BELT_OPTIONS.find((option) => option.gub === gub)?.belt;
 }
 
-export function poomsaeForGub(gub: number) {
+export function poomsaeForGub(gub: number, belt?: string) {
   const gubItem = GUB_BELT_OPTIONS.find((option) => option.gub === gub);
   if (gubItem) return gubItem.poomsae;
+
+  if (belt) {
+    const normalized = belt.toLowerCase().trim();
+    if (normalized.includes("3º dan") || normalized.includes("3rd dan") || normalized.includes("3 dan")) {
+      return "Taebaek";
+    }
+    if (normalized.includes("2º dan") || normalized.includes("2nd dan") || normalized.includes("2 dan")) {
+      return "Keumgang";
+    }
+  }
   return DAN_BELT_OPTIONS[0]?.poomsae ?? "Koryo";
 }
 

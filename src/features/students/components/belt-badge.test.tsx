@@ -36,4 +36,15 @@ describe("BeltBadge", () => {
     render(<BeltBadge />);
     expect(screen.getByText("Faixa Não informada")).toBeInTheDocument();
   });
+
+  it("treats Preta and Preta 1º Dan as identical 1st Dan black belt", () => {
+    const { unmount } = render(<BeltBadge belt="Preta" />);
+    expect(screen.getByText("Faixa Preta")).toBeInTheDocument();
+    expect(screen.getByText("1º Dan")).toBeInTheDocument();
+    unmount();
+
+    render(<BeltBadge belt="Preta 1º Dan" />);
+    expect(screen.getByText("Faixa Preta")).toBeInTheDocument();
+    expect(screen.getByText("1º Dan")).toBeInTheDocument();
+  });
 });
