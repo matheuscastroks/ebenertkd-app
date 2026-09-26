@@ -8,14 +8,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listChargesForStudent } from "@/features/billing/charge-service";
 import { getAttendanceHistory } from "@/features/classes/attendance-history-service";
+import { GraduationCard } from "@/features/students/components/graduation-card";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
+import { cn } from "@/lib/utils";
 import {
   AlertCircle,
   Building2,
   CalendarCheck2,
   CheckCircle2,
-  ClipboardList,
   FileText,
   UserPlus,
   UsersRound,
@@ -91,15 +92,16 @@ export default async function StudentPage() {
         </div>
       ) : null}
 
-      {/* 2. Métricas de Treino e Graduação */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <MetricCard
-          label="Faixa atual"
-          value={student?.current_belt ? `Faixa ${student.current_belt}` : "Não informada"}
-          helper={student?.gub ? `${student.gub}º GUB` : "Graduação do Taekwondo"}
-          icon={<ClipboardList aria-hidden="true" />}
-        />
+      {/* 2. Jornada de Graduação (Identidade Visual do Taekwondo) */}
+      <GraduationCard
+        currentBelt={student?.current_belt}
+        gub={student?.gub}
+        startedAtTkd={student?.started_at_tkd}
+        attendanceRate={attendance.summary.total ? attendance.summary.rate : undefined}
+      />
 
+      {/* 3. Indicadores Operacionais */}
+      <div className={cn("grid gap-4 sm:grid-cols-2", minor && "sm:grid-cols-1")}>
         <MetricCard
           label="Frequência registrada"
           value={attendance.summary.total ? `${attendance.summary.rate}%` : "Sem registros"}

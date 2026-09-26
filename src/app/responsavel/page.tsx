@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getAttendanceHistory } from "@/features/classes/attendance-history-service";
 import { listGuardianMinors } from "@/features/families/service";
+import { BeltBadge } from "@/features/students/components/belt-badge";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { listProfilePhotoDocumentIds } from "@/features/students/service";
 import { requireCapability } from "@/lib/auth/session";
@@ -66,15 +67,25 @@ export default async function GuardianPage() {
                   />
                   <div className="min-w-0 flex-1">
                     <CardTitle className="text-base truncate">{minor.full_name}</CardTitle>
-                    <div className="mt-1 flex flex-wrap items-center gap-2">
-                      <Badge variant="secondary">
-                        {history.student?.current_belt
-                          ? `Faixa ${history.student.current_belt}`
-                          : "Faixa não informada"}
-                      </Badge>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                      <BeltBadge
+                        belt={history.student?.current_belt}
+                        gub={history.student?.gub}
+                        size="sm"
+                      />
+                      {history.student?.status === "draft" && (
+                        <Badge variant="outline" className="border-warning/60 bg-warning/10 text-warning-foreground text-[10px]">
+                          Matrícula incompleta
+                        </Badge>
+                      )}
+                      {history.student?.status === "submitted" && (
+                        <Badge variant="outline" className="border-info/60 bg-info/10 text-info text-[10px]">
+                          Matrícula em análise
+                        </Badge>
+                      )}
                       <span className="text-xs text-muted-foreground">
                         {history.summary.total
-                          ? `${history.summary.rate}% de presença (${history.summary.attended}/${history.summary.total} aulas)`
+                          ? `${history.summary.rate}% presença (${history.summary.attended}/${history.summary.total} aulas)`
                           : "Sem chamadas registradas"}
                       </span>
                     </div>
