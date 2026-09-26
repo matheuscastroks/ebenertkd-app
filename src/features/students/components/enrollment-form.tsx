@@ -121,16 +121,22 @@ export function EnrollmentForm({
   bundle,
   targetProfileId,
   classes,
-  message
+  message,
+  feedback: initialFeedback
 }: {
   bundle: EnrollmentBundle;
   targetProfileId: string;
   classes: TrainingClass[];
   message?: string;
+  feedback?: { tone: "success" | "error" | "info" | "warning"; title: string } | null;
 }) {
   const { student, enrollment, documents } = bundle;
   const today = new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" });
   const isDraft = enrollment.status === "draft";
+  const feedback = initialFeedback ?? (message ? {
+    tone: message.includes("não") || message.includes("Adicione") || message.includes("erro") ? "error" as const : "success" as const,
+    title: message
+  } : null);
   const selectableClasses = classes.filter(
     (item) => item.status === "active" || item.$id === student.training_class_id
   );
@@ -192,16 +198,10 @@ export function EnrollmentForm({
             value={progress}
             aria-label={`${completed} de 11 itens essenciais preenchidos`}
           />
-          {message ? (
+          {feedback ? (
             <OperationToast
-              tone={
-                message.includes("não") ||
-                message.includes("Adicione") ||
-                message.includes("erro")
-                  ? "error"
-                  : "success"
-              }
-              title={message}
+              tone={feedback.tone}
+              title={feedback.title}
               clearParams={["saved", "submitted", "error"]}
             />
           ) : null}

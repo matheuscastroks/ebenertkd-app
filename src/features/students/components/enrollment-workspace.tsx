@@ -42,20 +42,20 @@ export async function EnrollmentWorkspace({
   }
 
   const classes = await listTrainingClasses(true);
-  const message = query.saved
-    ? "Rascunho salvo."
+  const feedback: { tone: "success" | "error"; title: string } | null = query.saved
+    ? { tone: "success", title: "Rascunho salvo com sucesso." }
     : query.submitted
-      ? "Ficha enviada para análise."
+      ? { tone: "success", title: "Ficha enviada para análise." }
       : query.error === "photo"
-        ? "Adicione a foto do aluno antes de enviar a ficha para análise."
+        ? { tone: "error", title: "Adicione a foto do aluno antes de enviar a ficha para análise." }
         : query.error
-          ? "Não foi possível salvar. Revise os campos e arquivos."
-        : undefined;
+          ? { tone: "error", title: "Não foi possível salvar. Revise os campos e arquivos." }
+        : null;
 
   return (
     <PortalShell profile={actor} activePath={activePath} title={`Matrícula · ${target.full_name}`} subtitle="Preencha os dados por etapa e salve para continuar depois.">
       <div className="w-full min-w-0">
-        <EnrollmentForm bundle={bundle} targetProfileId={target.$id} classes={classes} message={message} />
+        <EnrollmentForm bundle={bundle} targetProfileId={target.$id} classes={classes} feedback={feedback} />
       </div>
     </PortalShell>
   );
