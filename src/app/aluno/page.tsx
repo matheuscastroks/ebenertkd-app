@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listChargesForStudent } from "@/features/billing/charge-service";
 import { getAttendanceHistory } from "@/features/classes/attendance-history-service";
-import { GraduationCard } from "@/features/students/components/graduation-card";
+import { BeltBadge } from "@/features/students/components/belt-badge";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
 import { cn } from "@/lib/utils";
@@ -57,7 +57,12 @@ export default async function StudentPage() {
       profile={profile}
       activePath={ROUTES.student}
       title={`Olá, ${profile.full_name.split(" ")[0]}`}
-      subtitle="Seu treino, graduação e próximos passos na academia."
+      subtitle="Acompanhe seus treinos, frequência e mensalidades na academia."
+      headerActions={
+        student?.current_belt ? (
+          <BeltBadge belt={student.current_belt} gub={student.gub} size="sm" />
+        ) : undefined
+      }
     >
       {/* 1. Status de Matrícula (Hierarquia de tarefas essenciais) */}
       {isEnrollmentIncomplete ? (
@@ -92,15 +97,7 @@ export default async function StudentPage() {
         </div>
       ) : null}
 
-      {/* 2. Jornada de Graduação (Identidade Visual do Taekwondo) */}
-      <GraduationCard
-        currentBelt={student?.current_belt}
-        gub={student?.gub}
-        startedAtTkd={student?.started_at_tkd}
-        attendanceRate={attendance.summary.total ? attendance.summary.rate : undefined}
-      />
-
-      {/* 3. Indicadores Operacionais */}
+      {/* 2. Indicadores Operacionais */}
       <div className={cn("grid gap-4 sm:grid-cols-2", minor && "sm:grid-cols-1")}>
         <MetricCard
           label="Frequência registrada"
