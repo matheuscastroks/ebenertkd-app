@@ -30,10 +30,10 @@ Estas são decisões propostas para o app, não valores adicionais extraídos do
 - Padronizar o nome visível como **Ebener TKD** em sidebar, metadata, manifesto e textos. IDs técnicos, projeto Appwrite e cookies permanecem estáveis.
 - Ações principais e progresso usam o laranja da marca com texto escuro. Não presumir contraste adequado de texto branco sobre laranja ou de links laranja sobre branco: medir antes da implementação.
 - Usar Chakra Petch em marca, títulos e números de destaque; Inter em campos, tabelas e textos longos. Carregar apenas pesos necessários e remover famílias redundantes.
-- Fundo claro branco, superfícies secundárias neutras e modo escuro azul profundo. Sidebar segue a mesma família, com seleção em laranja discreto e contraste validado.
+- Fundo claro branco e superfícies secundárias zinc. O modo escuro usa zinc pouco saturado em camadas: fundo 16%, sidebar 18%, cards 20%, popovers 23% e interação 29% de luminosidade HSL. Texto principal é quase branco, texto secundário é cinza e a seleção da sidebar recebe um laranja discreto. Esta revisão substitui o azul profundo do site institucional no produto, conforme solicitado pelo usuário.
 - Tokens semânticos `primary`, `primary-foreground`, `ring`, `sidebar-primary` e estados selecionados derivam da marca; `success`, `warning`, `destructive` continuam comunicando estados distintos.
 - Raio proposto para densidade do app: controles 8 px, superfícies 12 px e modais 16 px. O raio de 24 px do site institucional não precisa ser aplicado a todas as linhas e campos.
-- Logo: usar `src/assets/favicon.avif`, preservando original. Inspecionar proporção/legibilidade nos dois temas antes da aplicação; reservar dimensões para evitar deslocamento.
+- Logo: usar `/brand-icon.png`, preservando o original em `src/assets/favicon.png`. Reservar dimensões para evitar deslocamento.
 - Tom: próximo, direto e específico à tarefa. Preservar o vocabulário de treino, turma e professor; o portal autenticado não precisa repetir slogans de divulgação.
 - Fotos e elementos expressivos podem apoiar identidade em contextos apropriados, sem competir com leitura financeira e formulários.
 
