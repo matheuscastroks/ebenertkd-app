@@ -19,7 +19,8 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarRail,
-  SidebarSeparator
+  SidebarSeparator,
+  useSidebar
 } from "@/components/ui/sidebar";
 import { AccountMenu } from "@/components/dashboard/account-menu";
 import { NotificationNavItem } from "@/components/dashboard/notification-nav-item";
@@ -42,31 +43,73 @@ const navIcons = {
 };
 
 function NavigationItem({ item }: { item: AppSidebarNavItem }) {
-  if (item.icon === "notifications") return <NotificationNavItem initialCount={item.badge ?? 0} active={item.active} />;
-  const Icon = navIcons[item.icon ?? "dashboard"];
-  if (!item.children?.length) return (
-    <SidebarMenuItem>
-      <SidebarMenuButton asChild isActive={item.active} tooltip={item.label}>
-        <Link href={item.href}><Icon aria-hidden="true" /><span>{item.label}</span></Link>
-      </SidebarMenuButton>
-      {item.badge ? <SidebarMenuBadge aria-label={`${item.badge} pendente${item.badge === 1 ? "" : "s"}`}>{item.badge}</SidebarMenuBadge> : null}
-    </SidebarMenuItem>
-  );
+  const { isMobile, setOpenMobile } = useSidebar();
+  const handleNavClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
-  return (
-    <Collapsible key={`${item.href}-${item.active}`} asChild defaultOpen={item.active} className="group/collapsible">
+  if (item.icon === "notifications") {
+    return (
+      <div onClick={handleNavClick}>
+        <NotificationNavItem initialCount={item.badge ?? 0} active={item.active} />
+      </div>
+    );
+  }
+
+  const Icon = navIcons[item.icon ?? "dashboard"];
+  if (!item.children?.length) {
+    return (
       <SidebarMenuItem>
         <SidebarMenuButton asChild isActive={item.active} tooltip={item.label}>
-          <Link href={item.href}><Icon aria-hidden="true" /><span>{item.label}</span></Link>
+          <Link href={item.href} onClick={handleNavClick}>
+            <Icon aria-hidden="true" />
+            <span>{item.label}</span>
+          </Link>
+        </SidebarMenuButton>
+        {item.badge ? (
+          <SidebarMenuBadge aria-label={`${item.badge} pendente${item.badge === 1 ? "" : "s"}`}>
+            {item.badge}
+          </SidebarMenuBadge>
+        ) : null}
+      </SidebarMenuItem>
+    );
+  }
+
+  return (
+    <Collapsible
+      key={`${item.href}-${item.active}`}
+      asChild
+      defaultOpen={item.active}
+      className="group/collapsible"
+    >
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild isActive={item.active} tooltip={item.label}>
+          <Link href={item.href} onClick={handleNavClick}>
+            <Icon aria-hidden="true" />
+            <span>{item.label}</span>
+          </Link>
         </SidebarMenuButton>
         <CollapsibleTrigger asChild>
           <SidebarMenuAction aria-label={`Alternar submenu de ${item.label}`}>
-            <ChevronRight aria-hidden="true" className="transition-transform group-data-[state=open]/collapsible:rotate-90" />
+            <ChevronRight
+              aria-hidden="true"
+              className="transition-transform group-data-[state=open]/collapsible:rotate-90"
+            />
           </SidebarMenuAction>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <SidebarMenuSub>
-            {item.children.map((child) => <SidebarMenuSubItem key={child.href}><SidebarMenuSubButton asChild isActive={child.active}><Link href={child.href}><span>{child.label}</span></Link></SidebarMenuSubButton></SidebarMenuSubItem>)}
+            {item.children.map((child) => (
+              <SidebarMenuSubItem key={child.href}>
+                <SidebarMenuSubButton asChild isActive={child.active}>
+                  <Link href={child.href} onClick={handleNavClick}>
+                    <span>{child.label}</span>
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            ))}
           </SidebarMenuSub>
         </CollapsibleContent>
       </SidebarMenuItem>

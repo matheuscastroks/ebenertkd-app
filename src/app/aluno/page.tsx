@@ -236,8 +236,8 @@ export default async function StudentPage() {
                 )}
               </p>
             </div>
-            <div className="shrink-0">
-              <Button asChild size="sm" variant={isProofUnderReview ? "outline" : "default"}>
+            <div className="w-full shrink-0 sm:w-auto">
+              <Button asChild size="sm" className="w-full sm:w-auto" variant={isProofUnderReview ? "outline" : "default"}>
                 <Link href={ROUTES.studentBilling}>
                   <CreditCard className="size-4" aria-hidden="true" />
                   {isProofUnderReview ? "Ver pagamento" : "Pagar via PIX / Enviar comprovante"}

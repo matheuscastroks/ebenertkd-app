@@ -40,16 +40,20 @@ export function DashboardShell({
 }: DashboardShellProps) {
   return (
     <>
-      <header className="flex flex-col gap-4 pb-2 md:flex-row md:items-start md:justify-between">
-        <div className="flex items-start gap-3">
-          <SidebarTrigger className="mt-0.5 shrink-0" />
-          <div className="space-y-1">
+      <header className="flex flex-col gap-3 pb-2 md:flex-row md:items-start md:justify-between">
+        <div className="flex items-start gap-3 min-w-0">
+          <SidebarTrigger className="mt-0.5 size-9 shrink-0 md:size-8" />
+          <div className="space-y-1 min-w-0 flex-1">
             {breadcrumbs ? <PageBreadcrumb items={breadcrumbs} /> : null}
-            <h1 className="font-display text-2xl font-bold tracking-tight md:text-3xl">{title}</h1>
-            <p className="text-sm text-muted-foreground">{subtitle}</p>
+            <h1 className="font-display text-xl font-bold tracking-tight sm:text-2xl md:text-3xl break-words">
+              {title}
+            </h1>
+            <p className="text-xs text-muted-foreground sm:text-sm">{subtitle}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">{headerActions}</div>
+        {headerActions ? (
+          <div className="flex flex-wrap items-center gap-2 pl-12 md:pl-0">{headerActions}</div>
+        ) : null}
       </header>
       <div className="space-y-6">{children}</div>
     </>
