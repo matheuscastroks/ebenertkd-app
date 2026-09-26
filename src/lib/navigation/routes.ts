@@ -5,7 +5,7 @@ export const ROUTES = {
   notifications: "/avisos",
   admin: "/admin",
   adminEnrollments: "/admin/matriculas",
-  adminStudentAccess: "/admin/alunos/acessos",
+  adminStudentAccess: "/admin/matriculas/acessos",
   adminClasses: "/admin/turmas",
   adminExams: "/admin/exames",
   studentAttendance: "/aluno/frequencia",
