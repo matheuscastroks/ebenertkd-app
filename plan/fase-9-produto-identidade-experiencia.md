@@ -78,6 +78,14 @@ Frases curtas, verbos específicos e termos da academia. Não usar ID, capabilit
 
 **Aceite:** marca rastreável à referência, temas coerentes, logo legível e glossário aplicado sem modificar regras.
 
+### Critérios de identidade (referência do curso)
+
+A marca existe e é forte (laranja `#F98E03`, Chakra Petch, universo de faixas), mas a decisão vigente mantém Neutral/Poppins. Ao implementar 9P.1, avaliar explicitamente:
+
+- [ ] **Especificidade do conteúdo**: os tokens escolhidos servem ao conteúdo da academia ou a qualquer SaaS genérico? Se o app não se diferencia visualmente de um template shadcn padrão, documentar o motivo da escolha e a eventual migração futura.
+- [ ] **Equilíbrio pragmático vs. poético**: onde o design puramente funcional pode incorporar elementos da identidade TKD sem sacrificar clareza? Candidatos: cor de progresso da matrícula, destaque da faixa do aluno, cor de ação na sidebar.
+- [ ] **Hierarquia tipográfica com propósito**: se uma fonte de marca (Chakra Petch) existir, ela comunica "este é o Ebener TKD" em títulos/marca, enquanto a fonte de conteúdo (Poppins ou Inter) mantém legibilidade operacional. Fonte única aplana a personalidade.
+
 ## 9P.2 — Estrutura, sidebar e conta
 
 **Alterar:** `dashboard-shell.tsx`, `portal-shell.tsx`, `app-sidebar.tsx`, `active-sidebar.tsx` em `src/components/dashboard/`, `src/lib/navigation/routes.ts` e testes associados.
@@ -125,6 +133,16 @@ Frases curtas, verbos específicos e termos da academia. Não usar ID, capabilit
 - [ ] Revalidar elegibilidade e autorização no servidor e apresentar consequência da troca de acesso antes da confirmação; preservar regras de vínculo familiar existentes.
 
 **Aceite:** nenhuma configuração aleatória na visão geral; indicadores correspondem a dados reais; falha em um bloco não elimina os demais.
+
+### Checklist de análise por tela (critérios do curso)
+
+Aplicar a cada dashboard alterado antes de marcar concluído:
+
+| Tela | Hierarquia (o mais importante tem mais destaque?) | Estrutura invisível (conteúdo > containers?) | Propósito (cada elemento tem função clara?) |
+| --- | --- | --- | --- |
+| Professor | Tarefas pendentes (matrículas, comprovantes) devem ter mais destaque que métricas informativas | Remover Card "Próximos passos" se os links forem sempre os mesmos — se não é contextual, é ruído | Gráfico de tendência não responde pergunta operacional; mover para relatório |
+| Aluno | Próxima aula e faixa são a informação principal — devem liderar visualmente | "Tudo em dia" não pode estar no mesmo nível visual que uma dívida em aberto | Link "Cadastrar dependente" tem propósito mas pode confundir no contexto do treino |
+| Responsável | Dependente selecionado + suas pendências — sem mistura entre irmãos | Avatar com foto diferencia irmãos; sem foto, a tela é ambígua | Resumo só mostra dados que levam a uma ação; dados decorativos são ruído |
 
 ## 9P.5 — Financeiro do professor, aluno e responsável
 

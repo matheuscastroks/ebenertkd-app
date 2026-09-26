@@ -59,6 +59,27 @@ Esta revisão complementa a Fase 9 e precede a Fase 10. Não substitui os gates 
 
 Ordem: R0 → R1 → R2 → R3 → R4 → R5 → R6. Marcar concluído somente com evidência. Os commits abaixo são propostas para a implementação futura.
 
+### Critérios transversais de qualidade UI/UX
+
+Estes critérios devem ser verificados em cada subfase. Derivam de princípios de design centrado no usuário e complementam os requisitos funcionais.
+
+**Familiaridade e convenções:**
+- Padrões esperados: o usuário traz bagagem de interações do mundo real e digital. Cada controle deve ser intuitivo sem manual — botões são botões, menus são menus, campos comportam-se como campos.
+- Causa e efeito: toda interação produz retorno imediato. Clique → mudança visual; filtro → atualização sem perda de contexto; submissão → progresso visível. Nunca "nada acontece".
+- Consistência sistêmica: se um padrão de interação existe em uma tela, ele é idêntico em todas. Filtros, feedback, confirmações e navegação seguem a mesma lógica.
+- Sensação de segurança: o usuário explora sem medo. Ações reversíveis permitem desfazer; ações irreversíveis mostram consequência antes de confirmar. Incluir opções de confirmação com contexto ("Rejeitar matrícula de João — documentos precisam de correção").
+
+**Identidade — evitar design genérico:**
+- Especificidade de conteúdo: o layout é moldado pelo conteúdo, não o contrário. Perguntar: "este formato faz sentido para esta informação específica?"
+- Identidade visual reconhecível: funcional e familiar, mas com voz própria. Paleta, tipografia e elementos visuais devem comunicar "este é o Ebener TKD", não "este é qualquer app".
+- Equilíbrio pragmático vs. poético: nem puramente funcional (entediante), nem abstrato (confuso). Elementos como faixa do aluno, progresso de matrícula e calendário de frequência são oportunidades de personalidade sem sacrificar clareza.
+
+**Checklist por tela alterada:**
+1. Hierarquia: o mais importante ocupa mais espaço ou tem mais destaque?
+2. Estrutura invisível: o usuário foca no conteúdo, não na interface?
+3. Propósito: cada elemento tem função clara que ajuda o objetivo da jornada?
+
+
 ### R0 — Baseline e inventário
 
 - [ ] Registrar commit, ambiente, perfis disponíveis e limites de autenticação em `docs/ux/general-review.md`.
@@ -92,7 +113,7 @@ Ordem: R0 → R1 → R2 → R3 → R4 → R5 → R6. Marcar concluído somente c
 - [ ] Listagens usam o gutter; campos recebem largura proporcional ao conteúdo. Evitar `max-w-*` aninhado. Texto contratual extenso pode manter limite de leitura.
 - [ ] Acessos: busca → contas → ação contextual. Converter a transição de menores em modal responsivo, retirando o formulário permanente da área principal.
 
-**Aceite:** objetivo e ação principal claros; wireframes cobrem mobile e falhas. Commit sugerido: `docs: define task-oriented page wireframes`.
+**Aceite:** objetivo e ação principal claros; wireframes cobrem mobile e falhas. Aplicar checklist por tela: hierarquia (destaque proporcional à importância), estrutura invisível (conteúdo > containers), propósito (nenhum elemento sem função clara). Commit sugerido: `docs: define task-oriented page wireframes`.
 
 ### R3 — Componentes e linguagem
 
@@ -106,7 +127,7 @@ Ordem: R0 → R1 → R2 → R3 → R4 → R5 → R6. Marcar concluído somente c
 
 **Teste de comportamento:** envio atrasado mostra espera e impede segundo envio; falha preserva valores e orienta correção; documento recusado exibe estado em português e motivo intacto.
 
-**Aceite:** operações equivalentes têm controles e feedback equivalentes. Commit sugerido: `refactor: unify forms and user-facing feedback`.
+**Aceite:** operações equivalentes têm controles e feedback equivalentes. Verificar causa e efeito: toda interação produz retorno visual imediato. Verificar consistência: mesma lógica visual em todas as telas — se um padrão existe em matrículas, ele é idêntico no financeiro. Commit sugerido: `refactor: unify forms and user-facing feedback`.
 
 ### R4 — Telas e carregamento local
 
@@ -132,7 +153,7 @@ Ordem: R0 → R1 → R2 → R3 → R4 → R5 → R6. Marcar concluído somente c
 - [ ] Conferir View Transition em ambos os sentidos, seguir dispositivo, movimento reduzido e navegador sem suporte; registrar verificação visual além do fallback unitário.
 - [ ] Executar axe/Lighthouse no ambiente de teste, guardar relatório sanitizado e revisar violações com impacto na tarefa.
 
-**Aceite:** sem impedimento de tarefa por teclado, foco, toque, contraste ou zoom; evidências e limitações registradas. Commit sugerido: `fix: address product accessibility findings`.
+**Aceite:** sem impedimento de tarefa por teclado, foco, toque, contraste ou zoom; evidências e limitações registradas. Verificar sensação de segurança: ações destrutivas mostram consequência com nome/valor/contexto; ações reversíveis oferecem opção de desfazer. Verificar identidade: o app é reconhecível como Ebener TKD, não como template genérico. Commit sugerido: `fix: address product accessibility findings`.
 
 ### R6 — Piloto e encerramento
 
@@ -176,5 +197,11 @@ O relatório registra versão/ambiente, perfil/tarefa, passos, esperado/observad
 - [ ] Acessibilidade automatizada/manual tem evidência e limitações explícitas.
 - [ ] Piloto e E2E autenticado possuem resultados; gates pendentes não são marcados como aprovados.
 - [ ] Autorização, dados privados e regras contratuais/financeiras preservados.
+- [ ] Toda interação produz retorno visual imediato (causa e efeito verificado).
+- [ ] Padrões de interação são idênticos entre telas equivalentes (consistência sistêmica).
+- [ ] Ações destrutivas mostram consequência com contexto; ações reversíveis permitem desfazer (sensação de segurança).
+- [ ] Cada tela é moldada para seu conteúdo específico, não para um template genérico (especificidade de conteúdo).
+- [ ] O app é visualmente reconhecível como Ebener TKD (identidade verificada).
+- [ ] Hierarquia, estrutura invisível e propósito verificados por tela (checklist de análise aplicado).
 
 **Primeiro bloco recomendado:** R0 e R1. Jornadas orientam wireframes; reorganização visual começa após R2.
