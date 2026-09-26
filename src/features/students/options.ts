@@ -20,12 +20,7 @@ export const DAN_BELT_OPTIONS = [
 export type GubOption = (typeof GUB_BELT_OPTIONS)[number]["gub"];
 export type BeltOption =
   | (typeof GUB_BELT_OPTIONS)[number]["belt"]
-  | (typeof DAN_BELT_OPTIONS)[number]["belt"]
-  | "Cinza"
-  | "Laranja"
-  | "Verde escura"
-  | "Azul escura"
-  | "Vermelha escura";
+  | (typeof DAN_BELT_OPTIONS)[number]["belt"];
 
 export const GUB_OPTIONS = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1] as const;
 export const BELT_OPTIONS = [
@@ -42,18 +37,18 @@ export const BELT_OPTIONS = [
   "Preta",
   "Preta 1º Dan",
   "Preta 2º Dan",
-  "Preta 3º Dan",
-  // Aliases legados para compatibilidade com registros anteriores
-  "Cinza",
-  "Laranja",
-  "Verde escura",
-  "Azul escura",
-  "Vermelha escura"
+  "Preta 3º Dan"
 ] as const;
 export const DUE_DAY_OPTIONS = [5, 10, 15, 20, 25, 30] as const;
 
 export function beltForGub(gub: number) {
   return GUB_BELT_OPTIONS.find((option) => option.gub === gub)?.belt;
+}
+
+export function poomsaeForGub(gub: number) {
+  const gubItem = GUB_BELT_OPTIONS.find((option) => option.gub === gub);
+  if (gubItem) return gubItem.poomsae;
+  return DAN_BELT_OPTIONS[0]?.poomsae ?? "Koryo";
 }
 
 export function gubForBelt(belt: string) {
@@ -63,17 +58,17 @@ export function gubForBelt(belt: string) {
   );
   if (direct) return direct.gub;
 
-  // Aliases e nomes convencionais
+  // Nomes em inglês ou variações diretas
   if (normalized === "white" || normalized === "branca") return 10;
-  if (normalized === "cinza" || normalized === "yellow tip" || normalized === "ponta amarela" || normalized === "branca ponta amarela") return 9;
+  if (normalized === "yellow tip" || normalized === "ponta amarela" || normalized === "branca ponta amarela") return 9;
   if (normalized === "amarela" || normalized === "yellow") return 8;
-  if (normalized === "laranja" || normalized === "green tip" || normalized === "ponta verde" || normalized === "amarela ponta verde") return 7;
+  if (normalized === "green tip" || normalized === "ponta verde" || normalized === "amarela ponta verde") return 7;
   if (normalized === "verde" || normalized === "green") return 6;
-  if (normalized === "verde escura" || normalized === "blue tip" || normalized === "ponta azul" || normalized === "verde ponta azul") return 5;
+  if (normalized === "blue tip" || normalized === "ponta azul" || normalized === "verde ponta azul") return 5;
   if (normalized === "azul" || normalized === "blue") return 4;
-  if (normalized === "azul escura" || normalized === "red tip" || normalized === "ponta vermelha" || normalized === "azul ponta vermelha") return 3;
+  if (normalized === "red tip" || normalized === "ponta vermelha" || normalized === "azul ponta vermelha") return 3;
   if (normalized === "vermelha" || normalized === "red") return 2;
-  if (normalized === "vermelha escura" || normalized === "black tip" || normalized === "ponta preta" || normalized === "vermelha ponta preta") return 1;
+  if (normalized === "black tip" || normalized === "ponta preta" || normalized === "vermelha ponta preta") return 1;
   if (normalized.includes("preta") || normalized.includes("black") || normalized.includes("dan")) return 0;
   return undefined;
 }

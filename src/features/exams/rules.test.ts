@@ -4,7 +4,7 @@ import type { BeltHistory } from "@/features/exams/types";
 
 describe("exam rules", () => {
   it("accepts only the next coherent GUB and belt", () => {
-    expect(() => assertNextGraduation(6, 5, "Verde escura")).not.toThrow();
+    expect(() => assertNextGraduation(6, 5, "Ponta Azul")).not.toThrow();
     expect(() => assertNextGraduation(6, 4, "Azul")).toThrow("exam_graduation_must_be_next");
     expect(() => assertNextGraduation(6, 5, "Azul")).toThrow("exam_graduation_mismatch");
   });

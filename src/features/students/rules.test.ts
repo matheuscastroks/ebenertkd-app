@@ -13,7 +13,7 @@ describe("enrollment rules", () => {
     expect(beltForGub(8)).toBe("Amarela");
     expect(beltForGub(5)).toBe("Ponta Azul");
     expect(gubForBelt("Ponta Preta")).toBe(1);
-    expect(gubForBelt("Vermelha escura")).toBe(1);
+    expect(gubForBelt("Ponta Vermelha")).toBe(3);
     expect(graduationMatches(4, "Azul")).toBe(true);
     expect(graduationMatches(4, "Vermelha")).toBe(false);
   });
@@ -28,13 +28,13 @@ describe("enrollment rules", () => {
     expect(validateSubmission({
       fullName: "Aluno Teste", cpf: "529.982.247-25", birthDate: "2000-01-01", whatsapp: "11999999999",
       address: "Rua de Teste, 100", emergencyContactName: "Contato Teste", emergencyContactRelationship: "Familiar",
-      emergencyContactPhone: "11988888888", startedAtTkd: "2025-01-01", currentBelt: "Cinza", gub: 9,
+      emergencyContactPhone: "11988888888", startedAtTkd: "2025-01-01", currentBelt: "Ponta Amarela", gub: 9,
       healthCondition: "no", trainingClassId: "class-test", requestedDueDay: 10
     }).success).toBe(true);
     expect(validateSubmission({
       fullName: "Aluno Teste", cpf: "52998224725", birthDate: "2000-01-01", whatsapp: "11999999999",
       address: "Rua de Teste, 100", emergencyContactName: "Contato Teste", emergencyContactRelationship: "Familiar",
-      emergencyContactPhone: "11988888888", startedAtTkd: "2025-01-01", currentBelt: "Cinza", gub: 10,
+      emergencyContactPhone: "11988888888", startedAtTkd: "2025-01-01", currentBelt: "Ponta Amarela", gub: 10,
       healthCondition: "no", trainingClassId: "class-test", requestedDueDay: 12
     }).success).toBe(false);
     expect(validateSubmission({
