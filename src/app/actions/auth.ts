@@ -77,13 +77,29 @@ export async function promoteMinorAction(formData: FormData) {
   const minorProfileId = String(formData.get("minor_profile_id") ?? "").trim();
   const parsedEmail = recoverySchema.safeParse({ email: formData.get("email") });
   const retainGuardianAccess = formData.get("retain_guardian_access") === "on";
-  if (!minorProfileId || !parsedEmail.success) redirect(`${ROUTES.adminStudentAccess}?error=promotion`);
+
+  const returnParams = new URLSearchParams();
+  const q = String(formData.get("q") ?? "").trim();
+  const page = String(formData.get("page") ?? "").trim();
+  if (q) returnParams.set("q", q);
+  if (page && page !== "1") returnParams.set("page", page);
+
+  const buildUrl = (extra: Record<string, string>) => {
+    const params = new URLSearchParams(returnParams);
+    for (const [key, value] of Object.entries(extra)) {
+      params.set(key, value);
+    }
+    const qs = params.toString();
+    return qs ? `${ROUTES.adminStudentAccess}?${qs}` : ROUTES.adminStudentAccess;
+  };
+
+  if (!minorProfileId || !parsedEmail.success) redirect(buildUrl({ error: "promotion" }));
   try {
     await promoteMinorToAdult(minorProfileId, parsedEmail.data.email, admin.account_id, retainGuardianAccess);
   } catch {
-    redirect(`${ROUTES.adminStudentAccess}?error=promotion`);
+    redirect(buildUrl({ error: "promotion" }));
   }
-  redirect(`${ROUTES.adminStudentAccess}?promoted=1`);
+  redirect(buildUrl({ promoted: "1" }));
 }
 
 export async function registerAdultAction(formData: FormData) {
