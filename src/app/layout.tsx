@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Inter, Chakra_Petch } from "next/font/google";
+import { Poppins } from "next/font/google";
 import { RegisterServiceWorker } from "@/components/pwa/register-sw";
 import { AppwriteConnectionCheck } from "@/components/appwrite/appwrite-connection-check";
 import "./globals.css";
@@ -8,15 +8,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 
-const inter = Inter({
+const poppins = Poppins({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
   variable: "--font-body"
-});
-
-const chakraPetch = Chakra_Petch({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-display"
 });
 
 export const metadata: Metadata = {
@@ -31,7 +27,7 @@ type RootLayoutProps = {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body className={`${inter.variable} ${chakraPetch.variable}`}>
+      <body className={poppins.variable}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <TooltipProvider>
             <AppwriteConnectionCheck />

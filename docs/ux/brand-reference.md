@@ -1,5 +1,13 @@
 # Referência de marca — Ebener TKD
 
+## Decisão vigente — 26/09/2026
+
+Por solicitação do usuário, o produto voltou à paleta **Neutral padrão do shadcn/ui**, conforme `components.json` e https://ui.shadcn.com/docs/theming. Os tokens base usam OKLCH e os componentes recebem as mesmas cores semânticas nos temas claro e escuro. As personalizações anteriores em laranja/zinc abaixo ficam como histórico, não como instrução para novas telas.
+
+**Poppins** é a fonte única de títulos e conteúdo, carregada por `next/font/google` nos pesos 400, 500, 600 e 700. Chakra Petch e Inter foram removidas. A logo permanece; a troca de tema mantém View Transition com respeito a movimento reduzido. Cores de status continuam limitadas a sucesso, aviso, informação e erro.
+
+## Referência histórica do site
+
 Fonte confirmada pelo usuário: https://ebenertkd.com.br/.
 Inspeção em 24/09/2026: HTML e CSS públicos, sem captura visual nesta etapa.
 Folha consultada: https://ebenertkd.com.br/_next/static/chunks/0s54op61ilmva.css. O nome do arquivo pode mudar em novos deployments.
