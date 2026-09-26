@@ -56,6 +56,26 @@ export async function advanceToSignatureAction(formData: FormData) {
   redirect(reviewPath(studentId, "?updated=signature"));
 }
 
+import { formatAddress } from "@/lib/address";
+
+function extractAddress(formData: FormData): string | undefined {
+  const address = String(formData.get("address") ?? "").trim();
+  if (address) return address;
+
+  const street = String(formData.get("address_street") ?? "").trim();
+  const number = String(formData.get("address_number") ?? "").trim();
+  const complement = String(formData.get("address_complement") ?? "").trim();
+  const neighborhood = String(formData.get("address_neighborhood") ?? "").trim();
+  const city = String(formData.get("address_city") ?? "").trim();
+  const state = String(formData.get("address_state") ?? "").trim();
+  const cep = String(formData.get("address_cep") ?? "").trim();
+
+  if (street || number || city || cep) {
+    return formatAddress({ street, number, complement, neighborhood, city, state, cep }) || undefined;
+  }
+  return undefined;
+}
+
 export async function adminUpdateStudentAction(formData: FormData) {
   const admin = await requireProfile("admin");
   const studentId = String(formData.get("student_id") ?? "");
@@ -65,7 +85,7 @@ export async function adminUpdateStudentAction(formData: FormData) {
       cpf: String(formData.get("cpf") ?? "") || undefined,
       birthDate: String(formData.get("birth_date") ?? "") || undefined,
       whatsapp: String(formData.get("whatsapp") ?? "") || undefined,
-      address: String(formData.get("address") ?? "") || undefined,
+      address: extractAddress(formData),
       emergencyContactName: String(formData.get("emergency_contact_name") ?? "") || undefined,
       emergencyContactRelationship: String(formData.get("emergency_contact_relationship") ?? "") || undefined,
       emergencyContactPhone: String(formData.get("emergency_contact_phone") ?? "") || undefined,

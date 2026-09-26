@@ -6,6 +6,7 @@ import { adminUpdateStudentAction } from "@/app/actions/enrollment-review";
 import { DateField } from "@/components/shared/date-field";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { PhoneField } from "@/components/shared/phone-field";
+import { AddressFields } from "@/components/shared/address-fields";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -171,14 +172,7 @@ export function EditStudentDialog({
               </div>
 
               <div className="sm:col-span-2">
-                <Field>
-                  <FieldLabel htmlFor="edit-address">Endereço residencial</FieldLabel>
-                  <Input
-                    id="edit-address"
-                    name="address"
-                    defaultValue={student.address ?? ""}
-                  />
-                </Field>
+                <AddressFields defaultValue={student.address} />
               </div>
             </div>
           </div>

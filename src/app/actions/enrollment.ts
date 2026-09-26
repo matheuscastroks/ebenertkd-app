@@ -7,8 +7,27 @@ import { uploadStudentDocument } from "@/features/students/document-service";
 import { saveEnrollmentDraft } from "@/features/students/enrollment-service";
 import { requireProfile } from "@/lib/auth/session";
 import type { BeltOption } from "@/features/students/options";
+import { formatAddress } from "@/lib/address";
 import type { Profile } from "@/features/auth/types";
 import { guardianEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
+
+function extractAddress(formData: FormData): string | undefined {
+  const address = String(formData.get("address") ?? "").trim();
+  if (address) return address;
+
+  const street = String(formData.get("address_street") ?? "").trim();
+  const number = String(formData.get("address_number") ?? "").trim();
+  const complement = String(formData.get("address_complement") ?? "").trim();
+  const neighborhood = String(formData.get("address_neighborhood") ?? "").trim();
+  const city = String(formData.get("address_city") ?? "").trim();
+  const state = String(formData.get("address_state") ?? "").trim();
+  const cep = String(formData.get("address_cep") ?? "").trim();
+
+  if (street || number || city || cep) {
+    return formatAddress({ street, number, complement, neighborhood, city, state, cep }) || undefined;
+  }
+  return undefined;
+}
 
 function enrollmentInput(formData: FormData) {
   const value = (key: string) => String(formData.get(key) ?? "");
@@ -17,7 +36,7 @@ function enrollmentInput(formData: FormData) {
     cpf: value("cpf"),
     birthDate: value("birth_date"),
     whatsapp: value("whatsapp"),
-    address: value("address") || undefined,
+    address: extractAddress(formData),
     emergencyContactName: value("emergency_contact_name"),
     emergencyContactRelationship: value("emergency_contact_relationship"),
     emergencyContactPhone: value("emergency_contact_phone"),

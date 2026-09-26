@@ -7,6 +7,7 @@ import { DateField } from "@/components/shared/date-field";
 import { FileField } from "@/components/shared/file-field";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { PhoneField } from "@/components/shared/phone-field";
+import { AddressFields } from "@/components/shared/address-fields";
 import { StatusBadge } from "@/components/shared/status-badge";
 import {
   Attachment,
@@ -274,16 +275,12 @@ export function EnrollmentForm({
                   placeholder="(21) 9 6518-8988"
                 />
               </div>
-              <FormField className="sm:col-span-12">
-                <FieldLabel htmlFor="enrollment-address">Endereço completo *</FieldLabel>
-                <Textarea
-                  id="enrollment-address"
-                  name="address"
-                  defaultValue={student.address ?? ""}
-                  required
-                  rows={2}
+              <div className="sm:col-span-12">
+                <AddressFields
+                  defaultValue={student.address}
+                  required={!isDraft}
                 />
-              </FormField>
+              </div>
             </div>
           </Section>
 
@@ -543,6 +540,7 @@ export function EnrollmentForm({
               variant="outline"
               formAction={saveEnrollmentDraftAction}
               pendingLabel="Salvando…"
+              formNoValidate
             >
               Salvar rascunho
             </FormSubmitButton>
@@ -558,6 +556,7 @@ export function EnrollmentForm({
             <FormSubmitButton
               formAction={saveEnrollmentDraftAction}
               pendingLabel="Salvando alterações…"
+              formNoValidate
             >
               Salvar alterações
             </FormSubmitButton>
