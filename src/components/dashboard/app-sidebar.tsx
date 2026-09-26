@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Activity, Award, Bell, Building2, CalendarCheck2, ChevronRight, ClipboardList, FileSignature, LayoutDashboard, UserRound, UsersRound, WalletCards } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
@@ -17,11 +18,11 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  SidebarRail
+  SidebarRail,
+  SidebarSeparator
 } from "@/components/ui/sidebar";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogoutButton } from "@/components/dashboard/logout-button";
+import { AccountMenu } from "@/components/dashboard/account-menu";
+import { NotificationNavItem } from "@/components/dashboard/notification-nav-item";
 import type { SidebarNavItem } from "@/lib/navigation/routes";
 
 export type AppSidebarNavItem = SidebarNavItem;
@@ -41,6 +42,7 @@ const navIcons = {
 };
 
 function NavigationItem({ item }: { item: AppSidebarNavItem }) {
+  if (item.icon === "notifications") return <NotificationNavItem initialCount={item.badge ?? 0} active={item.active} />;
   const Icon = navIcons[item.icon ?? "dashboard"];
   if (!item.children?.length) return (
     <SidebarMenuItem>
@@ -82,39 +84,31 @@ export function AppSidebar({
   profileName: string;
 }) {
   const groups = Array.from(new Set(navItems.map((item) => item.group ?? "Principal")));
-  const initials = profileName.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
+      <SidebarHeader className="px-3 pb-5 pt-6">
         <div className="flex items-center gap-2">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary font-display text-sm font-bold text-primary-foreground">E</div>
+          <Image src="/brand-icon.png" alt="Símbolo da Ebener TKD" width={44} height={44} unoptimized className="size-11 shrink-0 object-contain group-data-[collapsible=icon]:size-6" />
           <div className="min-w-0 flex-1 space-y-1 group-data-[collapsible=icon]:hidden">
-            <p className="text-sm font-semibold">Ebenert KD</p>
-            <p className="text-xs text-muted-foreground">{badge}</p>
+            <p className="font-display text-sm font-bold tracking-wide">Ebener TKD</p>
+            <p className="text-xs text-muted-foreground">Sua academia</p>
           </div>
-          <Badge variant="outline" className="rounded-md group-data-[collapsible=icon]:hidden">
-            PWA
-          </Badge>
         </div>
       </SidebarHeader>
 
       <SidebarContent>
-        {groups.map((group) => <SidebarGroup key={group}>
+        {groups.map((group, index) => <div key={group}>{index > 0 ? <SidebarSeparator /> : null}<SidebarGroup>
           <SidebarGroupLabel>{group}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.filter((item) => (item.group ?? "Principal") === group).map((item) => <NavigationItem key={item.href} item={item} />)}
             </SidebarMenu>
           </SidebarGroupContent>
-        </SidebarGroup>)}
+        </SidebarGroup></div>)}
       </SidebarContent>
 
-      <SidebarFooter>
-        <div className="flex items-center gap-3 rounded-lg border bg-muted/40 p-2">
-          <Avatar size="sm"><AvatarFallback>{initials}</AvatarFallback></Avatar>
-          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden"><p className="truncate text-sm font-medium">{profileName}</p><p className="text-xs text-muted-foreground">{badge}</p></div>
-          <div className="group-data-[collapsible=icon]:hidden"><LogoutButton compact /></div>
-        </div>
+      <SidebarFooter className="p-3">
+        <AccountMenu name={profileName} badge={badge} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

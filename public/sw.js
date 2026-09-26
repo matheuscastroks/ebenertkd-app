@@ -4,8 +4,7 @@ const OFFLINE_URL = "/offline.html";
 const PUBLIC_ASSETS = [
   OFFLINE_URL,
   "/manifest.webmanifest",
-  "/icons/icon-192.svg",
-  "/icons/icon-512.svg",
+  "/brand-icon.png",
 ];
 
 self.addEventListener("install", (event) => {
@@ -51,8 +50,8 @@ self.addEventListener("push", (event) => {
 
   event.waitUntil(self.registration.showNotification(payload.title ?? "Ebenert KD", {
     body: payload.body ?? "Você tem um novo aviso no aplicativo.",
-    icon: "/icons/icon-192.svg",
-    badge: "/icons/icon-192.svg",
+    icon: "/brand-icon.png",
+    badge: "/brand-icon.png",
     data: { url: payload.url ?? "/avisos" },
     tag: payload.tag,
   }));

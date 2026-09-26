@@ -3,9 +3,10 @@ import { navigationForProfile, ROUTES } from "@/lib/navigation/routes";
 
 describe("navigationForProfile", () => {
   it("builds the admin hierarchy with server-provided counts", () => {
-    const items = navigationForProfile({ role: "admin", capabilities: ["admin"] }, { enrollments: 4 });
+    const items = navigationForProfile({ role: "admin", capabilities: ["admin"] }, { enrollments: 4, notifications: 2 });
     expect(items.find((item) => item.href === ROUTES.adminEnrollments)?.badge).toBe(4);
     expect(items.find((item) => item.href === ROUTES.notifications)?.icon).toBe("notifications");
+    expect(items.find((item) => item.href === ROUTES.notifications)?.badge).toBe(2);
     expect(items.find((item) => item.href === ROUTES.adminContracts)?.children?.map((item) => item.href)).toEqual([
       ROUTES.adminContracts,
       ROUTES.adminContractTemplate,
