@@ -1,0 +1,51 @@
+app:
+  - 'src/app/**'
+  - 'src/components/**'
+  - 'src/features/**'
+  - 'public/**'
+
+ci:
+  - '.github/**'
+  - '.github/workflows/**'
+
+infra:
+  - 'scripts/appwrite/**'
+  - 'appwrite/**'
+  - 'scripts/**'
+
+docs:
+  - 'docs/**'
+  - 'plan/**'
+  - '*.md'
+
+auth:
+  - 'src/**/auth/**'
+  - 'src/features/auth/**'
+
+notifications:
+  - 'src/**/notifications/**'
+  - 'src/features/notifications/**'
+
+billing:
+  - 'src/**/billing/**'
+  - 'src/features/billing/**'
+
+students:
+  - 'src/**/students/**'
+  - 'src/features/students/**'
+
+families:
+  - 'src/**/families/**'
+  - 'src/features/families/**'
+
+classes:
+  - 'src/**/classes/**'
+  - 'src/features/classes/**'
+
+contracts:
+  - 'src/**/contracts/**'
+  - 'src/features/contracts/**'
+
+exams:
+  - 'src/**/exams/**'
+  - 'src/features/exams/**'
