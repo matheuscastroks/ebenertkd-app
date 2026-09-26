@@ -1,5 +1,7 @@
 # Fase 9 — Refinamento de UI/UX Implementation Plan
 
+O detalhamento atual está em [Identidade e experiência de produto](./fase-9-produto-identidade-experiencia.md). Os problemas relatados pelo usuário autorizam priorizar essas correções agora, sem esperar o piloto geral. Checkboxes históricos abaixo não atestam que os novos critérios foram cumpridos.
+
 > **For agentic workers:** execute esta fase somente após o piloto. Mudanças visuais não podem alterar regras de negócio aprovadas.
 
 **Goal:** reduzir esforço e erros nos fluxos reais observados, melhorar acessibilidade e consolidar uma identidade visual adequada à academia.

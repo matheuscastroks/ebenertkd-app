@@ -310,7 +310,7 @@ function calculateCheckinWindow(
 
 ### 7.1 Direção visual
 
-Usar uma estética **dojang contemporâneo**: fundo claro quente, carvão, vermelho de selo e a cor da faixa atual como acento. A assinatura visual é uma trilha vertical inspirada no caminho do poomsae, com nós para presença, estudo e competências. Evitar estética de cassino, gradientes roxos genéricos e animações contínuas.
+Herdar a identidade Ebener TKD definida na [referência de marca](../docs/ux/brand-reference.md): laranja `#F98E03`, neutros claros, azul profundo no modo escuro e Chakra Petch nos títulos. A cor da faixa identifica a graduação sem substituir a cor principal das ações. A assinatura visual da jornada é uma trilha vertical inspirada no caminho do poomsae, com nós para presença, estudo e competências. Evitar animações contínuas e manter a densidade adequada ao painel.
 
 ### 7.2 Rotas
 

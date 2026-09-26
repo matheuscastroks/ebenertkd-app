@@ -22,6 +22,8 @@ O contrato transversal de componentes e as subfases de correção estão em [Ref
 
 ## Regras de execução
 
+A próxima prioridade de experiência é [Fase 9 — Identidade e experiência de produto](./fase-9-produto-identidade-experiencia.md), que detalha a auditoria de telas, sidebar, tokens, comunicação, carregamento local e CSP. Executar antes da Jornada gamificada. A [referência de marca](../docs/ux/brand-reference.md) documenta os tokens e fontes de https://ebenertkd.com.br/.
+
 - Trabalhar uma fase por vez e marcar os checkboxes somente após validação.
 - Antes de criar HTML ou componente visual próprio, consultar a matriz shadcn/ui; toda exceção deve explicar por que a primitive instalada não atende ao caso.
 - Manter primitives em `src/components/ui/`, composições reutilizáveis em `src/components/shared/` e regras de domínio em `src/features/`.
