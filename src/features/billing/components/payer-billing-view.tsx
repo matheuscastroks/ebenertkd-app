@@ -47,7 +47,31 @@ export function PayerBillingView({ charges, proofs, settings, profileId, initial
   const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   const changeView = (next: PayerChargeView) => { setView(next); setPage(1); };
 
-  const details = (charge: Charge) => <ResponsiveDialog trigger={<Button size="sm" variant="outline">Detalhes</Button>} title={charge.description} description={`Cobrança de ${charge.competence}.`}><ChargeDetails charge={charge} proof={proofs[charge.$id]} settings={settings} profileId={profileId} /></ResponsiveDialog>;
+  const details = (charge: Charge) => {
+    const isPayable = charge.status === "pending" || charge.status === "overdue";
+    const isReview = charge.status === "proof_under_review";
+    const triggerLabel = isPayable ? "Pagar via PIX" : isReview ? "Ver envio" : "Detalhes";
+    const triggerVariant = isPayable ? "default" : "outline";
+
+    return (
+      <ResponsiveDialog
+        trigger={
+          <Button size="sm" variant={triggerVariant} className="h-9 font-semibold touch-manipulation">
+            {triggerLabel}
+          </Button>
+        }
+        title={charge.description}
+        description={`Cobrança referente a ${charge.competence}.`}
+      >
+        <ChargeDetails
+          charge={charge}
+          proof={proofs[charge.$id]}
+          settings={settings}
+          profileId={profileId}
+        />
+      </ResponsiveDialog>
+    );
+  };
   return <div className="space-y-5">
     <div className="flex flex-wrap gap-2" aria-label="Filtrar pagamentos por situação">{views.map((option) => <Button key={option.value} type="button" variant={view === option.value ? "default" : "outline"} size="sm" onClick={() => changeView(option.value)} aria-pressed={view === option.value}>{option.label}</Button>)}</div>
     <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]"><InputGroup className="h-10"><InputGroupAddon><Search className="size-4" aria-hidden="true" /></InputGroupAddon><InputGroupInput aria-label="Buscar cobrança" placeholder="Buscar cobrança" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} /></InputGroup><Input aria-label="Filtrar por mês" type="month" value={competence} onChange={(event) => { setCompetence(event.target.value); setPage(1); }} /></div>

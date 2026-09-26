@@ -287,20 +287,20 @@ Cada tela e componente listado abaixo deve ser auditado e refinado seguindo os s
 ---
 
 ### Módulo 4: Gestão Financeira, PIX e Pagamentos
-- [ ] **4.1 Painel Financeiro do Professor (`src/app/admin/financeiro/page.tsx`, `src/features/billing/components/billing-table.tsx`, `billing-filters.tsx`, `charge-actions.tsx`):**
-  - [ ] Métricas de fluxo de caixa claras no topo: Recebido no mês, A receber, Em atraso, Comprovantes pendentes.
-  - [ ] Fila prioritária de comprovantes aguardando conferência com modal/drawer de visualização do anexo e aprovação em 1 clique.
-  - [ ] Tabela com versão adaptada para cards no mobile, busca por nome do aluno e filtro por competência.
-- [ ] **4.2 Configurações de PIX (`src/app/admin/financeiro/configuracoes/page.tsx`, `src/features/billing/components/pix-settings-dialog.tsx`):**
-  - [ ] Formulário modal para definir chave PIX (CPF/CNPJ, e-mail, telefone ou aleatória), nome do beneficiário e instruções.
-  - [ ] Pré-visualização do QR Code e teste da cópia da chave.
-- [ ] **4.3 Exportação Financeira (`src/app/admin/financeiro/exportar/page.tsx`):**
-  - [ ] Filtro de período e seleção de formato (CSV/planilha) com indicação do total de registros a exportar.
-- [ ] **4.4 Financeiro do Aluno / Responsável (`src/app/aluno/financeiro/page.tsx`, `src/app/responsavel/dependentes/[profileId]/financeiro/page.tsx`, `src/features/billing/components/payer-billing-view.tsx`, `copy-pix-button.tsx`):**
-  - [ ] Abas de filtro: Em aberto, Em análise, Pagos, Todos.
-  - [ ] Card de pagamento direto com chave PIX copia-e-cola e instruções da academia.
-  - [ ] Envio fácil de comprovante (foto do comprovante ou PDF) via gaveta inferior móvel (`Drawer`).
-  - [ ] Feedback visual imediato quando o comprovante for enviado e estiver em análise pelo professor.
+- [x] **4.1 Painel Financeiro do Professor (`src/app/admin/financeiro/page.tsx`, `src/features/billing/components/billing-table.tsx`, `billing-filters.tsx`, `charge-actions.tsx`):**
+  - [x] Métricas de fluxo de caixa claras no topo: Recebido no mês, A receber, Em atraso, Comprovantes pendentes.
+  - [x] Fila prioritária de comprovantes aguardando conferência com modal/drawer de visualização do anexo e aprovação em 1 clique.
+  - [x] Tabela com versão adaptada para cards no mobile, busca por nome do aluno e filtro por competência.
+- [x] **4.2 Configurações de PIX (`src/app/admin/financeiro/configuracoes/page.tsx`, `src/features/billing/components/pix-settings-dialog.tsx`):**
+  - [x] Formulário modal para definir chave PIX (CPF/CNPJ, e-mail, telefone ou aleatória), nome do beneficiário e instruções.
+  - [x] Pré-visualização do QR Code e teste da cópia da chave.
+- [x] **4.3 Exportação Financeira (`src/app/admin/financeiro/exportar/page.tsx`):**
+  - [x] Filtro de período e seleção de formato (CSV/planilha) com indicação do total de registros a exportar.
+- [x] **4.4 Financeiro do Aluno / Responsável (`src/app/aluno/financeiro/page.tsx`, `src/app/responsavel/dependentes/[profileId]/financeiro/page.tsx`, `src/features/billing/components/payer-billing-view.tsx`, `copy-pix-button.tsx`):**
+  - [x] Abas de filtro: Em aberto, Em análise, Pagos, Todos.
+  - [x] Card de pagamento direto com chave PIX copia-e-cola e instruções da academia.
+  - [x] Envio fácil de comprovante (foto do comprovante ou PDF) via gaveta inferior móvel (`Drawer`).
+  - [x] Feedback visual imediato quando o comprovante for enviado e estiver em análise pelo professor.
 
 ---
 
