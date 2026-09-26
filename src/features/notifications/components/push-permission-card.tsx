@@ -5,7 +5,6 @@ import { Bell, BellOff, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 import { revokePushSubscriptionAction, savePushSubscriptionAction } from "@/app/actions/notifications";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 function applicationServerKey(value: string) {
   const padding = "=".repeat((4 - value.length % 4) % 4);
@@ -55,17 +54,17 @@ export function PushPermissionCard({ configured, initiallyActive }: { configured
   });
 
   return (
-    <Card>
-      <CardHeader className="flex-row items-start gap-3">
+    <div className="space-y-4">
+      <div className="flex items-start gap-3">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><Smartphone aria-hidden="true" className="size-5" /></div>
-        <div><CardTitle className="text-base">Notificações neste celular</CardTitle><CardDescription>O conteúdo da tela bloqueada é sempre genérico. Os detalhes ficam protegidos no aplicativo.</CardDescription></div>
-      </CardHeader>
-      <CardContent className="space-y-3">
+        <div><p className="font-medium">Avisos no navegador</p><p className="text-sm text-muted-foreground">Os detalhes ficam protegidos no aplicativo.</p></div>
+      </div>
+      <div className="space-y-3">
         {!configured ? <p className="text-sm text-warning-foreground">O envio push ainda não foi configurado pelo administrador.</p> : null}
         {permission === "unsupported" ? <p className="text-sm text-muted-foreground">Este navegador não oferece suporte a notificações web.</p> : null}
         {permission === "denied" ? <p className="text-sm text-muted-foreground">A permissão está bloqueada nas configurações do navegador.</p> : null}
         {active ? <Button variant="outline" onClick={disable} disabled={pending}><BellOff aria-hidden="true" />Desativar neste dispositivo</Button> : <Button onClick={enable} disabled={pending || !configured || permission === "unsupported" || permission === "denied"}><Bell aria-hidden="true" />{pending ? "Ativando…" : "Ativar notificações"}</Button>}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

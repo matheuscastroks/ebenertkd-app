@@ -50,5 +50,7 @@ export type NotificationDelivery = Models.Row & {
   updated_at: string;
 };
 
-export type InboxItem = { notification: AppNotification; recipient: NotificationRecipient };
+export type NotificationView = Pick<AppNotification, "$id" | "kind" | "title" | "body" | "audience" | "action_url" | "published_at">;
+export type RecipientView = Pick<NotificationRecipient, "$id" | "read_at">;
+export type InboxItem = { notification: NotificationView; recipient: RecipientView };
 export type BrowserPushSubscription = { endpoint: string; keys: { p256dh: string; auth: string } };

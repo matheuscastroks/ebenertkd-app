@@ -69,6 +69,9 @@ async function createColumn(tableId: string, column: ColumnDefinition) {
   if (column.kind === "datetime") {
     return tablesDb.createDatetimeColumn({ ...common, required: column.required });
   }
+  if (column.kind === "boolean") {
+    return tablesDb.createBooleanColumn({ ...common, required: column.required });
+  }
   if (column.kind === "integer") {
     return tablesDb.createIntegerColumn({
       ...common,

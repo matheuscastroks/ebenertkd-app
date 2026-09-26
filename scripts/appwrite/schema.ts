@@ -4,6 +4,7 @@ export type ColumnDefinition =
   | { key: string; kind: "varchar"; size: number; required: boolean; array?: boolean }
   | { key: string; kind: "text"; required: boolean }
   | { key: string; kind: "datetime"; required: boolean }
+  | { key: string; kind: "boolean"; required: boolean }
   | { key: string; kind: "integer"; required: boolean; min?: number; max?: number }
   | { key: string; kind: "enum"; elements: string[]; required: boolean };
 
@@ -558,6 +559,18 @@ export const tables: TableDefinition[] = [
       { key: "profile_created_idx", type: "key", columns: ["profile_id", "created_at"] },
       { key: "notification_idx", type: "key", columns: ["notification_id"] }
     ]
+  },
+  {
+    id: APPWRITE_IDS.tables.notificationPreferences,
+    name: "Notification preferences",
+    columns: [
+      { key: "account_id", kind: "varchar", size: 36, required: true },
+      { key: "announcements_enabled", kind: "boolean", required: true },
+      { key: "financial_enabled", kind: "boolean", required: true },
+      { key: "system_enabled", kind: "boolean", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [{ key: "account_id_unique", type: "unique", columns: ["account_id"] }]
   },
   {
     id: APPWRITE_IDS.tables.pushSubscriptions,

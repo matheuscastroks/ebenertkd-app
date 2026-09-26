@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { publishAnnouncementAction } from "@/app/actions/notifications";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,9 +14,6 @@ type ClassOption = { id: string; name: string; startTime: string };
 export function AnnouncementForm({ profiles, classes }: { profiles: ProfileOption[]; classes: ClassOption[] }) {
   const [audience, setAudience] = useState("all");
   return (
-    <Card>
-      <CardHeader><CardTitle>Publicar aviso</CardTitle><CardDescription>Escolha quem receberá. A lista de destinatários fica registrada no momento da publicação.</CardDescription></CardHeader>
-      <CardContent>
         <form action={publishAnnouncementAction} className="grid gap-4 md:grid-cols-2">
           <Field className="md:col-span-2"><FieldLabel htmlFor="notice-title">Título</FieldLabel><Input id="notice-title" name="title" maxLength={128} required /></Field>
           <Field><FieldLabel htmlFor="notice-audience">Destinatários</FieldLabel><Select name="audience" value={audience} onValueChange={setAudience}><SelectTrigger id="notice-audience" className="w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todos os usuários ativos</SelectItem><SelectItem value="class">Uma turma</SelectItem><SelectItem value="profile">Uma pessoa</SelectItem></SelectContent></Select></Field>
@@ -27,7 +23,5 @@ export function AnnouncementForm({ profiles, classes }: { profiles: ProfileOptio
           <Field className="md:col-span-2"><FieldLabel htmlFor="notice-url">Link interno (opcional)</FieldLabel><Input id="notice-url" name="action_url" placeholder="/avisos" /><FieldDescription>Use apenas caminhos internos, como /aluno/financeiro.</FieldDescription></Field>
           <FormSubmitButton className="md:w-fit" pendingLabel="Publicando…">Publicar aviso</FormSubmitButton>
         </form>
-      </CardContent>
-    </Card>
   );
 }

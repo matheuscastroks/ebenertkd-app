@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { markNotificationRead, publishAnnouncement } from "@/features/notifications/notification-service";
 import { revokePushSubscription, savePushSubscription } from "@/features/notifications/push-service";
+import { setNotificationPreference, type NotificationPreferences } from "@/features/notifications/preferences-service";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
 
@@ -36,4 +37,10 @@ export async function revokePushSubscriptionAction(endpoint: string) {
   const actor = await requireProfile();
   await revokePushSubscription(actor, endpoint);
   revalidatePath(ROUTES.notifications);
+}
+
+export async function setNotificationPreferenceAction(key: keyof NotificationPreferences, enabled: boolean) {
+  const actor = await requireProfile();
+  if (!["announcements_enabled", "financial_enabled", "system_enabled"].includes(key) || typeof enabled !== "boolean") throw new Error("invalid_preference");
+  await setNotificationPreference(actor, key, enabled);
 }

@@ -42,6 +42,7 @@ describe("Appwrite infrastructure schema", () => {
       "billing_settings",
       "notifications",
       "notification_recipients",
+      "notification_preferences",
       "push_subscriptions",
       "notification_deliveries",
       "audit_events",

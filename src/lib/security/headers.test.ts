@@ -13,4 +13,11 @@ describe("securityHeaders", () => {
   it("não envia HSTS durante desenvolvimento HTTP", () => {
     expect(securityHeaders(false).some((header) => header.key === "Strict-Transport-Security")).toBe(false);
   });
+
+  it("permite eval apenas para as ferramentas de desenvolvimento do React", () => {
+    const dev = securityHeaders(false).find((header) => header.key === "Content-Security-Policy")?.value;
+    const prod = securityHeaders(true).find((header) => header.key === "Content-Security-Policy")?.value;
+    expect(dev).toContain("'unsafe-eval'");
+    expect(prod).not.toContain("'unsafe-eval'");
+  });
 });

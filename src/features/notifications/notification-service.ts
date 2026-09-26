@@ -7,6 +7,7 @@ import type { Profile } from "@/features/auth/types";
 import type { ClassEnrollment, TrainingClass } from "@/features/classes/types";
 import { deliverNotificationPush } from "@/features/notifications/push-service";
 import type { AppNotification, InboxItem, NotificationAudience, NotificationKind, NotificationRecipient } from "@/features/notifications/types";
+import { inboxItemView, notificationView } from "@/features/notifications/notification-view";
 import type { Student } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
@@ -91,9 +92,42 @@ export async function publishAnnouncement(actor: Profile, raw: unknown) {
 
 export async function listInbox(profile: Profile): Promise<InboxItem[]> {
   const { tables, config } = createAppwriteAdminClient();
-  const recipients = await tables.listRows<NotificationRecipient>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationRecipients, queries: [Query.equal("profile_id", [profile.$id]), Query.orderDesc("created_at"), Query.limit(100)] });
-  const items = await Promise.all(recipients.rows.map(async (recipient) => ({ recipient, notification: await tables.getRow<AppNotification>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notifications, rowId: recipient.notification_id }) })));
-  return items;
+  const recipients: NotificationRecipient[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await tables.listRows<NotificationRecipient>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationRecipients, queries: [Query.equal("profile_id", [profile.$id]), Query.orderDesc("created_at"), Query.limit(500), ...(cursor ? [Query.cursorAfter(cursor)] : [])] });
+    recipients.push(...page.rows);
+    cursor = page.rows.length === 500 ? page.rows.at(-1)?.$id : undefined;
+  } while (cursor);
+  const notifications = new Map<string, AppNotification>();
+  const ids = [...new Set(recipients.map((recipient) => recipient.notification_id))];
+  for (let index = 0; index < ids.length; index += 50) {
+    const page = await tables.listRows<AppNotification>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notifications, queries: [Query.equal("$id", ids.slice(index, index + 50)), Query.limit(50)] });
+    for (const notification of page.rows) notifications.set(notification.$id, notification);
+  }
+  return recipients.flatMap((recipient) => {
+    const notification = notifications.get(recipient.notification_id);
+    return notification ? [inboxItemView(recipient, notification)] : [];
+  });
+}
+
+export async function countUnreadNotifications(profile: Profile) {
+  const { tables, config } = createAppwriteAdminClient();
+  const result = await tables.listRows<NotificationRecipient>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationRecipients, queries: [Query.equal("profile_id", [profile.$id]), Query.isNull("read_at"), Query.limit(1)] });
+  return result.total;
+}
+
+export async function listSentAnnouncements(profile: Profile) {
+  if (profile.role !== "admin") throw new Error("admin_required");
+  const { tables, config } = createAppwriteAdminClient();
+  const rows: AppNotification[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await tables.listRows<AppNotification>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notifications, queries: [Query.equal("created_by_account_id", [profile.account_id]), Query.equal("kind", ["announcement"]), Query.orderDesc("published_at"), Query.limit(500), ...(cursor ? [Query.cursorAfter(cursor)] : [])] });
+    rows.push(...page.rows);
+    cursor = page.rows.length === 500 ? page.rows.at(-1)?.$id : undefined;
+  } while (cursor);
+  return rows.map(notificationView);
 }
 
 export async function markNotificationRead(profile: Profile, recipientId: string) {
