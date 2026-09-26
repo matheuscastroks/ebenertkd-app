@@ -348,13 +348,13 @@ Cada tela e componente listado abaixo deve ser auditado e refinado seguindo os s
 ---
 
 ### Módulo 8: Sistema, Preferências e Configurações
-- [ ] **8.1 Painel do Sistema (`src/app/admin/sistema/page.tsx`, `src/components/appwrite/appwrite-connection-check.tsx`):**
-  - [ ] Indicador de integridade dos bancos e buckets do Appwrite, status dos backups automáticos e jobs agendados.
-  - [ ] Layout limpo sem termos excessivamente técnicos voltados a suporte.
-- [ ] **8.2 Configurações de Conta e Notificações (`src/app/configuracoes/page.tsx`, `src/components/dashboard/account-menu.tsx`, `src/features/notifications/components/notification-preferences.tsx`, `push-permission-card.tsx`):**
-  - [ ] Alternância de tema Claro / Escuro / Sistema com persistência imediata.
-  - [ ] Gerenciamento de notificações push por categoria (Avisos, Mensalidades, Sistema) com feedback claro de permissão do navegador.
-  - [ ] Acesso seguro de logout e alteração de senha.
+- [x] **8.1 Painel do Sistema (`src/app/admin/sistema/page.tsx`, `src/components/appwrite/appwrite-connection-check.tsx`):**
+  - [x] Indicador de integridade dos bancos e buckets do Appwrite, status dos backups automáticos e jobs agendados.
+  - [x] Layout limpo sem termos excessivamente técnicos voltados a suporte.
+- [x] **8.2 Configurações de Conta e Notificações (`src/app/configuracoes/page.tsx`, `src/components/dashboard/account-menu.tsx`, `src/features/notifications/components/notification-preferences.tsx`, `push-permission-card.tsx`):**
+  - [x] Alternância de tema Claro / Escuro / Sistema com persistência imediata.
+  - [x] Gerenciamento de notificações push por categoria (Avisos, Mensalidades, Sistema) com feedback claro de permissão do navegador.
+  - [x] Acesso seguro de logout e alteração de senha.
 
 ---
 
