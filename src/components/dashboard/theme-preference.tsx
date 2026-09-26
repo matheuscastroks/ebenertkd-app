@@ -1,12 +1,20 @@
 "use client";
 
+import * as React from "react";
 import { useTheme } from "next-themes";
 import { changeTheme } from "@/lib/theme-transition";
 import { Moon, Sun, Monitor } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const emptySubscribe = () => () => {};
+
 export function ThemePreference() {
   const { theme, setTheme } = useTheme();
+  const mounted = React.useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
   const themes = [
     { value: "light", label: "Claro", icon: Sun },
@@ -25,7 +33,7 @@ export function ThemePreference() {
 
       <div className="grid grid-cols-3 gap-2.5">
         {themes.map(({ value, label, icon: Icon }) => {
-          const isActive = theme === value;
+          const isActive = mounted && theme === value;
           return (
             <button
               key={value}
