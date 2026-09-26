@@ -5,6 +5,9 @@ import { PageBreadcrumb, type BreadcrumbEntry } from "@/components/shared/page-b
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { InstallGuide } from "@/components/pwa/install-guide";
 
+import { MobileBottomNav } from "@/components/dashboard/mobile-bottom-nav";
+import { MobileGestureDetector } from "@/components/dashboard/mobile-gesture-detector";
+
 type DashboardShellProps = {
   title: string;
   subtitle: string;
@@ -21,10 +24,12 @@ export function DashboardFrame({ badge, profileName, navItems, children }: Dashb
     <SidebarProvider>
       <ActiveSidebar badge={badge} navItems={navItems} profileName={profileName} />
       <SidebarInset>
-        <div className="flex-1 p-4 md:p-6">
+        <div className="flex-1 p-4 pb-20 md:p-6 md:pb-6">
           <div className="flex w-full min-w-0 flex-col gap-6">{children}</div>
         </div>
       </SidebarInset>
+      <MobileBottomNav navItems={navItems} />
+      <MobileGestureDetector />
       <InstallGuide />
     </SidebarProvider>
   );
