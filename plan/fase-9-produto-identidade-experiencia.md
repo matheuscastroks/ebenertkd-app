@@ -276,13 +276,13 @@ Cada tela e componente listado abaixo deve ser auditado e refinado seguindo os s
 ---
 
 ### Módulo 3: Frequência e Calendário (Aluno & Responsável)
-- [ ] **3.1 Calendário de Frequência do Aluno (`src/app/aluno/frequencia/page.tsx`, `src/features/classes/components/attendance-history.tsx`):**
-  - [ ] Calendário visual com adaptação perfeita em telas de 360px (células legíveis sem sobreposição dos indicadores de status).
-  - [ ] Legenda compacta com ícones e cores acessíveis (Presença, Falta, Justificada, Prevista, Cancelada).
-  - [ ] Ao tocar em um dia, exibir gaveta (`Drawer`) no mobile ou painel lateral no desktop com horário e status da aula.
-  - [ ] Alternância entre meses rápida via URL sem recarregar o layout do shell.
-- [ ] **3.2 Frequência do Dependente (`src/app/responsavel/dependentes/[profileId]/frequencia/page.tsx`):**
-  - [ ] Mesma consistência visual de calendário, contextualizada com o nome e foto do dependente selecionado.
+- [x] **3.1 Calendário de Frequência do Aluno (`src/app/aluno/frequencia/page.tsx`, `src/features/classes/components/attendance-history.tsx`):**
+  - [x] Calendário visual com adaptação perfeita em telas de 360px (células legíveis sem sobreposição dos indicadores de status).
+  - [x] Legenda compacta com ícones e cores acessíveis (Presença, Falta, Justificada, Prevista, Cancelada).
+  - [x] Ao tocar em um dia, exibir gaveta (`Drawer`) no mobile ou painel lateral no desktop com horário e status da aula.
+  - [x] Alternância entre meses rápida via URL sem recarregar o layout do shell.
+- [x] **3.2 Frequência do Dependente (`src/app/responsavel/dependentes/[profileId]/frequencia/page.tsx`):**
+  - [x] Mesma consistência visual de calendário, contextualizada com o nome e foto do dependente selecionado.
 
 ---
 

@@ -9,13 +9,44 @@ import { requireCapability } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
 import { ROUTES } from "@/lib/navigation/routes";
 
-async function StudentAttendanceContent({ profile, month }: { profile: Profile; month: string }) {
+async function StudentAttendanceContent({
+  profile,
+  month
+}: {
+  profile: Profile;
+  month: string;
+}) {
   const history = await getAttendanceCalendar(profile, month);
-  return <AttendanceHistory entries={toClientData(history.entries)} summary={history.summary} month={month} basePath={ROUTES.studentAttendance} />;
+  return (
+    <AttendanceHistory
+      entries={toClientData(history.entries)}
+      summary={history.summary}
+      month={month}
+      basePath={ROUTES.studentAttendance}
+    />
+  );
 }
 
-export default async function StudentAttendancePage({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
+export default async function StudentAttendancePage({
+  searchParams
+}: {
+  searchParams: Promise<{ month?: string }>;
+}) {
   const profile = await requireCapability("student");
   const month = normalizeAttendanceMonth((await searchParams).month, currentAttendanceMonth());
-  return <PortalShell profile={profile} activePath={ROUTES.studentAttendance} title="Minha frequência" subtitle="Veja suas aulas e chamadas mês a mês."><Suspense key={month} fallback={<AttendanceCalendarSkeleton />}><StudentAttendanceContent profile={profile} month={month} /></Suspense></PortalShell>;
+
+  return (
+    <PortalShell
+      profile={profile}
+      activePath={ROUTES.studentAttendance}
+      title="Minha frequência"
+      subtitle="Acompanhe sua assiduidade e o histórico das aulas mês a mês."
+    >
+      <div className="w-full min-w-0">
+        <Suspense key={month} fallback={<AttendanceCalendarSkeleton />}>
+          <StudentAttendanceContent profile={profile} month={month} />
+        </Suspense>
+      </div>
+    </PortalShell>
+  );
 }
