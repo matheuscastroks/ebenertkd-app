@@ -205,7 +205,7 @@ Aplicar a cada dashboard alterado antes de marcar concluído:
 
 **Aceite:** leitura remove ponto em todas as regiões, switches persistem e afetam entrega, menores não recebem opções financeiras indevidas.
 
-## 9P.9 — Homologação visual e funcional
+## 9P.9 — Homologação visual e funcional (Baseline)
 
 **Criar:** `tests/e2e/product-experience.spec.ts`, `docs/ux/product-review.md`.
 
@@ -216,8 +216,149 @@ Aplicar a cada dashboard alterado antes de marcar concluído:
 - [x] Testes de comportamento para URL dos filtros, restauração por voltar, resultado vazio, falha de rede, rascunho em modal e isolamento entre famílias.
 - [x] Testes de dados para totais financeiros, fotos autorizadas, calendário sem chamada e preferências de notificação no envio.
 - [x] Rodar `npm test`, `npm run lint`, `npm run typecheck`, `npm run build` e Playwright com usuários de teste. Para schema, `npm run infra:plan` antes de qualquer aplicação.
-- [x] Registrar pendências e evidências, atualizar checkboxes da Fase 9 apenas com validação. Alterações de identidade seguem para Fase 10, substituindo sugestões estéticas que conflitem com a marca aprovada.
+- [x] Registrar pendências e evidências, atualizar checkboxes da Fase 9 apenas com validação.
+
+---
+
+## 9P.10 — Navegação móvel nativa e gestos (Concluído)
+
+**Alterar:** `src/components/dashboard/dashboard-shell.tsx`, `src/features/students/components/enrollment-form.tsx`, `src/features/classes/components/attendance-sheet.tsx`.
+**Criar:** `src/components/dashboard/mobile-bottom-nav.tsx`, `src/components/dashboard/mobile-gesture-detector.tsx`, testes unitários associados.
+
+- [x] Barra inferior fixa (`MobileBottomNav`) visível apenas no mobile (`md:hidden`) com abas dinâmicas por papel: Início, Treinos/Turmas, Dependentes/Financeiro, Avisos (com badge de não lidos) e Menu lateral.
+- [x] Detecção de gesto swipe da borda esquerda (`<= 40px`, horizontal > vertical * 1.3, <= 600ms) para abrir a gaveta lateral em dispositivos touch, e swipe para a esquerda para fechar (`MobileGestureDetector`).
+- [x] Espaçamento inferior global (`pb-20 md:pb-6`) e elevação de barras fixas (`sticky bottom-20 md:bottom-3`) para evitar sobreposição de elementos na base da tela.
+- [x] Submenus colapsáveis na sidebar para Matrículas, Turmas, Financeiro, Contratos e acesso direto e destacado para Responsáveis (`/responsavel`).
+
+---
+
+## 9P.11 — Inventário Completo e Cronograma de Revisão de UI/UX (Tela a Tela e Componente a Componente)
+
+Para garantir que a aplicação atinja um padrão de excelência de produto em todas as suas vertentes (desktop e prioritariamente mobile), sem atalhos visuais e sem componentes esquecidos, este cronograma estabelece o checklist de revisão sistemática de **todas as telas e componentes do projeto** antes do avanço para a Fase 10.
+
+### Diretrizes de Avaliação por Tela e Componente
+Cada tela e componente listado abaixo deve ser auditado e refinado seguindo os seguintes critérios:
+1. **Hierarquia Visual e Foco:** A informação mais crítica lidera a tela; ações primárias são evidentes; ruído e repetições são eliminados.
+2. **Mobile First & Touch Targets:** Alvos de toque mínimos de 44×44 px; nada quebra ou requer rolagem horizontal em viewports estreitos (360px a 430px); formulários e barras de ação ficam desimpedidos da barra de navegação inferior.
+3. **Estrutura Invisível:** Substituir cards aninhados e molduras desnecessárias por tipografia forte, respiro e separadores sutis.
+4. **Linguagem Natural de Taekwondo:** Termos da academia em português claro ("Turmas", "Treinos", "Avisos", "Graduação", "Faixas", "Dojô", "Mensalidades").
+5. **Feedback Imediato & Tratamento de Erros:** Estados de carregamento locais (skeletons específicos), mensagens de erro acionáveis junto aos campos, toasts confirmatórios e prevenção de duplo clique.
+
+---
+
+### Módulo 1: Autenticação, Onboarding e Entrada Pública
+- [ ] **1.1 Tela de Entrada / Login (`src/app/page.tsx`, `src/components/auth/auth-entry.tsx`, `login-card.tsx`, `register-card.tsx`):**
+  - [ ] Alternador de modo Adulto / Menor em destaque tátil ergonômico no topo.
+  - [ ] Campos de e-mail e senha com altura mínima de 44px e preenchimento automático de credenciais seguro (`autoComplete`).
+  - [ ] Tratamento amigável de erro de credenciais (ex: senha incorreta ou usuário não encontrado) sem recarregar a tela.
+  - [ ] Link visível e acessível para "Esqueci minha senha" e suporte a retorno limpo de erros via URL (`?error=...`).
+- [ ] **1.2 Recuperação de Senha (`src/app/recuperar/page.tsx`, `src/app/recuperar/confirmar/page.tsx`):**
+  - [ ] Tela de solicitação de redefinição com instrução clara de recebimento de e-mail.
+  - [ ] Tela de confirmação com validação de força da nova senha e retorno direto para login com toast de sucesso.
+
+---
+
+### Módulo 2: Turmas, Grade e Chamada Operacional
+- [ ] **2.1 Gestão de Turmas do Professor (`src/app/admin/turmas/page.tsx`, `src/features/classes/components/class-manager.tsx`):**
+  - [ ] Cards de turmas com chips de dias da semana (ex: Seg/Qua/Sex), faixa etária, horário e lotação atual.
+  - [ ] Modal responsivo "Criar turma" / "Editar turma" com validação de horários de início e término.
+  - [ ] No mobile, botão de ação "Criar turma" fixo ou acessível no topo, sem empurrar a lista de turmas ativas.
+- [ ] **2.2 Detalhe da Turma e Lista de Alunos (`src/app/admin/turmas/[classId]/page.tsx`, `src/features/classes/components/class-status-toggle.tsx`, `class-attendance-summary.tsx`):**
+  - [ ] Visualização limpa da lista de alunos matriculados com fotos, faixas atuais e frequência média.
+  - [ ] Alternador de status da turma (ativa/inativa) com confirmação clara de impacto.
+  - [ ] Histórico de aulas ministradas com atalho para abrir/revisar cada chamada.
+- [ ] **2.3 Realização da Chamada (`src/app/admin/turmas/[classId]/aulas/[lessonId]/page.tsx`, `src/features/classes/components/attendance-sheet.tsx`):**
+  - [ ] Otimização para uso com uma mão pelo professor no tatame (alvos grandes para Presente / Falta / Justificada).
+  - [ ] Botão de "Marcar todos presentes" para agilidade operacional.
+  - [ ] Barra flutuante de salvar chamada com clearance garantido sobre a bottom nav no celular (`sticky bottom-20 md:bottom-3`).
+  - [ ] Campo de justificativa de auditoria exigido apenas ao corrigir chamadas já concluídas.
+
+---
+
+### Módulo 3: Frequência e Calendário (Aluno & Responsável)
+- [ ] **3.1 Calendário de Frequência do Aluno (`src/app/aluno/frequencia/page.tsx`, `src/features/classes/components/attendance-history.tsx`):**
+  - [ ] Calendário visual com adaptação perfeita em telas de 360px (células legíveis sem sobreposição dos indicadores de status).
+  - [ ] Legenda compacta com ícones e cores acessíveis (Presença, Falta, Justificada, Prevista, Cancelada).
+  - [ ] Ao tocar em um dia, exibir gaveta (`Drawer`) no mobile ou painel lateral no desktop com horário e status da aula.
+  - [ ] Alternância entre meses rápida via URL sem recarregar o layout do shell.
+- [ ] **3.2 Frequência do Dependente (`src/app/responsavel/dependentes/[profileId]/frequencia/page.tsx`):**
+  - [ ] Mesma consistência visual de calendário, contextualizada com o nome e foto do dependente selecionado.
+
+---
+
+### Módulo 4: Gestão Financeira, PIX e Pagamentos
+- [ ] **4.1 Painel Financeiro do Professor (`src/app/admin/financeiro/page.tsx`, `src/features/billing/components/billing-table.tsx`, `billing-filters.tsx`, `charge-actions.tsx`):**
+  - [ ] Métricas de fluxo de caixa claras no topo: Recebido no mês, A receber, Em atraso, Comprovantes pendentes.
+  - [ ] Fila prioritária de comprovantes aguardando conferência com modal/drawer de visualização do anexo e aprovação em 1 clique.
+  - [ ] Tabela com versão adaptada para cards no mobile, busca por nome do aluno e filtro por competência.
+- [ ] **4.2 Configurações de PIX (`src/app/admin/financeiro/configuracoes/page.tsx`, `src/features/billing/components/pix-settings-dialog.tsx`):**
+  - [ ] Formulário modal para definir chave PIX (CPF/CNPJ, e-mail, telefone ou aleatória), nome do beneficiário e instruções.
+  - [ ] Pré-visualização do QR Code e teste da cópia da chave.
+- [ ] **4.3 Exportação Financeira (`src/app/admin/financeiro/exportar/page.tsx`):**
+  - [ ] Filtro de período e seleção de formato (CSV/planilha) com indicação do total de registros a exportar.
+- [ ] **4.4 Financeiro do Aluno / Responsável (`src/app/aluno/financeiro/page.tsx`, `src/app/responsavel/dependentes/[profileId]/financeiro/page.tsx`, `src/features/billing/components/payer-billing-view.tsx`, `copy-pix-button.tsx`):**
+  - [ ] Abas de filtro: Em aberto, Em análise, Pagos, Todos.
+  - [ ] Card de pagamento direto com chave PIX copia-e-cola e instruções da academia.
+  - [ ] Envio fácil de comprovante (foto do comprovante ou PDF) via gaveta inferior móvel (`Drawer`).
+  - [ ] Feedback visual imediato quando o comprovante for enviado e estiver em análise pelo professor.
+
+---
+
+### Módulo 5: Contratos e Assinatura Digital
+- [ ] **5.1 Visão Geral de Contratos no Admin (`src/app/admin/contratos/page.tsx`):**
+  - [ ] Lista de contratos emitidos com status (Pendente de assinatura, Assinado, Cancelado, Expirado).
+  - [ ] Ação rápida para visualizar PDF gerado, reenviar solicitação ou registrar cancelamento.
+- [ ] **5.2 Modelo de Contrato da Academia (`src/app/admin/contratos/modelo/page.tsx`):**
+  - [ ] Editor dos termos de adesão e regras do dojang com inserção de tags dinâmicas ({nome_aluno}, {valor_mensalidade}, etc.).
+  - [ ] Pré-visualização responsiva do documento formatado.
+- [ ] **5.3 Fila de Cancelamentos e Rescisões (`src/app/admin/contratos/cancelamentos/page.tsx`):**
+  - [ ] Lista de pedidos de encerramento com motivo informado pelo aluno/responsável.
+  - [ ] Modal de homologação do cancelamento com cálculo de eventuais pendências e data de encerramento.
+- [ ] **5.4 Assinatura Digital do Aluno e Responsável (`src/app/aluno/contratos/page.tsx`, `src/app/aluno/contratos/[contractId]/page.tsx`, `src/features/contracts/components/signature-pad.tsx`, páginas do responsável):**
+  - [ ] Visualização confortável do contrato antes da assinatura em qualquer dispositivo.
+  - [ ] Componente `SignaturePad`: desenho da assinatura suave no toque touch com alta resolução, botões "Limpar" e "Confirmar assinatura".
+  - [ ] Opção de assinar digitalmente com carimbo de data/hora, IP e hash do documento.
+  - [ ] Download imediato do contrato assinado em PDF.
+
+---
+
+### Módulo 6: Exames de Faixa e Graduação
+- [ ] **6.1 Lista de Exames de Faixa (`src/app/admin/exames/page.tsx`):**
+  - [ ] Cards dos próximos exames com data, local, taxa e quantidade de inscritos.
+  - [ ] Modal "Criar novo exame de faixa" com campos de data, turmas elegíveis e avaliador.
+- [ ] **6.2 Condução do Exame e Avaliação (`src/app/admin/exames/[eventId]/page.tsx`):**
+  - [ ] Tabela/cards de candidatos com faixa atual e próxima faixa (GUB/Dan) destacada com as cores oficiais de Taekwondo.
+  - [ ] Alternador de resultado Aprovado / Reprovado e notas de avaliação por disciplina (Kyorugui, Poomsae, Quebramento).
+  - [ ] Botão de homologação em lote que atualiza automaticamente a graduação dos alunos no sistema.
+- [ ] **6.3 Visualização da Graduação pelo Aluno (`src/features/students/components/graduation-card.tsx`, `belt-badge.tsx`):**
+  - [ ] Card no dashboard do aluno destacando sua faixa atual, tempo de treino e requisitos para o próximo exame.
+
+---
+
+### Módulo 7: Gestão de Matrículas e Dependentes (Admin & Família)
+- [ ] **7.1 Fila de Matrículas no Admin (`src/app/admin/matriculas/page.tsx`, `src/features/students/components/enrollment-table.tsx`, `enrollment-filters.tsx`):**
+  - [ ] Abas por situação: Rascunhos, Aguardando análise, Aguardando assinatura, Ativas, Pausadas.
+  - [ ] No mobile, cards responsivos com foto do aluno, faixa, turma e botão direto de "Analisar".
+- [ ] **7.2 Acesso e Transição de Alunos Menores (`src/app/admin/matriculas/acessos/page.tsx`, `src/features/students/components/promote-minor-dialog.tsx`):**
+  - [ ] Lista de alunos que atingiram a maioridade com ação de liberar acesso independente por e-mail próprio.
+- [ ] **7.3 Gestão Familiar e Dependentes (`src/app/responsavel/dependentes/page.tsx`, `src/app/responsavel/dependentes/[profileId]/matricula/page.tsx`):**
+  - [ ] Painel do responsável com cartões de cada dependente, indicando status de matrícula, próxima aula e situação financeira.
+  - [ ] Fluxo simplificado de "Adicionar dependente" preenchendo automaticamente os dados do responsável.
+
+---
+
+### Módulo 8: Sistema, Preferências e Configurações
+- [ ] **8.1 Painel do Sistema (`src/app/admin/sistema/page.tsx`, `src/components/appwrite/appwrite-connection-check.tsx`):**
+  - [ ] Indicador de integridade dos bancos e buckets do Appwrite, status dos backups automáticos e jobs agendados.
+  - [ ] Layout limpo sem termos excessivamente técnicos voltados a suporte.
+- [ ] **8.2 Configurações de Conta e Notificações (`src/app/configuracoes/page.tsx`, `src/components/dashboard/account-menu.tsx`, `src/features/notifications/components/notification-preferences.tsx`, `push-permission-card.tsx`):**
+  - [ ] Alternância de tema Claro / Escuro / Sistema com persistência imediata.
+  - [ ] Gerenciamento de notificações push por categoria (Avisos, Mensalidades, Sistema) com feedback claro de permissão do navegador.
+  - [ ] Acesso seguro de logout e alteração de senha.
+
+---
 
 ## Resultado esperado
 
-Professor encontra o que precisa fazer hoje; aluno encontra próxima aula, frequência e pagamentos; responsável acompanha cada dependente. A marca aparece consistentemente no shell e nas ações, textos descrevem tarefas concretas e carregar dados não desmonta a interface.
+Todas as telas e componentes do sistema passam por um ciclo padronizado de validação visual e técnica, eliminando inconsistências estéticas e garantindo que o Ebener TKD App funcione de ponta a ponta como uma aplicação móvel moderna, fluida e eficiente para o professor, o aluno e a família.
+
