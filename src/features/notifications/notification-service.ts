@@ -137,6 +137,26 @@ export async function markNotificationRead(profile: Profile, recipientId: string
   if (!recipient.read_at) await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationRecipients, rowId: recipient.$id, data: { read_at: new Date().toISOString(), updated_at: new Date().toISOString() } });
 }
 
+export async function markAllNotificationsRead(profile: Profile) {
+  const { tables, config } = createAppwriteAdminClient();
+  const unread = await tables.listRows<NotificationRecipient>({
+    databaseId: config.databaseId,
+    tableId: APPWRITE_IDS.tables.notificationRecipients,
+    queries: [Query.equal("profile_id", [profile.$id]), Query.isNull("read_at"), Query.limit(100)]
+  });
+  const now = new Date().toISOString();
+  await Promise.all(
+    unread.rows.map((row) =>
+      tables.updateRow({
+        databaseId: config.databaseId,
+        tableId: APPWRITE_IDS.tables.notificationRecipients,
+        rowId: row.$id,
+        data: { read_at: now, updated_at: now }
+      })
+    )
+  );
+}
+
 export async function listNotificationAudienceOptions() {
   const { tables, config } = createAppwriteAdminClient();
   const [profiles, classes] = await Promise.all([

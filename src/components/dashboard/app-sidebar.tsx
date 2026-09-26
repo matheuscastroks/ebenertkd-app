@@ -85,7 +85,7 @@ export function AppSidebar({
 }) {
   const groups = Array.from(new Set(navItems.map((item) => item.group ?? "Principal")));
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" variant="inset">
       <SidebarHeader className="px-3 pb-5 pt-6">
         <div className="flex items-center gap-2">
           <Image src="/brand-icon.png" alt="Símbolo da Ebener TKD" width={44} height={44} unoptimized className="size-11 shrink-0 object-contain group-data-[collapsible=icon]:size-6" />

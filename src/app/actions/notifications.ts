@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { markNotificationRead, publishAnnouncement } from "@/features/notifications/notification-service";
+import { markAllNotificationsRead, markNotificationRead, publishAnnouncement } from "@/features/notifications/notification-service";
 import { revokePushSubscription, savePushSubscription } from "@/features/notifications/push-service";
 import { setNotificationPreference, type NotificationPreferences } from "@/features/notifications/preferences-service";
 import { requireProfile } from "@/lib/auth/session";
@@ -23,6 +23,12 @@ export async function publishAnnouncementAction(formData: FormData) {
 export async function markNotificationReadAction(formData: FormData) {
   const actor = await requireProfile();
   await markNotificationRead(actor, String(formData.get("recipient_id") ?? ""));
+  revalidatePath(ROUTES.notifications);
+}
+
+export async function markAllNotificationsReadAction() {
+  const actor = await requireProfile();
+  await markAllNotificationsRead(actor);
   revalidatePath(ROUTES.notifications);
 }
 

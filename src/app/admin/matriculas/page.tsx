@@ -8,6 +8,7 @@ import { EnrollmentFilters } from "@/features/students/components/enrollment-fil
 import { EnrollmentTable } from "@/features/students/components/enrollment-table";
 import { listEnrollmentsForReview } from "@/features/students/service";
 import { requireProfile } from "@/lib/auth/session";
+import { toClientData } from "@/lib/client-data";
 import { ROUTES } from "@/lib/navigation/routes";
 
 export default async function EnrollmentsPage({
@@ -34,7 +35,7 @@ export default async function EnrollmentsPage({
       subtitle="Analise cadastros, documentos e condições financeiras."
     >
       <div className="mx-auto max-w-6xl space-y-5">
-        <EnrollmentFilters classes={classes} />
+        <EnrollmentFilters classes={toClientData(classes)} />
         {result.rows.length === 0 ? (
           <EmptyState
             title="Nenhuma matrícula encontrada"

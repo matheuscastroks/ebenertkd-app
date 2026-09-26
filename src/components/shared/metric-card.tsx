@@ -18,7 +18,7 @@ export function MetricCard({ label, value, helper, tone = "neutral", icon }: { l
       <CardContent className="flex items-start justify-between gap-3 p-5">
         <div>
           <p className="text-sm text-muted-foreground">{label}</p>
-          <p className="mt-2 text-2xl font-semibold tabular-nums">{value}</p>
+          <div className="mt-2 text-2xl font-semibold tabular-nums">{value}</div>
           {helper ? <p className="mt-1 text-xs text-muted-foreground">{helper}</p> : null}
         </div>
         {icon ? <div className="text-muted-foreground">{icon}</div> : null}
