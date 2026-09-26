@@ -323,15 +323,15 @@ Cada tela e componente listado abaixo deve ser auditado e refinado seguindo os s
 ---
 
 ### Módulo 6: Exames de Faixa e Graduação
-- [ ] **6.1 Lista de Exames de Faixa (`src/app/admin/exames/page.tsx`):**
-  - [ ] Cards dos próximos exames com data, local, taxa e quantidade de inscritos.
-  - [ ] Modal "Criar novo exame de faixa" com campos de data, turmas elegíveis e avaliador.
-- [ ] **6.2 Condução do Exame e Avaliação (`src/app/admin/exames/[eventId]/page.tsx`):**
-  - [ ] Tabela/cards de candidatos com faixa atual e próxima faixa (GUB/Dan) destacada com as cores oficiais de Taekwondo.
-  - [ ] Alternador de resultado Aprovado / Reprovado e notas de avaliação por disciplina (Kyorugui, Poomsae, Quebramento).
-  - [ ] Botão de homologação em lote que atualiza automaticamente a graduação dos alunos no sistema.
-- [ ] **6.3 Visualização da Graduação pelo Aluno (`src/features/students/components/graduation-card.tsx`, `belt-badge.tsx`):**
-  - [ ] Card no dashboard do aluno destacando sua faixa atual, tempo de treino e requisitos para o próximo exame.
+- [x] **6.1 Lista de Exames de Faixa (`src/app/admin/exames/page.tsx`):**
+  - [x] Cards dos próximos exames com data, local, taxa e quantidade de inscritos.
+  - [x] Modal "Criar novo exame de faixa" com campos de data, turmas elegíveis e avaliador.
+- [x] **6.2 Condução do Exame e Avaliação (`src/app/admin/exames/[eventId]/page.tsx`):**
+  - [x] Tabela/cards de candidatos com faixa atual e próxima faixa (GUB/Dan) destacada com as cores oficiais de Taekwondo.
+  - [x] Alternador de resultado Aprovado / Reprovado e notas de avaliação por disciplina (Kyorugui, Poomsae, Quebramento).
+  - [x] Botão de homologação em lote que atualiza automaticamente a graduação dos alunos no sistema.
+- [x] **6.3 Visualização da Graduação pelo Aluno (`src/features/students/components/graduation-card.tsx`, `belt-badge.tsx`):**
+  - [x] Card no dashboard do aluno destacando sua faixa atual, tempo de treino e requisitos para o próximo exame.
 
 ---
 

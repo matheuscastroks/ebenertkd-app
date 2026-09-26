@@ -11,6 +11,7 @@ import { getAttendanceHistory } from "@/features/classes/attendance-history-serv
 import { getTrainingClass } from "@/features/classes/service";
 import { getNextClassSchedule } from "@/features/classes/schedule";
 import { BeltBadge } from "@/features/students/components/belt-badge";
+import { GraduationCard } from "@/features/students/components/graduation-card";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
 import { cn } from "@/lib/utils";
@@ -297,7 +298,15 @@ export default async function StudentPage() {
         ) : null}
       </div>
 
-      {/* 5. Dados Cadastrais e Ações Rápidas */}
+      {/* 5. Jornada de Graduação e Faixas */}
+      <GraduationCard
+        currentBelt={student?.current_belt}
+        gub={student?.gub}
+        startedAtTkd={student?.started_at_tkd}
+        attendanceRate={attendance.summary.total ? attendance.summary.rate : undefined}
+      />
+
+      {/* 6. Dados Cadastrais e Ações Rápidas */}
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
