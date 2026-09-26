@@ -24,9 +24,13 @@ export function validateSubmission(input: unknown) {
 }
 
 export function hasApprovedRequiredDocuments(documents: StudentDocument[]) {
-  return (["profile_photo", "medical_certificate"] as DocumentType[]).every((type) =>
-    documents.some((document) => document.document_type === type && document.status === "approved")
+  const hasMedicalApproved = documents.some(
+    (document) => document.document_type === "medical_certificate" && document.status === "approved"
   );
+  const hasValidPhoto = documents.some(
+    (document) => document.document_type === "profile_photo" && document.status !== "rejected"
+  );
+  return hasMedicalApproved && hasValidPhoto;
 }
 
 export function hasRequiredSubmissionPhoto(documents: StudentDocument[]) {

@@ -59,9 +59,11 @@ describe("enrollment rules", () => {
     expect(validateDocumentFile({ name: "foto.png", declaredType: "image/jpeg", size: jpeg.length, bytes: jpeg, documentType: "profile_photo" }).valid).toBe(false);
   });
 
-  it("requires both approved document types before signature", () => {
+  it("requires approved medical certificate and valid photo before signature", () => {
     const document = (document_type: StudentDocument["document_type"], status: StudentDocument["status"]) => ({ document_type, status }) as StudentDocument;
-    expect(hasApprovedRequiredDocuments([document("profile_photo", "approved"), document("medical_certificate", "pending")])).toBe(false);
+    expect(hasApprovedRequiredDocuments([document("profile_photo", "pending"), document("medical_certificate", "pending")])).toBe(false);
+    expect(hasApprovedRequiredDocuments([document("profile_photo", "rejected"), document("medical_certificate", "approved")])).toBe(false);
+    expect(hasApprovedRequiredDocuments([document("profile_photo", "pending"), document("medical_certificate", "approved")])).toBe(true);
     expect(hasApprovedRequiredDocuments([document("profile_photo", "approved"), document("medical_certificate", "approved")])).toBe(true);
   });
 
