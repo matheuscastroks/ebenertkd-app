@@ -75,10 +75,10 @@ Criaremos um módulo unificado em `src/components/skeletons/` contendo fallbacks
 ## 4. Plano de Execução por Módulo e Telas
 
 ### Fase 1: Fundação & Remoção dos Bloqueios Globais
-- [ ] **1.1 Ajustar `loading.tsx` dos Portais:**
+- [x] **1.1 Ajustar `loading.tsx` dos Portais:**
   - Remover a substituição de tela inteira em `src/app/admin/loading.tsx`, `src/app/aluno/loading.tsx` e `src/app/responsavel/loading.tsx`.
   - Transformá-los em fallbacks transparentes ou barras de progresso superiores discretas que não ocultem o shell da rota.
-- [ ] **1.2 Criar a Biblioteca de Skeletons Contextuais:**
+- [x] **1.2 Criar a Biblioteca de Skeletons Contextuais:**
   - Criar `src/components/skeletons/metric-cards-skeleton.tsx`
   - Criar `src/components/skeletons/table-rows-skeleton.tsx`
   - Criar `src/components/skeletons/card-grid-skeleton.tsx`
@@ -88,73 +88,73 @@ Criaremos um módulo unificado em `src/components/skeletons/` contendo fallbacks
 
 ### Fase 2: Painéis Administrativos (`/admin`)
 
-- [ ] **2.1 Dashboard do Professor (`src/app/admin/page.tsx`):**
+- [x] **2.1 Dashboard do Professor (`src/app/admin/page.tsx`):**
   - **Estático imediato:** Título "Visão geral", subtítulo, atalhos rápidos e molduras dos cards principais.
   - **Suspense 1 (Métricas):** `<Suspense fallback={<MetricCardsSkeleton count={4} />}> <AdminDashboardMetrics /> </Suspense>`
   - **Suspense 2 (Turmas de Hoje):** `<Suspense fallback={<CardGridSkeleton count={2} />}> <TodayClassesSection /> </Suspense>`
   - **Suspense 3 (Fila de Matrículas e Comprovantes):** `<Suspense fallback={<ListItemsSkeleton count={3} />}> <PendingReviewsSection /> </Suspense>`
 
-- [ ] **2.2 Turmas (`src/app/admin/turmas/page.tsx`):**
+- [x] **2.2 Turmas (`src/app/admin/turmas/page.tsx`):**
   - **Estático imediato:** Título "Turmas e horários", botão "Nova turma" com modal, cabeçalho da seção.
   - **Suspense:** `<Suspense fallback={<CardGridSkeleton count={4} />}> <ClassesGrid /> </Suspense>`
 
-- [ ] **2.3 Fila de Matrículas (`src/app/admin/matriculas/page.tsx`):**
+- [x] **2.3 Fila de Matrículas (`src/app/admin/matriculas/page.tsx`):**
   - **Estático imediato:** Título "Matrículas", botão "Acessos dos alunos", formulário de busca e filtros (`EnrollmentFilters`).
   - **Suspense:** `<Suspense fallback={<TableRowsSkeleton columns={6} rows={5} />}> <EnrollmentTableData /> </Suspense>`
 
-- [ ] **2.4 Painel Financeiro (`src/app/admin/financeiro/page.tsx`):**
+- [x] **2.4 Painel Financeiro (`src/app/admin/financeiro/page.tsx`):**
   - **Estático imediato:** Título "Painel financeiro", botões "Configurar PIX" e "Exportar", filtros de competência e abas de status.
   - **Suspense 1 (Métricas de Caixa):** `<Suspense fallback={<MetricCardsSkeleton count={4} />}> <BillingMetrics /> </Suspense>`
   - **Suspense 2 (Fila de Comprovantes):** `<Suspense fallback={<ListItemsSkeleton count={2} />}> <PendingProofsQueue /> </Suspense>`
   - **Suspense 3 (Tabela de Mensalidades):** `<Suspense fallback={<TableRowsSkeleton columns={5} rows={6} />}> <BillingTableData /> </Suspense>`
 
-- [ ] **2.5 Exames de Faixa (`src/app/admin/exames/page.tsx` e `[eventId]/page.tsx`):**
+- [x] **2.5 Exames de Faixa (`src/app/admin/exames/page.tsx` e `[eventId]/page.tsx`):**
   - **Lista (`/admin/exames`):** Título e botão "Novo exame" imediatos; grade de exames dentro de Suspense.
   - **Detalhe (`/admin/exames/[eventId]`):** Banner com nome do exame e data imediatos; lista de alunos elegíveis e participantes dentro de Suspenses independentes.
 
-- [ ] **2.6 Contratos e Cancelamentos (`src/app/admin/contratos/page.tsx` e `cancelamentos/page.tsx`):**
+- [x] **2.6 Contratos e Cancelamentos (`src/app/admin/contratos/page.tsx` e `cancelamentos/page.tsx`):**
   - Título e navegação imediatos; dados de versões e solicitações de rescisão em Suspense.
 
-- [ ] **2.7 Sistema e Diagnóstico (`src/app/admin/sistema/page.tsx`):**
+- [x] **2.7 Sistema e Diagnóstico (`src/app/admin/sistema/page.tsx`):**
   - Título e cards externos imediatos; gauges de armazenamento e status de rotinas em Suspense.
 
 ---
 
 ### Fase 3: Portal do Aluno (`/aluno`)
 
-- [ ] **3.1 Dashboard do Aluno (`src/app/aluno/page.tsx`):**
+- [x] **3.1 Dashboard do Aluno (`src/app/aluno/page.tsx`):**
   - **Estático imediato:** Saudação "Olá, [Nome]", BeltBadge de graduação, links de navegação rápida e dados cadastrais.
   - **Suspense 1 (Próximo Treino):** `<Suspense fallback={<TrainingHeroSkeleton />}> <NextTrainingSection /> </Suspense>`
   - **Suspense 2 (Situação Financeira):** `<Suspense fallback={<BillingBannerSkeleton />}> <StudentBillingBanner /> </Suspense>`
   - **Suspense 3 (Jornada de Graduação):** `<Suspense fallback={<GraduationCardSkeleton />}> <StudentGraduationSection /> </Suspense>`
 
-- [ ] **3.2 Frequência do Aluno (`src/app/aluno/frequencia/page.tsx`):**
+- [x] **3.2 Frequência do Aluno (`src/app/aluno/frequencia/page.tsx`):**
   - **Estático imediato:** Título, legenda de presença/falta e seletor de mês.
   - **Suspense:** `<Suspense fallback={<AttendanceCalendarSkeleton />}> <CalendarData /> </Suspense>`
 
-- [ ] **3.3 Financeiro do Aluno (`src/app/aluno/financeiro/page.tsx`):**
+- [x] **3.3 Financeiro do Aluno (`src/app/aluno/financeiro/page.tsx`):**
   - **Estático imediato:** Título, instruções de PIX e abas de filtro (Em aberto, Em análise, Pagos).
   - **Suspense:** `<Suspense fallback={<PayerBillingSkeleton />}> <PayerBillingData /> </Suspense>`
 
-- [ ] **3.4 Contratos do Aluno (`src/app/aluno/contratos/page.tsx`):**
+- [x] **3.4 Contratos do Aluno (`src/app/aluno/contratos/page.tsx`):**
   - **Estático imediato:** Título e subtítulo; lista de termos em Suspense.
 
 ---
 
 ### Fase 4: Portal do Responsável (`/responsavel`)
 
-- [ ] **4.1 Gestão de Dependentes (`src/app/responsavel/dependentes/page.tsx`):**
+- [x] **4.1 Gestão de Dependentes (`src/app/responsavel/dependentes/page.tsx`):**
   - **Estático imediato:** Título "Meus dependentes", botão "Adicionar dependente" com modal.
   - **Suspense:** `<Suspense fallback={<CardGridSkeleton count={2} />}> <MinorsList /> </Suspense>`
 
-- [ ] **4.2 Páginas de Dependente (Frequência, Financeiro, Contratos):**
+- [x] **4.2 Páginas de Dependente (Frequência, Financeiro, Contratos):**
   - Mesma padronização: o contexto do aluno e controles de filtro aparecem na hora; o miolo da tabela ou calendário pulsa localmente enquanto busca.
 
 ---
 
 ### Fase 5: Central de Avisos (`/avisos`)
 
-- [ ] **5.1 Feed de Avisos (`src/app/avisos/page.tsx`):**
+- [x] **5.1 Feed de Avisos (`src/app/avisos/page.tsx`):**
   - **Estático imediato:** Título "Avisos da academia", botão "Novo aviso" (para admin), abas de filtro (Todos / Não lidos).
   - **Suspense:** `<Suspense fallback={<ListItemsSkeleton count={4} />}> <AnnouncementsList /> </Suspense>`
 
