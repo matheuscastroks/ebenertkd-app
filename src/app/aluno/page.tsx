@@ -1,32 +1,32 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { enableGuardianAction } from "@/app/actions/family";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { MetricCard } from "@/components/shared/metric-card";
+import { MetricCardsSkeleton } from "@/components/skeletons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { listChargesForStudent } from "@/features/billing/charge-service";
 import { getAttendanceHistory } from "@/features/classes/attendance-history-service";
 import { getTrainingClass } from "@/features/classes/service";
 import { getNextClassSchedule } from "@/features/classes/schedule";
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import { GraduationCard } from "@/features/students/components/graduation-card";
+import type { Profile } from "@/features/auth/types";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
 import { cn } from "@/lib/utils";
 import {
   AlertCircle,
-  ArrowRight,
-  Building2,
   CalendarCheck2,
-  CheckCircle2,
   Clock,
   CreditCard,
   FileText,
   MapPin,
   Sparkles,
-  UserCheck,
   UserPen,
   UserPlus,
   UsersRound,
@@ -36,13 +36,13 @@ import {
 const money = (value: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value / 100);
 
-export default async function StudentPage() {
-  const profile = await requireProfile();
-  if (profile.role === "admin") redirect(ROUTES.admin);
-  if (!profile.capabilities.includes("student")) redirect(ROUTES.guardian);
-  const guardian = profile.capabilities.includes("guardian");
-  const minor = profile.role === "minor_student";
-
+async function StudentDashboardDynamic({
+  profile,
+  minor,
+}: {
+  profile: Profile;
+  minor: boolean;
+}) {
   const [attendance, charges] = await Promise.all([
     getAttendanceHistory(profile),
     minor ? Promise.resolve([]) : listChargesForStudent(profile),
@@ -70,20 +70,9 @@ export default async function StudentPage() {
 
   const isOverdue = outstanding?.status === "overdue";
   const isProofUnderReview = outstanding?.status === "proof_under_review";
-  const isPendingPayment = outstanding?.status === "pending";
 
   return (
-    <PortalShell
-      profile={profile}
-      activePath={ROUTES.student}
-      title={`Olá, ${profile.full_name.split(" ")[0]}`}
-      subtitle="Acompanhe seus treinos, frequência e mensalidades na academia."
-      headerActions={
-        student?.current_belt ? (
-          <BeltBadge belt={student.current_belt} gub={student.gub} size="sm" />
-        ) : undefined
-      }
-    >
+    <div className="space-y-4">
       {/* 1. Status de Matrícula (Hierarquia de tarefas essenciais) */}
       {isEnrollmentIncomplete ? (
         <Card className="border-warning/50 bg-warning/5 dark:bg-warning/10">
@@ -305,82 +294,141 @@ export default async function StudentPage() {
         startedAtTkd={student?.started_at_tkd}
         attendanceRate={attendance.summary.total ? attendance.summary.rate : undefined}
       />
+    </div>
+  );
+}
 
-      {/* 6. Dados Cadastrais e Ações Rápidas */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">Meus dados cadastrais</CardTitle>
-              <UserPen className="size-5 text-muted-foreground" aria-hidden="true" />
-            </div>
-            <CardDescription className="text-xs">
-              Mantenha seu telefone, endereço e informações de emergência sempre atualizados.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="text-sm space-y-1 text-muted-foreground">
-              <p><strong className="text-foreground">Nome:</strong> {student?.full_name || profile.full_name}</p>
-              {student?.whatsapp ? <p><strong className="text-foreground">WhatsApp:</strong> {student.whatsapp}</p> : null}
-              {student?.address ? <p className="truncate"><strong className="text-foreground">Endereço:</strong> {student.address}</p> : null}
-            </div>
-            <div className="pt-1">
-              <Button asChild variant="outline" size="sm">
-                <Link href={ROUTES.studentEnrollment}>
-                  <UserPen className="size-4" aria-hidden="true" />
-                  Editar meus dados e endereço
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+function StudentDashboardSkeleton({ minor }: { minor: boolean }) {
+  return (
+    <div className="space-y-4">
+      {/* Hero Next Training Skeleton */}
+      <Card className="border-border/80">
+        <CardHeader className="pb-3 space-y-2">
+          <Skeleton className="h-4 w-36" />
+          <Skeleton className="h-6 w-72" />
+          <Skeleton className="h-4 w-48" />
+        </CardHeader>
+        <CardContent className="pt-0 flex justify-between items-center">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-9 w-32 rounded-lg" />
+        </CardContent>
+      </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Documentos e contratos</CardTitle>
-            <CardDescription className="text-xs">
-              Acesse termos de adesão, contratos de matrícula e pagamentos.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex flex-wrap gap-2">
-              <Button asChild variant="outline" size="sm">
-                <Link href={ROUTES.studentContracts}>
-                  <FileText className="size-4" aria-hidden="true" />
-                  Meus contratos
-                </Link>
-              </Button>
-              {!minor ? (
+      {/* Metrics Cards Skeleton */}
+      <div className={cn("grid gap-4 sm:grid-cols-2", minor && "sm:grid-cols-1")}>
+        <MetricCardsSkeleton count={minor ? 1 : 2} />
+      </div>
+
+      {/* Graduation Card Skeleton */}
+      <Card className="border-border/80 p-5 space-y-4">
+        <div className="flex justify-between items-center">
+          <div className="space-y-1.5">
+            <Skeleton className="h-5 w-44" />
+            <Skeleton className="h-4 w-60" />
+          </div>
+          <Skeleton className="h-7 w-24 rounded-full" />
+        </div>
+        <Skeleton className="h-3 w-full rounded-full" />
+      </Card>
+    </div>
+  );
+}
+
+export default async function StudentPage() {
+  const profile = await requireProfile();
+  if (profile.role === "admin") redirect(ROUTES.admin);
+  if (!profile.capabilities.includes("student")) redirect(ROUTES.guardian);
+  const guardian = profile.capabilities.includes("guardian");
+  const minor = profile.role === "minor_student";
+
+  return (
+    <PortalShell
+      profile={profile}
+      activePath={ROUTES.student}
+      title={`Olá, ${profile.full_name.split(" ")[0]}`}
+      subtitle="Acompanhe seus treinos, frequência e mensalidades na academia."
+    >
+      <div className="w-full min-w-0 space-y-4">
+        {/* Dynamic Training, Metrics, and Graduation in Suspense */}
+        <Suspense fallback={<StudentDashboardSkeleton minor={minor} />}>
+          <StudentDashboardDynamic profile={profile} minor={minor} />
+        </Suspense>
+
+        {/* 6. Dados Cadastrais e Ações Rápidas (Estático Imediato) */}
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">Meus dados cadastrais</CardTitle>
+                <UserPen className="size-5 text-muted-foreground" aria-hidden="true" />
+              </div>
+              <CardDescription className="text-xs">
+                Mantenha seu telefone, endereço e informações de emergência sempre atualizados.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="text-sm space-y-1 text-muted-foreground">
+                <p><strong className="text-foreground">Nome:</strong> {profile.full_name}</p>
+                <p><strong className="text-foreground">Acesso:</strong> {profile.email || "Matrícula ativa"}</p>
+              </div>
+              <div className="pt-1">
                 <Button asChild variant="outline" size="sm">
-                  <Link href={ROUTES.studentBilling}>
-                    <CreditCard className="size-4" aria-hidden="true" />
-                    Pagamentos e PIX
+                  <Link href={ROUTES.studentEnrollment}>
+                    <UserPen className="size-4" aria-hidden="true" />
+                    Editar meus dados e endereço
                   </Link>
                 </Button>
-              ) : null}
-            </div>
+              </div>
+            </CardContent>
+          </Card>
 
-            {!minor ? (
-              <div className="pt-2 border-t text-sm">
-                {guardian ? (
-                  <Button asChild variant="ghost" size="sm" className="px-0">
-                    <Link href={ROUTES.guardianDependents} className="flex items-center gap-2">
-                      <UsersRound className="size-4" aria-hidden="true" />
-                      Acessar painel de dependentes
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Documentos e contratos</CardTitle>
+              <CardDescription className="text-xs">
+                Acesse termos de adesão, contratos de matrícula e pagamentos.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                <Button asChild variant="outline" size="sm">
+                  <Link href={ROUTES.studentContracts}>
+                    <FileText className="size-4" aria-hidden="true" />
+                    Meus contratos
+                  </Link>
+                </Button>
+                {!minor ? (
+                  <Button asChild variant="outline" size="sm">
+                    <Link href={ROUTES.studentBilling}>
+                      <CreditCard className="size-4" aria-hidden="true" />
+                      Pagamentos e PIX
                     </Link>
                   </Button>
-                ) : (
-                  <form action={enableGuardianAction}>
-                    <Button type="submit" variant="ghost" size="sm" className="px-0">
-                      <UserPlus className="size-4" aria-hidden="true" />
-                      Cadastrar filhos ou dependentes
-                    </Button>
-                  </form>
-                )}
+                ) : null}
               </div>
-            ) : null}
-          </CardContent>
-        </Card>
+
+              {!minor ? (
+                <div className="pt-2 border-t text-sm">
+                  {guardian ? (
+                    <Button asChild variant="ghost" size="sm" className="px-0">
+                      <Link href={ROUTES.guardianDependents} className="flex items-center gap-2">
+                        <UsersRound className="size-4" aria-hidden="true" />
+                        Acessar painel de dependentes
+                      </Link>
+                    </Button>
+                  ) : (
+                    <form action={enableGuardianAction}>
+                      <Button type="submit" variant="ghost" size="sm" className="px-0">
+                        <UserPlus className="size-4" aria-hidden="true" />
+                        Cadastrar filhos ou dependentes
+                      </Button>
+                    </form>
+                  )}
+                </div>
+              ) : null}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </PortalShell>
   );
