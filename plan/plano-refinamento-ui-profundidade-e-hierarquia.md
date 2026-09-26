@@ -112,76 +112,76 @@ Para áreas onde o usuário interage ou insere dados (campos, controles deslizan
 ## 3. Fases de Execução
 
 ### Fase A: Fundação de Tokens e Classes Utilitárias (`globals.css`)
-- [ ] **A.1** Atualizar variáveis de luminosidade em `:root` e `.dark` no `src/app/globals.css`:
+- [x] **A.1** Atualizar variáveis de luminosidade em `:root` e `.dark` no `src/app/globals.css`:
   - Calibrar `--background` (L0) e `--card` (L1) para haver um delta de luminosidade constante de 8% a 10%.
   - Definir `--card-elevated` (L2) e `--surface-recessed` (para campos escavados).
-- [ ] **A.2** Criar utilitários de sombras combinadas no Tailwind `@theme`:
+- [x] **A.2** Criar utilitários de sombras combinadas no Tailwind `@theme`:
   - `shadow-raised`: top glow sutil + bottom shadow de elevação.
   - `shadow-floating`: top glow mais pronunciado + bottom shadow ampla.
   - `shadow-recessed`: inset superior escuro + inset inferior claro.
   - `shadow-track`: profundidade negativa para progress bars e switchs.
-- [ ] **A.3** Criar tokens de bordas chanfradas translúcidas para dar acabamento suave aos componentes.
+- [x] **A.3** Criar tokens de bordas chanfradas translúcidas para dar acabamento suave aos componentes.
 
 ---
 
 ### Fase B: Atualização dos Componentes Primitivos (`src/components/ui/`)
-- [ ] **B.1 `Card` (`src/components/ui/card.tsx`):**
+- [x] **B.1 `Card` (`src/components/ui/card.tsx`):**
   - Aplicar `shadow-raised` como padrão; substituir bordas pesadas por bordas orgânicas/luminosas.
   - Adicionar suporte a variante `variant="floating"` e `variant="flat"`.
-- [ ] **B.2 `Input`, `Textarea` e `Select` (`src/components/ui/input.tsx`, `textarea.tsx`):**
+- [x] **B.2 `Input`, `Textarea` e `Select` (`src/components/ui/input.tsx`, `textarea.tsx`):**
   - Aplicar profundidade negativa `shadow-recessed`.
   - Melhorar estados de foco com anel suave que simula iluminação direta no contorno.
-- [ ] **B.3 `Progress` (`src/components/ui/progress.tsx`):**
+- [x] **B.3 `Progress` (`src/components/ui/progress.tsx`):**
   - Trilha com `shadow-track` (escavada); barra preenchida com gradiente sutil e highlight superior.
-- [ ] **B.4 `Badge` e `StatusBadge` (`src/components/ui/badge.tsx`, `src/components/shared/status-badge.tsx`):**
+- [x] **B.4 `Badge` e `StatusBadge` (`src/components/ui/badge.tsx`, `src/components/shared/status-badge.tsx`):**
   - Badges secundárias com estilo *recessed*; badges de destaque com sutil elevação e luz.
-- [ ] **B.5 `Dialog` e `Sheet` (`src/components/ui/dialog.tsx`, `sheet.tsx`):**
+- [x] **B.5 `Dialog` e `Sheet` (`src/components/ui/dialog.tsx`, `sheet.tsx`):**
   - Aplicar `shadow-overlay` e fundo L2 para garantir destaque total sobre o backdrop.
 
 ---
 
 ### Fase C: Painéis Administrativos (`/admin`)
-- [ ] **C.1 Dashboard do Professor (`src/app/admin/page.tsx`):**
+- [x] **C.1 Dashboard do Professor (`src/app/admin/page.tsx`):**
   - Card de **Tarefas Urgentes**: destaque como elemento mais elevado da página (`shadow-floating`), atraindo a atenção instantânea.
   - Grade de **Métricas**: elevação equilibrada (`shadow-raised`), com números nítidos e ícones sobre fundos com profundidade.
   - **Turmas de Hoje**: cards organizados em camadas sem excesso de linhas divisórias.
-- [ ] **C.2 Gestão de Turmas (`src/app/admin/turmas/page.tsx`):**
+- [x] **C.2 Gestão de Turmas (`src/app/admin/turmas/page.tsx`):**
   - Cards de turmas com profundidade tátil; badges de dias da semana embutidas suavemente.
-- [ ] **C.3 Fila de Matrículas e Financeiro (`src/app/admin/matriculas/`, `src/app/admin/financeiro/`):**
+- [x] **C.3 Fila de Matrículas e Financeiro (`src/app/admin/matriculas/`, `src/app/admin/financeiro/`):**
   - Filtros e barras de pesquisa com profundidade negativa (`shadow-recessed`).
   - Cards de faturamento e comprovantes com hierarquia visual clara entre pendências e quitados.
-- [ ] **C.4 Exames de Faixa e Contratos:**
+- [x] **C.4 Exames de Faixa e Contratos:**
   - Banners de exames com destaque de luz superior; lista de participantes com deênfase em itens já avaliados.
 
 ---
 
 ### Fase D: Portal do Aluno (`/aluno`)
-- [ ] **D.1 Card Hero do Próximo Treino (`src/app/aluno/page.tsx`):**
+- [x] **D.1 Card Hero do Próximo Treino (`src/app/aluno/page.tsx`):**
   - Elevação máxima (`shadow-floating`) com gradiente sutil direcional; quando "Hoje tem treino!", adicionar glow de acento temático.
-- [ ] **D.2 Situação Financeira do Aluno:**
+- [x] **D.2 Situação Financeira do Aluno:**
   - Se houver mensalidade em atraso ou aberta, card flutuante destacado; se estiver em dia, card discreto sem alarmismo.
-- [ ] **D.3 Card de Jornada de Graduação (`GraduationCard`):**
+- [x] **D.3 Card de Jornada de Graduação (`GraduationCard`):**
   - Barra de progresso com profundidade negativa (`shadow-track`); faixas com efeito chanfrado de acabamento.
-- [ ] **D.4 Frequência e Histórico (`src/app/aluno/frequencia/page.tsx`):**
+- [x] **D.4 Frequência e Histórico (`src/app/aluno/frequencia/page.tsx`):**
   - Dias com presença em relevo sutil; dias sem aula integrados ao fundo do calendário.
 
 ---
 
 ### Fase E: Portal do Responsável (`/responsavel`) e Central de Avisos (`/avisos`)
-- [ ] **E.1 Cards de Dependentes (`src/app/responsavel/dependentes/page.tsx`):**
+- [x] **E.1 Cards de Dependentes (`src/app/responsavel/dependentes/page.tsx`):**
   - Cartões de cada filho com elevação tátil e separação suave de seções de frequência, financeiro e matrícula.
   - Ações rápidas de credenciais organizadas com deênfase visual.
-- [ ] **E.2 Central de Avisos (`src/app/avisos/page.tsx`):**
+- [x] **E.2 Central de Avisos (`src/app/avisos/page.tsx`):**
   - Cards de comunicados não lidos com elevação e destaque; comunicados lidos deênfatizados e integrados à lista.
 
 ---
 
 ### Fase F: Homologação e Qualidade
-- [ ] **F.1 Validação de Contraste WCAG AA:**
+- [x] **F.1 Validação de Contraste WCAG AA:**
   - Garantir que todas as camadas de texto mantêm contraste mínimo de 4.5:1 (texto normal) e 3:1 (texto grande e ícones).
-- [ ] **F.2 Validação em Telas OLED/Dark Mode e Telas Claras:**
+- [x] **F.2 Validação em Telas OLED/Dark Mode e Telas Claras:**
   - Verificar que o contraste não causa ofuscamento no tema claro nem perda de detalhe no tema escuro.
-- [ ] **F.3 Integridade Funcional:**
+- [x] **F.3 Integridade Funcional:**
   - Executar `npm run typecheck`, `npm run lint`, `npm test` (240 testes verdes) e `npm run build`.
 
 ---
