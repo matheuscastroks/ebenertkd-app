@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { AuthEntry } from "@/components/auth/auth-entry";
 import { resolveDashboardPath } from "@/lib/auth/auth-utils";
@@ -27,13 +28,34 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     : undefined;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-10">
-      <div className="w-full max-w-md space-y-8">
+    <main className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-8 sm:py-12">
+      <div className="w-full max-w-md space-y-6">
         <div className="space-y-2 text-center">
-          <p className="text-sm font-semibold tracking-[0.18em] text-muted-foreground">EBENER TKD</p>
-          <h1 className="text-3xl font-semibold tracking-tight">Acesse sua conta</h1>
+          <Image
+            src="/brand-icon.png"
+            alt="Ebener TKD"
+            width={64}
+            height={64}
+            unoptimized
+            className="mx-auto size-16 object-contain"
+            priority
+          />
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
+            Ebener Taekwondo
+          </p>
+          <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+            Acesse sua conta
+          </h1>
+          <p className="text-xs text-muted-foreground sm:text-sm">
+            Portal do aluno, responsável e gestão da academia.
+          </p>
         </div>
-        <AuthEntry minorError={minorError} adultError={adultError} registrationError={registrationError} registered={params.registered === "1"} />
+        <AuthEntry
+          minorError={minorError}
+          adultError={adultError}
+          registrationError={registrationError}
+          registered={params.registered === "1"}
+        />
       </div>
     </main>
   );

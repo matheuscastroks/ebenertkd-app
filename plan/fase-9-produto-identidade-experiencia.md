@@ -247,14 +247,14 @@ Cada tela e componente listado abaixo deve ser auditado e refinado seguindo os s
 ---
 
 ### Módulo 1: Autenticação, Onboarding e Entrada Pública
-- [ ] **1.1 Tela de Entrada / Login (`src/app/page.tsx`, `src/components/auth/auth-entry.tsx`, `login-card.tsx`, `register-card.tsx`):**
-  - [ ] Alternador de modo Adulto / Menor em destaque tátil ergonômico no topo.
-  - [ ] Campos de e-mail e senha com altura mínima de 44px e preenchimento automático de credenciais seguro (`autoComplete`).
-  - [ ] Tratamento amigável de erro de credenciais (ex: senha incorreta ou usuário não encontrado) sem recarregar a tela.
-  - [ ] Link visível e acessível para "Esqueci minha senha" e suporte a retorno limpo de erros via URL (`?error=...`).
-- [ ] **1.2 Recuperação de Senha (`src/app/recuperar/page.tsx`, `src/app/recuperar/confirmar/page.tsx`):**
-  - [ ] Tela de solicitação de redefinição com instrução clara de recebimento de e-mail.
-  - [ ] Tela de confirmação com validação de força da nova senha e retorno direto para login com toast de sucesso.
+- [x] **1.1 Tela de Entrada / Login (`src/app/page.tsx`, `src/components/auth/auth-entry.tsx`, `login-card.tsx`, `register-card.tsx`):**
+  - [x] Alternador de modo Adulto / Menor em destaque tátil ergonômico no topo.
+  - [x] Campos de e-mail e senha com altura mínima de 44px e preenchimento automático de credenciais seguro (`autoComplete`).
+  - [x] Tratamento amigável de erro de credenciais (ex: senha incorreta ou usuário não encontrado) sem recarregar a tela.
+  - [x] Link visível e acessível para "Esqueci minha senha" e suporte a retorno limpo de erros via URL (`?error=...`).
+- [x] **1.2 Recuperação de Senha (`src/app/recuperar/page.tsx`, `src/app/recuperar/confirmar/page.tsx`):**
+  - [x] Tela de solicitação de redefinição com instrução clara de recebimento de e-mail.
+  - [x] Tela de confirmação com validação de força da nova senha e retorno direto para login com toast de sucesso.
 
 ---
 
