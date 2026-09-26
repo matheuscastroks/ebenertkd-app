@@ -6,20 +6,174 @@
     <meta name="theme-color" content="#115c5d" />
     <title>Sem conexão — Ebener TKD</title>
     <style>
+      :root {
+        --bg: #f7f5f1;
+        --panel: rgba(255, 255, 255, 0.88);
+        --panel-border: rgba(17, 92, 93, 0.12);
+        --primary: #115c5d;
+        --primary-strong: #0d494a;
+        --primary-soft: #e5f0ef;
+        --accent: #f6a936;
+        --text: #142323;
+        --muted: #5f6d6b;
+        --shadow: rgba(16, 34, 33, 0.12);
+      }
+
       * { box-sizing: border-box; }
-      body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; color: #172423; background: #fffaf3; font-family: system-ui, sans-serif; }
-      main { width: min(100%, 440px); padding: 28px; border: 1px solid #d8dfdc; border-radius: 18px; background: white; box-shadow: 0 18px 50px rgb(23 36 35 / 10%); }
-      .mark { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; color: white; background: #115c5d; font-weight: 800; }
-      h1 { margin: 22px 0 8px; font-size: 1.5rem; }
-      p { margin: 0 0 22px; color: #586765; line-height: 1.55; }
-      button { width: 100%; min-height: 44px; border: 0; border-radius: 10px; color: white; background: #115c5d; font: inherit; font-weight: 700; cursor: pointer; }
+
+      html, body {
+        min-height: 100%;
+        margin: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(246, 169, 54, 0.14), transparent 32%),
+          radial-gradient(circle at bottom right, rgba(17, 92, 93, 0.12), transparent 28%),
+          var(--bg);
+        font-family: "Poppins", "Segoe UI", sans-serif;
+      }
+
+      main {
+        width: min(100%, 460px);
+        padding: 28px 24px 24px;
+        border: 1px solid var(--panel-border);
+        border-radius: 24px;
+        background: var(--panel);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 24px 60px var(--shadow);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+
+      .mark {
+        display: grid;
+        place-items: center;
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        color: #fff;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%);
+        box-shadow: 0 12px 28px rgba(17, 92, 93, 0.22);
+        font-size: 1.4rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border: 1px solid rgba(17, 92, 93, 0.16);
+        border-radius: 999px;
+        background: var(--primary-soft);
+        color: var(--primary-strong);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .status::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 4px rgba(246, 169, 54, 0.18);
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: clamp(1.7rem, 3vw, 2.2rem);
+        line-height: 1.15;
+        letter-spacing: -0.04em;
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.65;
+        font-size: 0.98rem;
+      }
+
+      .notice {
+        margin-top: 18px;
+        padding: 14px 16px;
+        border-radius: 14px;
+        background: rgba(17, 92, 93, 0.04);
+        border: 1px solid rgba(17, 92, 93, 0.09);
+        color: var(--text);
+        font-size: 0.88rem;
+      }
+
+      button {
+        width: 100%;
+        min-height: 48px;
+        margin-top: 22px;
+        border: 0;
+        border-radius: 12px;
+        color: white;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%);
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+        box-shadow: 0 14px 28px rgba(17, 92, 93, 0.2);
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.02);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button:focus-visible {
+        outline: 3px solid rgba(17, 92, 93, 0.25);
+        outline-offset: 3px;
+      }
+
+      @media (max-width: 480px) {
+        main {
+          padding: 22px 18px 18px;
+          border-radius: 20px;
+        }
+        .brand {
+          align-items: flex-start;
+        }
+      }
     </style>
   </head>
   <body>
     <main>
-      <div class="mark" aria-hidden="true">E</div>
+      <div class="brand">
+        <div class="mark" aria-hidden="true">E</div>
+        <div class="status">Offline</div>
+      </div>
+
       <h1>Você está sem conexão</h1>
-      <p>Reconecte-se para consultar dados ou concluir operações. Nenhuma alteração foi registrada offline.</p>
+      <p>
+        Reconecte-se para consultar dados, acompanhar frequência e concluir operações sem perder o contexto.
+      </p>
+
+      <div class="notice">
+        Nenhuma alteração foi registrada offline. Assim que a conexão voltar, o app volta ao normal.
+      </div>
+
       <button type="button" onclick="window.location.reload()">Tentar novamente</button>
     </main>
   </body>

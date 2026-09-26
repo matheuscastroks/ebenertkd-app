@@ -3,22 +3,33 @@ import { PortalShell } from "@/components/dashboard/portal-shell";
 import { MetricCard } from "@/components/shared/metric-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getBillingOverview } from "@/features/billing/report-service";
 import { listTrainingClasses } from "@/features/classes/service";
+import { getTodayWeekday } from "@/features/classes/schedule";
 import { listExamEvents } from "@/features/exams/service";
-import { countEnrollmentsRequiringReview } from "@/features/students/service";
+import {
+  countEnrollmentsRequiringReview,
+  listEnrollmentsForReview,
+} from "@/features/students/service";
+import { StudentAvatar } from "@/features/students/components/student-avatar";
+import { BeltBadge } from "@/features/students/components/belt-badge";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
 import {
   AlertCircle,
+  ArrowRight,
   Award,
+  CalendarCheck2,
   CalendarDays,
   CheckCircle2,
-  ClipboardCheck,
+  Clock,
   FileCheck,
+  MapPin,
+  Megaphone,
+  UserCheck,
   UsersRound,
-  WalletCards
+  WalletCards,
 } from "lucide-react";
 
 const money = (value: number) =>
@@ -26,11 +37,28 @@ const money = (value: number) =>
 
 export default async function AdminPage() {
   const profile = await requireProfile("admin");
-  const [pendingEnrollments, classes, billing, exams] = await Promise.all([
+  const todayWeekday = getTodayWeekday();
+
+  const [
+    pendingEnrollmentsCount,
+    classes,
+    billing,
+    exams,
+    pendingEnrollmentsData,
+    pendingBillingData,
+  ] = await Promise.all([
     countEnrollmentsRequiringReview(),
     listTrainingClasses(),
     getBillingOverview({ page: 1 }),
-    listExamEvents()
+    listExamEvents(),
+    listEnrollmentsForReview({ status: "submitted", page: 1 }).catch(() => ({
+      rows: [],
+      total: 0,
+    })),
+    getBillingOverview({ status: "proof_under_review", page: 1 }).catch(() => ({
+      charges: [],
+      summary: { underReviewCents: 0 },
+    })),
   ]);
 
   const upcomingExam = exams
@@ -42,72 +70,191 @@ export default async function AdminPage() {
     )
     .sort((a, b) => a.event_date.localeCompare(b.event_date))[0];
 
-  const hasPendingEnrollments = pendingEnrollments > 0;
-  const hasPendingProofs = billing.summary.underReviewCents > 0;
-  const hasUrgentTasks = hasPendingEnrollments || hasPendingProofs;
+  const pendingEnrollments = pendingEnrollmentsData.rows;
+  const pendingProofs = pendingBillingData.charges;
+  const hasUrgentTasks = pendingEnrollments.length > 0 || pendingProofs.length > 0;
+
+  const classesToday = classes.filter(
+    (c) => c.status === "active" && c.weekdays.includes(todayWeekday)
+  );
 
   return (
     <PortalShell
       profile={profile}
       activePath={ROUTES.admin}
       title={`Olá, ${profile.full_name.split(" ")[0]}`}
-      subtitle="Acompanhe as tarefas pendentes e o resumo operacional de hoje."
+      subtitle="Acompanhe as tarefas pendentes, treinos de hoje e o resumo operacional."
     >
-      {/* 1. Tarefas que exigem atenção imediata (Hierarquia de Causa e Efeito) */}
+      {/* 1. Tarefas que exigem atenção imediata (Hierarquia de Ação) */}
       {hasUrgentTasks ? (
-        <Card className="border-warning/50 bg-warning/5 dark:bg-warning/10">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
               <AlertCircle className="size-5 text-warning" aria-hidden="true" />
-              <CardTitle className="text-base font-semibold">
-                Itens aguardando sua conferência
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="space-y-1 text-sm">
-              {hasPendingEnrollments ? (
-                <p>
-                  <strong>{pendingEnrollments}</strong> matrícula
-                  {pendingEnrollments === 1 ? "" : "s"} precisa
-                  {pendingEnrollments === 1 ? "" : "m"} de análise documental e aprovação.
-                </p>
-              ) : null}
-              {hasPendingProofs ? (
-                <p>
-                  Comprovantes de pagamento aguardando conferência (
-                  <strong>{money(billing.summary.underReviewCents)}</strong> em análise).
-                </p>
-              ) : null}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {hasPendingEnrollments ? (
-                <Button asChild size="sm">
-                  <Link href={ROUTES.adminEnrollments}>
-                    <ClipboardCheck aria-hidden="true" />
-                    Analisar matrículas
-                  </Link>
-                </Button>
-              ) : null}
-              {hasPendingProofs ? (
-                <Button asChild variant="outline" size="sm">
-                  <Link href={`${ROUTES.adminBilling}?status=proof_under_review`}>
-                    <FileCheck aria-hidden="true" />
-                    Conferir comprovantes
-                  </Link>
-                </Button>
-              ) : null}
-            </div>
-          </CardContent>
-        </Card>
+              <span>Aguardando sua conferência</span>
+            </h2>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Matrículas Pendentes */}
+            {pendingEnrollments.length > 0 ? (
+              <Card className="border-warning/40 bg-warning/5 dark:bg-warning/10">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                      <UserCheck className="size-4 text-warning" aria-hidden="true" />
+                      <span>Matrículas para análise ({pendingEnrollmentsCount})</span>
+                    </CardTitle>
+                    <Button asChild variant="ghost" size="sm" className="h-7 text-xs">
+                      <Link href={ROUTES.adminEnrollments}>Ver todas</Link>
+                    </Button>
+                  </div>
+                  <CardDescription className="text-xs">
+                    Alunos que enviaram documentos e aguardam aprovação para treinar.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2.5 pt-0">
+                  {pendingEnrollments.slice(0, 3).map((item) => (
+                    <div
+                      key={item.student.$id}
+                      className="flex items-center justify-between gap-3 rounded-lg border bg-background/80 p-2.5 text-sm shadow-xs"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <StudentAvatar
+                          name={item.student.full_name}
+                          photoDocumentId={item.profilePhotoDocumentId}
+                          size="sm"
+                        />
+                        <div className="min-w-0">
+                          <p className="truncate font-medium text-foreground text-xs sm:text-sm">
+                            {item.student.full_name}
+                          </p>
+                          <div className="flex items-center gap-1.5 pt-0.5">
+                            {item.student.current_belt ? (
+                              <BeltBadge belt={item.student.current_belt} gub={item.student.gub} size="sm" />
+                            ) : (
+                              <span className="text-xs text-muted-foreground">Iniciante</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <Button asChild size="sm" className="shrink-0 h-8 text-xs">
+                        <Link href={`${ROUTES.adminEnrollments}/${item.student.$id}`}>
+                          Analisar
+                        </Link>
+                      </Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            ) : null}
+
+            {/* Comprovantes PIX Pendentes */}
+            {pendingProofs.length > 0 ? (
+              <Card className="border-warning/40 bg-warning/5 dark:bg-warning/10">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                      <FileCheck className="size-4 text-warning" aria-hidden="true" />
+                      <span>Comprovantes PIX ({pendingProofs.length})</span>
+                    </CardTitle>
+                    <Button asChild variant="ghost" size="sm" className="h-7 text-xs">
+                      <Link href={`${ROUTES.adminBilling}?status=proof_under_review`}>Ver todos</Link>
+                    </Button>
+                  </div>
+                  <CardDescription className="text-xs">
+                    Total de <strong>{money(billing.summary.underReviewCents)}</strong> aguardando confirmação bancária.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2.5 pt-0">
+                  {pendingProofs.slice(0, 3).map((charge) => (
+                    <div
+                      key={charge.$id}
+                      className="flex items-center justify-between gap-3 rounded-lg border bg-background/80 p-2.5 text-sm shadow-xs"
+                    >
+                      <div className="min-w-0 space-y-0.5">
+                        <p className="truncate font-medium text-foreground text-xs sm:text-sm">
+                          Mensalidade · {charge.competence || "Cobrança"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Valor: <strong className="text-foreground">{money(charge.amount_cents)}</strong>
+                        </p>
+                      </div>
+                      <Button asChild variant="outline" size="sm" className="shrink-0 h-8 text-xs">
+                        <Link href={`${ROUTES.adminBilling}?status=proof_under_review`}>
+                          Conferir
+                        </Link>
+                      </Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            ) : null}
+          </div>
+        </div>
       ) : (
-        <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-          <CheckCircle2 className="size-4 text-success" aria-hidden="true" />
-          <span>Nenhuma matrícula ou comprovante pendente de conferência no momento.</span>
+        <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 p-3.5 text-sm text-emerald-800 dark:text-emerald-300">
+          <CheckCircle2 className="size-4.5 text-emerald-600 dark:text-emerald-400 shrink-0" aria-hidden="true" />
+          <span>Tudo em dia! Nenhuma matrícula ou comprovante pendente de conferência no momento.</span>
         </div>
       )}
 
-      {/* 2. Resumo Operacional Financeiro e de Treinos */}
+      {/* 2. Treinos de Hoje (Ação Rápida de Chamada) */}
+      <section className="space-y-3" aria-label="Treinos de hoje">
+        <div className="flex items-center justify-between">
+          <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+            <CalendarCheck2 className="size-5 text-primary" aria-hidden="true" />
+            <span>Treinos de hoje ({todayWeekday})</span>
+          </h2>
+          <Button asChild variant="ghost" size="sm" className="h-7 text-xs">
+            <Link href={ROUTES.adminClasses}>Ver todas as turmas</Link>
+          </Button>
+        </div>
+
+        {classesToday.length > 0 ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {classesToday.map((classItem) => (
+              <Card key={classItem.$id} className="relative overflow-hidden border-border/80">
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="text-base font-semibold truncate">
+                      {classItem.name}
+                    </CardTitle>
+                    <Badge variant="outline" className="text-xs shrink-0 font-normal">
+                      {classItem.weekdays.map((d) => d.slice(0, 3)).join("/")}
+                    </Badge>
+                  </div>
+                  <CardDescription className="text-xs flex items-center gap-1.5 pt-1 text-muted-foreground">
+                    <Clock className="size-3.5 shrink-0" aria-hidden="true" />
+                    <span>{classItem.start_time} às {classItem.end_time}</span>
+                    {classItem.location ? (
+                      <>
+                        <span aria-hidden="true">·</span>
+                        <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
+                        <span className="truncate">{classItem.location}</span>
+                      </>
+                    ) : null}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-2">
+                  <Button asChild size="sm" className="w-full">
+                    <Link href={`${ROUTES.adminClasses}/${classItem.$id}`}>
+                      <CalendarCheck2 className="size-4" aria-hidden="true" />
+                      Iniciar chamada da turma
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed p-4 text-center text-sm text-muted-foreground">
+            Hoje ({todayWeekday}) não há treinos agendados na grade regular da academia.
+          </div>
+        )}
+      </section>
+
+      {/* 3. Resumo Operacional Financeiro e de Alunos */}
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Resumo operacional">
         <MetricCard
           label="Recebido no mês"
@@ -137,7 +284,7 @@ export default async function AdminPage() {
         />
       </section>
 
-      {/* 3. Agenda de Exames e Ações Operacionais */}
+      {/* 4. Agenda de Exames e Atalhos de Operação */}
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -153,7 +300,7 @@ export default async function AdminPage() {
                   <span className="font-medium">{upcomingExam.name}</span>
                   <Badge variant="secondary">
                     {new Date(upcomingExam.event_date).toLocaleDateString("pt-BR", {
-                      timeZone: "UTC"
+                      timeZone: "UTC",
                     })}
                   </Badge>
                 </div>
@@ -181,21 +328,21 @@ export default async function AdminPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Operação diária</CardTitle>
+            <CardTitle className="text-base">Operação e Comunicação</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Acesse rapidamente as turmas para chamada ou emita novos comunicados para os alunos.
+              Acesse rapidamente os relatórios financeiros ou envie avisos e comunicados importantes.
             </p>
             <div className="flex flex-wrap gap-2">
-              <Button asChild variant="outline" size="sm">
-                <Link href={ROUTES.adminClasses}>Gerenciar turmas e chamada</Link>
-              </Button>
               <Button asChild variant="outline" size="sm">
                 <Link href={ROUTES.adminBilling}>Visão financeira completa</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
-                <Link href={ROUTES.notifications}>Enviar aviso</Link>
+                <Link href={ROUTES.notifications}>
+                  <Megaphone className="size-4" aria-hidden="true" />
+                  Enviar aviso aos alunos
+                </Link>
               </Button>
             </div>
           </CardContent>
