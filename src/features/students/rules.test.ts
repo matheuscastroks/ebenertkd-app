@@ -4,12 +4,15 @@ import { DUE_DAY_OPTIONS, GUB_OPTIONS, beltForGub, graduationMatches, gubForBelt
 
 describe("enrollment rules", () => {
   it("exposes only the allowed GUB and due-day choices", () => {
-    expect(GUB_OPTIONS).toEqual([9, 8, 7, 6, 5, 4, 3, 2, 1]);
+    expect(GUB_OPTIONS).toEqual([10, 9, 8, 7, 6, 5, 4, 3, 2, 1]);
     expect(DUE_DAY_OPTIONS).toEqual([5, 10, 15, 20, 25, 30]);
   });
-  it("maps each GUB to exactly one CBTKD belt in both directions", () => {
-    expect(beltForGub(9)).toBe("Cinza");
-    expect(beltForGub(5)).toBe("Verde escura");
+  it("maps each GUB to Ebener TKD belt system in both directions", () => {
+    expect(beltForGub(10)).toBe("Branca");
+    expect(beltForGub(9)).toBe("Ponta Amarela");
+    expect(beltForGub(8)).toBe("Amarela");
+    expect(beltForGub(5)).toBe("Ponta Azul");
+    expect(gubForBelt("Ponta Preta")).toBe(1);
     expect(gubForBelt("Vermelha escura")).toBe(1);
     expect(graduationMatches(4, "Azul")).toBe(true);
     expect(graduationMatches(4, "Vermelha")).toBe(false);

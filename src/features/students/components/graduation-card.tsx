@@ -34,11 +34,11 @@ export function GraduationCard({
   attendanceRate?: number;
 }) {
   const config = getBeltConfig(currentBelt, gub);
-  const activeGub = gub ?? config.gub ?? 9;
+  const activeGub = gub ?? config.gub ?? 10;
 
-  // No Taekwondo: 9º GUB é o primeiro degrau (índice 0), 1º GUB é o nono degrau (índice 8), Preta é o décimo (índice 9)
-  const currentIndex = activeGub === 0 ? 9 : Math.max(0, 9 - activeGub);
-  const totalSteps = GRADUATION_STEPS.length - 1; // 0 a 9
+  // No Taekwondo Ebener TKD: 10º GUB (Branca) é índice 0, 1º GUB (Ponta Preta) é índice 9, Preta é índice 10
+  const currentIndex = activeGub === 0 ? 10 : Math.max(0, 10 - activeGub);
+  const totalSteps = GRADUATION_STEPS.length - 1; // 0 a 10
   const progressPercent = Math.min(100, Math.round((currentIndex / totalSteps) * 100));
 
   const nextStep = currentIndex < GRADUATION_STEPS.length - 1

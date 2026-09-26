@@ -1,33 +1,87 @@
 export const GUB_BELT_OPTIONS = [
-  { gub: 9, belt: "Cinza" },
-  { gub: 8, belt: "Amarela" },
-  { gub: 7, belt: "Laranja" },
-  { gub: 6, belt: "Verde" },
-  { gub: 5, belt: "Verde escura" },
-  { gub: 4, belt: "Azul" },
-  { gub: 3, belt: "Azul escura" },
-  { gub: 2, belt: "Vermelha" },
-  { gub: 1, belt: "Vermelha escura" }
+  { gub: 10, belt: "Branca", nameEn: "White", poomsae: "Introductory Poomsae" },
+  { gub: 9, belt: "Ponta Amarela", nameEn: "Yellow Tip", poomsae: "Preliminary Poomsae" },
+  { gub: 8, belt: "Amarela", nameEn: "Yellow", poomsae: "Taegeuk Il Jang" },
+  { gub: 7, belt: "Ponta Verde", nameEn: "Green Tip", poomsae: "Taegeuk Ee Jang" },
+  { gub: 6, belt: "Verde", nameEn: "Green", poomsae: "Taegeuk Sam Jang" },
+  { gub: 5, belt: "Ponta Azul", nameEn: "Blue Tip", poomsae: "Taegeuk Sa Jang" },
+  { gub: 4, belt: "Azul", nameEn: "Blue", poomsae: "Taegeuk Oh Jang" },
+  { gub: 3, belt: "Ponta Vermelha", nameEn: "Red Tip", poomsae: "Taegeuk Yuk Jang" },
+  { gub: 2, belt: "Vermelha", nameEn: "Red", poomsae: "Taegeuk Chil Jang" },
+  { gub: 1, belt: "Ponta Preta", nameEn: "Black Tip", poomsae: "Taegeuk Pal Jang" }
+] as const;
+
+export const DAN_BELT_OPTIONS = [
+  { dan: 1, belt: "Preta", nameEn: "1st Dan Black Belt", poomsae: "Koryo" },
+  { dan: 2, belt: "Preta 2º Dan", nameEn: "2nd Dan Black Belt", poomsae: "Keumgang" },
+  { dan: 3, belt: "Preta 3º Dan", nameEn: "3rd Dan Black Belt", poomsae: "Taebaek" }
 ] as const;
 
 export type GubOption = (typeof GUB_BELT_OPTIONS)[number]["gub"];
-export type BeltOption = (typeof GUB_BELT_OPTIONS)[number]["belt"];
+export type BeltOption =
+  | (typeof GUB_BELT_OPTIONS)[number]["belt"]
+  | (typeof DAN_BELT_OPTIONS)[number]["belt"]
+  | "Cinza"
+  | "Laranja"
+  | "Verde escura"
+  | "Azul escura"
+  | "Vermelha escura";
 
-export const GUB_OPTIONS = GUB_BELT_OPTIONS.map(({ gub }) => gub) as GubOption[];
-export const BELT_OPTIONS = GUB_BELT_OPTIONS.map(({ belt }) => belt) as BeltOption[];
+export const GUB_OPTIONS = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1] as const;
+export const BELT_OPTIONS = [
+  "Branca",
+  "Ponta Amarela",
+  "Amarela",
+  "Ponta Verde",
+  "Verde",
+  "Ponta Azul",
+  "Azul",
+  "Ponta Vermelha",
+  "Vermelha",
+  "Ponta Preta",
+  "Preta",
+  "Preta 1º Dan",
+  "Preta 2º Dan",
+  "Preta 3º Dan",
+  // Aliases legados para compatibilidade com registros anteriores
+  "Cinza",
+  "Laranja",
+  "Verde escura",
+  "Azul escura",
+  "Vermelha escura"
+] as const;
 export const DUE_DAY_OPTIONS = [5, 10, 15, 20, 25, 30] as const;
 
-export function beltForGub(gub: GubOption) {
+export function beltForGub(gub: number) {
   return GUB_BELT_OPTIONS.find((option) => option.gub === gub)?.belt;
 }
 
-export function gubForBelt(belt: BeltOption) {
-  return GUB_BELT_OPTIONS.find((option) => option.belt === belt)?.gub;
+export function gubForBelt(belt: string) {
+  const normalized = belt.toLowerCase().trim().replace(/^faixa\s+/, "");
+  const direct = GUB_BELT_OPTIONS.find(
+    (option) => option.belt.toLowerCase() === normalized
+  );
+  if (direct) return direct.gub;
+
+  // Aliases e nomes convencionais
+  if (normalized === "white" || normalized === "branca") return 10;
+  if (normalized === "cinza" || normalized === "yellow tip" || normalized === "ponta amarela" || normalized === "branca ponta amarela") return 9;
+  if (normalized === "amarela" || normalized === "yellow") return 8;
+  if (normalized === "laranja" || normalized === "green tip" || normalized === "ponta verde" || normalized === "amarela ponta verde") return 7;
+  if (normalized === "verde" || normalized === "green") return 6;
+  if (normalized === "verde escura" || normalized === "blue tip" || normalized === "ponta azul" || normalized === "verde ponta azul") return 5;
+  if (normalized === "azul" || normalized === "blue") return 4;
+  if (normalized === "azul escura" || normalized === "red tip" || normalized === "ponta vermelha" || normalized === "azul ponta vermelha") return 3;
+  if (normalized === "vermelha" || normalized === "red") return 2;
+  if (normalized === "vermelha escura" || normalized === "black tip" || normalized === "ponta preta" || normalized === "vermelha ponta preta") return 1;
+  if (normalized.includes("preta") || normalized.includes("black") || normalized.includes("dan")) return 0;
+  return undefined;
 }
 
 export function graduationMatches(gub?: number, belt?: string) {
   if (gub == null && !belt) return true;
-  return GUB_BELT_OPTIONS.some((option) => option.gub === gub && option.belt === belt);
+  if (gub == null || !belt) return false;
+  return gubForBelt(belt) === gub;
 }
 
 export function calculateNextDueDate(dueDay: number, referenceDate: Date = new Date()): string {

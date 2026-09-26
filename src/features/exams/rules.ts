@@ -1,11 +1,11 @@
 import type { ChargeStatus } from "@/features/billing/types";
-import { beltForGub, type BeltOption, type GubOption } from "@/features/students/options";
+import { graduationMatches, type BeltOption, type GubOption } from "@/features/students/options";
 import type { BeltHistory } from "@/features/exams/types";
 
 export type PaidChargeDecision = "future_credit" | "keep_charge";
 
 export function assertNextGraduation(currentGub: number | null | undefined, targetGub: GubOption, targetBelt: BeltOption) {
-  if (beltForGub(targetGub) !== targetBelt) throw new Error("exam_graduation_mismatch");
+  if (!graduationMatches(targetGub, targetBelt)) throw new Error("exam_graduation_mismatch");
   if (currentGub == null || targetGub !== currentGub - 1) throw new Error("exam_graduation_must_be_next");
 }
 

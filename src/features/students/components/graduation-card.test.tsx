@@ -16,7 +16,7 @@ describe("GraduationCard", () => {
     expect(screen.getByText("Jornada de Graduação")).toBeInTheDocument();
     expect(screen.getByText("8º GUB · Confederação Brasileira de Taekwondo")).toBeInTheDocument();
     expect(screen.getByText("Próximo objetivo:")).toBeInTheDocument();
-    expect(screen.getByText(/Faixa Laranja/)).toBeInTheDocument();
+    expect(screen.getByText(/Faixa Ponta Verde/)).toBeInTheDocument();
     expect(screen.getByText(/85% · Apto para exame/)).toBeInTheDocument();
   });
 

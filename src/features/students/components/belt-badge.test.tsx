@@ -20,6 +20,18 @@ describe("BeltBadge", () => {
     expect(screen.getByText("Faixa Preta")).toBeInTheDocument();
   });
 
+  it("renders White belt (10º GUB) correctly", () => {
+    render(<BeltBadge belt="Branca" gub={10} />);
+    expect(screen.getByText("Faixa Branca")).toBeInTheDocument();
+    expect(screen.getByText("10º GUB")).toBeInTheDocument();
+  });
+
+  it("renders Yellow Tip (9º GUB) and Black Tip (1º GUB) correctly", () => {
+    render(<BeltBadge belt="Ponta Amarela" gub={9} />);
+    expect(screen.getByText("Faixa Ponta Amarela")).toBeInTheDocument();
+    expect(screen.getByText("9º GUB")).toBeInTheDocument();
+  });
+
   it("handles unknown or missing belt gracefully", () => {
     render(<BeltBadge />);
     expect(screen.getByText("Faixa Não informada")).toBeInTheDocument();

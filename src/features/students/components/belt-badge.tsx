@@ -12,38 +12,107 @@ export type BeltVisualConfig = {
 };
 
 const BELT_CONFIGS: Record<string, BeltVisualConfig> = {
-  "cinza": {
-    name: "Cinza",
-    gub: 9,
-    bgClass: "bg-slate-200 dark:bg-slate-700",
-    borderClass: "border-slate-300 dark:border-slate-600",
-    textClass: "text-slate-800 dark:text-slate-100",
-    tipClass: "bg-slate-400"
-  },
+  // 10º GUB: Branca (White)
   "branca": {
     name: "Branca",
-    gub: 9,
-    bgClass: "bg-slate-100 dark:bg-slate-800",
-    borderClass: "border-slate-300 dark:border-slate-600",
-    textClass: "text-slate-800 dark:text-slate-100",
-    tipClass: "bg-slate-300"
+    gub: 10,
+    bgClass: "bg-neutral-100 dark:bg-neutral-200",
+    borderClass: "border-neutral-300 dark:border-neutral-400",
+    textClass: "text-neutral-900 font-medium",
+    tipClass: "bg-neutral-900"
   },
+  "white": {
+    name: "Branca",
+    gub: 10,
+    bgClass: "bg-neutral-100 dark:bg-neutral-200",
+    borderClass: "border-neutral-300 dark:border-neutral-400",
+    textClass: "text-neutral-900 font-medium",
+    tipClass: "bg-neutral-900"
+  },
+  // 9º GUB: Ponta Amarela (Yellow Tip)
+  "ponta amarela": {
+    name: "Ponta Amarela",
+    gub: 9,
+    bgClass: "bg-neutral-100 dark:bg-neutral-200",
+    borderClass: "border-amber-400",
+    textClass: "text-neutral-900 font-medium",
+    tipClass: "bg-amber-400"
+  },
+  "branca ponta amarela": {
+    name: "Ponta Amarela",
+    gub: 9,
+    bgClass: "bg-neutral-100 dark:bg-neutral-200",
+    borderClass: "border-amber-400",
+    textClass: "text-neutral-900 font-medium",
+    tipClass: "bg-amber-400"
+  },
+  "yellow tip": {
+    name: "Ponta Amarela",
+    gub: 9,
+    bgClass: "bg-neutral-100 dark:bg-neutral-200",
+    borderClass: "border-amber-400",
+    textClass: "text-neutral-900 font-medium",
+    tipClass: "bg-amber-400"
+  },
+  "cinza": {
+    name: "Ponta Amarela",
+    gub: 9,
+    bgClass: "bg-neutral-100 dark:bg-neutral-200",
+    borderClass: "border-amber-400",
+    textClass: "text-neutral-900 font-medium",
+    tipClass: "bg-amber-400"
+  },
+  // 8º GUB: Amarela (Yellow)
   "amarela": {
     name: "Amarela",
     gub: 8,
-    bgClass: "bg-amber-400 dark:bg-amber-500",
-    borderClass: "border-amber-500/80",
-    textClass: "text-amber-950 dark:text-amber-950 font-medium",
+    bgClass: "bg-amber-400 dark:bg-amber-400",
+    borderClass: "border-amber-500",
+    textClass: "text-amber-950 font-medium",
     tipClass: "bg-neutral-900"
+  },
+  "yellow": {
+    name: "Amarela",
+    gub: 8,
+    bgClass: "bg-amber-400 dark:bg-amber-400",
+    borderClass: "border-amber-500",
+    textClass: "text-amber-950 font-medium",
+    tipClass: "bg-neutral-900"
+  },
+  // 7º GUB: Ponta Verde (Green Tip)
+  "ponta verde": {
+    name: "Ponta Verde",
+    gub: 7,
+    bgClass: "bg-amber-400 dark:bg-amber-400",
+    borderClass: "border-emerald-500",
+    textClass: "text-amber-950 font-medium",
+    tipClass: "bg-emerald-600"
+  },
+  "amarela ponta verde": {
+    name: "Ponta Verde",
+    gub: 7,
+    bgClass: "bg-amber-400 dark:bg-amber-400",
+    borderClass: "border-emerald-500",
+    textClass: "text-amber-950 font-medium",
+    tipClass: "bg-emerald-600"
+  },
+  "green tip": {
+    name: "Ponta Verde",
+    gub: 7,
+    bgClass: "bg-amber-400 dark:bg-amber-400",
+    borderClass: "border-emerald-500",
+    textClass: "text-amber-950 font-medium",
+    tipClass: "bg-emerald-600"
   },
   "laranja": {
-    name: "Laranja",
+    name: "Ponta Verde",
     gub: 7,
-    bgClass: "bg-orange-500 dark:bg-orange-500",
-    borderClass: "border-orange-600",
-    textClass: "text-white font-medium",
-    tipClass: "bg-neutral-900"
+    bgClass: "bg-amber-400 dark:bg-amber-400",
+    borderClass: "border-emerald-500",
+    textClass: "text-amber-950 font-medium",
+    tipClass: "bg-emerald-600"
   },
+  // 6º GUB: Verde (Green)
   "verde": {
     name: "Verde",
     gub: 6,
@@ -52,14 +121,48 @@ const BELT_CONFIGS: Record<string, BeltVisualConfig> = {
     textClass: "text-white font-medium",
     tipClass: "bg-neutral-900"
   },
-  "verde escura": {
-    name: "Verde escura",
+  "green": {
+    name: "Verde",
+    gub: 6,
+    bgClass: "bg-emerald-600 dark:bg-emerald-600",
+    borderClass: "border-emerald-700",
+    textClass: "text-white font-medium",
+    tipClass: "bg-neutral-900"
+  },
+  // 5º GUB: Ponta Azul (Blue Tip)
+  "ponta azul": {
+    name: "Ponta Azul",
     gub: 5,
-    bgClass: "bg-emerald-800 dark:bg-emerald-800",
-    borderClass: "border-emerald-900",
+    bgClass: "bg-emerald-600 dark:bg-emerald-600",
+    borderClass: "border-blue-500",
     textClass: "text-white font-medium",
     tipClass: "bg-blue-600"
   },
+  "verde ponta azul": {
+    name: "Ponta Azul",
+    gub: 5,
+    bgClass: "bg-emerald-600 dark:bg-emerald-600",
+    borderClass: "border-blue-500",
+    textClass: "text-white font-medium",
+    tipClass: "bg-blue-600"
+  },
+  "blue tip": {
+    name: "Ponta Azul",
+    gub: 5,
+    bgClass: "bg-emerald-600 dark:bg-emerald-600",
+    borderClass: "border-blue-500",
+    textClass: "text-white font-medium",
+    tipClass: "bg-blue-600"
+  },
+  "verde escura": {
+    name: "Ponta Azul",
+    gub: 5,
+    bgClass: "bg-emerald-600 dark:bg-emerald-600",
+    borderClass: "border-blue-500",
+    textClass: "text-white font-medium",
+    tipClass: "bg-blue-600"
+  },
+  // 4º GUB: Azul (Blue)
   "azul": {
     name: "Azul",
     gub: 4,
@@ -68,14 +171,48 @@ const BELT_CONFIGS: Record<string, BeltVisualConfig> = {
     textClass: "text-white font-medium",
     tipClass: "bg-neutral-900"
   },
-  "azul escura": {
-    name: "Azul escura",
+  "blue": {
+    name: "Azul",
+    gub: 4,
+    bgClass: "bg-blue-600 dark:bg-blue-600",
+    borderClass: "border-blue-700",
+    textClass: "text-white font-medium",
+    tipClass: "bg-neutral-900"
+  },
+  // 3º GUB: Ponta Vermelha (Red Tip)
+  "ponta vermelha": {
+    name: "Ponta Vermelha",
     gub: 3,
-    bgClass: "bg-indigo-900 dark:bg-indigo-900",
-    borderClass: "border-indigo-950",
+    bgClass: "bg-blue-600 dark:bg-blue-600",
+    borderClass: "border-red-500",
     textClass: "text-white font-medium",
     tipClass: "bg-red-600"
   },
+  "azul ponta vermelha": {
+    name: "Ponta Vermelha",
+    gub: 3,
+    bgClass: "bg-blue-600 dark:bg-blue-600",
+    borderClass: "border-red-500",
+    textClass: "text-white font-medium",
+    tipClass: "bg-red-600"
+  },
+  "red tip": {
+    name: "Ponta Vermelha",
+    gub: 3,
+    bgClass: "bg-blue-600 dark:bg-blue-600",
+    borderClass: "border-red-500",
+    textClass: "text-white font-medium",
+    tipClass: "bg-red-600"
+  },
+  "azul escura": {
+    name: "Ponta Vermelha",
+    gub: 3,
+    bgClass: "bg-blue-600 dark:bg-blue-600",
+    borderClass: "border-red-500",
+    textClass: "text-white font-medium",
+    tipClass: "bg-red-600"
+  },
+  // 2º GUB: Vermelha (Red)
   "vermelha": {
     name: "Vermelha",
     gub: 2,
@@ -84,16 +221,78 @@ const BELT_CONFIGS: Record<string, BeltVisualConfig> = {
     textClass: "text-white font-medium",
     tipClass: "bg-neutral-900"
   },
-  "vermelha escura": {
-    name: "Vermelha escura",
-    gub: 1,
-    bgClass: "bg-red-900 dark:bg-red-900",
-    borderClass: "border-red-950",
+  "red": {
+    name: "Vermelha",
+    gub: 2,
+    bgClass: "bg-red-600 dark:bg-red-600",
+    borderClass: "border-red-700",
     textClass: "text-white font-medium",
     tipClass: "bg-neutral-900"
   },
+  // 1º GUB: Ponta Preta (Black Tip)
+  "ponta preta": {
+    name: "Ponta Preta",
+    gub: 1,
+    bgClass: "bg-red-600 dark:bg-red-600",
+    borderClass: "border-neutral-900",
+    textClass: "text-white font-medium",
+    tipClass: "bg-neutral-950"
+  },
+  "vermelha ponta preta": {
+    name: "Ponta Preta",
+    gub: 1,
+    bgClass: "bg-red-600 dark:bg-red-600",
+    borderClass: "border-neutral-900",
+    textClass: "text-white font-medium",
+    tipClass: "bg-neutral-950"
+  },
+  "black tip": {
+    name: "Ponta Preta",
+    gub: 1,
+    bgClass: "bg-red-600 dark:bg-red-600",
+    borderClass: "border-neutral-900",
+    textClass: "text-white font-medium",
+    tipClass: "bg-neutral-950"
+  },
+  "vermelha escura": {
+    name: "Ponta Preta",
+    gub: 1,
+    bgClass: "bg-red-600 dark:bg-red-600",
+    borderClass: "border-neutral-900",
+    textClass: "text-white font-medium",
+    tipClass: "bg-neutral-950"
+  },
+  // Dan: Faixa Preta (Black Belt)
   "preta": {
     name: "Preta",
+    gub: 0,
+    bgClass: "bg-neutral-950 dark:bg-neutral-950",
+    borderClass: "border-neutral-800",
+    textClass: "text-amber-400 font-bold",
+    tipClass: "bg-amber-400",
+    isBlackBelt: true
+  },
+  "preta 1º dan": {
+    name: "Preta 1º Dan",
+    gub: 0,
+    bgClass: "bg-neutral-950 dark:bg-neutral-950",
+    borderClass: "border-neutral-800",
+    textClass: "text-amber-400 font-bold",
+    tipClass: "bg-amber-400",
+    isBlackBelt: true
+  },
+  "preta 2º dan": {
+    name: "Preta 2º Dan",
+    gub: 0,
+    bgClass: "bg-neutral-950 dark:bg-neutral-950",
+    borderClass: "border-neutral-800",
+    textClass: "text-amber-400 font-bold",
+    tipClass: "bg-amber-400",
+    isBlackBelt: true
+  },
+  "preta 3º dan": {
+    name: "Preta 3º Dan",
+    gub: 0,
     bgClass: "bg-neutral-950 dark:bg-neutral-950",
     borderClass: "border-neutral-800",
     textClass: "text-amber-400 font-bold",

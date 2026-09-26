@@ -17,7 +17,7 @@ const studentDraftObject = z.object({
   startedAtTkd: z.string().optional(),
   currentBelt: z.enum(BELT_OPTIONS).optional(),
   trainingClassId: z.string().trim().max(36).optional(),
-  gub: z.coerce.number().int().min(1).max(9).optional(),
+  gub: z.coerce.number().int().min(1).max(10).optional(),
   healthCondition: z.enum(["yes", "no"]).optional(),
   healthDetails: optionalText,
   medications: optionalText,
@@ -47,7 +47,7 @@ export const studentSubmissionSchema = studentDraftObject.extend({
   startedAtTkd: requiredText(10, 10),
   currentBelt: z.enum(BELT_OPTIONS),
   trainingClassId: requiredText(1, 36),
-  gub: z.coerce.number().int().min(1).max(9),
+  gub: z.coerce.number().int().min(1).max(10),
   healthCondition: z.enum(["yes", "no"]),
   requestedDueDay: z.coerce.number().int().refine((value) => DUE_DAY_OPTIONS.includes(value as (typeof DUE_DAY_OPTIONS)[number]))
 }).superRefine(validateGraduation);

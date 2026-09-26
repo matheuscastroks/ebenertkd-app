@@ -8,7 +8,8 @@ import { BELT_OPTIONS, GUB_BELT_OPTIONS, GUB_OPTIONS, beltForGub, gubForBelt, ty
 export function GraduationFields({ defaultBelt, defaultGub }: { defaultBelt?: string | null; defaultGub?: number | null }) {
   const validGub = GUB_OPTIONS.includes(defaultGub as GubOption) ? defaultGub as GubOption : undefined;
   const validBelt = BELT_OPTIONS.includes(defaultBelt as BeltOption) ? defaultBelt as BeltOption : undefined;
-  const initialGub = validGub ?? (validBelt ? gubForBelt(validBelt) : undefined);
+  const rawGub = validGub ?? (validBelt ? gubForBelt(validBelt) : undefined);
+  const initialGub = rawGub && GUB_OPTIONS.includes(rawGub as GubOption) ? (rawGub as GubOption) : undefined;
   const initialBelt = initialGub ? beltForGub(initialGub) : validBelt;
   const [gub, setGub] = useState<GubOption | "">(initialGub ?? "");
   const [belt, setBelt] = useState<BeltOption | "">(initialBelt ?? "");
@@ -19,7 +20,8 @@ export function GraduationFields({ defaultBelt, defaultGub }: { defaultBelt?: st
       <Select name="current_belt" value={belt} onValueChange={(value) => {
         const nextBelt = value as BeltOption;
         setBelt(nextBelt);
-        setGub(gubForBelt(nextBelt) ?? "");
+        const resolvedGub = gubForBelt(nextBelt);
+        setGub(resolvedGub && GUB_OPTIONS.includes(resolvedGub as GubOption) ? (resolvedGub as GubOption) : "");
       }} required>
         <SelectTrigger id="current-belt" className="w-full"><SelectValue placeholder="Selecione a faixa" /></SelectTrigger>
         <SelectContent>{GUB_BELT_OPTIONS.map(({ belt: option, gub: optionGub }) => <SelectItem key={option} value={option}>{option} · {optionGub}º GUB</SelectItem>)}</SelectContent>
