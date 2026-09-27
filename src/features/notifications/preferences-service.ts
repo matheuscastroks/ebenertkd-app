@@ -1,11 +1,13 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import { AppwriteException } from "node-appwrite";
 import type { Models } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import type { NotificationKind } from "@/features/notifications/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 export type NotificationPreferences = {
   announcements_enabled: boolean;
@@ -27,16 +29,20 @@ export function pushAllowed(kind: NotificationKind, preferences: NotificationPre
   return preferences.system_enabled;
 }
 
-export async function getNotificationPreferences(accountId: string): Promise<NotificationPreferences> {
-  const { tables, config } = createAppwriteAdminClient();
-  try {
-    const row = await tables.getRow<PreferencesRow>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationPreferences, rowId: accountId });
-    return { announcements_enabled: row.announcements_enabled, financial_enabled: row.financial_enabled, system_enabled: row.system_enabled };
-  } catch (error) {
-    if (error instanceof AppwriteException && error.code === 404) return DEFAULT_NOTIFICATION_PREFERENCES;
-    throw error;
-  }
-}
+export const getNotificationPreferences = unstable_cache(
+  async (accountId: string): Promise<NotificationPreferences> => {
+    const { tables, config } = createAppwriteAdminClient();
+    try {
+      const row = await tables.getRow<PreferencesRow>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationPreferences, rowId: accountId });
+      return { announcements_enabled: row.announcements_enabled, financial_enabled: row.financial_enabled, system_enabled: row.system_enabled };
+    } catch (error) {
+      if (error instanceof AppwriteException && error.code === 404) return DEFAULT_NOTIFICATION_PREFERENCES;
+      throw error;
+    }
+  },
+  ["get-notification-preferences"],
+  { tags: [CACHE_TAGS.notificationPreferences], revalidate: 300 }
+);
 
 export async function setNotificationPreference(actor: Profile, key: keyof NotificationPreferences, enabled: boolean) {
   if (actor.role === "minor_student" && key === "financial_enabled") throw new Error("preference_not_allowed");

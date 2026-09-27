@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { publishContractTemplate, saveContractTemplateDraft } from "@/features/contracts/template-service";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 export async function saveContractTemplateAction(formData: FormData) {
   const admin = await requireProfile("admin");
@@ -16,6 +17,7 @@ export async function saveContractTemplateAction(formData: FormData) {
   } catch {
     redirect(`${ROUTES.adminContractTemplate}?error=invalid`);
   }
+  updateTag(CACHE_TAGS.contractTemplate);
   revalidatePath(ROUTES.adminContractTemplate);
   redirect(`${ROUTES.adminContractTemplate}?${publishing ? "published" : "saved"}=1`);
 }

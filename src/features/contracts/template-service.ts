@@ -1,5 +1,6 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import { ID, Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import { contractTemplateSchema } from "@/features/contracts/schemas";
@@ -8,6 +9,7 @@ import type { ContractTemplate, ContractVersion } from "@/features/contracts/typ
 import { writeAuditEvent } from "@/features/auth/service";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 export const DEFAULT_CONTRACT_CONTENT = `CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE TAEKWONDO
 
@@ -21,11 +23,15 @@ O aluno ou responsável declara que as informações de saúde fornecidas são v
 
 const sampleVariables = Object.fromEntries(CONTRACT_VARIABLES.map((key) => [key, "Exemplo"])) as Record<(typeof CONTRACT_VARIABLES)[number], string>;
 
-export async function getContractTemplate() {
-  const { tables, config } = createAppwriteAdminClient();
-  const rows = await tables.listRows<ContractTemplate>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contractTemplates, queries: [Query.limit(1)] });
-  return rows.rows[0] ?? null;
-}
+export const getContractTemplate = unstable_cache(
+  async () => {
+    const { tables, config } = createAppwriteAdminClient();
+    const rows = await tables.listRows<ContractTemplate>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contractTemplates, queries: [Query.limit(1)] });
+    return rows.rows[0] ?? null;
+  },
+  ["get-contract-template"],
+  { tags: [CACHE_TAGS.contractTemplate], revalidate: 300 }
+);
 
 export async function saveContractTemplateDraft(actor: Profile, raw: unknown) {
   const input = contractTemplateSchema.parse(raw);

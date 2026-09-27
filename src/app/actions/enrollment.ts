@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { resolveStudentProfile } from "@/features/students/access";
 import { uploadStudentDocument } from "@/features/students/document-service";
@@ -10,6 +10,7 @@ import type { BeltOption } from "@/features/students/options";
 import { formatAddress } from "@/lib/address";
 import type { Profile } from "@/features/auth/types";
 import { guardianEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 function extractAddress(formData: FormData): string | undefined {
   const address = String(formData.get("address") ?? "").trim();
@@ -75,6 +76,7 @@ async function persistEnrollment(actor: Profile, formData: FormData, submit: boo
   }
   if (submit) await saveEnrollmentDraft(target, actor, enrollmentInput(formData), true);
   const destination = enrollmentPath(actor, profileId);
+  updateTag(CACHE_TAGS.enrollments);
   revalidatePath(destination);
   return destination;
 }

@@ -1,10 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { deleteSelfAccount, deleteStudentAccount } from "@/features/auth/account-deletion-service";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 /**
  * Action to delete the currently logged‑in user's own account.
@@ -43,6 +44,8 @@ export async function deleteStudentAccountAction(formData: FormData) {
   try {
     await deleteStudentAccount(admin, targetId);
     // Invalidate the student‑access list page.
+    updateTag(CACHE_TAGS.studentAccess);
+    updateTag(CACHE_TAGS.enrollments);
     revalidatePath(ROUTES.adminStudentAccess);
     redirect(`${ROUTES.adminStudentAccess}?deleted=1`);
   } catch (e) {

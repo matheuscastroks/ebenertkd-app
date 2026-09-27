@@ -1,12 +1,13 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { decideCancellation, requestCancellation } from "@/features/contracts/cancellation-service";
 import { getContractForActor } from "@/features/contracts/contract-service";
 import { requireProfile } from "@/lib/auth/session";
 import { guardianContractPath, ROUTES, studentContractPath } from "@/lib/navigation/routes";
 import { reaisToCents } from "@/lib/money";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 export async function requestCancellationAction(formData: FormData) {
   const actor = await requireProfile();
@@ -28,6 +29,7 @@ export async function decideCancellationAction(formData: FormData) {
   } catch {
     redirect(`${ROUTES.adminCancellations}?error=decision`);
   }
+  updateTag(CACHE_TAGS.cancellations);
   revalidatePath(ROUTES.adminCancellations);
   redirect(`${ROUTES.adminCancellations}?updated=1`);
 }

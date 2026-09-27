@@ -1,12 +1,13 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { minorRegistrationSchema } from "@/features/auth/schemas";
 import { createMinorAccount } from "@/features/auth/service";
 import { enableGuardianCapability, resetMinorPassword, revokeMinorSessions } from "@/features/families/service";
 import { requireCapability, requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 export async function enableGuardianAction() {
   const profile = await requireProfile();
@@ -25,6 +26,7 @@ export async function createMinorAction(formData: FormData) {
   } catch {
     redirect(`${ROUTES.guardianDependents}?error=create_minor`);
   }
+  updateTag(CACHE_TAGS.studentAccess);
   redirect(`${ROUTES.guardianDependents}?created=1`);
 }
 

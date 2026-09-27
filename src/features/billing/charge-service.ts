@@ -1,5 +1,6 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import { AppwriteException, Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import { writeAuditEvent } from "@/features/auth/service";
@@ -12,6 +13,7 @@ import { getEnrollmentBundleByStudentId } from "@/features/students/service";
 import type { Enrollment } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 function asDateTime(date: string) {
   return date.includes("T") ? date : `${date}T12:00:00.000Z`;
@@ -107,22 +109,26 @@ export async function listChargesForStudent(actor: Profile, profileId?: string) 
   return rows.map((charge) => ({ ...charge, status: effectiveChargeStatus(charge.status, charge.due_date, today) }));
 }
 
-export async function listCharges(filters: { status?: Charge["status"]; competence?: string; type?: ChargeType } = {}) {
-  const { tables, config } = createAppwriteAdminClient();
-  const queries = [Query.orderDesc("due_date")];
-  if (filters.status) queries.push(Query.equal("status", [filters.status]));
-  if (filters.competence) queries.push(Query.equal("competence", [filters.competence]));
-  if (filters.type) queries.push(Query.equal("charge_type", [filters.type]));
-  const rows: Charge[] = [];
-  let cursor: string | undefined;
-  do {
-    const result = await tables.listRows<Charge>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, queries: [...queries, Query.limit(500), ...(cursor ? [Query.cursorAfter(cursor)] : [])] });
-    rows.push(...result.rows);
-    cursor = result.rows.length === 500 ? result.rows.at(-1)?.$id : undefined;
-  } while (cursor);
-  const today = new Date().toISOString();
-  return rows.map((charge) => ({ ...charge, status: effectiveChargeStatus(charge.status, charge.due_date, today) }));
-}
+export const listCharges = unstable_cache(
+  async (filters: { status?: Charge["status"]; competence?: string; type?: ChargeType } = {}) => {
+    const { tables, config } = createAppwriteAdminClient();
+    const queries = [Query.orderDesc("due_date")];
+    if (filters.status) queries.push(Query.equal("status", [filters.status]));
+    if (filters.competence) queries.push(Query.equal("competence", [filters.competence]));
+    if (filters.type) queries.push(Query.equal("charge_type", [filters.type]));
+    const rows: Charge[] = [];
+    let cursor: string | undefined;
+    do {
+      const result = await tables.listRows<Charge>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, queries: [...queries, Query.limit(500), ...(cursor ? [Query.cursorAfter(cursor)] : [])] });
+      rows.push(...result.rows);
+      cursor = result.rows.length === 500 ? result.rows.at(-1)?.$id : undefined;
+    } while (cursor);
+    const today = new Date().toISOString();
+    return rows.map((charge) => ({ ...charge, status: effectiveChargeStatus(charge.status, charge.due_date, today) }));
+  },
+  ["list-charges"],
+  { tags: [CACHE_TAGS.billingCharges], revalidate: 60 }
+);
 
 export async function adjustCharge(actor: Profile, raw: unknown) {
   if (actor.role !== "admin") throw new Error("admin_required");

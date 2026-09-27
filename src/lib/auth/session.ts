@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { Query } from "node-appwrite";
 import { redirect } from "next/navigation";
 import type { AppCapability, AppRole } from "@/lib/auth/auth-utils";
@@ -11,7 +12,7 @@ import { hasCapability } from "@/features/auth/permissions";
 
 export type ProfileRecord = Profile;
 
-export async function getCurrentProfile() {
+export const getCurrentProfile = cache(async function getCurrentProfile() {
   const appwrite = await createAppwriteSessionClient();
   if (!appwrite) return null;
 
@@ -27,7 +28,7 @@ export async function getCurrentProfile() {
   } catch {
     return null;
   }
-}
+});
 
 export async function requireProfile(role?: AppRole) {
   const profile = await getCurrentProfile();

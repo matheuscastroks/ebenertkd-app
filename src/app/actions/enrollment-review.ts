@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { reviewStudentDocument } from "@/features/students/document-service";
 import { advanceToSignature, adminUpdateStudent, saveFinancialReview } from "@/features/students/enrollment-service";
@@ -8,6 +8,7 @@ import type { BeltOption } from "@/features/students/options";
 import { requireProfile } from "@/lib/auth/session";
 import { reaisToCents } from "@/lib/money";
 import { adminEnrollmentPath } from "@/lib/navigation/routes";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 const reviewPath = (studentId: string, query = "") => `${adminEnrollmentPath(studentId)}${query}`;
 
@@ -40,6 +41,7 @@ export async function saveFinancialReviewAction(formData: FormData) {
   } catch {
     redirect(reviewPath(studentId, "?error=financial"));
   }
+  updateTag(CACHE_TAGS.enrollments);
   revalidatePath(reviewPath(studentId));
   redirect(reviewPath(studentId, "?updated=financial"));
 }
@@ -52,6 +54,7 @@ export async function advanceToSignatureAction(formData: FormData) {
   } catch {
     redirect(reviewPath(studentId, "?error=advance"));
   }
+  updateTag(CACHE_TAGS.enrollments);
   revalidatePath(reviewPath(studentId));
   redirect(reviewPath(studentId, "?updated=signature"));
 }

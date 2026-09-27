@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { adjustCharge } from "@/features/billing/charge-service";
 import { decidePaymentProof, recordManualPayment, reversePayment } from "@/features/billing/payment-service";
@@ -9,6 +9,7 @@ import { saveBillingSettings } from "@/features/billing/settings-service";
 import { requireProfile } from "@/lib/auth/session";
 import { guardianBillingPath, ROUTES } from "@/lib/navigation/routes";
 import { reaisToCents } from "@/lib/money";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 export async function saveBillingSettingsAction(formData: FormData) {
   const actor = await requireProfile("admin");
@@ -34,26 +35,26 @@ export async function decidePaymentProofAction(formData: FormData) {
   const actor = await requireProfile("admin");
   try { await decidePaymentProof(actor, { proofId: formData.get("proof_id"), decision: formData.get("decision"), reason: formData.get("reason") || undefined, paidAt: formData.get("paid_at") || undefined }); }
   catch { redirect(`${ROUTES.adminBilling}?error=review`); }
-  revalidatePath(ROUTES.adminBilling); redirect(`${ROUTES.adminBilling}?updated=review`);
+  updateTag(CACHE_TAGS.billingCharges); revalidatePath(ROUTES.adminBilling); redirect(`${ROUTES.adminBilling}?updated=review`);
 }
 
 export async function recordManualPaymentAction(formData: FormData) {
   const actor = await requireProfile("admin");
   try { await recordManualPayment(actor, { chargeId: formData.get("charge_id"), amountCents: reaisToCents(formData.get("amount_reais")), paidAt: formData.get("paid_at"), notes: formData.get("notes") }); }
   catch { redirect(`${ROUTES.adminBilling}?error=payment`); }
-  revalidatePath(ROUTES.adminBilling); redirect(`${ROUTES.adminBilling}?updated=payment`);
+  updateTag(CACHE_TAGS.billingCharges); revalidatePath(ROUTES.adminBilling); redirect(`${ROUTES.adminBilling}?updated=payment`);
 }
 
 export async function reversePaymentAction(formData: FormData) {
   const actor = await requireProfile("admin");
   try { await reversePayment(actor, { paymentId: formData.get("payment_id"), reason: formData.get("reason") }); }
   catch { redirect(`${ROUTES.adminBilling}?error=reversal`); }
-  revalidatePath(ROUTES.adminBilling); redirect(`${ROUTES.adminBilling}?updated=reversal`);
+  updateTag(CACHE_TAGS.billingCharges); revalidatePath(ROUTES.adminBilling); redirect(`${ROUTES.adminBilling}?updated=reversal`);
 }
 
 export async function adjustChargeAction(formData: FormData) {
   const actor = await requireProfile("admin");
   try { await adjustCharge(actor, { chargeId: formData.get("charge_id"), amountCents: reaisToCents(formData.get("amount_reais")), dueDate: formData.get("due_date"), reason: formData.get("reason") }); }
   catch { redirect(`${ROUTES.adminBilling}?error=adjustment`); }
-  revalidatePath(ROUTES.adminBilling); redirect(`${ROUTES.adminBilling}?updated=adjustment`);
+  updateTag(CACHE_TAGS.billingCharges); revalidatePath(ROUTES.adminBilling); redirect(`${ROUTES.adminBilling}?updated=adjustment`);
 }

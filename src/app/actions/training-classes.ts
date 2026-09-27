@@ -1,9 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { createTrainingClass, setTrainingClassStatus, updateTrainingClass } from "@/features/classes/service";
 import { requireProfile } from "@/lib/auth/session";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 function classInput(formData: FormData) {
   return {
@@ -23,6 +24,7 @@ export async function createTrainingClassAction(formData: FormData) {
   } catch {
     redirect("/admin/turmas?error=create");
   }
+  updateTag(CACHE_TAGS.trainingClasses);
   revalidatePath("/admin/turmas");
   redirect("/admin/turmas?created=1");
 }
@@ -35,6 +37,7 @@ export async function updateTrainingClassAction(formData: FormData) {
   } catch {
     redirect("/admin/turmas?error=update");
   }
+  updateTag(CACHE_TAGS.trainingClasses);
   revalidatePath("/admin/turmas");
   redirect("/admin/turmas?updated=1");
 }
@@ -49,6 +52,7 @@ export async function setTrainingClassStatusAction(formData: FormData) {
   } catch {
     redirect("/admin/turmas?error=status");
   }
+  updateTag(CACHE_TAGS.trainingClasses);
   revalidatePath("/admin/turmas");
   redirect("/admin/turmas?updated=1");
 }

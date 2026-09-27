@@ -1,5 +1,6 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import { ID, Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import { writeAuditEvent } from "@/features/auth/service";
@@ -10,6 +11,7 @@ import type { CancellationRequest } from "@/features/contracts/types";
 import { calculateExitFee } from "@/lib/domain/billing-rules";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 function saoPauloDate() {
   const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
@@ -32,13 +34,17 @@ export async function requestCancellation(actor: Profile, raw: unknown) {
   return request;
 }
 
-export async function listCancellationRequests(status?: CancellationRequest["status"]) {
-  const { tables, config } = createAppwriteAdminClient();
-  const queries = [Query.orderDesc("created_at"), Query.limit(50)];
-  if (status) queries.unshift(Query.equal("status", [status]));
-  const rows = await tables.listRows<CancellationRequest>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.cancellationRequests, queries });
-  return rows.rows;
-}
+export const listCancellationRequests = unstable_cache(
+  async (status?: CancellationRequest["status"]) => {
+    const { tables, config } = createAppwriteAdminClient();
+    const queries = [Query.orderDesc("created_at"), Query.limit(50)];
+    if (status) queries.unshift(Query.equal("status", [status]));
+    const rows = await tables.listRows<CancellationRequest>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.cancellationRequests, queries });
+    return rows.rows;
+  },
+  ["list-cancellation-requests"],
+  { tags: [CACHE_TAGS.cancellations], revalidate: 60 }
+);
 
 export async function decideCancellation(actor: Profile, raw: unknown) {
   const input = cancellationDecisionSchema.parse(raw);

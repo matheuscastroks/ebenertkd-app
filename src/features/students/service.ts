@@ -1,9 +1,11 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import { ID, Permission, Query, Role } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { Enrollment, EnrollmentBundle, Student, StudentDocument } from "@/features/students/types";
 
 function ownerPermissions(target: Profile, actor: Profile) {
@@ -66,59 +68,67 @@ export async function getEnrollmentBundleByStudentId(studentId: string) {
 
 export const ENROLLMENTS_PAGE_SIZE = 20;
 
-export async function countEnrollmentsRequiringReview() {
-  const { tables, config } = createAppwriteAdminClient();
-  const result = await tables.listRows<Enrollment>({
-    databaseId: config.databaseId,
-    tableId: APPWRITE_IDS.tables.enrollments,
-    queries: [Query.equal("status", ["submitted", "under_review"]), Query.limit(1)]
-  });
-  return result.total;
-}
-
-export async function listEnrollmentsForReview(filters: { search?: string; status?: string; belt?: string; trainingClass?: string; page?: number } = {}) {
-  const { tables, config } = createAppwriteAdminClient();
-  const requestedPage = Math.max(1, Math.trunc(filters.page ?? 1));
-  const queries = [Query.orderDesc("$createdAt")];
-  if (filters.status) {
-    const matchingEnrollments = await tables.listRows<Enrollment>({
+export const countEnrollmentsRequiringReview = unstable_cache(
+  async () => {
+    const { tables, config } = createAppwriteAdminClient();
+    const result = await tables.listRows<Enrollment>({
       databaseId: config.databaseId,
       tableId: APPWRITE_IDS.tables.enrollments,
-      queries: [Query.equal("status", [filters.status]), Query.limit(500)]
+      queries: [Query.equal("status", ["submitted", "under_review"]), Query.limit(1)]
     });
-    const studentIds = [...new Set(matchingEnrollments.rows.map((enrollment) => enrollment.student_id))];
-    if (studentIds.length === 0) return { rows: [], page: 1, pageSize: ENROLLMENTS_PAGE_SIZE, total: 0, totalPages: 0 };
-    queries.push(Query.equal("$id", studentIds));
-  }
-  if (filters.search?.trim()) queries.push(Query.contains("full_name", [filters.search.trim()]));
-  if (filters.belt?.trim()) queries.push(Query.equal("current_belt", [filters.belt.trim()]));
-  if (filters.trainingClass?.trim()) queries.push(Query.equal("training_class", [filters.trainingClass.trim()]));
-  let students = await tables.listRows<Student>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, queries: [...queries, Query.limit(ENROLLMENTS_PAGE_SIZE), Query.offset((requestedPage - 1) * ENROLLMENTS_PAGE_SIZE)] });
-  const totalPages = Math.ceil(students.total / ENROLLMENTS_PAGE_SIZE);
-  const page = totalPages > 0 ? Math.min(requestedPage, totalPages) : 1;
-  if (page !== requestedPage) {
-    students = await tables.listRows<Student>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, queries: [...queries, Query.limit(ENROLLMENTS_PAGE_SIZE), Query.offset((page - 1) * ENROLLMENTS_PAGE_SIZE)] });
-  }
-  const rows = await Promise.all(students.rows.map(async (student) => {
-    const [enrollments, photos] = await Promise.all([
-      tables.listRows<Enrollment>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, queries: [Query.equal("student_id", [student.$id]), Query.limit(1)] }),
-      tables.listRows<StudentDocument>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.studentDocuments, queries: [Query.equal("student_id", [student.$id]), Query.equal("document_type", ["profile_photo"]), Query.limit(1)] })
-    ]);
-    const photo = photos.rows[0];
-    return { student, enrollment: enrollments.rows[0] ?? null, profilePhotoDocumentId: photo?.status === "rejected" ? undefined : photo?.$id };
-  }));
-  return {
-    rows: JSON.parse(JSON.stringify(rows)) as Array<{
-      student: Student;
-      enrollment: Enrollment | null;
-      profilePhotoDocumentId?: string;
-    }>,
-    page,
-    pageSize: ENROLLMENTS_PAGE_SIZE,
-    total: students.total,
-    totalPages,
-  };
-}
+    return result.total;
+  },
+  ["count-enrollments-requiring-review"],
+  { tags: [CACHE_TAGS.enrollments], revalidate: 60 }
+);
+
+export const listEnrollmentsForReview = unstable_cache(
+  async (filters: { search?: string; status?: string; belt?: string; trainingClass?: string; page?: number } = {}) => {
+    const { tables, config } = createAppwriteAdminClient();
+    const requestedPage = Math.max(1, Math.trunc(filters.page ?? 1));
+    const queries = [Query.orderDesc("$createdAt")];
+    if (filters.status) {
+      const matchingEnrollments = await tables.listRows<Enrollment>({
+        databaseId: config.databaseId,
+        tableId: APPWRITE_IDS.tables.enrollments,
+        queries: [Query.equal("status", [filters.status]), Query.limit(500)]
+      });
+      const studentIds = [...new Set(matchingEnrollments.rows.map((enrollment) => enrollment.student_id))];
+      if (studentIds.length === 0) return { rows: [], page: 1, pageSize: ENROLLMENTS_PAGE_SIZE, total: 0, totalPages: 0 };
+      queries.push(Query.equal("$id", studentIds));
+    }
+    if (filters.search?.trim()) queries.push(Query.contains("full_name", [filters.search.trim()]));
+    if (filters.belt?.trim()) queries.push(Query.equal("current_belt", [filters.belt.trim()]));
+    if (filters.trainingClass?.trim()) queries.push(Query.equal("training_class", [filters.trainingClass.trim()]));
+    let students = await tables.listRows<Student>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, queries: [...queries, Query.limit(ENROLLMENTS_PAGE_SIZE), Query.offset((requestedPage - 1) * ENROLLMENTS_PAGE_SIZE)] });
+    const totalPages = Math.ceil(students.total / ENROLLMENTS_PAGE_SIZE);
+    const page = totalPages > 0 ? Math.min(requestedPage, totalPages) : 1;
+    if (page !== requestedPage) {
+      students = await tables.listRows<Student>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, queries: [...queries, Query.limit(ENROLLMENTS_PAGE_SIZE), Query.offset((page - 1) * ENROLLMENTS_PAGE_SIZE)] });
+    }
+    const rows = await Promise.all(students.rows.map(async (student) => {
+      const [enrollments, photos] = await Promise.all([
+        tables.listRows<Enrollment>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, queries: [Query.equal("student_id", [student.$id]), Query.limit(1)] }),
+        tables.listRows<StudentDocument>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.studentDocuments, queries: [Query.equal("student_id", [student.$id]), Query.equal("document_type", ["profile_photo"]), Query.limit(1)] })
+      ]);
+      const photo = photos.rows[0];
+      return { student, enrollment: enrollments.rows[0] ?? null, profilePhotoDocumentId: photo?.status === "rejected" ? undefined : photo?.$id };
+    }));
+    return {
+      rows: JSON.parse(JSON.stringify(rows)) as Array<{
+        student: Student;
+        enrollment: Enrollment | null;
+        profilePhotoDocumentId?: string;
+      }>,
+      page,
+      pageSize: ENROLLMENTS_PAGE_SIZE,
+      total: students.total,
+      totalPages,
+    };
+  },
+  ["list-enrollments-for-review"],
+  { tags: [CACHE_TAGS.enrollments], revalidate: 60 }
+);
 
 export async function listProfilePhotoDocumentIds(profileIds: string[]) {
   const result = new Map<string, string>();

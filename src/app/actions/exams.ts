@@ -1,12 +1,13 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { addExamParticipant, cancelExamEvent, cancelExamParticipant, createExamEvent, recordExamResult } from "@/features/exams/service";
 import type { PaidChargeDecision } from "@/features/exams/rules";
 import { requireProfile } from "@/lib/auth/session";
 import { reaisToCents } from "@/lib/money";
 import { adminExamPath, ROUTES } from "@/lib/navigation/routes";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 export async function createExamEventAction(formData: FormData) {
   const admin = await requireProfile("admin");
@@ -17,6 +18,7 @@ export async function createExamEventAction(formData: FormData) {
   } catch {
     redirect(`${ROUTES.adminExams}?error=create`);
   }
+  updateTag(CACHE_TAGS.examEvents);
   revalidatePath(ROUTES.adminExams);
   redirect(adminExamPath(eventId));
 }
@@ -29,6 +31,7 @@ export async function addExamParticipantAction(formData: FormData) {
   } catch {
     redirect(`${adminExamPath(eventId)}?error=participant`);
   }
+  updateTag(CACHE_TAGS.examEvents);
   revalidatePath(adminExamPath(eventId));
   redirect(`${adminExamPath(eventId)}?added=1`);
 }
@@ -41,6 +44,7 @@ export async function recordExamResultAction(formData: FormData) {
   } catch {
     redirect(`${adminExamPath(eventId)}?error=result`);
   }
+  updateTag(CACHE_TAGS.examEvents);
   revalidatePath(adminExamPath(eventId));
   redirect(`${adminExamPath(eventId)}?graded=1`);
 }
@@ -54,6 +58,7 @@ export async function cancelExamParticipantAction(formData: FormData) {
   } catch {
     redirect(`${adminExamPath(eventId)}?error=cancel`);
   }
+  updateTag(CACHE_TAGS.examEvents);
   revalidatePath(adminExamPath(eventId));
   redirect(`${adminExamPath(eventId)}?cancelled=1`);
 }
@@ -66,6 +71,7 @@ export async function cancelExamEventAction(formData: FormData) {
   } catch {
     redirect(`${adminExamPath(eventId)}?error=event-cancel`);
   }
+  updateTag(CACHE_TAGS.examEvents);
   revalidatePath(ROUTES.adminExams);
   redirect(`${ROUTES.adminExams}?cancelled=1`);
 }
