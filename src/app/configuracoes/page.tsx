@@ -10,6 +10,7 @@ import { hasActivePushSubscription } from "@/features/notifications/push-service
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { DeleteAccountDialog } from "@/app/configuracoes/DeleteAccountDialog";
 
 export default async function SettingsPage() {
   const profile = await requireProfile();
@@ -66,6 +67,9 @@ export default async function SettingsPage() {
                       Deseja desconectar sua conta deste navegador?
                     </p>
                     <LogoutButton />
+        <div className="mt-2">
+          <DeleteAccountDialog />
+        </div>
                   </div>
                 </CardContent>
               </Card>

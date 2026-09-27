@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import type { Profile } from "@/features/auth/types";
 import { PromoteMinorDialog } from "@/features/students/components/promote-minor-dialog";
+import { AdminDeleteStudentDialog } from "@/features/students/components/AdminDeleteStudentDialog";
 import { useTableSort } from "@/hooks/use-table-sort";
 
 type StudentAccessSortKey = "student" | "role" | "login" | "status";
@@ -114,16 +115,20 @@ export function StudentAccessTable({
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    {student.role === "minor_student" &&
-                    student.status === "active" ? (
-                      <PromoteMinorDialog
-                        minorProfileId={student.$id}
+                    <div className="flex items-center justify-end gap-2">
+                      {student.role === "minor_student" &&
+                      student.status === "active" ? (
+                        <PromoteMinorDialog
+                          minorProfileId={student.$id}
+                          studentName={student.full_name}
+                          currentQuery={currentQuery}
+                        />
+                      ) : null}
+                      <AdminDeleteStudentDialog
+                        profileId={student.$id}
                         studentName={student.full_name}
-                        currentQuery={currentQuery}
                       />
-                    ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -171,16 +176,20 @@ export function StudentAccessTable({
                     </Badge>
                   </div>
 
-                  {student.role === "minor_student" &&
-                    student.status === "active" && (
-                      <div className="pt-2 border-t border-border/40">
-                        <PromoteMinorDialog
-                          minorProfileId={student.$id}
-                          studentName={student.full_name}
-                          currentQuery={currentQuery}
-                        />
-                      </div>
-                    )}
+                  <div className="pt-2 border-t border-border/40 flex flex-wrap items-center gap-2">
+                      {student.role === "minor_student" &&
+                        student.status === "active" && (
+                          <PromoteMinorDialog
+                            minorProfileId={student.$id}
+                            studentName={student.full_name}
+                            currentQuery={currentQuery}
+                          />
+                        )}
+                      <AdminDeleteStudentDialog
+                        profileId={student.$id}
+                        studentName={student.full_name}
+                      />
+                    </div>
                 </CardContent>
               </Card>
             ))
