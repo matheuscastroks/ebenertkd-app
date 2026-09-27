@@ -114,7 +114,7 @@ function Fields({ trainingClass }: { trainingClass?: TrainingClass }) {
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor={`class-capacity-${suffix}`}>Capacidade máxima de alunos</FieldLabel>
+          <FieldLabel htmlFor={`class-capacity-${suffix}`}>Capacidade máxima</FieldLabel>
           <Input
             id={`class-capacity-${suffix}`}
             name="capacity"
