@@ -2,13 +2,10 @@ import { PortalShell } from "@/components/dashboard/portal-shell";
 import { ListPagination } from "@/components/shared/list-pagination";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { SearchField } from "@/components/shared/search-field";
-import { ResponsiveDataView } from "@/components/shared/responsive-data-view";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listStudentAccessProfiles } from "@/features/students/access-service";
-import { PromoteMinorDialog } from "@/features/students/components/promote-minor-dialog";
+import { StudentAccessTable } from "@/features/students/components/student-access-table";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
 import { KeyRound, ShieldAlert, User, Search } from "lucide-react";
@@ -70,110 +67,9 @@ export default async function StudentAccessPage({
           </form>
         </div>
 
-        <ResponsiveDataView
-          desktop={
-            <div className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/40">
-                    <TableHead>Aluno</TableHead>
-                    <TableHead>Tipo de acesso</TableHead>
-                    <TableHead>Login / E-mail</TableHead>
-                    <TableHead>Situação</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {result.rows.map((student) => (
-                    <TableRow key={student.$id} className="hover:bg-muted/20 transition-colors">
-                      <TableCell className="font-semibold text-sm text-foreground">
-                        {student.full_name}
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {student.role === "minor_student" ? "Menor · usuário e senha" : "E-mail e senha"}
-                      </TableCell>
-                      <TableCell className="text-xs font-mono">
-                        {student.role === "minor_student"
-                          ? student.username || "Não definido"
-                          : student.email}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={student.status === "active" ? "secondary" : "outline"}>
-                          {student.status === "active"
-                            ? "Ativo"
-                            : student.status === "disabled"
-                              ? "Desativado"
-                              : "Convidado"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {student.role === "minor_student" && student.status === "active" ? (
-                          <PromoteMinorDialog
-                            minorProfileId={student.$id}
-                            studentName={student.full_name}
-                            currentQuery={{ q: query.q, page: query.page }}
-                          />
-                        ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {!result.rows.length ? (
-                    <TableRow>
-                      <TableCell colSpan={5} className="py-12 text-center text-muted-foreground">
-                        Nenhum aluno encontrado com os termos de busca.
-                      </TableCell>
-                    </TableRow>
-                  ) : null}
-                </TableBody>
-              </Table>
-            </div>
-          }
-          mobile={
-            <div className="space-y-3">
-              {result.rows.length ? (
-                result.rows.map((student) => (
-                  <Card key={student.$id} className="border-border/80 shadow-xs">
-                    <CardContent className="p-4 space-y-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="space-y-1">
-                          <p className="font-semibold text-foreground text-sm">{student.full_name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {student.role === "minor_student" ? "Acesso menor" : "Acesso próprio"} ·{" "}
-                            <span className="font-mono text-foreground">
-                              {student.role === "minor_student"
-                                ? student.username || "Sem usuário"
-                                : student.email}
-                            </span>
-                          </p>
-                        </div>
-                        <Badge variant={student.status === "active" ? "secondary" : "outline"}>
-                          {student.status === "active" ? "Ativo" : "Inativo"}
-                        </Badge>
-                      </div>
-
-                      {student.role === "minor_student" && student.status === "active" && (
-                        <div className="pt-2 border-t border-border/40">
-                          <PromoteMinorDialog
-                            minorProfileId={student.$id}
-                            studentName={student.full_name}
-                            currentQuery={{ q: query.q, page: query.page }}
-                          />
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <Card className="border-border/80">
-                  <CardContent className="p-8 text-center text-xs text-muted-foreground">
-                    Nenhum aluno encontrado.
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          }
+        <StudentAccessTable
+          profiles={result.rows}
+          currentQuery={{ q: query.q, page: query.page }}
         />
 
         <ListPagination

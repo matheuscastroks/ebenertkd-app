@@ -1,14 +1,17 @@
+"use client";
+
 import Link from "next/link";
 import { Eye } from "lucide-react";
 import { ResponsiveDataView } from "@/components/shared/responsive-data-view";
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";
+import { SortableTableHead } from "@/components/shared/sortable-table-head";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { beltForGub, type GubOption } from "@/features/students/options";
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
 import type { Enrollment, Student } from "@/features/students/types";
+import { useTableSort } from "@/hooks/use-table-sort";
 import { adminEnrollmentPath } from "@/lib/navigation/routes";
 
 export type EnrollmentRow = {
@@ -28,16 +31,43 @@ const status: Record<string, { label: string; tone: StatusTone }> = {
   awaiting_renewal: { label: "Aguardando renovação", tone: "warning" },
 };
 
-function belt(student: Student) {
-  return student.current_belt || (student.gub != null ? beltForGub(student.gub as GubOption) : "Não informada");
-}
-
 function EnrollmentStatus({ value }: { value?: string }) {
   const item = value ? status[value] : undefined;
   return <StatusBadge tone={item?.tone ?? "neutral"}>{item?.label ?? "Sem matrícula"}</StatusBadge>;
 }
 
+type EnrollmentSortKey = "student" | "belt" | "class" | "due_day" | "status";
+
 export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
+  const {
+    sortedItems,
+    sortKey,
+    sortDirection,
+    toggleSort,
+  } = useTableSort<EnrollmentRow, EnrollmentSortKey>(rows, {
+    comparators: {
+      student: (a, b) =>
+        a.student.full_name.localeCompare(b.student.full_name, "pt-BR"),
+      // GUB 10 = Branca (iniciante) até 0 = Preta/Dan (avançado)
+      // asc: iniciante -> graduado (10 -> 0)
+      // desc: graduado -> iniciante (0 -> 10)
+      belt: (a, b) => (b.student.gub ?? 10) - (a.student.gub ?? 10),
+      class: (a, b) =>
+        (a.student.training_class ?? "").localeCompare(
+          b.student.training_class ?? "",
+          "pt-BR"
+        ),
+      due_day: (a, b) =>
+        (a.enrollment?.requested_due_day ?? 99) -
+        (b.enrollment?.requested_due_day ?? 99),
+      status: (a, b) =>
+        (status[a.enrollment?.status ?? ""]?.label ?? "").localeCompare(
+          status[b.enrollment?.status ?? ""]?.label ?? "",
+          "pt-BR"
+        ),
+    },
+  });
+
   return (
     <ResponsiveDataView
       desktop={
@@ -45,16 +75,46 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40">
-                <TableHead>Aluno</TableHead>
-                <TableHead>Graduação</TableHead>
-                <TableHead>Turma</TableHead>
-                <TableHead>Vencimento</TableHead>
-                <TableHead>Status</TableHead>
+                <SortableTableHead
+                  title="Aluno"
+                  sortKey="student"
+                  currentSortKey={sortKey}
+                  currentDirection={sortDirection}
+                  onToggle={toggleSort}
+                />
+                <SortableTableHead
+                  title="Graduação"
+                  sortKey="belt"
+                  currentSortKey={sortKey}
+                  currentDirection={sortDirection}
+                  onToggle={toggleSort}
+                />
+                <SortableTableHead
+                  title="Turma"
+                  sortKey="class"
+                  currentSortKey={sortKey}
+                  currentDirection={sortDirection}
+                  onToggle={toggleSort}
+                />
+                <SortableTableHead
+                  title="Vencimento"
+                  sortKey="due_day"
+                  currentSortKey={sortKey}
+                  currentDirection={sortDirection}
+                  onToggle={toggleSort}
+                />
+                <SortableTableHead
+                  title="Status"
+                  sortKey="status"
+                  currentSortKey={sortKey}
+                  currentDirection={sortDirection}
+                  onToggle={toggleSort}
+                />
                 <TableHead className="text-right">Ação</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map(({ student, enrollment, profilePhotoDocumentId }) => (
+              {sortedItems.map(({ student, enrollment, profilePhotoDocumentId }) => (
                 <TableRow key={student.$id} className="hover:bg-muted/20 transition-colors">
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -90,7 +150,7 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
       }
       mobile={
         <div className="space-y-3">
-          {rows.map(({ student, enrollment, profilePhotoDocumentId }) => (
+          {sortedItems.map(({ student, enrollment, profilePhotoDocumentId }) => (
             <Card key={student.$id}>
               <CardContent className="space-y-4 p-4">
                 <div className="flex items-start justify-between gap-3">
