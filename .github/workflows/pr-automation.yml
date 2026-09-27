@@ -1,5 +1,4 @@
 name: PR automation
-
 on:
   pull_request:
     types:
