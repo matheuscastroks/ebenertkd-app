@@ -18,6 +18,8 @@ import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
+import { OnboardingTrigger } from "@/features/onboarding/components/onboarding-trigger";
+import { OnboardingChecklist } from "@/features/onboarding/components/onboarding-checklist";
 import { CardGridSkeleton, MetricCardsSkeleton } from "@/components/skeletons";
 import {
   AlertCircle,
@@ -357,6 +359,13 @@ async function ExamsAndShortcutsSection() {
 export default async function AdminPage() {
   const profile = await requireProfile("admin");
 
+  const adminChecklistItems = [
+    { id: "1", label: "Conta de administrador mestre verificada", href: ROUTES.admin, completed: true },
+    { id: "2", label: "Conferir turmas ativas na Ilha do Governador", href: ROUTES.adminClasses, completed: true },
+    { id: "3", label: "Analisar fichas de matrículas de alunos", href: ROUTES.adminEnrollments, completed: false },
+    { id: "4", label: "Acompanhar bancas de exames de faixa", href: ROUTES.adminExams, completed: false },
+  ];
+
   return (
     <PortalShell
       profile={profile}
@@ -366,6 +375,17 @@ export default async function AdminPage() {
       breadcrumbs={[{ label: "Início" }]}
     >
       <div className="w-full min-w-0 space-y-6">
+        <Suspense fallback={null}>
+          <OnboardingTrigger
+            role="admin"
+            userName={profile.full_name}
+            hasCompletedOnboarding={Boolean(profile.onboarding_completed_at)}
+          />
+        </Suspense>
+
+        {/* Trilha Inicial / Onboarding Checklist */}
+        <OnboardingChecklist role="admin" items={adminChecklistItems} />
+
         {/* 1. Tarefas Urgentes */}
         <Suspense
           fallback={

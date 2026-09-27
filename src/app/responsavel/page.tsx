@@ -15,6 +15,8 @@ import { listGuardianMinors } from "@/features/families/service";
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { listProfilePhotoDocumentIds } from "@/features/students/service";
+import { OnboardingTrigger } from "@/features/onboarding/components/onboarding-trigger";
+import { OnboardingChecklist } from "@/features/onboarding/components/onboarding-checklist";
 import type { Profile } from "@/features/auth/types";
 import { requireCapability } from "@/lib/auth/session";
 import { formatBrl } from "@/lib/money";
@@ -204,6 +206,14 @@ async function GuardianMinorsOverview({ guardian }: { guardian: Profile }) {
 
 export default async function GuardianPage() {
   const guardian = await requireCapability("guardian");
+  const minors = await listGuardianMinors(guardian).catch(() => []);
+
+  const guardianChecklistItems = [
+    { id: "1", label: "Acesso de responsável verificado", href: ROUTES.guardian, completed: true },
+    { id: "2", label: "Cadastrar ou vincular dependentes", href: ROUTES.guardianDependents, completed: minors.length > 0 },
+    { id: "3", label: "Acompanhar chamada e frequência", href: ROUTES.guardian, completed: false },
+    { id: "4", label: "Consultar mensalidades e chave PIX", href: ROUTES.guardian, completed: false },
+  ];
 
   return (
     <PortalShell
@@ -220,9 +230,21 @@ export default async function GuardianPage() {
         </Button>
       }
     >
-      <Suspense fallback={<CardGridSkeleton count={2} columns={2} />}>
-        <GuardianMinorsOverview guardian={guardian} />
-      </Suspense>
+      <div className="w-full min-w-0 space-y-6">
+        <Suspense fallback={null}>
+          <OnboardingTrigger
+            role="guardian"
+            userName={guardian.full_name}
+            hasCompletedOnboarding={Boolean(guardian.onboarding_completed_at)}
+          />
+        </Suspense>
+
+        <OnboardingChecklist role="guardian" items={guardianChecklistItems} />
+
+        <Suspense fallback={<CardGridSkeleton count={2} columns={2} />}>
+          <GuardianMinorsOverview guardian={guardian} />
+        </Suspense>
+      </div>
     </PortalShell>
   );
 }

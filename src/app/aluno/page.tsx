@@ -17,6 +17,8 @@ import { BeltBadge } from "@/features/students/components/belt-badge";
 import { GraduationCard } from "@/features/students/components/graduation-card";
 import type { Profile } from "@/features/auth/types";
 import { requireProfile } from "@/lib/auth/session";
+import { OnboardingTrigger } from "@/features/onboarding/components/onboarding-trigger";
+import { OnboardingChecklist } from "@/features/onboarding/components/onboarding-checklist";
 import { ROUTES } from "@/lib/navigation/routes";
 import { cn } from "@/lib/utils";
 import {
@@ -71,8 +73,25 @@ async function StudentDashboardDynamic({
   const isOverdue = outstanding?.status === "overdue";
   const isProofUnderReview = outstanding?.status === "proof_under_review";
 
+  const studentChecklistItems = [
+    { id: "1", label: "Acesso de praticante ativado", href: ROUTES.student, completed: true },
+    { id: "2", label: "Ficha de matrícula cadastrada", href: ROUTES.studentEnrollment, completed: Boolean(student && student.status !== "draft") },
+    { id: "3", label: "Consultar presenças e frequência", href: ROUTES.studentAttendance, completed: attendance.entries.length > 0 },
+    { id: "4", label: "Contratos e pagamentos", href: minor ? ROUTES.studentContracts : ROUTES.studentBilling, completed: Boolean(charges && charges.length > 0) },
+  ];
+
   return (
     <div className="space-y-4">
+      <Suspense fallback={null}>
+        <OnboardingTrigger
+          role={profile.role}
+          userName={profile.full_name}
+          hasCompletedOnboarding={Boolean(profile.onboarding_completed_at)}
+        />
+      </Suspense>
+
+      <OnboardingChecklist role={profile.role} items={studentChecklistItems} />
+
       {/* 1. Status de Matrícula (Hierarquia de tarefas essenciais) */}
       {isEnrollmentIncomplete ? (
         <Card variant="floating" className="border-warning/40">

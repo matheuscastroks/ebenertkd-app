@@ -4,6 +4,7 @@ import { ThemePreference } from "@/components/dashboard/theme-preference";
 import { NotificationPreferences } from "@/features/notifications/components/notification-preferences";
 import { PushPermissionCard } from "@/features/notifications/components/push-permission-card";
 import { LogoutButton } from "@/components/dashboard/logout-button";
+import { ReplayOnboardingCard } from "@/features/onboarding/components/replay-onboarding-card";
 import { getNotificationPreferences } from "@/features/notifications/preferences-service";
 import { hasActivePushSubscription } from "@/features/notifications/push-service";
 import { requireProfile } from "@/lib/auth/session";
@@ -68,6 +69,10 @@ export default async function SettingsPage() {
                   </div>
                 </CardContent>
               </Card>
+            </section>
+
+            <section className="space-y-3">
+              <ReplayOnboardingCard role={profile.role} />
             </section>
           </div>
 
