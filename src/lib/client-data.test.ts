@@ -18,4 +18,15 @@ describe("toClientData", () => {
     expect(toClientData(null)).toBeNull();
     expect(toClientData(undefined)).toBeUndefined();
   });
+
+  it("handles Maps with Appwrite-like objects correctly", () => {
+    const map = new Map<string, AppwriteLikeRow>([
+      ["item-1", new AppwriteLikeRow()],
+    ]);
+    const result = toClientData(map);
+    expect(result instanceof Map).toBe(true);
+    const item = result.get("item-1");
+    expect(item).toEqual({ $id: "row-1", value: "example" });
+    expect(Object.getPrototypeOf(item)).toBe(Object.prototype);
+  });
 });

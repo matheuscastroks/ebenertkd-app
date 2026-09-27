@@ -154,11 +154,11 @@ async function BillingResults({ params }: { params: BillingQuery }) {
         />
       ) : (
         <BillingTable
-          charges={data.charges}
+          charges={toClientData(data.charges)}
           names={data.names}
           photosByStudent={data.photosByStudent}
-          proofsByCharge={data.proofsByCharge}
-          payments={data.payments}
+          proofsByCharge={toClientData(data.proofsByCharge)}
+          payments={toClientData(data.payments)}
         />
       )}
       <ListPagination

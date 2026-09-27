@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listStudentAccessProfiles } from "@/features/students/access-service";
 import { StudentAccessTable } from "@/features/students/components/student-access-table";
 import { requireProfile } from "@/lib/auth/session";
+import { toClientData } from "@/lib/client-data";
 import { ROUTES } from "@/lib/navigation/routes";
 import { KeyRound, ShieldAlert, User, Search } from "lucide-react";
 
@@ -68,7 +69,7 @@ export default async function StudentAccessPage({
         </div>
 
         <StudentAccessTable
-          profiles={result.rows}
+          profiles={toClientData(result.rows)}
           currentQuery={{ q: query.q, page: query.page }}
         />
 

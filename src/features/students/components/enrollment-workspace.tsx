@@ -4,6 +4,7 @@ import type { Profile } from "@/features/auth/types";
 import { listTrainingClasses } from "@/features/classes/service";
 import { EnrollmentForm } from "@/features/students/components/enrollment-form";
 import { getOrCreateEnrollmentBundle } from "@/features/students/service";
+import { toClientData } from "@/lib/client-data";
 
 type EnrollmentQuery = {
   saved?: string;
@@ -55,7 +56,12 @@ export async function EnrollmentWorkspace({
   return (
     <PortalShell profile={actor} activePath={activePath} title={`Matrícula · ${target.full_name}`} subtitle="Preencha os dados por etapa e salve para continuar depois.">
       <div className="w-full min-w-0">
-        <EnrollmentForm bundle={bundle} targetProfileId={target.$id} classes={classes} feedback={feedback} />
+        <EnrollmentForm
+          bundle={toClientData(bundle)}
+          targetProfileId={target.$id}
+          classes={toClientData(classes)}
+          feedback={feedback}
+        />
       </div>
     </PortalShell>
   );

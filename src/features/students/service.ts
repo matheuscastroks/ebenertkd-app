@@ -107,7 +107,17 @@ export async function listEnrollmentsForReview(filters: { search?: string; statu
     const photo = photos.rows[0];
     return { student, enrollment: enrollments.rows[0] ?? null, profilePhotoDocumentId: photo?.status === "rejected" ? undefined : photo?.$id };
   }));
-  return { rows, page, pageSize: ENROLLMENTS_PAGE_SIZE, total: students.total, totalPages };
+  return {
+    rows: JSON.parse(JSON.stringify(rows)) as Array<{
+      student: Student;
+      enrollment: Enrollment | null;
+      profilePhotoDocumentId?: string;
+    }>,
+    page,
+    pageSize: ENROLLMENTS_PAGE_SIZE,
+    total: students.total,
+    totalPages,
+  };
 }
 
 export async function listProfilePhotoDocumentIds(profileIds: string[]) {

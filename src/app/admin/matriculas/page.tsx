@@ -53,7 +53,7 @@ async function EnrollmentListContent({ searchParams }: { searchParams: SearchPar
 
   return (
     <>
-      <EnrollmentTable rows={result.rows} />
+      <EnrollmentTable rows={toClientData(result.rows)} />
       <ListPagination
         basePath={ROUTES.adminEnrollments}
         params={{ q: filters.q, status: filters.status, belt: filters.belt, turma: filters.turma }}
