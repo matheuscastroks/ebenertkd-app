@@ -17,12 +17,33 @@ type DashboardShellProps = {
   children: ReactNode;
 };
 
-type DashboardFrameProps = Pick<DashboardShellProps, "badge" | "children"> & { profileName: string; navItems: AppSidebarNavItem[] };
+type DashboardFrameProps = Pick<DashboardShellProps, "badge" | "children"> & {
+  profileName: string;
+  profileEmail?: string;
+  role?: string;
+  avatarUrl?: string;
+  navItems: AppSidebarNavItem[];
+};
 
-export function DashboardFrame({ badge, profileName, navItems, children }: DashboardFrameProps) {
+export function DashboardFrame({
+  badge,
+  profileName,
+  profileEmail,
+  role,
+  avatarUrl,
+  navItems,
+  children
+}: DashboardFrameProps) {
   return (
     <SidebarProvider>
-      <ActiveSidebar badge={badge} navItems={navItems} profileName={profileName} />
+      <ActiveSidebar
+        badge={badge}
+        navItems={navItems}
+        profileName={profileName}
+        profileEmail={profileEmail}
+        role={role}
+        avatarUrl={avatarUrl}
+      />
       <SidebarInset>
         <div className="flex-1 p-4 pb-20 md:p-6 md:pb-6">
           <div className="flex w-full min-w-0 flex-col gap-6">{children}</div>

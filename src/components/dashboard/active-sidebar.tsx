@@ -12,8 +12,31 @@ function activateItem(item: AppSidebarNavItem, pathname: string): AppSidebarNavI
   return { ...item, children, active: selfActive || Boolean(children?.some((child) => child.active)) };
 }
 
-export function ActiveSidebar({ badge, navItems, profileName }: { badge: string; navItems: AppSidebarNavItem[]; profileName: string }) {
+export function ActiveSidebar({
+  badge,
+  navItems,
+  profileName,
+  profileEmail,
+  role,
+  avatarUrl
+}: {
+  badge: string;
+  navItems: AppSidebarNavItem[];
+  profileName: string;
+  profileEmail?: string;
+  role?: string;
+  avatarUrl?: string;
+}) {
   const pathname = usePathname();
   const items = navItems.map((item) => activateItem(item, pathname));
-  return <AppSidebar badge={badge} navItems={items} profileName={profileName} />;
+  return (
+    <AppSidebar
+      badge={badge}
+      navItems={items}
+      profileName={profileName}
+      profileEmail={profileEmail}
+      role={role}
+      avatarUrl={avatarUrl}
+    />
+  );
 }

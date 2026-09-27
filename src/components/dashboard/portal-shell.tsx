@@ -9,7 +9,18 @@ import { navigationForProfile } from "@/lib/navigation/routes";
 export async function PortalFrame({ profile, children }: { profile: Profile; children: ReactNode }) {
   const badge = profile.role === "admin" ? "Professor" : profile.role === "guardian" ? "Responsável" : "Aluno";
   const [enrollments, notifications] = await Promise.all([profile.role === "admin" ? countEnrollmentsRequiringReview().catch(() => 0) : Promise.resolve(undefined), countUnreadNotifications(profile).catch(() => 0)]);
-  return <DashboardFrame badge={badge} profileName={profile.full_name} navItems={navigationForProfile(profile, { enrollments, notifications })}>{children}</DashboardFrame>;
+  const email = profile.email || (profile.username ? `@${profile.username}` : undefined);
+  return (
+    <DashboardFrame
+      badge={badge}
+      profileName={profile.full_name}
+      profileEmail={email}
+      role={profile.role}
+      navItems={navigationForProfile(profile, { enrollments, notifications })}
+    >
+      {children}
+    </DashboardFrame>
+  );
 }
 
 export function PortalShell({ profile, title, subtitle, breadcrumbs, headerActions, children }: { profile: Profile; title: string; subtitle: string; activePath: string; breadcrumbs?: BreadcrumbEntry[]; headerActions?: ReactNode; children: ReactNode }) {

@@ -120,11 +120,17 @@ function NavigationItem({ item }: { item: AppSidebarNavItem }) {
 export function AppSidebar({
   badge,
   navItems,
-  profileName
+  profileName,
+  profileEmail,
+  role,
+  avatarUrl
 }: {
   badge: string;
   navItems: AppSidebarNavItem[];
   profileName: string;
+  profileEmail?: string;
+  role?: string;
+  avatarUrl?: string;
 }) {
   const groups = Array.from(new Set(navItems.map((item) => item.group ?? "Principal")));
   return (
@@ -150,8 +156,14 @@ export function AppSidebar({
         </SidebarGroup></div>)}
       </SidebarContent>
 
-      <SidebarFooter className="p-3">
-        <AccountMenu name={profileName} badge={badge} />
+      <SidebarFooter>
+        <AccountMenu
+          name={profileName}
+          badge={badge}
+          email={profileEmail}
+          role={role}
+          avatarUrl={avatarUrl}
+        />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

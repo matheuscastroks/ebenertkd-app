@@ -1,36 +1,203 @@
 "use client";
 
 import Link from "next/link";
-import { useTheme } from "next-themes";
-import { changeTheme } from "@/lib/theme-transition";
-import { Bell, ChevronUp, Moon, Settings, Sun } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Switch } from "@/components/ui/switch";
+import {
+  Bell,
+  CalendarCheck2,
+  ChevronsUpDown,
+  LogOut,
+  Settings,
+  Shield,
+  UsersRound,
+  WalletCards,
+} from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/sidebar";
 import { LogoutButton } from "@/components/dashboard/logout-button";
 
-export function AccountMenu({ name, badge }: { name: string; badge: string }) {
-  const { resolvedTheme, setTheme } = useTheme();
-  const initials = name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+export type AccountMenuProps = {
+  name: string;
+  badge?: string;
+  email?: string;
+  avatarUrl?: string;
+  role?: string;
+};
 
-  return <Popover>
-    <PopoverTrigger className="flex w-full items-center gap-3 rounded-lg border border-sidebar-border bg-sidebar-accent/40 p-2 text-left outline-none transition hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring" aria-label={`Abrir menu de ${name}`}>
-      <Avatar size="sm"><AvatarFallback>{initials}</AvatarFallback></Avatar>
-      <span className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden"><span className="block truncate text-sm font-medium">{name}</span><span className="block text-xs text-muted-foreground">{badge}</span></span>
-      <ChevronUp className="size-4 group-data-[collapsible=icon]:hidden" aria-hidden="true" />
-    </PopoverTrigger>
-    <PopoverContent side="top" align="start" className="w-64 space-y-1">
-      <p className="px-2 py-1 font-display text-sm font-semibold">Minha conta</p>
-      <button
-        type="button"
-        onClick={() => window.dispatchEvent(new Event("notifications:open-drawer"))}
-        className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted text-left"
-      >
-        <Bell className="size-4" aria-hidden="true" />
-        Avisos e notificações
-      </button>
-      <Link href="/configuracoes" className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted"><Settings className="size-4" aria-hidden="true" />Configurações</Link>
-      <div className="border-t pt-2"><LogoutButton /></div>
-    </PopoverContent>
-  </Popover>;
+export function AccountMenu({
+  name,
+  badge,
+  email,
+  avatarUrl,
+  role,
+}: AccountMenuProps) {
+  const { isMobile } = useSidebar();
+  const initials =
+    name
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase() || "U";
+
+  const displaySubtitle = email || badge || "Minha conta";
+
+  return (
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton
+              size="lg"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            >
+              <Avatar className="h-8 w-8 rounded-lg">
+                {avatarUrl ? <AvatarImage src={avatarUrl} alt={name} /> : null}
+                <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+              </Avatar>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{name}</span>
+                <span className="truncate text-xs text-muted-foreground">
+                  {displaySubtitle}
+                </span>
+              </div>
+              <ChevronsUpDown className="ml-auto size-4" />
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            side={isMobile ? "bottom" : "right"}
+            align="end"
+            sideOffset={4}
+          >
+            <DropdownMenuLabel className="p-0 font-normal">
+              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                <Avatar className="h-8 w-8 rounded-lg">
+                  {avatarUrl ? <AvatarImage src={avatarUrl} alt={name} /> : null}
+                  <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+                </Avatar>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold text-foreground">{name}</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {displaySubtitle}
+                  </span>
+                </div>
+              </div>
+            </DropdownMenuLabel>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <Link href="/configuracoes" className="cursor-pointer">
+                  <Settings className="size-4" />
+                  <span>Configurações</span>
+                </Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem asChild>
+                <Link href="/avisos" className="cursor-pointer">
+                  <Bell className="size-4" />
+                  <span>Avisos e notificações</span>
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+
+            {/* Acessos contextuais relevantes para cada perfil */}
+            {role === "admin" && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/financeiro" className="cursor-pointer">
+                      <WalletCards className="size-4" />
+                      <span>Financeiro</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/sistema" className="cursor-pointer">
+                      <Shield className="size-4" />
+                      <span>Sistema e auditoria</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </>
+            )}
+
+            {role === "guardian" && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <Link href="/responsavel" className="cursor-pointer">
+                      <WalletCards className="size-4" />
+                      <span>Painel da Família</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/responsavel/dependentes" className="cursor-pointer">
+                      <UsersRound className="size-4" />
+                      <span>Dependentes</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </>
+            )}
+
+            {role === "adult_student" && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <Link href="/aluno/financeiro" className="cursor-pointer">
+                      <WalletCards className="size-4" />
+                      <span>Financeiro</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/aluno/frequencia" className="cursor-pointer">
+                      <CalendarCheck2 className="size-4" />
+                      <span>Minha frequência</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </>
+            )}
+
+            {role === "minor_student" && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <Link href="/aluno/frequencia" className="cursor-pointer">
+                      <CalendarCheck2 className="size-4" />
+                      <span>Minha frequência</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </>
+            )}
+
+            <DropdownMenuSeparator />
+
+            <LogoutButton variant="menu-item" />
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    </SidebarMenu>
+  );
 }
