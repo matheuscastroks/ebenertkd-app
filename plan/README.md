@@ -18,7 +18,7 @@ Este diretório transforma o planejamento do sistema da academia em fases execut
 | [9](./fase-9-ui-ux.md) | Refinamento de experiência | 8 | Fluxos do piloto melhorados sem regressão |
 | [10](./fase-10-jornada-gamificada.md) | Jornada gamificada, check-in e aprendizagem | 5, 6 e 9 | Ciclo piloto justo, auditável e sem rastreamento contínuo |
 
-O contrato transversal de componentes e as subfases de correção estão em [Refinamento shadcn/ui](./refinamento-shadcn-ui.md). Para a evolução visual e combate ao design plano ("boring"), consulte o [Plano de Refinamento de UI: Profundidade, Iluminação e Hierarquia](./plano-refinamento-ui-profundidade-e-hierarquia.md). Ele é obrigatório para qualquer tela criada ou alterada, independentemente da fase funcional em execução.
+O contrato transversal de componentes e as subfases de correção estão em [Refinamento shadcn/ui](./refinamento-shadcn-ui.md). Para a evolução visual e combate ao design plano ("boring"), consulte o [Plano de Refinamento de UI: Profundidade, Iluminação e Hierarquia](./plano-refinamento-ui-profundidade-e-hierarquia.md). Para as jornadas de introdução do usuário e reestruturação da área de graduações, consulte o [Plano de Onboarding Multi-Perfil e Hierarquia de Exames](./plano-onboarding-e-hierarquia-exames.md). Ele é obrigatório para qualquer tela criada ou alterada, independentemente da fase funcional em execução.
 
 ## Regras de execução
 
