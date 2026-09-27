@@ -43,6 +43,8 @@ export const tables: TableDefinition[] = [
         elements: ["active", "invited", "disabled"],
         required: true
       },
+      { key: "onboarding_completed_at", kind: "datetime", required: false },
+      { key: "onboarding_preferences", kind: "varchar", size: 2000, required: false },
       { key: "created_at", kind: "datetime", required: true },
       { key: "updated_at", kind: "datetime", required: true }
     ],

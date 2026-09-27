@@ -32,6 +32,85 @@ export async function listExamEvents() {
   return (await tables.listRows<ExamEvent>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examEvents, queries: [Query.orderDesc("event_date"), Query.limit(100)] })).rows;
 }
 
+export type ExamEventWithStats = ExamEvent & {
+  participantCount: number;
+  totalFeesCents: number;
+};
+
+export type ExamsOverview = {
+  events: ExamEventWithStats[];
+  nextUpcomingEvent: ExamEvent | null;
+  daysUntilNext: number | null;
+  totalActiveParticipants: number;
+  totalProjectedRevenueCents: number;
+};
+
+export async function getExamsOverview(): Promise<ExamsOverview> {
+  const { tables, config } = createAppwriteAdminClient();
+  const [eventsResult, participantsResult] = await Promise.all([
+    tables.listRows<ExamEvent>({
+      databaseId: config.databaseId,
+      tableId: APPWRITE_IDS.tables.examEvents,
+      queries: [Query.orderDesc("event_date"), Query.limit(100)],
+    }),
+    tables.listRows<ExamParticipant>({
+      databaseId: config.databaseId,
+      tableId: APPWRITE_IDS.tables.examParticipants,
+      queries: [Query.limit(5000)],
+    }),
+  ]);
+
+  const events = eventsResult.rows;
+  const nonCancelledParticipants = participantsResult.rows.filter((p) => p.status !== "cancelled");
+
+  const participantsByEvent = new Map<string, ExamParticipant[]>();
+  for (const p of nonCancelledParticipants) {
+    const list = participantsByEvent.get(p.event_id) ?? [];
+    list.push(p);
+    participantsByEvent.set(p.event_id, list);
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  const activeEvents = events.filter((e) => e.status !== "cancelled");
+  const upcomingEvents = activeEvents
+    .filter((e) => e.event_date.slice(0, 10) >= today)
+    .sort((a, b) => a.event_date.localeCompare(b.event_date));
+  const nextUpcomingEvent = upcomingEvents[0] ?? null;
+
+  let daysUntilNext: number | null = null;
+  if (nextUpcomingEvent) {
+    const targetDate = new Date(nextUpcomingEvent.event_date);
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    targetDate.setHours(0, 0, 0, 0);
+    const diffTime = targetDate.getTime() - currentDate.getTime();
+    daysUntilNext = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+  }
+
+  const eventsWithStats: ExamEventWithStats[] = events.map((event) => {
+    const eventParticipants = participantsByEvent.get(event.$id) ?? [];
+    const totalFeesCents = eventParticipants.reduce((sum, p) => sum + (p.fee_cents || 0), 0);
+    return {
+      ...event,
+      participantCount: eventParticipants.length,
+      totalFeesCents,
+    };
+  });
+
+  const totalActiveParticipants = nonCancelledParticipants.filter((p) => p.status === "registered").length;
+  const totalProjectedRevenueCents = eventsWithStats
+    .filter((e) => e.status !== "cancelled")
+    .reduce((sum, e) => sum + e.totalFeesCents, 0);
+
+  return {
+    events: eventsWithStats,
+    nextUpcomingEvent,
+    daysUntilNext,
+    totalActiveParticipants,
+    totalProjectedRevenueCents,
+  };
+}
+
 export async function getExamEvent(eventId: string) {
   const { tables, config } = createAppwriteAdminClient();
   return tables.getRow<ExamEvent>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examEvents, rowId: eventId });

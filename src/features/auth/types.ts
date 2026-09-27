@@ -9,6 +9,8 @@ export type Profile = Models.Row & {
   role: AppRole;
   capabilities: AppCapability[];
   status: "active" | "invited" | "disabled";
+  onboarding_completed_at?: string | null;
+  onboarding_preferences?: string | null;
   created_at: string;
   updated_at: string;
 };

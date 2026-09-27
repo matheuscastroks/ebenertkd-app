@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { calculateDefaultContractDates, calculateNextDueDate } from "@/features/students/options";
+import {
+  calculateDefaultContractDates,
+  calculateNextDueDate,
+  getBeltTheme,
+  getNextGraduation,
+} from "@/features/students/options";
 
 describe("options - contract date helpers", () => {
   it("calculates next due date correctly when reference is before due day", () => {
@@ -30,5 +35,26 @@ describe("options - contract date helpers", () => {
     const dates = calculateDefaultContractDates("2026-09-26", "2026-12-31");
     expect(dates.start).toBe("2026-09-26");
     expect(dates.end).toBe("2026-12-31");
+  });
+});
+
+describe("options - belt progression & theme helpers", () => {
+  it("determines the next graduation correctly across gubs", () => {
+    expect(getNextGraduation(10)).toEqual({ targetGub: 9, targetBelt: "Ponta Amarela" });
+    expect(getNextGraduation(8)).toEqual({ targetGub: 7, targetBelt: "Ponta Verde" });
+    expect(getNextGraduation(2)).toEqual({ targetGub: 1, targetBelt: "Ponta Preta" });
+    expect(getNextGraduation(1)).toEqual({ targetGub: 0, targetBelt: "Preta" });
+    expect(getNextGraduation(0)).toBeNull();
+    expect(getNextGraduation(null)).toBeNull();
+  });
+
+  it("returns correct theme for belts", () => {
+    const whiteTheme = getBeltTheme("Branca", 10);
+    expect(whiteTheme.isBlackBelt).toBe(false);
+    expect(whiteTheme.pillClass).toContain("bg-neutral-50");
+
+    const blackTheme = getBeltTheme("Preta", 0);
+    expect(blackTheme.isBlackBelt).toBe(true);
+    expect(blackTheme.pillClass).toContain("text-amber-300");
   });
 });

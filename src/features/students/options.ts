@@ -88,6 +88,128 @@ export function graduationMatches(gub?: number, belt?: string) {
   return gubForBelt(belt) === gub;
 }
 
+export function getNextGraduation(currentGub: number | null | undefined): {
+  targetGub: GubOption | 0;
+  targetBelt: BeltOption;
+} | null {
+  if (currentGub == null || currentGub <= 0) return null;
+  const nextGub = currentGub - 1;
+  if (nextGub === 0) {
+    return { targetGub: 0, targetBelt: "Preta" };
+  }
+  const nextBelt = beltForGub(nextGub);
+  if (!nextBelt) return null;
+  return { targetGub: nextGub as GubOption, targetBelt: nextBelt };
+}
+
+export type BeltColorTheme = {
+  name: string;
+  gub?: number;
+  isBlackBelt: boolean;
+  pillClass: string;
+};
+
+export function getBeltTheme(belt?: string | null, gub?: number | null): BeltColorTheme {
+  const resolvedGub = gub ?? (belt ? gubForBelt(belt) : undefined);
+
+  if (resolvedGub === 10) {
+    return {
+      name: "Branca",
+      gub: 10,
+      isBlackBelt: false,
+      pillClass: "bg-neutral-50 text-neutral-800 border-neutral-300 dark:bg-neutral-900 dark:text-neutral-200 dark:border-neutral-700",
+    };
+  }
+  if (resolvedGub === 9) {
+    return {
+      name: "Ponta Amarela",
+      gub: 9,
+      isBlackBelt: false,
+      pillClass: "bg-amber-50/80 text-neutral-900 border-amber-300 dark:bg-neutral-900 dark:text-neutral-100 dark:border-amber-500/70",
+    };
+  }
+  if (resolvedGub === 8) {
+    return {
+      name: "Amarela",
+      gub: 8,
+      isBlackBelt: false,
+      pillClass: "bg-amber-100 text-amber-950 border-amber-400 dark:bg-amber-950/40 dark:text-amber-200 dark:border-amber-700/60",
+    };
+  }
+  if (resolvedGub === 7) {
+    return {
+      name: "Ponta Verde",
+      gub: 7,
+      isBlackBelt: false,
+      pillClass: "bg-emerald-50 text-emerald-950 border-emerald-300 dark:bg-neutral-900 dark:text-emerald-300 dark:border-emerald-700/70",
+    };
+  }
+  if (resolvedGub === 6) {
+    return {
+      name: "Verde",
+      gub: 6,
+      isBlackBelt: false,
+      pillClass: "bg-emerald-100 text-emerald-950 border-emerald-400 dark:bg-emerald-950/40 dark:text-emerald-200 dark:border-emerald-700/60",
+    };
+  }
+  if (resolvedGub === 5) {
+    return {
+      name: "Ponta Azul",
+      gub: 5,
+      isBlackBelt: false,
+      pillClass: "bg-sky-50 text-sky-950 border-sky-300 dark:bg-neutral-900 dark:text-sky-300 dark:border-sky-700/70",
+    };
+  }
+  if (resolvedGub === 4) {
+    return {
+      name: "Azul",
+      gub: 4,
+      isBlackBelt: false,
+      pillClass: "bg-blue-100 text-blue-950 border-blue-400 dark:bg-blue-950/40 dark:text-blue-200 dark:border-blue-700/60",
+    };
+  }
+  if (resolvedGub === 3) {
+    return {
+      name: "Ponta Vermelha",
+      gub: 3,
+      isBlackBelt: false,
+      pillClass: "bg-rose-50 text-rose-950 border-rose-300 dark:bg-neutral-900 dark:text-rose-300 dark:border-rose-700/70",
+    };
+  }
+  if (resolvedGub === 2) {
+    return {
+      name: "Vermelha",
+      gub: 2,
+      isBlackBelt: false,
+      pillClass: "bg-rose-100 text-rose-950 border-rose-400 dark:bg-rose-950/40 dark:text-rose-200 dark:border-rose-700/60",
+    };
+  }
+  if (resolvedGub === 1) {
+    return {
+      name: "Ponta Preta",
+      gub: 1,
+      isBlackBelt: false,
+      pillClass: "bg-neutral-100 text-neutral-950 border-neutral-400 dark:bg-neutral-900 dark:text-neutral-100 dark:border-neutral-600",
+    };
+  }
+  if (resolvedGub === 0 || (belt && belt.toLowerCase().includes("preta"))) {
+    return {
+      name: belt ?? "Preta",
+      gub: 0,
+      isBlackBelt: true,
+      pillClass: "bg-neutral-900 text-amber-300 border-amber-500/50 dark:bg-neutral-950 dark:text-amber-300 dark:border-amber-500/60 shadow-xs",
+    };
+  }
+
+  return {
+    name: belt ?? "Não informada",
+    gub: resolvedGub,
+    isBlackBelt: false,
+    pillClass: "bg-muted text-muted-foreground border-border",
+  };
+}
+
+
 export function calculateNextDueDate(dueDay: number, referenceDate: Date = new Date()): string {
   const year = referenceDate.getFullYear();
   const month = referenceDate.getMonth();
