@@ -44,7 +44,7 @@ function WeekdayFields({ selected = [], idSuffix }: { selected?: string[]; idSuf
           <label
             key={day}
             htmlFor={`weekday-${day}-${idSuffix}`}
-            className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted/50 cursor-pointer touch-manipulation"
+            className="flex items-center gap-2 rounded-lg border border-border/50 bg-surface-recessed/60 px-3 py-2 text-sm font-medium transition-colors hover:bg-surface-recessed cursor-pointer touch-manipulation depth-recessed"
           >
             <Checkbox
               id={`weekday-${day}-${idSuffix}`}
@@ -114,7 +114,7 @@ function Fields({ trainingClass }: { trainingClass?: TrainingClass }) {
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor={`class-capacity-${suffix}`}>Capacidade máxima de alunos</FieldLabel>
+          <FieldLabel htmlFor={`class-capacity-${suffix}`}>Capacidade máxima</FieldLabel>
           <Input
             id={`class-capacity-${suffix}`}
             name="capacity"
@@ -190,7 +190,7 @@ export function ClassManager({ classes, notice }: { classes: TrainingClass[]; no
             {classes.map((trainingClass) => {
               const active = trainingClass.status === "active";
               return (
-                <Card key={trainingClass.$id} className="border-border/80 shadow-xs hover:border-primary/30 transition-colors">
+                <Card key={trainingClass.$id} className="hover:border-primary/40 transition-colors">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1">
@@ -234,7 +234,7 @@ export function ClassManager({ classes, notice }: { classes: TrainingClass[]; no
                     </div>
                   </CardHeader>
 
-                  <CardContent className="flex flex-wrap gap-2 pt-2 border-t">
+                  <CardContent className="flex flex-wrap gap-2 pt-3 border-t border-border/40">
                     <Button asChild size="sm" className="h-9 touch-manipulation">
                       <Link href={adminClassPath(trainingClass.$id)}>
                         <CalendarCheck2 className="size-4 mr-1.5" aria-hidden="true" />

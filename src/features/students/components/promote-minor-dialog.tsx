@@ -12,15 +12,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { KeyRound } from "lucide-react";
 
 export function PromoteMinorDialog({
   minorProfileId,
   studentName,
-  currentQuery = {}
+  currentQuery = {},
 }: {
   minorProfileId: string;
   studentName: string;
@@ -31,24 +32,27 @@ export function PromoteMinorDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="h-9 w-full sm:w-auto font-medium">
+          <KeyRound className="mr-1.5 size-3.5" />
           Configurar acesso próprio
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Configurar acesso próprio</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-base font-semibold">Configurar acesso próprio</DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm">
             Defina o e-mail de acesso individual para <strong>{studentName}</strong>. O aluno receberá um convite para criar sua senha e as sessões atuais de menor serão encerradas.
           </DialogDescription>
         </DialogHeader>
-        <form action={promoteMinorAction} className="space-y-4">
+        <form action={promoteMinorAction} className="space-y-4 pt-2">
           <input type="hidden" name="minor_profile_id" value={minorProfileId} />
           {currentQuery.q ? <input type="hidden" name="q" value={currentQuery.q} /> : null}
           {currentQuery.page ? <input type="hidden" name="page" value={currentQuery.page} /> : null}
 
           <Field>
-            <FieldLabel htmlFor={`email-${minorProfileId}`}>Novo e-mail do aluno</FieldLabel>
+            <FieldLabel htmlFor={`email-${minorProfileId}`} className="text-xs sm:text-sm font-semibold">
+              Novo e-mail do aluno
+            </FieldLabel>
             <Input
               id={`email-${minorProfileId}`}
               name="email"
@@ -57,9 +61,10 @@ export function PromoteMinorDialog({
               autoComplete="email"
               required
               autoFocus
+              className="h-11"
             />
-            <FieldDescription>
-              O aluno usará este e-mail para acessar o portal de forma independente.
+            <FieldDescription className="text-xs">
+              O aluno usará este e-mail para acessar o portal de forma autônoma.
             </FieldDescription>
           </Field>
 
@@ -71,17 +76,22 @@ export function PromoteMinorDialog({
             />
             <label
               htmlFor={`retain-guardian-${minorProfileId}`}
-              className="text-sm font-medium leading-none cursor-pointer text-muted-foreground"
+              className="text-xs sm:text-sm font-medium leading-none cursor-pointer text-muted-foreground select-none"
             >
               Manter acesso de consulta do responsável
             </label>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0 pt-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 pt-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              className="h-11 font-medium"
+            >
               Cancelar
             </Button>
-            <FormSubmitButton pendingLabel="Atualizando acesso…">
+            <FormSubmitButton className="h-11 font-medium" pendingLabel="Atualizando acesso…">
               Atualizar acesso
             </FormSubmitButton>
           </DialogFooter>

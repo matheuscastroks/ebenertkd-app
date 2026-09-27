@@ -1,10 +1,57 @@
 "use client";
 
+import * as React from "react";
 import { useTheme } from "next-themes";
 import { changeTheme } from "@/lib/theme-transition";
-import { Switch } from "@/components/ui/switch";
+import { Moon, Sun, Monitor } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const emptySubscribe = () => () => {};
 
 export function ThemePreference() {
-  const { resolvedTheme, setTheme } = useTheme();
-  return <div className="space-y-3 rounded-xl border p-4"><label className="flex items-center justify-between gap-4"><span><span className="block font-medium">Modo escuro</span><span className="block text-sm text-muted-foreground">Use cores mais suaves à noite.</span></span><Switch checked={resolvedTheme === "dark"} onCheckedChange={(checked) => changeTheme(setTheme, checked ? "dark" : "light")} aria-label="Ativar modo escuro" /></label><button type="button" className="text-sm text-primary-text underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-4" onClick={() => changeTheme(setTheme, "system")}>Seguir preferência do dispositivo</button></div>;
+  const { theme, setTheme } = useTheme();
+  const mounted = React.useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+
+  const themes = [
+    { value: "light", label: "Claro", icon: Sun },
+    { value: "dark", label: "Escuro", icon: Moon },
+    { value: "system", label: "Sistema", icon: Monitor },
+  ] as const;
+
+  return (
+    <div className="space-y-4 rounded-xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs">
+      <div>
+        <p className="font-semibold text-sm text-foreground">Tema da interface</p>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          Escolha entre visual claro, escuro ou acompanhamento automático do sistema.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2.5">
+        {themes.map(({ value, label, icon: Icon }) => {
+          const isActive = mounted && theme === value;
+          return (
+            <button
+              key={value}
+              type="button"
+              onClick={() => changeTheme(setTheme, value)}
+              className={cn(
+                "flex flex-col items-center justify-center gap-2 rounded-xl border p-3.5 text-xs font-semibold transition-all h-20 outline-none select-none",
+                isActive
+                  ? "border-primary bg-primary/10 text-primary shadow-xs ring-1 ring-primary"
+                  : "border-border/60 bg-muted/20 text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+              )}
+            >
+              <Icon className={cn("size-5", isActive ? "text-primary" : "text-muted-foreground")} />
+              <span>{label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 }

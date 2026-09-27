@@ -70,11 +70,11 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
   );
 
   return (
-    <div className="space-y-3 rounded-xl border bg-card p-4">
+    <div className="space-y-3 rounded-xl border border-border/50 bg-card p-4 depth-raised">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Field>
           <FieldLabel htmlFor="enrollment-search">Aluno</FieldLabel>
-          <InputGroup className="h-10">
+          <InputGroup className="h-11">
             <InputGroupAddon>
               <Search className="size-4" aria-hidden="true" />
             </InputGroupAddon>
@@ -94,7 +94,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
             value={searchParams.get("status") ?? "all"}
             onValueChange={(val) => update("status", val)}
           >
-            <SelectTrigger id="enrollment-status" className="w-full">
+            <SelectTrigger id="enrollment-status" className="w-full h-11">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -113,7 +113,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
             value={searchParams.get("belt") ?? "all"}
             onValueChange={(val) => update("belt", val)}
           >
-            <SelectTrigger id="enrollment-belt" className="w-full">
+            <SelectTrigger id="enrollment-belt" className="w-full h-11">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -133,7 +133,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
             value={searchParams.get("turma") ?? "all"}
             onValueChange={(val) => update("turma", val)}
           >
-            <SelectTrigger id="enrollment-class" className="w-full">
+            <SelectTrigger id="enrollment-class" className="w-full h-11">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

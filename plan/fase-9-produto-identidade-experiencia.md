@@ -323,38 +323,38 @@ Cada tela e componente listado abaixo deve ser auditado e refinado seguindo os s
 ---
 
 ### Módulo 6: Exames de Faixa e Graduação
-- [ ] **6.1 Lista de Exames de Faixa (`src/app/admin/exames/page.tsx`):**
-  - [ ] Cards dos próximos exames com data, local, taxa e quantidade de inscritos.
-  - [ ] Modal "Criar novo exame de faixa" com campos de data, turmas elegíveis e avaliador.
-- [ ] **6.2 Condução do Exame e Avaliação (`src/app/admin/exames/[eventId]/page.tsx`):**
-  - [ ] Tabela/cards de candidatos com faixa atual e próxima faixa (GUB/Dan) destacada com as cores oficiais de Taekwondo.
-  - [ ] Alternador de resultado Aprovado / Reprovado e notas de avaliação por disciplina (Kyorugui, Poomsae, Quebramento).
-  - [ ] Botão de homologação em lote que atualiza automaticamente a graduação dos alunos no sistema.
-- [ ] **6.3 Visualização da Graduação pelo Aluno (`src/features/students/components/graduation-card.tsx`, `belt-badge.tsx`):**
-  - [ ] Card no dashboard do aluno destacando sua faixa atual, tempo de treino e requisitos para o próximo exame.
+- [x] **6.1 Lista de Exames de Faixa (`src/app/admin/exames/page.tsx`):**
+  - [x] Cards dos próximos exames com data, local, taxa e quantidade de inscritos.
+  - [x] Modal "Criar novo exame de faixa" com campos de data, turmas elegíveis e avaliador.
+- [x] **6.2 Condução do Exame e Avaliação (`src/app/admin/exames/[eventId]/page.tsx`):**
+  - [x] Tabela/cards de candidatos com faixa atual e próxima faixa (GUB/Dan) destacada com as cores oficiais de Taekwondo.
+  - [x] Alternador de resultado Aprovado / Reprovado e notas de avaliação por disciplina (Kyorugui, Poomsae, Quebramento).
+  - [x] Botão de homologação em lote que atualiza automaticamente a graduação dos alunos no sistema.
+- [x] **6.3 Visualização da Graduação pelo Aluno (`src/features/students/components/graduation-card.tsx`, `belt-badge.tsx`):**
+  - [x] Card no dashboard do aluno destacando sua faixa atual, tempo de treino e requisitos para o próximo exame.
 
 ---
 
 ### Módulo 7: Gestão de Matrículas e Dependentes (Admin & Família)
-- [ ] **7.1 Fila de Matrículas no Admin (`src/app/admin/matriculas/page.tsx`, `src/features/students/components/enrollment-table.tsx`, `enrollment-filters.tsx`):**
-  - [ ] Abas por situação: Rascunhos, Aguardando análise, Aguardando assinatura, Ativas, Pausadas.
-  - [ ] No mobile, cards responsivos com foto do aluno, faixa, turma e botão direto de "Analisar".
-- [ ] **7.2 Acesso e Transição de Alunos Menores (`src/app/admin/matriculas/acessos/page.tsx`, `src/features/students/components/promote-minor-dialog.tsx`):**
-  - [ ] Lista de alunos que atingiram a maioridade com ação de liberar acesso independente por e-mail próprio.
-- [ ] **7.3 Gestão Familiar e Dependentes (`src/app/responsavel/dependentes/page.tsx`, `src/app/responsavel/dependentes/[profileId]/matricula/page.tsx`):**
-  - [ ] Painel do responsável com cartões de cada dependente, indicando status de matrícula, próxima aula e situação financeira.
-  - [ ] Fluxo simplificado de "Adicionar dependente" preenchendo automaticamente os dados do responsável.
+- [x] **7.1 Fila de Matrículas no Admin (`src/app/admin/matriculas/page.tsx`, `src/features/students/components/enrollment-table.tsx`, `enrollment-filters.tsx`):**
+  - [x] Abas por situação: Rascunhos, Aguardando análise, Aguardando assinatura, Ativas, Pausadas.
+  - [x] No mobile, cards responsivos com foto do aluno, faixa, turma e botão direto de "Analisar".
+- [x] **7.2 Acesso e Transição de Alunos Menores (`src/app/admin/matriculas/acessos/page.tsx`, `src/features/students/components/promote-minor-dialog.tsx`):**
+  - [x] Lista de alunos que atingiram a maioridade com ação de liberar acesso independente por e-mail próprio.
+- [x] **7.3 Gestão Familiar e Dependentes (`src/app/responsavel/dependentes/page.tsx`, `src/app/responsavel/dependentes/[profileId]/matricula/page.tsx`):**
+  - [x] Painel do responsável com cartões de cada dependente, indicando status de matrícula, próxima aula e situação financeira.
+  - [x] Fluxo simplificado de "Adicionar dependente" preenchendo automaticamente os dados do responsável.
 
 ---
 
 ### Módulo 8: Sistema, Preferências e Configurações
-- [ ] **8.1 Painel do Sistema (`src/app/admin/sistema/page.tsx`, `src/components/appwrite/appwrite-connection-check.tsx`):**
-  - [ ] Indicador de integridade dos bancos e buckets do Appwrite, status dos backups automáticos e jobs agendados.
-  - [ ] Layout limpo sem termos excessivamente técnicos voltados a suporte.
-- [ ] **8.2 Configurações de Conta e Notificações (`src/app/configuracoes/page.tsx`, `src/components/dashboard/account-menu.tsx`, `src/features/notifications/components/notification-preferences.tsx`, `push-permission-card.tsx`):**
-  - [ ] Alternância de tema Claro / Escuro / Sistema com persistência imediata.
-  - [ ] Gerenciamento de notificações push por categoria (Avisos, Mensalidades, Sistema) com feedback claro de permissão do navegador.
-  - [ ] Acesso seguro de logout e alteração de senha.
+- [x] **8.1 Painel do Sistema (`src/app/admin/sistema/page.tsx`, `src/components/appwrite/appwrite-connection-check.tsx`):**
+  - [x] Indicador de integridade dos bancos e buckets do Appwrite, status dos backups automáticos e jobs agendados.
+  - [x] Layout limpo sem termos excessivamente técnicos voltados a suporte.
+- [x] **8.2 Configurações de Conta e Notificações (`src/app/configuracoes/page.tsx`, `src/components/dashboard/account-menu.tsx`, `src/features/notifications/components/notification-preferences.tsx`, `push-permission-card.tsx`):**
+  - [x] Alternância de tema Claro / Escuro / Sistema com persistência imediata.
+  - [x] Gerenciamento de notificações push por categoria (Avisos, Mensalidades, Sistema) com feedback claro de permissão do navegador.
+  - [x] Acesso seguro de logout e alteração de senha.
 
 ---
 
