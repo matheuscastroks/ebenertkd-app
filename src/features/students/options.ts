@@ -17,12 +17,12 @@ export const DAN_BELT_OPTIONS = [
   { dan: 3, belt: "Preta 3º Dan", nameEn: "3rd Dan Black Belt", poomsae: "Taebaek" }
 ] as const;
 
-export type GubOption = (typeof GUB_BELT_OPTIONS)[number]["gub"];
+export type GubOption = (typeof GUB_BELT_OPTIONS)[number]["gub"] | 0;
 export type BeltOption =
   | (typeof GUB_BELT_OPTIONS)[number]["belt"]
   | (typeof DAN_BELT_OPTIONS)[number]["belt"];
 
-export const GUB_OPTIONS = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1] as const;
+export const GUB_OPTIONS = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0] as const;
 export const BELT_OPTIONS = [
   "Branca",
   "Ponta Amarela",
@@ -41,6 +41,7 @@ export const BELT_OPTIONS = [
 export const DUE_DAY_OPTIONS = [5, 10, 15, 20, 25, 30] as const;
 
 export function beltForGub(gub: number) {
+  if (gub === 0) return "Preta";
   return GUB_BELT_OPTIONS.find((option) => option.gub === gub)?.belt;
 }
 

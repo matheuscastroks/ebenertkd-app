@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  beltForGub,
   calculateDefaultContractDates,
   calculateNextDueDate,
   getBeltTheme,
   getNextGraduation,
+  graduationMatches,
+  gubForBelt,
 } from "@/features/students/options";
 
 describe("options - contract date helpers", () => {
@@ -56,5 +59,17 @@ describe("options - belt progression & theme helpers", () => {
     const blackTheme = getBeltTheme("Preta", 0);
     expect(blackTheme.isBlackBelt).toBe(true);
     expect(blackTheme.pillClass).toContain("text-amber-300");
+  });
+
+  it("handles Black Belt (Dan / GUB 0) mappings correctly", () => {
+    expect(beltForGub(0)).toBe("Preta");
+    expect(gubForBelt("Preta")).toBe(0);
+    expect(gubForBelt("Preta 1º Dan")).toBe(0);
+    expect(gubForBelt("Preta 2º Dan")).toBe(0);
+    expect(gubForBelt("Preta 3º Dan")).toBe(0);
+    expect(graduationMatches(0, "Preta")).toBe(true);
+    expect(graduationMatches(0, "Preta 2º Dan")).toBe(true);
+    expect(graduationMatches(0, "Branca")).toBe(false);
+    expect(graduationMatches(10, "Preta")).toBe(false);
   });
 });

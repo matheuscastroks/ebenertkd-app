@@ -29,7 +29,7 @@ const status: Record<string, { label: string; tone: StatusTone }> = {
 };
 
 function belt(student: Student) {
-  return student.gub ? beltForGub(student.gub as GubOption) : student.current_belt ?? "Não informada";
+  return student.current_belt || (student.gub != null ? beltForGub(student.gub as GubOption) : "Não informada");
 }
 
 function EnrollmentStatus({ value }: { value?: string }) {

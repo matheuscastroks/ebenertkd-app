@@ -352,7 +352,7 @@ const BELT_CONFIGS: Record<string, BeltVisualConfig> = {
 };
 
 export function getBeltConfig(belt?: string | null, gub?: number | null): BeltVisualConfig {
-  const rawBelt = belt ?? (gub ? beltForGub(gub as GubOption) : "") ?? "";
+  const rawBelt = belt ?? (gub != null ? beltForGub(gub as GubOption) : "") ?? "";
   const normalizedBelt = rawBelt
     .toLowerCase()
     .trim()
@@ -368,7 +368,7 @@ export function getBeltConfig(belt?: string | null, gub?: number | null): BeltVi
 
   // Fallback for custom or unknown belt
   return {
-    name: belt || (gub ? `${gub}º GUB` : "Não informada"),
+    name: belt || (gub != null ? (gub === 0 ? "Preta" : `${gub}º GUB`) : "Não informada"),
     gub: gub ?? undefined,
     beltColor: "bg-muted",
     tipColor: "bg-muted-foreground/40",

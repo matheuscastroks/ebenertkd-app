@@ -19,7 +19,7 @@ function required(source: EnvironmentSource, name: string) {
 
 export function testPersonas(source: EnvironmentSource = process.env): TestPersona[] {
   return [
-    { key: "admin", name: "Ricardo Almeida", email: "ricardo.almeida@ebenertkd.app", password: required(source, "TEST_ADMIN_PASSWORD"), role: "admin", capabilities: ["admin"], route: "/admin" },
+    { key: "admin", name: "Ebener Santos", email: "ricardo.almeida@ebenertkd.app", password: required(source, "TEST_ADMIN_PASSWORD"), role: "admin", capabilities: ["admin"], route: "/admin" },
     { key: "adult", name: "Camila Ferreira", email: "camila.ferreira@ebenertkd.app", password: required(source, "TEST_ADULT_PASSWORD"), role: "adult_student", capabilities: ["student"], route: "/aluno" },
     { key: "guardian", name: "Juliana Mendes", email: "juliana.mendes@ebenertkd.app", password: required(source, "TEST_GUARDIAN_PASSWORD"), role: "guardian", capabilities: ["guardian"], route: "/responsavel" },
     { key: "minor", name: "Lucas Mendes", email: "lucas.mendes@minor.ebenertkd.internal", username: "lucas.mendes", password: required(source, "TEST_MINOR_PASSWORD"), role: "minor_student", capabilities: ["student"], route: "/aluno" }

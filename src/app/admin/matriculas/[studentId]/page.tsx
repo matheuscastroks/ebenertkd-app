@@ -5,6 +5,7 @@ import { listEnrollmentReviews } from "@/features/students/document-service";
 import { getEnrollmentBundleByStudentId } from "@/features/students/service";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
+import { toClientData } from "@/lib/client-data";
 import { AppwriteException } from "node-appwrite";
 import { notFound } from "next/navigation";
 
@@ -39,7 +40,12 @@ export default async function EnrollmentReviewPage({ params, searchParams }: { p
       breadcrumbs={[{ label: "Matrículas", href: ROUTES.adminEnrollments }, { label: bundle.student.full_name }]}
     >
       <div className="mx-auto w-full max-w-6xl">
-        <ReviewPanel bundle={bundle} reviews={reviews as Array<Record<string, unknown>>} classes={classes} notice={notice} />
+        <ReviewPanel
+          bundle={toClientData(bundle)}
+          reviews={toClientData(reviews) as Array<Record<string, unknown>>}
+          classes={toClientData(classes)}
+          notice={notice}
+        />
       </div>
     </PortalShell>
   );

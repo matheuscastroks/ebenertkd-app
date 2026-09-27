@@ -83,7 +83,7 @@ export function ReviewPanel({
   notice?: string;
 }) {
   const { student, enrollment, documents } = bundle;
-  const currentBelt = student.gub ? beltForGub(student.gub as GubOption) : student.current_belt;
+  const currentBelt = student.current_belt || (student.gub != null ? beltForGub(student.gub as GubOption) : undefined);
   const profilePhoto = documents.find((doc) => doc.document_type === "profile_photo");
   const medicalCertificate = documents.find((doc) => doc.document_type === "medical_certificate");
 
@@ -117,7 +117,7 @@ export function ReviewPanel({
               {student.full_name}
             </h1>
             <p className="text-sm text-muted-foreground">
-              CPF: {student.cpf || "Não informado"} · Faixa: {currentBelt ? `Faixa ${currentBelt}` : "Não informada"} {student.gub ? `(${student.gub}º GUB)` : ""}
+              CPF: {student.cpf || "Não informado"} · Faixa: {currentBelt ? `Faixa ${currentBelt}` : "Não informada"} {student.gub ? `(${student.gub}º GUB)` : (student.gub === 0 ? "(Dan)" : "")}
             </p>
           </div>
         </div>
@@ -237,7 +237,7 @@ export function ReviewPanel({
                     <span className="text-xs text-muted-foreground block">Graduação Atual</span>
                     <span className="font-medium text-foreground">
                       {currentBelt ? `Faixa ${currentBelt}` : "—"}{" "}
-                      {student.gub ? `(${student.gub}º GUB)` : ""}
+                      {student.gub ? `(${student.gub}º GUB)` : (student.gub === 0 ? "(Dan)" : "")}
                     </span>
                   </div>
                   <div className="rounded-lg border bg-muted/10 p-3">

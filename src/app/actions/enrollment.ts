@@ -43,7 +43,7 @@ function enrollmentInput(formData: FormData) {
     startedAtTkd: value("started_at_tkd"),
     currentBelt: (value("current_belt") || undefined) as BeltOption | undefined,
     trainingClassId: value("training_class_id"),
-    gub: value("gub") ? Number(value("gub")) : undefined,
+    gub: value("gub") !== "" ? Number(value("gub")) : undefined,
     healthCondition: (value("health_condition") || undefined) as "yes" | "no" | undefined,
     healthDetails: value("health_details") || undefined,
     medications: value("medications") || undefined,

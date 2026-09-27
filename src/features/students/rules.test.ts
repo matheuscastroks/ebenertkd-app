@@ -4,7 +4,7 @@ import { DUE_DAY_OPTIONS, GUB_OPTIONS, beltForGub, graduationMatches, gubForBelt
 
 describe("enrollment rules", () => {
   it("exposes only the allowed GUB and due-day choices", () => {
-    expect(GUB_OPTIONS).toEqual([10, 9, 8, 7, 6, 5, 4, 3, 2, 1]);
+    expect(GUB_OPTIONS).toEqual([10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]);
     expect(DUE_DAY_OPTIONS).toEqual([5, 10, 15, 20, 25, 30]);
   });
   it("maps each GUB to Ebener TKD belt system in both directions", () => {

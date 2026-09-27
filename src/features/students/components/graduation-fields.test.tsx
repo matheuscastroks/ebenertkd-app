@@ -19,4 +19,15 @@ describe("GraduationFields", () => {
     await user.click(screen.getByRole("option", { name: "2º GUB · Vermelha" }));
     expect(screen.getByRole("combobox", { name: "Faixa atual *" })).toHaveTextContent("Vermelha");
   });
+
+  it("supports Black Belt (Faixa Preta / Dan) selection and sync", async () => {
+    const user = userEvent.setup();
+    render(<GraduationFields defaultBelt="Preta" defaultGub={0} />);
+    expect(screen.getByRole("combobox", { name: "Faixa atual *" })).toHaveTextContent("Preta");
+    expect(screen.getByRole("combobox", { name: /^GUB/ })).toHaveTextContent("Faixa Preta · Dan");
+
+    await user.click(screen.getByRole("combobox", { name: "Faixa atual *" }));
+    await user.click(screen.getByRole("option", { name: "Preta 2º Dan · 2º Dan" }));
+    expect(screen.getByRole("combobox", { name: /^GUB/ })).toHaveTextContent("Faixa Preta · Dan");
+  });
 });
