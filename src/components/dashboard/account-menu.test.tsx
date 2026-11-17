@@ -43,14 +43,12 @@ describe("AccountMenu", () => {
     const trigger = screen.getByRole("button", { name: /Mestre Kim/i });
     await user.click(trigger);
 
-    expect(screen.getByRole("menuitem", { name: /Configurações/i })).toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: /Avisos e notificações/i })).toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: /Financeiro/i })).toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: /Sistema e auditoria/i })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: /Configurações/i })).toHaveAttribute("href", "/configuracoes");
+    expect(screen.getByRole("menuitem", { name: /Privacidade/i })).toHaveAttribute("href", "/privacidade");
     expect(screen.getByText("Sair da conta")).toBeInTheDocument();
   });
 
-  it("shows student specific items when role is adult_student", async () => {
+  it("keeps work destinations in the navigation instead of repeating them", async () => {
     const user = userEvent.setup();
 
     render(
@@ -67,7 +65,7 @@ describe("AccountMenu", () => {
     const trigger = screen.getByRole("button", { name: /Carlos Silva/i });
     await user.click(trigger);
 
-    expect(screen.getByRole("menuitem", { name: /Minha frequência/i })).toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: /Financeiro/i })).toBeInTheDocument();
+    expect(screen.getAllByRole("menuitem").map((item) => item.textContent)).toEqual(["Configurações", "Privacidade"]);
+    expect(screen.queryByRole("menuitem", { name: /Financeiro|Minha frequência|Avisos/i })).not.toBeInTheDocument();
   });
 });

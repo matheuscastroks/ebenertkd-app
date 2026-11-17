@@ -1,5 +1,27 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
+/**
+ * Mesma geometria do cabeçalho do `DashboardShell`: barra de ferramentas (só no desktop),
+ * título `text-2xl` (32px de linha) e subtítulo `text-sm` (20px de linha).
+ */
+export function PageHeaderSkeleton() {
+  return (
+    <div aria-hidden="true" className="flex flex-col gap-3">
+      <div className="hidden min-h-8 items-center md:flex">
+        <Skeleton className="size-6 rounded-lg" />
+      </div>
+      <div className="space-y-1">
+        <div className="flex h-8 items-center">
+          <Skeleton className="h-7 w-56 max-w-full rounded-lg" />
+        </div>
+        <div className="flex h-5 items-center">
+          <Skeleton className="h-4 w-80 max-w-full rounded-lg" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function PageSkeleton({
   metrics = true,
   metricCount = 4,
@@ -10,27 +32,23 @@ export function PageSkeleton({
   rows?: number;
 }) {
   return (
-    <div className="space-y-6" aria-label="Carregando conteúdo" aria-busy="true">
-      {/* Cabeçalho limpo sem bordas artificiais que causam layout shift */}
-      <div className="space-y-2 pb-2">
-        <Skeleton className="h-8 w-64 max-w-full" />
-        <Skeleton className="h-4 w-96 max-w-full" />
-      </div>
+    <div role="status" className="flex flex-col gap-6" aria-label="Carregando conteúdo" aria-busy="true">
+      <PageHeaderSkeleton />
 
       {metrics ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div aria-hidden="true" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: metricCount }, (_, index) => (
-            <div key={index} className="rounded-xl border bg-card p-5 space-y-2">
+            <div key={index} className="space-y-2 rounded-xl border border-border bg-card p-5">
               <Skeleton className="h-4 w-28" />
               <Skeleton className="h-8 w-36" />
-              <Skeleton className="h-3 w-44" />
+              <Skeleton className="h-4 w-44" />
             </div>
           ))}
         </div>
       ) : null}
 
-      <div className="space-y-3 rounded-xl border bg-card p-5">
-        <Skeleton className="h-9 w-full" />
+      <div aria-hidden="true" className="space-y-3 rounded-xl border border-border bg-card p-4 md:p-5">
+        <Skeleton className="h-5 w-40" />
         {Array.from({ length: rows }, (_, index) => (
           <Skeleton key={index} className="h-14 w-full" />
         ))}

@@ -25,10 +25,7 @@ export function MetricCardsSkeleton({
           className="border-border shadow-xs"
         >
           <CardContent className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Skeleton className="h-4 w-24 rounded-md" />
-              <Skeleton className="size-8 rounded-lg" />
-            </div>
+            <Skeleton className="h-4 w-24 rounded-md" />
             <Skeleton className="h-8 w-32 rounded-md" />
             <Skeleton className="h-3 w-40 rounded-md" />
           </CardContent>

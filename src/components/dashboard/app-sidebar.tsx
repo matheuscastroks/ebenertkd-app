@@ -20,7 +20,6 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarRail,
-  SidebarSeparator,
   useSidebar
 } from "@/components/ui/sidebar";
 import { AccountMenu } from "@/components/dashboard/account-menu";
@@ -122,25 +121,32 @@ export function AppSidebar({
   const groups = Array.from(new Set(navItems.map((item) => item.group ?? "Principal")));
   return (
     <Sidebar collapsible="icon" variant="inset">
-      <SidebarHeader className="px-3 pb-5 pt-6">
-        <div className="flex items-center gap-2">
-          <Image src="/brand-icon.png" alt="Símbolo da Ebener TKD" width={44} height={44} unoptimized className="size-11 shrink-0 object-contain group-data-[collapsible=icon]:size-6" />
-          <div className="min-w-0 flex-1 space-y-1 group-data-[collapsible=icon]:hidden">
-            <p className="font-display text-sm font-semibold">Ebener TKD</p>
-            <p className="text-xs text-muted-foreground">Sua academia</p>
+      <SidebarHeader className="px-3 pb-2 pt-4">
+        <div className="flex items-center gap-2.5 group-data-[collapsible=icon]:justify-center">
+          <Image src="/brand-icon.png" alt="" width={36} height={36} unoptimized className="size-9 shrink-0 object-contain group-data-[collapsible=icon]:size-6" />
+          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+            <p className="font-display text-sm font-semibold leading-5">Ebener TKD</p>
+            <p className="text-xs leading-4 text-muted-foreground">{badge}</p>
           </div>
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
-        {groups.map((group, index) => <div key={group}>{index > 0 ? <SidebarSeparator /> : null}<SidebarGroup>
-          <SidebarGroupLabel>{group}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navItems.filter((item) => (item.group ?? "Principal") === group).map((item) => <NavigationItem key={item.href} item={item} />)}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup></div>)}
+      <SidebarContent className="gap-0">
+        {groups.map((group, index) => {
+          const items = navItems.filter((item) => (item.group ?? "Principal") === group);
+          // O primeiro grupo abre a navegação: o rótulo fica só para leitores de tela.
+          const labelHidden = index === 0 && group === "Principal";
+          return (
+            <SidebarGroup key={group} role="group" aria-label={group} className="py-1.5">
+              <SidebarGroupLabel className={labelHidden ? "sr-only" : undefined}>{group}</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {items.map((item) => <NavigationItem key={item.href} item={item} />)}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          );
+        })}
       </SidebarContent>
 
       <SidebarFooter>
