@@ -87,6 +87,14 @@ jobs:
       - name: Run public E2E checks
         run: npm run test:e2e -- --grep-invert @authenticated
 
+      - name: Keep public E2E failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-e2e-failures
+          path: test-results/
+          retention-days: 7
+
   e2e-authenticated:
     name: Authenticated E2E
     if: ${{ vars.E2E_ENABLED == 'true' }}

@@ -24,6 +24,10 @@ As fontes Poppins 400/500/600 estão locais, com licença OFL. Dev e build usam 
 
 Os testes públicos bloquearam toda rede externa do navegador. O backend de produção não foi usado para login ou mutações de teste. Screenshots e traces locais ficam em `test-results/`; cópias da entrada em claro/escuro e outras telas públicas estão em `reports/ui-2026-11-17/` (artefatos ignorados no Git).
 
+## Verificação remota
+
+O primeiro CI aprovou qualidade e build, mas o E2E público em modo dev encontrou bloqueio de origem de HMR: o servidor usava localhost e o navegador 127.0.0.1. O comando do servidor Playwright foi alinhado ao hostname/porta do alvo, mantendo a proteção de origem do Next. A execução remota também preserva artefatos de falha dos testes públicos para diagnóstico. O resultado remoto de cada commit deve ser consultado nas Actions do repositório.
+
 ## Gates que continuam abertos
 
 - Projeto Appwrite isolado: `E2E_APPWRITE_PROJECT_ID` está vazio. Console administrativo localizado, mas a criação do projeto proposto “Ebener TKD - Homologacao”, em Frankfurt, foi bloqueada pela revisão automática por exigir autorização específica para um recurso real de nuvem potencialmente cobrável. O projeto não foi criado. A aprovação solicitada limita a criação a um ambiente gratuito, sem contratação de plano pago.

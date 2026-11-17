@@ -13,8 +13,11 @@ test("entrada, cadastro e recuperação em 375px e nos dois temas", async ({ pag
     expect(list && trigger && list.height >= trigger.height).toBe(true);
     await page.evaluate(() => document.fonts.ready);
     await page.screenshot({ animations: "disabled", path: testInfo.outputPath(`entrada-${theme}.png`), fullPage: true });
-    await page.getByRole("tab", { name: "Criar conta" }).click();
-    await expect(page.getByLabel("Confirmar senha", { exact: true })).toBeVisible();
+    // Em modo dev no CI a hidratação pode terminar depois do primeiro clique; repetir até a aba responder.
+    await expect(async () => {
+      await page.getByRole("tab", { name: "Criar conta" }).click();
+      await expect(page.getByLabel("Confirmar senha", { exact: true })).toBeVisible({ timeout: 1_500 });
+    }).toPass({ timeout: 15_000 });
     await page.evaluate(() => document.fonts.ready);
     await page.screenshot({ animations: "disabled", path: testInfo.outputPath(`cadastro-${theme}.png`), fullPage: true });
     await page.goto("/recuperar");
