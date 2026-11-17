@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Poppins } from "next/font/google";
+import localFont from "next/font/local";
 import { RegisterServiceWorker } from "@/components/pwa/register-sw";
 import { AppwriteConnectionCheck } from "@/components/appwrite/appwrite-connection-check";
 import "./globals.css";
@@ -8,9 +8,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+const poppins = localFont({
+  src: [
+    { path: "./fonts/Poppins-Regular.ttf", weight: "400", style: "normal" },
+    { path: "./fonts/Poppins-Medium.ttf", weight: "500", style: "normal" },
+    { path: "./fonts/Poppins-SemiBold.ttf", weight: "600", style: "normal" }
+  ],
   display: "swap",
   variable: "--font-body"
 });
