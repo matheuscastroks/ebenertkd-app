@@ -1,19 +1,22 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent } from "@/components/ui/card";
+import { PageHeaderSkeleton } from "@/components/shared/page-skeleton";
 
+/**
+ * Carregamento entre rotas: repete o cabeçalho da página e um bloco de conteúdo,
+ * para que título e primeiro card não "pulem" quando a página real chega.
+ */
 export function RouteLoading() {
   return (
-    <div role="status" aria-label="Carregando página" aria-busy="true" className="space-y-6">
+    <div role="status" aria-label="Carregando página" aria-busy="true" className="flex flex-col gap-6">
       <span className="sr-only">Carregando página…</span>
-      <div aria-hidden="true" className="space-y-3">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-4 w-64 max-w-full" />
-        <Card>
-          <CardContent className="space-y-4">
-            <Skeleton className="h-5 w-40" />
-            <Skeleton className="h-20 w-full" />
-          </CardContent>
-        </Card>
+      <PageHeaderSkeleton />
+      <div aria-hidden="true" className="space-y-4 rounded-xl border border-border bg-card p-4 md:p-5">
+        <Skeleton className="h-5 w-40" />
+        <div className="space-y-3">
+          <Skeleton className="h-14 w-full" />
+          <Skeleton className="h-14 w-full" />
+          <Skeleton className="h-14 w-full" />
+        </div>
       </div>
     </div>
   );

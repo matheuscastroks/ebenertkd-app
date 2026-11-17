@@ -56,4 +56,26 @@ describe("MobileBottomNav", () => {
     fireEvent.click(screen.getByRole("button", { name: "Abrir menu completo" }));
     expect(screen.getByTestId("drawer-state")).toHaveTextContent("open");
   });
+
+  it("uses flagged shortcuts with short labels and never truncates them", () => {
+    render(
+      <SidebarProvider>
+        <MobileBottomNav
+          navItems={[
+            { label: "Visão geral", href: "/aluno", exact: true, icon: "dashboard" },
+            { label: "Avisos", href: "/avisos", icon: "notifications" },
+            { label: "Minha frequência", shortLabel: "Frequência", bottomNav: true, href: "/aluno/frequencia", icon: "attendance" },
+            { label: "Minha matrícula", href: "/aluno/matricula", icon: "enrollment" },
+            { label: "Financeiro", bottomNav: true, href: "/aluno/financeiro", icon: "billing" }
+          ]}
+        />
+      </SidebarProvider>
+    );
+
+    const nav = screen.getByRole("navigation", { name: "Navegação móvel principal" });
+    const labels = Array.from(nav.querySelectorAll("a, button")).map((element) => element.textContent);
+    expect(labels).toEqual(["Início", "Frequência", "Financeiro", "Avisos", "Menu"]);
+    expect(nav.querySelector(".truncate")).toBeNull();
+    expect(screen.getByRole("link", { name: "Início" })).toHaveAttribute("href", "/aluno");
+  });
 });

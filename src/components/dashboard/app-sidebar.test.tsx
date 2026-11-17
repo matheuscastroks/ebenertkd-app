@@ -23,8 +23,11 @@ describe("AppSidebar", () => {
         </SidebarProvider>
       </TooltipProvider>
     );
-    expect(screen.getByText("Principal")).toBeInTheDocument();
-    expect(screen.getByText("Alunos")).toBeInTheDocument();
+    // O primeiro grupo não repete um rótulo visível; continua nomeado para leitores de tela.
+    expect(screen.getByText("Principal")).toHaveClass("sr-only");
+    expect(screen.getByRole("group", { name: "Principal" })).toBeInTheDocument();
+    expect(screen.getByText("Alunos")).not.toHaveClass("sr-only");
+    expect(screen.getAllByText("Professor")[0]).toBeInTheDocument();
     expect(screen.getByText("Ricardo Almeida")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Visão geral" })).toHaveAttribute("data-active", "true");
   });

@@ -27,10 +27,27 @@ export const ROUTES = {
 } as const;
 
 export type SidebarNavIcon = "dashboard" | "notifications" | "enrollment" | "students" | "classes" | "exams" | "attendance" | "family" | "contracts" | "billing" | "system";
-export type SidebarNavGroup = "Principal" | "Alunos" | "Família" | "Treino" | "Operação" | "Financeiro" | "Documentos" | "Sistema";
+// "Principal" abre a navegação sem rótulo visível; os demais nomes agrupam destinos afins.
+// Os nomes antigos continuam aceitos para não quebrar chamadas existentes.
+export type SidebarNavGroup =
+  | "Principal"
+  | "Academia"
+  | "Gestão"
+  | "Treino"
+  | "Matrícula"
+  | "Família"
+  | "Alunos"
+  | "Operação"
+  | "Financeiro"
+  | "Documentos"
+  | "Sistema";
 
 export type SidebarNavItem = {
   label: string;
+  /** Rótulo curto da barra inferior mobile; cai para `label` quando ausente. */
+  shortLabel?: string;
+  /** Marca o destino como atalho da barra inferior mobile (no máximo dois por perfil). */
+  bottomNav?: boolean;
   href: string;
   active?: boolean;
   exact?: boolean;
@@ -44,15 +61,17 @@ export function navigationForProfile(
   profile: Pick<Profile, "role" | "capabilities">,
   counts: { enrollments?: number; notifications?: number } = {}
 ): SidebarNavItem[] {
+  const notifications: SidebarNavItem = { label: "Avisos", href: ROUTES.notifications, icon: "notifications", group: "Principal", badge: counts.notifications };
+
   if (profile.role === "admin") {
     return [
       { label: "Visão geral", href: ROUTES.admin, exact: true, icon: "dashboard", group: "Principal" },
-      { label: "Avisos", href: ROUTES.notifications, icon: "notifications", group: "Principal", badge: counts.notifications },
+      notifications,
       {
         label: "Matrículas",
         href: ROUTES.adminEnrollments,
         icon: "students",
-        group: "Alunos",
+        group: "Academia",
         badge: counts.enrollments,
         children: [
           { label: "Fila de matrículas", href: ROUTES.adminEnrollments, exact: true },
@@ -61,9 +80,11 @@ export function navigationForProfile(
       },
       {
         label: "Turmas e horários",
+        shortLabel: "Turmas",
+        bottomNav: true,
         href: ROUTES.adminClasses,
         icon: "classes",
-        group: "Operação",
+        group: "Academia",
         children: [
           { label: "Grade de turmas", href: ROUTES.adminClasses, exact: true },
           { label: "Exames de faixa", href: ROUTES.adminExams }
@@ -71,9 +92,10 @@ export function navigationForProfile(
       },
       {
         label: "Financeiro",
+        bottomNav: true,
         href: ROUTES.adminBilling,
         icon: "billing",
-        group: "Financeiro",
+        group: "Gestão",
         children: [
           { label: "Visão geral", href: ROUTES.adminBilling, exact: true },
           { label: "Configurações PIX", href: ROUTES.adminBillingSettings }
@@ -83,91 +105,47 @@ export function navigationForProfile(
         label: "Contratos",
         href: ROUTES.adminContracts,
         icon: "contracts",
-        group: "Documentos",
+        group: "Gestão",
         children: [
           { label: "Visão geral", href: ROUTES.adminContracts, exact: true },
           { label: "Modelo", href: ROUTES.adminContractTemplate },
           { label: "Cancelamentos", href: ROUTES.adminCancellations }
         ]
       },
-      { label: "Sistema e operação", href: ROUTES.adminSystem, icon: "system", group: "Sistema" }
+      { label: "Sistema e operação", shortLabel: "Sistema", href: ROUTES.adminSystem, icon: "system", group: "Gestão" }
     ];
   }
+
+  const dependents: SidebarNavItem = { label: "Dependentes", href: ROUTES.guardianDependents, icon: "family" };
 
   if (profile.role === "guardian") {
+    // Perfil com poucos destinos: um grupo só, sem rótulo extra.
     return [
       { label: "Visão geral", href: ROUTES.guardian, exact: true, icon: "dashboard", group: "Principal" },
-      { label: "Avisos", href: ROUTES.notifications, icon: "notifications", group: "Principal", badge: counts.notifications },
-      {
-        label: "Meus dependentes",
-        href: ROUTES.guardianDependents,
-        icon: "family",
-        group: "Alunos",
-        children: [
-          { label: "Painel da família", href: ROUTES.guardian, exact: true },
-          { label: "Gerenciar dependentes", href: ROUTES.guardianDependents, exact: true }
-        ]
-      }
+      notifications,
+      { ...dependents, bottomNav: true, group: "Principal" }
     ];
   }
 
-  if (profile.role === "minor_student") {
-    return [
-      { label: "Visão geral", href: ROUTES.student, exact: true, icon: "dashboard", group: "Principal" },
-      { label: "Avisos", href: ROUTES.notifications, icon: "notifications", group: "Principal", badge: counts.notifications },
-      {
-        label: "Minha matrícula",
-        href: ROUTES.studentEnrollment,
-        icon: "enrollment",
-        group: "Treino",
-        children: [
-          { label: "Ficha de matrícula", href: ROUTES.studentEnrollment, exact: true },
-          { label: "Contratos", href: ROUTES.studentContracts }
-        ]
-      },
-      { label: "Minha frequência", href: ROUTES.studentAttendance, icon: "attendance", group: "Treino" },
-      { label: "Meus exames", href: ROUTES.studentExams, icon: "exams", group: "Treino" },
-      { label: "Contratos", href: ROUTES.studentContracts, icon: "contracts", group: "Documentos" }
-    ];
-  }
-
+  const minor = profile.role === "minor_student";
   const items: SidebarNavItem[] = [
     { label: "Visão geral", href: ROUTES.student, exact: true, icon: "dashboard", group: "Principal" },
-    { label: "Avisos", href: ROUTES.notifications, icon: "notifications", group: "Principal", badge: counts.notifications },
-    {
-      label: "Minha matrícula",
-      href: ROUTES.studentEnrollment,
-      icon: "enrollment",
-      group: "Treino",
-      children: [
-        { label: "Ficha de matrícula", href: ROUTES.studentEnrollment, exact: true },
-        { label: "Meus contratos", href: ROUTES.studentContracts }
-      ]
-    },
-    { label: "Minha frequência", href: ROUTES.studentAttendance, icon: "attendance", group: "Treino" },
-    { label: "Meus exames", href: ROUTES.studentExams, icon: "exams", group: "Treino" },
-    { label: "Contratos", href: ROUTES.studentContracts, icon: "contracts", group: "Documentos" },
-    { label: "Financeiro", href: ROUTES.studentBilling, icon: "billing", group: "Financeiro" }
+    notifications,
+    { label: "Minha frequência", shortLabel: "Frequência", bottomNav: true, href: ROUTES.studentAttendance, icon: "attendance", group: "Treino" },
+    { label: "Meus exames", shortLabel: "Exames", bottomNav: minor, href: ROUTES.studentExams, icon: "exams", group: "Treino" },
+    { label: "Minha matrícula", shortLabel: "Matrícula", href: ROUTES.studentEnrollment, icon: "enrollment", group: "Matrícula" },
+    { label: "Contratos", href: ROUTES.studentContracts, icon: "contracts", group: "Matrícula" }
   ];
 
+  if (minor) return items;
+
+  items.push({ label: "Financeiro", bottomNav: true, href: ROUTES.studentBilling, icon: "billing", group: "Matrícula" });
+
   if (profile.capabilities.includes("guardian")) {
-    items.push({
-      label: "Área do Responsável",
-      href: ROUTES.guardian,
-      exact: true,
-      icon: "dashboard",
-      group: "Família"
-    });
-    items.push({
-      label: "Meus dependentes",
-      href: ROUTES.guardianDependents,
-      icon: "family",
-      group: "Família",
-      children: [
-        { label: "Painel da família", href: ROUTES.guardian, exact: true },
-        { label: "Lista de dependentes", href: ROUTES.guardianDependents, exact: true }
-      ]
-    });
+    items.push(
+      { label: "Área do responsável", href: ROUTES.guardian, exact: true, icon: "dashboard", group: "Família" },
+      { ...dependents, group: "Família" }
+    );
   }
 
   return items;

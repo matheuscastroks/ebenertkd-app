@@ -2,157 +2,142 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, LayoutDashboard, Menu, type LucideIcon } from "lucide-react";
+import { Menu, type LucideIcon } from "lucide-react";
 import { NAV_ICONS } from "@/lib/navigation/nav-icons";
 import { useSidebar } from "@/components/ui/sidebar";
 import type { AppSidebarNavItem } from "@/components/dashboard/app-sidebar";
 import { cn } from "@/lib/utils";
 
+const HOME_PATHS = ["/admin", "/aluno", "/responsavel"];
+// Usado só quando nenhum item vem marcado com `bottomNav` (chamadas antigas).
+const FALLBACK_ICONS: Array<keyof typeof NAV_ICONS> = ["attendance", "classes", "billing", "family", "students", "enrollment"];
+const MAX_MIDDLE_TABS = 2;
+
+type BottomTab = {
+  key: string;
+  label: string;
+  href?: string;
+  icon: LucideIcon;
+  badge?: number;
+  active?: boolean;
+};
+
+function matches(pathname: string, item: Pick<AppSidebarNavItem, "href" | "exact">) {
+  return item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
+}
+
+function pickMiddleItems(navItems: AppSidebarNavItem[], excluded: Set<string>) {
+  const eligible = navItems.filter((item) => !excluded.has(item.href));
+  const flagged = eligible.filter((item) => item.bottomNav);
+  if (flagged.length) return flagged.slice(0, MAX_MIDDLE_TABS);
+  const picked: AppSidebarNavItem[] = [];
+  for (const icon of FALLBACK_ICONS) {
+    if (picked.length >= MAX_MIDDLE_TABS) break;
+    const found = eligible.find((item) => item.icon === icon && !picked.includes(item));
+    if (found) picked.push(found);
+  }
+  return picked;
+}
+
+/**
+ * Barra inferior do mobile: Início, até dois destinos frequentes do perfil, Avisos e Menu.
+ * O menu completo (sidebar em folha) continua acessível pelo último botão.
+ */
 export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] }) {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
 
-  // 1. Identificar o item inicial (Home)
-  const homeItem = navItems.find((i) => i.exact || ["/admin", "/aluno", "/responsavel"].includes(i.href)) ?? navItems[0];
+  const homeItem = navItems.find((item) => item.exact || HOME_PATHS.includes(item.href)) ?? navItems[0];
+  const notificationsItem = navItems.find((item) => item.icon === "notifications");
+  const middleItems = pickMiddleItems(
+    navItems,
+    new Set([homeItem?.href, notificationsItem?.href].filter((href): href is string => Boolean(href)))
+  );
 
-  // 2. Identificar avisos/notificações
-  const notificationsItem = navItems.find((i) => i.icon === "notifications");
-
-  // 3. Identificar os itens centrais mais relevantes (treino, financeiro, turmas, alunos, dependentes)
-  const candidateIcons: Array<keyof typeof NAV_ICONS> = [
-    "attendance",
-    "classes",
-    "billing",
-    "family",
-    "students",
-    "enrollment"
-  ];
-
-  const middleItems: AppSidebarNavItem[] = [];
-  for (const icon of candidateIcons) {
-    if (middleItems.length >= 2) break;
-    const found = navItems.find(
-      (item) => item.icon === icon && item.href !== homeItem?.href && item.href !== notificationsItem?.href
-    );
-    if (found && !middleItems.some((m) => m.href === found.href)) {
-      middleItems.push(found);
-    }
-  }
-
-  // 4. Montar a lista final com até 5 itens (Home + 2 principais + Avisos + Menu)
-  const bottomTabs: Array<{
-    label: string;
-    href?: string;
-    icon: LucideIcon;
-    badge?: number;
-    active?: boolean;
-    isMenuTrigger?: boolean;
-  }> = [];
+  const tabs: BottomTab[] = [];
+  const middleActive = middleItems.some((item) => matches(pathname, item));
 
   if (homeItem) {
-    const Icon = NAV_ICONS[homeItem.icon ?? "dashboard"] ?? LayoutDashboard;
-    const isHomeActive = homeItem.exact
-      ? pathname === homeItem.href
-      : pathname === homeItem.href || pathname.startsWith(`${homeItem.href}/`);
-    bottomTabs.push({
+    tabs.push({
+      key: homeItem.href,
       label: "Início",
       href: homeItem.href,
-      icon: Icon,
-      active: isHomeActive && !middleItems.some((m) => pathname.startsWith(m.href)) && pathname !== "/avisos"
+      icon: NAV_ICONS[homeItem.icon ?? "dashboard"],
+      active: matches(pathname, { ...homeItem, exact: homeItem.exact ?? true }) && !middleActive
     });
   }
 
   for (const item of middleItems) {
-    const Icon = NAV_ICONS[item.icon ?? "dashboard"] ?? LayoutDashboard;
-    const isActive = item.exact
-      ? pathname === item.href
-      : pathname === item.href || pathname.startsWith(`${item.href}/`);
-    bottomTabs.push({
-      label: item.label.split(" ")[0], // rótulo conciso
+    tabs.push({
+      key: item.href,
+      label: item.shortLabel ?? item.label,
       href: item.href,
-      icon: Icon,
+      icon: NAV_ICONS[item.icon ?? "dashboard"],
       badge: item.badge,
-      active: isActive
+      active: matches(pathname, item)
     });
   }
 
   if (notificationsItem) {
-    bottomTabs.push({
+    tabs.push({
+      key: notificationsItem.href,
       label: "Avisos",
       href: notificationsItem.href,
-      icon: Bell,
+      icon: NAV_ICONS.notifications,
       badge: notificationsItem.badge,
-      active: pathname.startsWith(notificationsItem.href)
+      active: matches(pathname, notificationsItem)
     });
   }
 
-  // Último item: Ação para abrir a barra lateral completa
-  bottomTabs.push({
-    label: "Menu",
-    icon: Menu,
-    isMenuTrigger: true
-  });
+  const itemClass = "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-0.5 py-1.5 touch-manipulation transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+  function renderContent(tab: BottomTab) {
+    const Icon = tab.icon;
+    return (
+      <>
+        <span className="relative">
+          <Icon className="size-5" strokeWidth={2} aria-hidden="true" />
+          {tab.badge && tab.badge > 0 ? (
+            <span
+              className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-semibold leading-none text-destructive-foreground tabular-nums"
+              aria-label={`${tab.badge} notificações`}
+            >
+              {tab.badge > 9 ? "9+" : tab.badge}
+            </span>
+          ) : null}
+        </span>
+        <span className="whitespace-nowrap text-xs leading-4">{tab.label}</span>
+      </>
+    );
+  }
 
   return (
     <nav
       aria-label="Navegação móvel principal"
       className="fixed inset-x-0 bottom-0 z-40 block border-t border-border bg-background pb-[env(safe-area-inset-bottom)] md:hidden"
     >
-      <div className="flex h-16 items-center justify-around px-2">
-        {bottomTabs.map((tab, idx) => {
-          const Icon = tab.icon;
-          const content = (
-            <div
-              className={cn(
-                "relative flex w-full min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 transition-colors duration-200 motion-reduce:transition-none",
-                tab.active
-                  ? "text-primary-text font-semibold"
-                  : "text-muted-foreground hover:text-foreground active:scale-95"
-              )}
-            >
-              <div className="relative">
-                <Icon className={cn("size-5 stroke-2")} aria-hidden="true" />
-                {tab.badge && tab.badge > 0 ? (
-                  <span
-                    className="absolute -top-1 -right-2 flex size-4 items-center justify-center rounded-full bg-destructive text-xs font-semibold text-destructive-foreground"
-                    aria-label={`${tab.badge} notificações`}
-                  >
-                    {tab.badge > 9 ? "9+" : tab.badge}
-                  </span>
-                ) : null}
-              </div>
-              <span className="w-full truncate text-center text-sm">{tab.label}</span>
-              {tab.active ? (
-                <span className="absolute bottom-0 h-0.5 w-6 rounded-full bg-primary" aria-hidden="true" />
-              ) : null}
-            </div>
-          );
-
-          if (tab.isMenuTrigger) {
-            return (
-              <button
-                key={`tab-menu-${idx}`}
-                type="button"
-                onClick={() => setOpenMobile(true)}
-                className="flex min-h-11 min-w-0 flex-1 items-center justify-center touch-manipulation"
-                aria-label="Abrir menu completo"
-              >
-                {content}
-              </button>
-            );
-          }
-
-          return (
-            <Link
-              key={tab.href}
-              href={tab.href!}
-              className="flex min-h-11 min-w-0 flex-1 items-center justify-center touch-manipulation"
-              aria-current={tab.active ? "page" : undefined}
-            >
-              {content}
-            </Link>
-          );
-        })}
+      <div className="flex h-16 items-stretch px-1 py-1.5">
+        {tabs.map((tab) => (
+          <Link
+            key={tab.key}
+            href={tab.href!}
+            aria-current={tab.active ? "page" : undefined}
+            className={cn(
+              itemClass,
+              tab.active ? "font-semibold text-primary-text" : "font-medium text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {renderContent(tab)}
+          </Link>
+        ))}
+        <button
+          type="button"
+          onClick={() => setOpenMobile(true)}
+          aria-label="Abrir menu completo"
+          className={cn(itemClass, "font-medium text-muted-foreground hover:text-foreground")}
+        >
+          {renderContent({ key: "menu", label: "Menu", icon: Menu })}
+        </button>
       </div>
     </nav>
   );

@@ -16,9 +16,9 @@ export function MetricCard({ label, value, helper, tone = "neutral", icon }: { l
           {helper ? <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{helper}</p> : null}
         </div>
         {icon ? (
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted/60 text-muted-foreground " aria-hidden="true">
+          <span className="shrink-0 text-muted-foreground [&_svg]:size-4" aria-hidden="true">
             {icon}
-          </div>
+          </span>
         ) : null}
       </CardContent>
     </Card>

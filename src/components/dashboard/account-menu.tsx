@@ -1,16 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Bell,
-  CalendarCheck2,
-  ChevronsUpDown,
-  LogOut,
-  Settings,
-  Shield,
-  UsersRound,
-  WalletCards,
-} from "lucide-react";
+import { ChevronsUpDown, Settings, Shield } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -28,12 +19,14 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { LogoutButton } from "@/components/dashboard/logout-button";
+import { ROUTES } from "@/lib/navigation/routes";
 
 export type AccountMenuProps = {
   name: string;
   badge?: string;
   email?: string;
   avatarUrl?: string;
+  /** Mantido por compatibilidade; os atalhos por perfil vivem na navegação. */
   role?: string;
 };
 
@@ -42,7 +35,6 @@ export function AccountMenu({
   badge,
   email,
   avatarUrl,
-  role,
 }: AccountMenuProps) {
   const { isMobile } = useSidebar();
   const initials =
@@ -65,9 +57,9 @@ export function AccountMenu({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg">
+              <Avatar className="size-8">
                 {avatarUrl ? <AvatarImage src={avatarUrl} alt={name} /> : null}
-                <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+                <AvatarFallback className="text-xs font-medium">{initials}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{name}</span>
@@ -75,20 +67,20 @@ export function AccountMenu({
                   {displaySubtitle}
                 </span>
               </div>
-              <ChevronsUpDown className="ml-auto size-4" />
+              <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" aria-hidden="true" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-xl"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
+                <Avatar className="size-8">
                   {avatarUrl ? <AvatarImage src={avatarUrl} alt={name} /> : null}
-                  <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+                  <AvatarFallback className="text-xs font-medium">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold text-foreground">{name}</span>
@@ -101,96 +93,21 @@ export function AccountMenu({
 
             <DropdownMenuSeparator />
 
+            {/* Destinos de trabalho ficam na navegação; aqui só o que é da conta. */}
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href="/configuracoes" className="cursor-pointer">
-                  <Settings className="size-4" />
+                <Link href={ROUTES.settings} className="cursor-pointer">
+                  <Settings className="size-4" aria-hidden="true" />
                   <span>Configurações</span>
                 </Link>
               </DropdownMenuItem>
-
               <DropdownMenuItem asChild>
-                <Link href="/avisos" className="cursor-pointer">
-                  <Bell className="size-4" />
-                  <span>Avisos e notificações</span>
+                <Link href={ROUTES.privacy} className="cursor-pointer">
+                  <Shield className="size-4" aria-hidden="true" />
+                  <span>Privacidade</span>
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
-
-            {/* Acessos contextuais relevantes para cada perfil */}
-            {role === "admin" && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin/financeiro" className="cursor-pointer">
-                      <WalletCards className="size-4" />
-                      <span>Financeiro</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin/sistema" className="cursor-pointer">
-                      <Shield className="size-4" />
-                      <span>Sistema e auditoria</span>
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </>
-            )}
-
-            {role === "guardian" && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem asChild>
-                    <Link href="/responsavel" className="cursor-pointer">
-                      <WalletCards className="size-4" />
-                      <span>Painel da Família</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/responsavel/dependentes" className="cursor-pointer">
-                      <UsersRound className="size-4" />
-                      <span>Dependentes</span>
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </>
-            )}
-
-            {role === "adult_student" && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem asChild>
-                    <Link href="/aluno/financeiro" className="cursor-pointer">
-                      <WalletCards className="size-4" />
-                      <span>Financeiro</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/aluno/frequencia" className="cursor-pointer">
-                      <CalendarCheck2 className="size-4" />
-                      <span>Minha frequência</span>
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </>
-            )}
-
-            {role === "minor_student" && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem asChild>
-                    <Link href="/aluno/frequencia" className="cursor-pointer">
-                      <CalendarCheck2 className="size-4" />
-                      <span>Minha frequência</span>
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </>
-            )}
 
             <DropdownMenuSeparator />
 

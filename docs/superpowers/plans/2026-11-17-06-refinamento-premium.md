@@ -50,6 +50,7 @@ Quem precisar de mudança fora da sua área registra em "Bloqueios" e pede ao do
 ## Registro de progresso
 
 - 2026-11-17: plano criado; quatro agentes lançados.
+- 2026-11-17: Task 2 (estrutura) concluída: navegação agrupada por perfil sem remover destinos, barra inferior com rótulos curtos, cabeçalho de página com título único e ação à direita, menu da conta só com itens da conta e skeletons com a geometria do cabeçalho.
 
 ### Task 1 (Agente A): Nova tela de entrada
 
@@ -63,10 +64,10 @@ Quem precisar de mudança fora da sua área registra em "Bloqueios" e pede ao do
 
 ### Task 2 (Agente B): Estrutura e navegação
 
-- [ ] **Step 1:** Auditar sidebar, barra inferior mobile, cabeçalho de página (`DashboardShell`), estados de carregamento e componentes compartilhados contra as diretrizes.
-- [ ] **Step 2:** Melhorar hierarquia do cabeçalho de página (título, subtítulo, ação principal), agrupamento da navegação e skeletons com a mesma geometria do conteúdo.
-- [ ] **Step 3:** Testes de navegação e da guarda de design (`src/lib/design-contract.test.ts`) passando.
-- [ ] **Step 4:** Verificar no navegador e validação completa; PR.
+- [x] **Step 1:** Auditar sidebar, barra inferior mobile, cabeçalho de página (`DashboardShell`), estados de carregamento e componentes compartilhados contra as diretrizes.
+- [x] **Step 2:** Melhorar hierarquia do cabeçalho de página (título, subtítulo, ação principal), agrupamento da navegação e skeletons com a mesma geometria do conteúdo.
+- [x] **Step 3:** Testes de navegação e da guarda de design (`src/lib/design-contract.test.ts`) passando.
+- [x] **Step 4:** Verificar no navegador e validação completa; PR.
 
 ### Task 3 (Agente C): Telas do professor
 
