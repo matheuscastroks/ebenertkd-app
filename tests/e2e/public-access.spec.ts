@@ -1,10 +1,19 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./public-fixture";
 
 test("exibe a entrada pública sem dados privados", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Acesse sua conta" })).toBeVisible();
-  await expect(page.getByRole("tab", { name: "Adulto" })).toBeVisible();
-  await expect(page.getByRole("tab", { name: "Menor" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Entrar" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Criar conta" })).toBeVisible();
+});
+
+test("primeira instalação PWA preserva o formulário em edição", async ({ page }) => {
+  await page.goto("/");
+  const email = page.getByLabel("E-mail", { exact: true });
+  await email.fill("rascunho@example.test");
+  await page.evaluate(() => navigator.serviceWorker.ready.then(() => true));
+  await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller)), { timeout: 15000 }).toBe(true);
+  await expect(email).toHaveValue("rascunho@example.test");
 });
 
 test("redireciona URLs protegidas quando não há sessão", async ({ page }) => {

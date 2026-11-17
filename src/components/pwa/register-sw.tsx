@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { createControllerChangeHandler } from "./controller-change";
 
 export function RegisterServiceWorker() {
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
@@ -11,12 +12,7 @@ export function RegisterServiceWorker() {
       return;
     }
 
-    let refreshing = false;
-    const handleControllerChange = () => {
-      if (refreshing) return;
-      refreshing = true;
-      window.location.reload();
-    };
+    const handleControllerChange = createControllerChangeHandler(Boolean(navigator.serviceWorker.controller), () => window.location.reload());
 
     navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
     navigator.serviceWorker.register("/sw.js").then((registration) => {
