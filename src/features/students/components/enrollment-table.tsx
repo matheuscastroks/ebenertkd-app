@@ -44,7 +44,7 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
     sortKey,
     sortDirection,
     toggleSort,
-  } = useTableSort<EnrollmentRow, EnrollmentSortKey>(rows, {
+  } = useTableSort<EnrollmentRow, EnrollmentSortKey>([...rows].sort((a, b) => Number(!["submitted", "under_review"].includes(a.enrollment?.status ?? "")) - Number(!["submitted", "under_review"].includes(b.enrollment?.status ?? ""))), {
     comparators: {
       student: (a, b) =>
         a.student.full_name.localeCompare(b.student.full_name, "pt-BR"),
@@ -69,7 +69,7 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
   });
 
   return (
-    <ResponsiveDataView
+    <><p className="mb-3 text-sm text-muted-foreground">Ordenação da página atual · pendentes primeiro</p><ResponsiveDataView
       desktop={
         <div className="overflow-hidden rounded-xl border border-border/50 bg-card shadow-xs">
           <Table>
@@ -135,10 +135,10 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
                     <EnrollmentStatus value={enrollment?.status} />
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button asChild size="sm" className="h-9 font-medium">
+                    <Button asChild size="sm" className="min-h-11 font-medium">
                       <Link href={adminEnrollmentPath(student.$id)}>
                         <Eye className="mr-1.5 size-4" aria-hidden="true" />
-                        Analisar
+                        {["submitted", "under_review"].includes(enrollment?.status ?? "") ? "Analisar" : "Ver"}
                       </Link>
                     </Button>
                   </TableCell>
@@ -161,7 +161,7 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
                       <div className="flex flex-wrap items-center gap-1.5">
                         <BeltBadge belt={student.current_belt} gub={student.gub} size="sm" />
                         {student.training_class && (
-                          <span className="text-xs text-muted-foreground">· {student.training_class}</span>
+                          <span className="text-sm text-muted-foreground">· {student.training_class}</span>
                         )}
                       </div>
                     </div>
@@ -169,16 +169,16 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
                   <EnrollmentStatus value={enrollment?.status} />
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t border-border/40">
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-sm text-muted-foreground">
                     Vencimento:{" "}
                     <strong className="text-foreground">
                       {enrollment?.requested_due_day ? `dia ${enrollment.requested_due_day}` : "não informado"}
                     </strong>
                   </span>
-                  <Button asChild className="h-10 font-medium px-4">
+                  <Button asChild className="min-h-11 font-medium px-4">
                     <Link href={adminEnrollmentPath(student.$id)}>
                       <Eye className="mr-1.5 size-4" aria-hidden="true" />
-                      Analisar
+                      {["submitted", "under_review"].includes(enrollment?.status ?? "") ? "Analisar" : "Ver"}
                     </Link>
                   </Button>
                 </div>
@@ -187,6 +187,6 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
           ))}
         </div>
       }
-    />
+    /></>
   );
 }

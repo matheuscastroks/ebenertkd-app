@@ -42,17 +42,17 @@ export async function updateTrainingClassAction(formData: FormData) {
   redirect("/admin/turmas?updated=1");
 }
 
-export async function setTrainingClassStatusAction(formData: FormData) {
+export async function setTrainingClassStatusAction(formData: FormData): Promise<{ success: true } | { success: false; error: string }> {
   const admin = await requireProfile("admin");
   const classId = String(formData.get("class_id") ?? "");
   const status = String(formData.get("status"));
-  if (status !== "active" && status !== "inactive") redirect("/admin/turmas?error=status");
+  if (status !== "active" && status !== "inactive") return { success: false, error: "Status da turma inválido." };
   try {
     await setTrainingClassStatus(admin, classId, status);
   } catch {
-    redirect("/admin/turmas?error=status");
+    return { success: false, error: "Não foi possível alterar a turma. Tente novamente." };
   }
   updateTag(CACHE_TAGS.trainingClasses);
   revalidatePath("/admin/turmas");
-  redirect("/admin/turmas?updated=1");
+  return { success: true };
 }

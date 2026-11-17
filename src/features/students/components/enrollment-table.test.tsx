@@ -5,6 +5,16 @@ import { EnrollmentTable } from "@/features/students/components/enrollment-table
 import type { Enrollment, Student } from "@/features/students/types";
 
 describe("EnrollmentTable", () => {
+  it("prioriza pendentes e reserva Analisar para fichas em revisão", () => {
+    const student = { $id: "a", full_name: "Ativa" } as Student;
+    render(<EnrollmentTable rows={[
+      { student, enrollment: { status: "active" } as Enrollment },
+      { student: { ...student, $id: "b", full_name: "Pendente" }, enrollment: { status: "submitted" } as Enrollment },
+    ]} />);
+    expect(screen.getAllByRole("link")[0]).toHaveAttribute("href", "/admin/matriculas/b");
+    expect(screen.getAllByRole("link", { name: "Ver" })).toHaveLength(2);
+    expect(screen.getByText(/Ordenação da página atual/)).toBeInTheDocument();
+  });
   it("shows operational data and preserves the review destination", () => {
     const student = {
       $id: "student-1",

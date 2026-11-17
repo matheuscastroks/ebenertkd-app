@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
   CalendarCheck2,
-  CircleHelp,
   Clock,
   MapPin,
   Pencil,
@@ -20,7 +19,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ClassStatusToggle } from "@/features/classes/components/class-status-toggle";
 import { WEEKDAYS, type TrainingClass } from "@/features/classes/types";
 import { adminClassPath } from "@/lib/navigation/routes";
@@ -52,7 +50,7 @@ function WeekdayFields({ selected = [], idSuffix }: { selected?: string[]; idSuf
               value={day}
               defaultChecked={selected.includes(day)}
             />
-            <span>{day}</span>
+            <span>{weekdayLabels[day] ?? day}</span>
           </label>
         ))}
       </FieldGroup>
@@ -131,12 +129,12 @@ function Fields({ trainingClass }: { trainingClass?: TrainingClass }) {
   );
 }
 
-export function ClassManager({ classes, notice }: { classes: TrainingClass[]; notice?: string }) {
+export function ClassManager({ classes, notice, noticeTone = "success" }: { classes: TrainingClass[]; notice?: string; noticeTone?: "error" | "success" }) {
   return (
     <div className="space-y-6">
       {notice ? (
         <OperationToast
-          tone={notice.toLowerCase().includes("não") ? "error" : "success"}
+          tone={noticeTone}
           title={notice}
           clearParams={["created", "updated", "error"]}
         />
@@ -145,24 +143,17 @@ export function ClassManager({ classes, notice }: { classes: TrainingClass[]; no
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-            Turmas ativas na academia
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button type="button" variant="ghost" size="icon-sm" aria-label="Sobre a disponibilidade das turmas">
-                  <CircleHelp className="size-4" aria-hidden="true" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Turmas inativas não aparecem como opção na ficha de matrícula dos alunos.</TooltipContent>
-            </Tooltip>
+            Turmas
+            
           </h2>
-          <p className="text-xs text-muted-foreground sm:text-sm">
+          <p className="text-sm text-muted-foreground sm:text-sm">
             Gerencie os horários, dias de treino e capacidade de alunos por turma.
           </p>
         </div>
 
         <ResponsiveDialog
           trigger={
-            <Button className="h-10 shrink-0 font-medium touch-manipulation">
+            <Button className="min-h-11 shrink-0 font-medium touch-manipulation">
               <Plus className="size-4 mr-1.5" aria-hidden="true" />
               Nova turma
             </Button>
@@ -172,7 +163,7 @@ export function ClassManager({ classes, notice }: { classes: TrainingClass[]; no
         >
           <form action={createTrainingClassAction} className="space-y-5">
             <Fields />
-            <FormSubmitButton className="w-full sm:w-auto" pendingLabel="Criando turma…">
+            <FormSubmitButton className="min-h-11 w-full sm:w-auto" pendingLabel="Criando turma…">
               Salvar nova turma
             </FormSubmitButton>
           </form>
@@ -190,14 +181,14 @@ export function ClassManager({ classes, notice }: { classes: TrainingClass[]; no
             {classes.map((trainingClass) => {
               const active = trainingClass.status === "active";
               return (
-                <Card key={trainingClass.$id} className="hover:border-primary/40 transition-colors">
+                <Card key={trainingClass.$id} >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1">
-                        <CardTitle className="text-base sm:text-lg font-bold">
+                        <CardTitle className="text-base sm:text-lg font-semibold">
                           {trainingClass.name}
                         </CardTitle>
-                        <CardDescription className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground pt-0.5">
+                        <CardDescription className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground pt-0.5">
                           <span className="flex items-center gap-1 font-medium text-foreground">
                             <Clock className="size-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
                             {trainingClass.start_time} às {trainingClass.end_time}
@@ -227,7 +218,7 @@ export function ClassManager({ classes, notice }: { classes: TrainingClass[]; no
 
                     <div className="flex flex-wrap items-center gap-1 pt-2">
                       {trainingClass.weekdays.map((day) => (
-                        <Badge key={day} variant="secondary" className="px-2 py-0.5 text-xs font-semibold">
+                        <Badge key={day} variant="secondary" className="px-2 py-0.5 text-sm font-semibold">
                           {weekdayLabels[day] ?? day.slice(0, 3)}
                         </Badge>
                       ))}
@@ -235,16 +226,16 @@ export function ClassManager({ classes, notice }: { classes: TrainingClass[]; no
                   </CardHeader>
 
                   <CardContent className="flex flex-wrap gap-2 pt-3 border-t border-border/40">
-                    <Button asChild size="sm" className="h-9 touch-manipulation">
+                    <Button asChild size="sm" className="min-h-11 touch-manipulation">
                       <Link href={adminClassPath(trainingClass.$id)}>
                         <CalendarCheck2 className="size-4 mr-1.5" aria-hidden="true" />
-                        Aulas e chamada
+                        Fazer chamada
                       </Link>
                     </Button>
 
                     <ResponsiveDialog
                       trigger={
-                        <Button variant="outline" size="sm" className="h-9 touch-manipulation">
+                        <Button variant="outline" size="sm" className="min-h-11 touch-manipulation">
                           <Pencil className="size-3.5 mr-1.5" aria-hidden="true" />
                           Editar
                         </Button>
@@ -255,7 +246,7 @@ export function ClassManager({ classes, notice }: { classes: TrainingClass[]; no
                       <form action={updateTrainingClassAction} className="space-y-5">
                         <input type="hidden" name="class_id" value={trainingClass.$id} />
                         <Fields trainingClass={trainingClass} />
-                        <FormSubmitButton className="w-full sm:w-auto" pendingLabel="Salvando…">
+                        <FormSubmitButton className="min-h-11 w-full sm:w-auto" pendingLabel="Salvando…">
                           Salvar alterações
                         </FormSubmitButton>
                       </form>

@@ -109,28 +109,28 @@ export function AttendanceHistory({
       <Card>
         <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5">
           <div className="space-y-1">
-            <p className="text-xs font-semibold text-muted-foreground">
+            <p className="text-sm font-semibold text-muted-foreground">
               Desempenho no mês de {monthLabel}
             </p>
             <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-bold tabular-nums text-foreground">
-                {summary.total ? `${summary.rate}%` : "100%"}
+              <span className="text-3xl font-semibold tabular-nums text-foreground">
+                {summary.total ? `${summary.rate}%` : "—"}
               </span>
               <span className="text-sm font-medium text-muted-foreground">
                 {summary.attended} {summary.attended === 1 ? "presença" : "presenças"} em {summary.total} {summary.total === 1 ? "chamada" : "chamadas"}
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {summary.total
                 ? summary.rate >= 75
-                  ? "Excelente assiduidade! Frequência suficiente para participar de exames de faixa."
-                  : "Atenção: frequência abaixo do recomendado de 75% para exames de graduação."
-                : "Sem chamadas registradas até o momento neste mês."}
+                  ? "Frequência registrada no mês: pelo menos 75%."
+                  : "Frequência registrada no mês: abaixo de 75%."
+                : "Ainda sem aulas registradas"}
             </p>
           </div>
 
-          <div className="w-full sm:max-w-xs space-y-2">
-            <div className="flex justify-between text-xs text-muted-foreground font-medium">
+          {summary.total > 0 ? <div className="w-full sm:max-w-xs space-y-2">
+            <div className="flex justify-between text-sm text-muted-foreground font-medium">
               <span>Meta da academia: 75%</span>
               <span className="font-semibold text-foreground">{summary.rate}%</span>
             </div>
@@ -139,7 +139,7 @@ export function AttendanceHistory({
               className="h-2.5"
               aria-label={`Taxa de presença de ${summary.rate}%`}
             />
-          </div>
+          </div> : null}
         </CardContent>
       </Card>
 
@@ -154,7 +154,7 @@ export function AttendanceHistory({
                   <CalendarDays className="size-4 text-primary-text" aria-hidden="true" />
                   Calendário de treinos
                 </CardTitle>
-                <CardDescription className="text-xs">
+                <CardDescription className="text-sm">
                   Toque em um dia para inspecionar os detalhes da aula e a chamada.
                 </CardDescription>
               </div>
@@ -200,8 +200,8 @@ export function AttendanceHistory({
                   cancelled: markedDates("cancelled")
                 }}
                 modifiersClassNames={{
-                  present: "[&>button]:bg-success/20 [&>button]:text-success-foreground [&>button]:font-bold",
-                  absent: "[&>button]:bg-destructive/15 [&>button]:text-destructive [&>button]:font-bold",
+                  present: "[&>button]:bg-success/20 [&>button]:text-success-foreground [&>button]:font-semibold",
+                  absent: "[&>button]:bg-destructive/15 [&>button]:text-destructive [&>button]:font-semibold",
                   excused: "[&>button]:bg-warning/20 [&>button]:text-warning-foreground",
                   scheduled: "[&>button]:bg-info/15 [&>button]:text-info",
                   not_recorded: "[&>button]:ring-1 [&>button]:ring-muted-foreground/50",
@@ -212,7 +212,7 @@ export function AttendanceHistory({
             </div>
 
             {/* Legenda Visual */}
-            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 pt-2 border-t text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 pt-2 border-t text-sm text-muted-foreground">
               <span className="flex items-center gap-1.5 font-medium text-foreground">
                 <Check className="size-3.5 text-success" aria-hidden="true" /> Presença
               </span>
@@ -244,7 +244,7 @@ export function AttendanceHistory({
                   })
                 : "Selecione uma data no calendário"}
             </CardTitle>
-            <CardDescription className="text-xs">
+            <CardDescription className="text-sm">
               {selectedEntries.length
                 ? `${selectedEntries.length} ${selectedEntries.length === 1 ? "aula registrada" : "aulas registradas"} neste dia`
                 : "Nenhuma aula programada ou chamada para este dia"}
@@ -264,7 +264,7 @@ export function AttendanceHistory({
                       <p className="font-semibold text-sm truncate">
                         {trainingClass?.name ?? "Treino regular"}
                       </p>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Clock3 className="size-3.5 text-muted-foreground" aria-hidden="true" />
                           {lesson.start_time} às {lesson.end_time}
@@ -288,7 +288,7 @@ export function AttendanceHistory({
               <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
                 <CalendarCheck2 className="size-8 stroke-1 mb-2 opacity-50" aria-hidden="true" />
                 <p className="text-sm font-medium">Sem atividades neste dia</p>
-                <p className="text-xs mt-0.5">Selecione os dias com marcadores no calendário acima para ver o registro de presença.</p>
+                <p className="text-sm mt-0.5">Selecione os dias com marcadores no calendário acima para ver o registro de presença.</p>
               </div>
             )}
           </CardContent>

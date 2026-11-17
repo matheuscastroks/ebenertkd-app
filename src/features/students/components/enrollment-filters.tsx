@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -22,6 +22,8 @@ const STATUS_OPTIONS = [
 
 export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
   const router = useRouter();
+  const [expanded, setExpanded] = useState(false);
+  const [pending, startTransition] = useTransition();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const searchInput = useRef<HTMLInputElement>(null);
@@ -48,7 +50,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
       query.set(name, value);
     }
     query.delete("page");
-    router.replace(`${pathname}${query.size ? `?${query}` : ""}`, { scroll: false });
+    startTransition(() => router.replace(`${pathname}${query.size ? `?${query}` : ""}`, { scroll: false }));
   };
 
   const onSearchChange = (value: string) => {
@@ -59,7 +61,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
   const handleClear = () => {
     if (timer.current) clearTimeout(timer.current);
     if (searchInput.current) searchInput.current.value = "";
-    router.replace(ROUTES.adminEnrollments, { scroll: false });
+    startTransition(() => router.replace(ROUTES.adminEnrollments, { scroll: false }));
   };
 
   const hasActiveFilters = Boolean(
@@ -69,8 +71,9 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
     (searchParams.get("turma") && searchParams.get("turma") !== "all")
   );
 
+  const activeCount = ["status", "belt", "turma"].filter((key) => searchParams.get(key) && searchParams.get(key) !== "all").length;
   return (
-    <div className="space-y-3 rounded-xl border border-border/50 bg-card p-4 shadow-xs">
+    <div aria-busy={pending} className={`space-y-3 rounded-xl border border-border bg-card p-4 shadow-xs ${pending ? "opacity-60" : ""}`}>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Field>
           <FieldLabel htmlFor="enrollment-search">Aluno</FieldLabel>
@@ -88,6 +91,8 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
           </InputGroup>
         </Field>
 
+        <Button type="button" variant="outline" className="min-h-11 sm:hidden" aria-expanded={expanded} aria-controls="enrollment-secondary-filters" onClick={() => setExpanded(!expanded)}>Filtros ({activeCount})</Button>
+        <div id="enrollment-secondary-filters" className={`${expanded ? "grid" : "hidden"} gap-3 sm:grid sm:col-span-2 xl:col-span-3 xl:grid-cols-3`}>
         <Field>
           <FieldLabel htmlFor="enrollment-status">Status</FieldLabel>
           <Select
@@ -146,8 +151,9 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
             </SelectContent>
           </Select>
         </Field>
+        </div>
       </div>
-
+      <div className="flex flex-wrap gap-2">{["status", "belt", "turma"].filter((key) => searchParams.get(key) && searchParams.get(key) !== "all").map((key) => <Button key={key} type="button" variant="outline" className="min-h-11" onClick={() => update(key, "all")}>Remover {key === "status" ? STATUS_OPTIONS.find((option) => option.value === searchParams.get(key))?.label : searchParams.get(key)}</Button>)}</div>
       {hasActiveFilters && (
         <div className="flex justify-end pt-1">
           <Button type="button" variant="ghost" size="sm" onClick={handleClear}>

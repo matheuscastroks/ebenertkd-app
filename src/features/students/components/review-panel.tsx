@@ -113,7 +113,7 @@ export function ReviewPanel({
             <Link href={ROUTES.adminEnrollments} className="text-sm text-muted-foreground hover:underline">
               ← Voltar para lista de matrículas
             </Link>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight md:text-3xl">
               {student.full_name}
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -172,7 +172,7 @@ export function ReviewPanel({
                 </h3>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 text-sm">
                   <div className="rounded-lg border bg-muted/10 p-3">
-                    <span className="text-xs text-muted-foreground block">Data de Nascimento</span>
+                    <span className="text-sm text-muted-foreground block">Data de Nascimento</span>
                     <span className="font-medium text-foreground">
                       {dateValue(student.birth_date)
                         ? new Date(`${dateValue(student.birth_date)}T12:00:00`).toLocaleDateString("pt-BR")
@@ -180,17 +180,17 @@ export function ReviewPanel({
                     </span>
                   </div>
                   <div className="rounded-lg border bg-muted/10 p-3">
-                    <span className="text-xs text-muted-foreground block">WhatsApp</span>
+                    <span className="text-sm text-muted-foreground block">WhatsApp</span>
                     <span className="font-medium text-foreground">
                       {formatBrazilianPhone(student.whatsapp) || "—"}
                     </span>
                   </div>
                   <div className="rounded-lg border bg-muted/10 p-3">
-                    <span className="text-xs text-muted-foreground block">Contato do Responsável</span>
+                    <span className="text-sm text-muted-foreground block">Contato do Responsável</span>
                     <span className="font-medium text-foreground">{student.guardian_contact || "Não informado / próprio aluno"}</span>
                   </div>
                   <div className="rounded-lg border bg-muted/10 p-3 sm:col-span-2 lg:col-span-3">
-                    <span className="text-xs text-muted-foreground block">Endereço Residencial</span>
+                    <span className="text-sm text-muted-foreground block">Endereço Residencial</span>
                     <span className="font-medium text-foreground">{student.address || "—"}</span>
                   </div>
                 </div>
@@ -205,15 +205,15 @@ export function ReviewPanel({
                 </h3>
                 <div className="mt-3 grid gap-3 sm:grid-cols-3 text-sm">
                   <div className="rounded-lg border bg-muted/10 p-3">
-                    <span className="text-xs text-muted-foreground block">Nome</span>
+                    <span className="text-sm text-muted-foreground block">Nome</span>
                     <span className="font-medium text-foreground">{student.emergency_contact_name || "—"}</span>
                   </div>
                   <div className="rounded-lg border bg-muted/10 p-3">
-                    <span className="text-xs text-muted-foreground block">Parentesco / Relação</span>
+                    <span className="text-sm text-muted-foreground block">Parentesco / Relação</span>
                     <span className="font-medium text-foreground">{student.emergency_contact_relationship || "—"}</span>
                   </div>
                   <div className="rounded-lg border bg-muted/10 p-3">
-                    <span className="text-xs text-muted-foreground block">Telefone</span>
+                    <span className="text-sm text-muted-foreground block">Telefone</span>
                     <span className="font-medium text-foreground">
                       {formatBrazilianPhone(student.emergency_contact_phone) || "—"}
                     </span>
@@ -230,18 +230,18 @@ export function ReviewPanel({
                 </h3>
                 <div className="mt-3 grid gap-3 sm:grid-cols-3 text-sm">
                   <div className="rounded-lg border bg-muted/10 p-3">
-                    <span className="text-xs text-muted-foreground block">Turma Escolhida</span>
+                    <span className="text-sm text-muted-foreground block">Turma Escolhida</span>
                     <span className="font-medium text-foreground">{student.training_class || "—"}</span>
                   </div>
                   <div className="rounded-lg border bg-muted/10 p-3">
-                    <span className="text-xs text-muted-foreground block">Graduação Atual</span>
+                    <span className="text-sm text-muted-foreground block">Graduação Atual</span>
                     <span className="font-medium text-foreground">
                       {currentBelt ? `Faixa ${currentBelt}` : "—"}{" "}
                       {student.gub ? `(${student.gub}º GUB)` : (student.gub === 0 ? "(Dan)" : "")}
                     </span>
                   </div>
                   <div className="rounded-lg border bg-muted/10 p-3">
-                    <span className="text-xs text-muted-foreground block">Início no Taekwondo</span>
+                    <span className="text-sm text-muted-foreground block">Início no Taekwondo</span>
                     <span className="font-medium text-foreground">
                       {dateValue(student.started_at_tkd)
                         ? new Date(`${dateValue(student.started_at_tkd)}T12:00:00`).toLocaleDateString("pt-BR")
@@ -276,21 +276,21 @@ export function ReviewPanel({
                   <div className="mt-3 space-y-3 rounded-xl border border-warning/40 bg-warning/5 p-4 text-sm">
                     {student.health_details ? (
                       <div>
-                        <span className="text-xs font-medium text-muted-foreground block">Detalhes da condição</span>
+                        <span className="text-sm font-medium text-muted-foreground block">Detalhes da condição</span>
                         <p className="font-medium text-foreground mt-0.5">{student.health_details}</p>
                       </div>
                     ) : null}
                     <div className="grid gap-3 sm:grid-cols-3 pt-1">
                       <div>
-                        <span className="text-xs font-medium text-muted-foreground block">Medicamentos</span>
+                        <span className="text-sm font-medium text-muted-foreground block">Medicamentos</span>
                         <span className="text-foreground">{student.medications || "Nenhum informado"}</span>
                       </div>
                       <div>
-                        <span className="text-xs font-medium text-muted-foreground block">Alergias</span>
+                        <span className="text-sm font-medium text-muted-foreground block">Alergias</span>
                         <span className="text-foreground">{student.allergies || "Nenhuma informada"}</span>
                       </div>
                       <div>
-                        <span className="text-xs font-medium text-muted-foreground block">Lesões ou Restrições</span>
+                        <span className="text-sm font-medium text-muted-foreground block">Lesões ou Restrições</span>
                         <span className="text-foreground">{student.injuries || "Nenhuma informada"}</span>
                       </div>
                     </div>
@@ -321,22 +321,22 @@ export function ReviewPanel({
                     {profilePhoto ? (
                       <Link
                         href={`/api/student-documents/${profilePhoto.$id}`}
-                        className="text-xs text-primary-text underline mt-0.5 block"
+                        className="text-sm text-primary-text underline mt-0.5 block"
                         target="_blank"
                       >
                         Visualizar imagem original
                       </Link>
                     ) : (
-                      <p className="text-xs text-muted-foreground mt-0.5">Nenhuma foto enviada</p>
+                      <p className="text-sm text-muted-foreground mt-0.5">Nenhuma foto enviada</p>
                     )}
                   </div>
                 </div>
                 {profilePhoto ? (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-sm">
                     Cadastrada
                   </Badge>
                 ) : (
-                  <Badge variant="destructive" className="text-xs">
+                  <Badge variant="destructive" className="text-sm">
                     Pendente
                   </Badge>
                 )}
@@ -352,13 +352,13 @@ export function ReviewPanel({
                       {medicalCertificate ? (
                         <Link
                           href={`/api/student-documents/${medicalCertificate.$id}`}
-                          className="text-xs text-primary-text underline mt-0.5 block"
+                          className="text-sm text-primary-text underline mt-0.5 block"
                           target="_blank"
                         >
                           Abrir documento enviado
                         </Link>
                       ) : (
-                        <p className="text-xs text-muted-foreground mt-0.5">Nenhum atestado anexado</p>
+                        <p className="text-sm text-muted-foreground mt-0.5">Nenhum atestado anexado</p>
                       )}
                     </div>
                   </div>
@@ -379,7 +379,7 @@ export function ReviewPanel({
                           : "Aguardando análise"}
                     </StatusBadge>
                   ) : (
-                    <Badge variant="outline" className="text-xs text-muted-foreground">
+                    <Badge variant="outline" className="text-sm text-muted-foreground">
                       Não enviado
                     </Badge>
                   )}
@@ -391,14 +391,14 @@ export function ReviewPanel({
                       <input type="hidden" name="student_id" value={student.$id} />
                       <input type="hidden" name="document_id" value={medicalCertificate.$id} />
                       <input type="hidden" name="decision" value="approved" />
-                      <FormSubmitButton size="sm" pendingLabel="Aprovando…">
+                      <FormSubmitButton className="min-h-11" size="sm" pendingLabel="Aprovando…">
                         Aprovar atestado
                       </FormSubmitButton>
                     </form>
 
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm">
+                        <Button className="min-h-11" variant="destructive" size="sm">
                           Reprovar
                         </Button>
                       </AlertDialogTrigger>
@@ -433,7 +433,7 @@ export function ReviewPanel({
                     </AlertDialog>
                   </div>
                 ) : medicalCertificate?.status === "approved" ? (
-                  <p className="text-xs text-success flex items-center gap-1.5 pt-1">
+                  <p className="text-sm text-success flex items-center gap-1.5 pt-1">
                     <CheckCircle2 className="size-3.5" aria-hidden="true" />
                     Atestado validado pela administração.
                   </p>
@@ -457,7 +457,7 @@ export function ReviewPanel({
                       reviews.map((review) => (
                         <div key={String(review.$id)} className="border-l-2 pl-3 text-sm">
                           <p className="font-medium">{String(review.action).replaceAll("_", " ")}</p>
-                          <p className="text-muted-foreground text-xs">
+                          <p className="text-muted-foreground text-sm">
                             {new Date(String(review.created_at)).toLocaleString("pt-BR")}
                             {review.notes ? ` · ${String(review.notes)}` : ""}
                           </p>
@@ -567,7 +567,7 @@ export function ReviewPanel({
 
                 <Separator />
 
-                <FormSubmitButton className="w-full" pendingLabel="Salvando condições…">
+                <FormSubmitButton className="min-h-11 w-full" pendingLabel="Salvando condições…">
                   Salvar condições contratuais
                 </FormSubmitButton>
               </form>
@@ -593,7 +593,7 @@ export function ReviewPanel({
                     min={new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" })}
                     required
                   />
-                  <FormSubmitButton className="w-full" pendingLabel="Emitindo renovação…">
+                  <FormSubmitButton className="min-h-11 w-full" pendingLabel="Emitindo renovação…">
                     Emitir renovação
                   </FormSubmitButton>
                 </form>
@@ -612,8 +612,8 @@ export function ReviewPanel({
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Checklist de requisitos para liberar assinatura */}
-                <div className="space-y-2 rounded-lg border bg-background/60 p-3 text-xs">
-                  <p className="font-semibold text-muted-foreground text-xs">
+                <div className="space-y-2 rounded-lg border bg-background/60 p-3 text-sm">
+                  <p className="font-semibold text-muted-foreground text-sm">
                     Status dos pré-requisitos:
                   </p>
                   <div className="flex items-center justify-between">
@@ -638,7 +638,7 @@ export function ReviewPanel({
 
                 <form action={advanceToSignatureAction}>
                   <input type="hidden" name="student_id" value={student.$id} />
-                  <FormSubmitButton className="w-full" pendingLabel="Liberando assinatura…">
+                  <FormSubmitButton className="min-h-11 w-full" pendingLabel="Liberando assinatura…">
                     Liberar para assinatura digital
                   </FormSubmitButton>
                 </form>

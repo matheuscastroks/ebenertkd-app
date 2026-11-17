@@ -83,9 +83,9 @@ export default async function EnrollmentsPage({
       subtitle="Analise cadastros, documentação, atestados médicos e condições financeiras."
       breadcrumbs={[{ label: "Matrículas" }]}
       headerActions={
-        <Button asChild variant="outline" className="h-10 font-medium">
+        <Button asChild variant="outline" className="min-h-11 font-medium">
           <Link href={ROUTES.adminStudentAccess}>
-            <KeyRound className="mr-2 size-4" />
+            <KeyRound aria-hidden="true" className="mr-2 size-4" />
             Acessos dos alunos
           </Link>
         </Button>

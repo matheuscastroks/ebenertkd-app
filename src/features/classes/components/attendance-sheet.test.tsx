@@ -15,10 +15,20 @@ describe("AttendanceSheet", () => {
   it("requires the complete roster and can mark everyone present", () => {
     const { container } = render(<AttendanceSheet classId="class-1" lessonId="lesson-1" lessonCompleted={false} rows={rows} />);
     expect(screen.getByRole("button", { name: "Concluir chamada" })).toBeDisabled();
-    fireEvent.click(screen.getByRole("button", { name: "Marcar todos presentes" }));
+    fireEvent.click(screen.getByRole("button", { name: "Marcar restantes como presentes" }));
     expect(screen.getByRole("button", { name: "Concluir chamada" })).toBeEnabled();
     expect(container.querySelectorAll('input[value="present"]')).toHaveLength(2);
     expect(screen.getByText("2 de 2 alunos marcados")).toBeInTheDocument();
+  });
+
+  it("preserva faltas e justificativas ao preencher os restantes", () => {
+    const { container } = render(<AttendanceSheet classId="class-1" lessonId="lesson-1" lessonCompleted={false} rows={[{ ...rows[0], status: "absent" }, rows[1]]} />);
+    fireEvent.click(screen.getByRole("button", { name: "Marcar restantes como presentes" }));
+    expect(container.querySelector('input[name="attendance:link-1"]')).toHaveValue("absent");
+    expect(container.querySelector('input[name="attendance:link-2"]')).toHaveValue("present");
+    expect(screen.getByText("Salvar só ao concluir")).toBeInTheDocument();
+    expect(screen.queryByText(/gravada em lote/)).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Presente" })[0]).toHaveClass("h-11");
   });
 
   it("requires a reason when a completed attendance is corrected", () => {

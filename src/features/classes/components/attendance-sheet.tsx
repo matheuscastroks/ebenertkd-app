@@ -47,27 +47,27 @@ export function AttendanceSheet({ classId, lessonId, lessonCompleted, rows, noti
     {notice === "reason" ? <OperationToast tone="warning" title="Informe o motivo da correção" description="Chamadas concluídas exigem uma justificativa para qualquer alteração." clearParams={["error"]} /> : null}
     {notice === "error" ? <OperationToast tone="error" title="Não foi possível salvar a chamada" description="Confira se todos os alunos receberam um status e tente novamente." clearParams={["error"]} /> : null}
 
-    <div className="sticky top-3 z-10 space-y-3 rounded-xl border bg-background/95 p-4 shadow-sm backdrop-blur">
+    <div className="sticky top-3 z-10 space-y-3 rounded-xl border bg-background p-4 shadow-xs">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="font-semibold text-sm sm:text-base">{selectedCount} de {rows.length} alunos marcados</p>
-          <p className="text-xs text-muted-foreground">A chamada é gravada em lote único.</p>
+          <p className="text-sm text-muted-foreground">Salvar só ao concluir</p>
         </div>
         <Button
           type="button"
           variant="outline"
           size="sm"
-          className="h-9 touch-manipulation font-medium"
-          onClick={() => setStatuses(Object.fromEntries(rows.map((row) => [row.classEnrollmentId, "present"])))}
+          className="min-h-11 touch-manipulation font-medium"
+          onClick={() => setStatuses((current) => ({ ...Object.fromEntries(rows.map((row) => [row.classEnrollmentId, "present"])), ...current }))}
         >
           <Check className="size-4 mr-1.5 text-success" aria-hidden="true" />
-          Marcar todos presentes
+          Marcar restantes como presentes
         </Button>
       </div>
       <Progress value={rows.length ? (selectedCount / rows.length) * 100 : 0} aria-label={`${selectedCount} de ${rows.length} alunos marcados`} />
     </div>
 
-    {rows.length === 0 ? <EmptyState title="Turma sem alunos ativos" description="Ative uma matrícula vinculada a esta turma antes de realizar a chamada." /> : rows.map((row) => <Card key={row.classEnrollmentId} className="border-border/80 shadow-xs">
+    {rows.length === 0 ? <EmptyState title="Turma sem alunos ativos" description="Ative uma matrícula vinculada a esta turma antes de realizar a chamada." /> : rows.map((row) => <Card key={row.classEnrollmentId} className="border-border shadow-xs">
       <CardContent className="space-y-3 p-4">
         <div className="flex items-center gap-3">
           <StudentAvatar name={row.studentName} photoDocumentId={row.photoDocumentId} size="md" />
@@ -86,6 +86,6 @@ export function AttendanceSheet({ classId, lessonId, lessonCompleted, rows, noti
     </Card>)}
 
     {lessonCompleted && changed ? <Field><FieldLabel htmlFor="correction-reason">Motivo da correção</FieldLabel><Textarea id="correction-reason" name="correction_reason" required minLength={3} placeholder="Ex.: presença corrigida após conferência com o professor." /><FieldDescription>Este motivo fica registrado na trilha de auditoria.</FieldDescription></Field> : null}
-    <div className="sticky bottom-20 z-10 rounded-xl border bg-background/95 p-3 shadow-lg backdrop-blur md:bottom-3"><FormSubmitButton className="h-11 w-full sm:w-auto" disabled={!complete || (lessonCompleted && changed === false)} pendingLabel="Salvando chamada…">{lessonCompleted ? "Salvar correção" : "Concluir chamada"}</FormSubmitButton></div>
+    <div className="sticky bottom-20 z-10 rounded-xl border bg-background p-3 shadow-xs md:bottom-3"><FormSubmitButton className="h-11 w-full sm:w-auto" disabled={!complete || (lessonCompleted && changed === false)} pendingLabel="Salvando chamada…">{lessonCompleted ? "Salvar correção" : "Concluir chamada"}</FormSubmitButton></div>
   </form>;
 }

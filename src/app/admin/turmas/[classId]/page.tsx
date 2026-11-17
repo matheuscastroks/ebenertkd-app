@@ -75,7 +75,7 @@ export default async function ClassLessonsPage({
 
         {/* Card Operacional da Aula de Hoje */}
         <Card className={cn(
-          "border transition-all",
+          "border",
           todayLesson
             ? "border-primary/40 bg-primary/5 dark:bg-primary/10 shadow-xs"
             : "border-border/80"
@@ -83,36 +83,34 @@ export default async function ClassLessonsPage({
           <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-muted-foreground">
+                <span className="text-sm font-semibold text-muted-foreground">
                   Agenda da turma
                 </span>
                 {todayLesson ? (
-                  <Badge variant="default" className="text-xs font-semibold">
+                  <Badge variant="default" className="text-sm font-semibold">
                     Aula de hoje pronta
                   </Badge>
                 ) : null}
               </div>
-              <p className="font-semibold text-base sm:text-lg">
-                {trainingClass.name}
-              </p>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+              
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1 font-medium text-foreground">
                   <Clock className="size-3.5 text-muted-foreground" aria-hidden="true" />
                   {trainingClass.start_time} às {trainingClass.end_time}
                 </span>
                 <span className="flex items-center gap-1">
                   <MapPin className="size-3.5 text-muted-foreground" aria-hidden="true" />
-                  {trainingClass.location ?? "Dojô Ebenézer TKD"}
+                  {trainingClass.location ?? "Local não informado"}
                 </span>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2.5">
               {todayLesson ? (
-                <Button asChild size="default" className="h-10 font-semibold touch-manipulation">
+                <Button asChild size="default" className="min-h-11 font-semibold touch-manipulation">
                   <Link href={adminLessonPath(classId, todayLesson.$id)}>
                     <ClipboardCheck className="size-4 mr-1.5" aria-hidden="true" />
-                    Abrir chamada de hoje
+                    Fazer chamada
                   </Link>
                 </Button>
               ) : (
@@ -125,7 +123,7 @@ export default async function ClassLessonsPage({
                   <FormSubmitButton
                     disabled={trainingClass.status !== "active"}
                     pendingLabel="Criando aula…"
-                    className="h-10 font-semibold touch-manipulation"
+                    className="min-h-11 font-semibold touch-manipulation"
                   >
                     <CalendarPlus className="size-4 mr-1.5" aria-hidden="true" />
                     Criar aula de hoje
@@ -135,7 +133,7 @@ export default async function ClassLessonsPage({
 
               <ResponsiveDialog
                 trigger={
-                  <Button variant="outline" size="default" className="h-10 touch-manipulation">
+                  <Button variant="outline" size="default" className="min-h-11 touch-manipulation">
                     <CalendarPlus className="size-4 mr-1.5" aria-hidden="true" />
                     Aula de reposição
                   </Button>
@@ -171,7 +169,7 @@ export default async function ClassLessonsPage({
                       />
                     </Field>
                   </div>
-                  <FormSubmitButton className="w-full sm:w-auto" pendingLabel="Criando reposição…">
+                  <FormSubmitButton className="min-h-11 w-full sm:w-auto" pendingLabel="Criando reposição…">
                     Criar e abrir chamada
                   </FormSubmitButton>
                 </form>
@@ -184,7 +182,7 @@ export default async function ClassLessonsPage({
         <section className="space-y-3">
           <div>
             <h2 className="text-lg font-semibold tracking-tight">Histórico de aulas</h2>
-            <p className="text-xs text-muted-foreground sm:text-sm">
+            <p className="text-sm text-muted-foreground sm:text-sm">
               Consulte aulas ministradas para realizar ou revisar a chamada de frequência.
             </p>
           </div>
@@ -201,7 +199,7 @@ export default async function ClassLessonsPage({
                 const status = lessonStatus[lesson.status];
                 const isLessonToday = lesson.lesson_date.slice(0, 10) === today;
                 return (
-                  <Card key={lesson.$id} className="border-border/80 shadow-xs hover:border-primary/30 transition-colors">
+                  <Card key={lesson.$id} className="border-border/80 shadow-xs ">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between gap-3">
                         <div className="space-y-1">
@@ -215,12 +213,12 @@ export default async function ClassLessonsPage({
                               })}
                             </CardTitle>
                             {isLessonToday ? (
-                              <Badge variant="outline" className="text-xs px-1.5 py-0">
+                              <Badge variant="outline" className="text-sm px-1.5 py-0">
                                 Hoje
                               </Badge>
                             ) : null}
                           </div>
-                          <CardDescription className="text-xs">
+                          <CardDescription className="text-sm">
                             {lesson.start_time} às {lesson.end_time} ·{" "}
                             {lesson.lesson_type === "makeup" ? "Aula de Reposição" : "Aula Regular"}
                           </CardDescription>
@@ -233,7 +231,7 @@ export default async function ClassLessonsPage({
                         asChild
                         size="sm"
                         variant={lesson.status === "completed" ? "outline" : "default"}
-                        className="h-9 w-full sm:w-auto touch-manipulation"
+                        className="min-h-11 w-full sm:w-auto touch-manipulation"
                       >
                         <Link href={adminLessonPath(classId, lesson.$id)}>
                           <ClipboardCheck className="size-4 mr-1.5" aria-hidden="true" />

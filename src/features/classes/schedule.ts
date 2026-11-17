@@ -20,6 +20,18 @@ export const WEEKDAY_TO_DAY_INDEX: Record<Weekday, number> = {
   Sábado: 6,
 };
 
+const businessClock = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/Sao_Paulo",
+  weekday: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+const weekdayIndices: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+function localScheduleClock(now: Date) {
+  const parts = Object.fromEntries(businessClock.formatToParts(now).map(({ type, value }) => [type, value]));
+  return { dayIndex: weekdayIndices[parts.weekday], time: `${parts.hour}:${parts.minute}` };
+}
 export type NextClassSchedule = {
   isToday: boolean;
   dayLabel: string;
@@ -41,13 +53,8 @@ export function getNextClassSchedule(
     return null;
   }
 
-  const currentDayIndex = now.getDay();
+  const { dayIndex: currentDayIndex, time: currentTime } = localScheduleClock(now);
   const currentWeekday = DAY_INDEX_TO_WEEKDAY[currentDayIndex];
-
-  // Horário atual no formato HH:MM
-  const currentHours = String(now.getHours()).padStart(2, "0");
-  const currentMinutes = String(now.getMinutes()).padStart(2, "0");
-  const currentTime = `${currentHours}:${currentMinutes}`;
 
   // 1. Verifica se hoje é dia de treino e se a aula ainda não terminou
   if (
@@ -98,5 +105,5 @@ export function getNextClassSchedule(
  * Retorna o dia da semana atual no padrão do aplicativo.
  */
 export function getTodayWeekday(now = new Date()): Weekday {
-  return DAY_INDEX_TO_WEEKDAY[now.getDay()];
+  return DAY_INDEX_TO_WEEKDAY[localScheduleClock(now).dayIndex];
 }

@@ -21,7 +21,7 @@ async function ClassManagerSection({
         ? "Turma atualizada com sucesso."
         : undefined;
 
-  return <ClassManager classes={toClientData(classes)} notice={notice} />;
+  return <ClassManager classes={toClientData(classes)} notice={notice} noticeTone={query.error ? "error" : "success"} />;
 }
 
 export default async function TrainingClassesPage({
@@ -35,9 +35,9 @@ export default async function TrainingClassesPage({
     <PortalShell
       profile={admin}
       activePath={ROUTES.adminClasses}
-      title="Turmas e horários"
+      title="Turmas"
       subtitle="Defina os horários e dojangs disponíveis para treinos e matrículas."
-      breadcrumbs={[{ label: "Turmas e horários" }]}
+      breadcrumbs={[{ label: "Turmas" }]}
     >
       <div className="w-full min-w-0">
         <Suspense fallback={<CardGridSkeleton count={4} columns={2} />}>

@@ -45,4 +45,14 @@ describe("EnrollmentFilters", () => {
     fireEvent.click(clearButton);
     expect(mockReplace).toHaveBeenCalledWith("/admin/matriculas", { scroll: false });
   });
+
+  it("recolhe filtros secundários e informa quantos estão ativos", () => {
+    mockSearchParams = new URLSearchParams("status=submitted&belt=Azul");
+    render(<EnrollmentFilters classes={dummyClasses} />);
+    const toggle = screen.getByRole("button", { name: "Filtros (2)" });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByLabelText("Status")).toBeInTheDocument();
+  });
 });
