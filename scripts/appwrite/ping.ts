@@ -1,15 +1,19 @@
+import { loadEnvConfig } from "@next/env";
 import { Client } from "appwrite";
-import { APPWRITE_PROJECT } from "../../src/lib/appwrite/browser";
+import { readPublicAppwriteConfig } from "../../src/lib/appwrite/config";
 
-const client = new Client()
-  .setEndpoint(APPWRITE_PROJECT.endpoint)
-  .setProject(APPWRITE_PROJECT.id);
+loadEnvConfig(process.cwd());
 
-client
-  .ping()
-  .then(() => console.log(`Appwrite ping OK: ${APPWRITE_PROJECT.name}`))
-  .catch((error: unknown) => {
-    console.error(error instanceof Error ? error.message : error);
-    process.exitCode = 1;
-  });
+async function run() {
+  const config = readPublicAppwriteConfig();
+  const client = new Client()
+    .setEndpoint(config.endpoint)
+    .setProject(config.projectId);
+  await client.ping();
+  console.log("Appwrite ping OK.");
+}
 
+void run().catch((error: unknown) => {
+  console.error(error instanceof Error ? error.message : "Não foi possível conectar ao Appwrite.");
+  process.exitCode = 1;
+});

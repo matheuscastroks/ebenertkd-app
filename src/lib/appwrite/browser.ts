@@ -1,19 +1,24 @@
 import { Client } from "appwrite";
 
-export const APPWRITE_PROJECT = {
-  id: "6ab4c32e00317977eeb6",
-  name: "My first project",
-  endpoint: "https://fra.cloud.appwrite.io/v1"
-} as const;
+// Acessos explícitos permitem que o Next incorpore a configuração pública no bundle.
+const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT?.trim() ?? "";
+const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID?.trim() ?? "";
 
-export const appwriteClient = new Client()
-  .setEndpoint(APPWRITE_PROJECT.endpoint)
-  .setProject(APPWRITE_PROJECT.id);
-
+let client: Client | null = null;
 let pingPromise: Promise<unknown> | null = null;
 
-export function pingAppwriteOnce() {
-  pingPromise ??= appwriteClient.ping();
-  return pingPromise;
+function configuredClient() {
+  let validEndpoint = false;
+  try {
+    const url = new URL(endpoint);
+    validEndpoint = url.protocol === "https:" || url.protocol === "http:";
+  } catch { /* Configuração ausente ou inválida não pode iniciar uma conexão. */ }
+  if (!projectId || !validEndpoint) throw new Error("appwrite_browser_configuration_missing");
+  client ??= new Client().setEndpoint(endpoint).setProject(projectId);
+  return client;
 }
 
+export function pingAppwriteOnce() {
+  pingPromise ??= Promise.resolve().then(() => configuredClient().ping());
+  return pingPromise;
+}

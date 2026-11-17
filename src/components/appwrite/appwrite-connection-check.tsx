@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
-import { APPWRITE_PROJECT, pingAppwriteOnce } from "@/lib/appwrite/browser";
+import { pingAppwriteOnce } from "@/lib/appwrite/browser";
 
 export function AppwriteConnectionCheck() {
   useEffect(() => {
     void pingAppwriteOnce()
       .then(() => {
         document.documentElement.dataset.appwrite = "connected";
-        console.info(`Appwrite conectado: ${APPWRITE_PROJECT.name}`);
+        console.info("Appwrite conectado.");
       })
       .catch((error: unknown) => {
         document.documentElement.dataset.appwrite = "error";
