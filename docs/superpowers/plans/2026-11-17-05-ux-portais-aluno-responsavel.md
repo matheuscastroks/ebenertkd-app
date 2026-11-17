@@ -26,11 +26,13 @@ As do plano mestre e do contrato. Menor nunca recebe dado financeiro (`showFinan
 
 ## Status
 
-- Feito: nada.
-- Pendente: tarefas 1 a 7.
-- Bloqueios: aguarda Onda 1 e PR #2.
+- Feito: tarefas 1–6 implementadas e revisadas por subagentes.
+- Pendente: tarefa 7 (validação integral e visual com perfis isolados).
+- Bloqueios: E2E_APPWRITE_PROJECT_ID não configurado; ambiente atual de produção não será usado na homologação.
 
 ## Registro de progresso
+
+- 2026-11-17: helper financeiro inclui comprovante em análise e ordena vencimentos; falhas de pagamentos/contratos do responsável têm estado explícito. Nome/seleção de dependente nas cinco seções, autorizado no servidor. Painel do aluno em treino/pendência/faixa, sem consulta financeira para menor. Frequência vazia usa —. Graduação simplificada e matrícula em quatro componentes com rascunho local isolado, datas/selects/uploads preservados. Testes direcionados e revisão cruzada aprovados; revisão encontrou e corrigiu fuso São Paulo e sincronização do switch de turma no plano03. Submissão completa da matrícula coberta em jsdom com adaptação documentada para File/FormData. Commits diretos na main autorizados.
 
 - 2026-11-17: plano criado.
 
@@ -43,11 +45,11 @@ As do plano mestre e do contrato. Menor nunca recebe dado financeiro (`showFinan
 **Interfaces:**
 - Produces: `getOutstandingCharge(charges: Charge[]): Charge | undefined` — escolhe a de vencimento mais próximo entre `pending`, `overdue`, `proof_under_review`; `outstandingLabel(charge): "Pendente" | "Em atraso" | "Comprovante em análise"`.
 
-- [ ] **Step 1:** Testes em `outstanding.test.ts`: `comprovante em análise não é "Em dia"`, `escolhe o vencimento mais próximo`, `vazio retorna undefined`.
-- [ ] **Step 2:** Rodar `npx vitest run src/features/billing/outstanding.test.ts` e ver falhar.
-- [ ] **Step 3:** Implementar; usar no aluno e no responsável; trocar `emerald/amber` por `StatusBadge`; chamar `listGuardianMinors` uma vez e passar por props.
-- [ ] **Step 4:** Rodar e ver passar.
-- [ ] **Step 5:** Commit `fix: responsável vê comprovante em análise em vez de "Em dia"`.
+- [x] **Step 1:** Testes em `outstanding.test.ts`: `comprovante em análise não é "Em dia"`, `escolhe o vencimento mais próximo`, `vazio retorna undefined`.
+- [x] **Step 2:** Rodar `npx vitest run src/features/billing/outstanding.test.ts` e ver falhar.
+- [x] **Step 3:** Implementar; usar no aluno e no responsável; trocar `emerald/amber` por `StatusBadge`; chamar `listGuardianMinors` uma vez e passar por props.
+- [x] **Step 4:** Rodar e ver passar.
+- [x] **Step 5:** Commit `fix: responsável vê comprovante em análise em vez de "Em dia"`.
 
 ### Task 2: Contexto do filho em todas as subpáginas (P0.2, P2.13)
 
@@ -58,41 +60,41 @@ As do plano mestre e do contrato. Menor nunca recebe dado financeiro (`showFinan
 **Interfaces:**
 - Produces: `DependentHeader({ name: string; belt?: string | null; gub?: number | null; photoDocumentId?: string | null; siblings: Array<{ profileId: string; name: string }>; currentProfileId: string; section: "financeiro" | "frequencia" | "exames" | "contratos" | "matricula" })` com seletor para trocar de filho mantendo a seção.
 
-- [ ] **Step 1:** Testes: `mostra o nome do filho e a faixa`, `seletor lista os irmãos e navega para a mesma seção`, `com um único filho não mostra seletor`.
-- [ ] **Step 2:** Rodar e ver falhar.
-- [ ] **Step 3:** Implementar e usar nas 5 subpáginas; títulos "Financeiro · {nome}".
-- [ ] **Step 4:** Rodar e ver passar.
-- [ ] **Step 5:** Commit `feat: cabeçalho do dependente com seletor de filho`.
+- [x] **Step 1:** Testes: `mostra o nome do filho e a faixa`, `seletor lista os irmãos e navega para a mesma seção`, `com um único filho não mostra seletor`.
+- [x] **Step 2:** Rodar e ver falhar.
+- [x] **Step 3:** Implementar e usar nas 5 subpáginas; títulos "Financeiro · {nome}".
+- [x] **Step 4:** Rodar e ver passar.
+- [x] **Step 5:** Commit `feat: cabeçalho do dependente com seletor de filho`.
 
 ### Task 3: Frequência sem número falso e alvos de toque (P0.3, P0.4, P2.14, P2.16)
 
 **Files:** `src/app/aluno/page.tsx:267`, `src/features/classes/components/attendance-history.tsx` (~l.105,118,290), `src/app/responsavel/page.tsx:180-200`, `src/features/billing/components/payer-billing-view.tsx:59`
 
-- [ ] **Step 1:** Testes: `sem aulas registradas mostra "—" e "Ainda sem aulas registradas", nunca 100%`; `texto de assiduidade neutro`; `botões de ação têm min-h-11`.
-- [ ] **Step 2:** Rodar e ver falhar.
-- [ ] **Step 3:** Tratar `total === 0`; `min-h-11` e `text-sm` nos controles; copy: "Pagar mensalidade", "Hoje, 19h às 20h".
-- [ ] **Step 4:** Rodar e ver passar.
-- [ ] **Step 5:** Commit `fix: frequência sem dados mostra "—" e controles com alvo de 44px`.
+- [x] **Step 1:** Testes: `sem aulas registradas mostra "—" e "Ainda sem aulas registradas", nunca 100%`; `texto de assiduidade neutro`; `botões de ação têm min-h-11`.
+- [x] **Step 2:** Rodar e ver falhar.
+- [x] **Step 3:** Tratar `total === 0`; `min-h-11` e `text-sm` nos controles; copy: "Pagar mensalidade", "Hoje, 19h às 20h".
+- [x] **Step 4:** Rodar e ver passar.
+- [x] **Step 5:** Commit `fix: frequência sem dados mostra "—" e controles com alvo de 44px`.
 
 ### Task 4: Painel do aluno enxuto (P1.5, P1.10, P1.11)
 
 **Files:** `src/app/aluno/page.tsx:127-309,393-394`
 
-- [ ] **Step 1:** Testes: `ordem: treino, pendência (card único), faixa`; `não repete a pendência em MetricCard`; `não mostra nome e e-mail do próprio usuário`; `menor não vê financeiro`.
-- [ ] **Step 2:** Rodar e ver falhar.
-- [ ] **Step 3:** Remover MetricCards redundantes; frequência vira uma linha no card do treino; "Meus dados" e "Documentos" como lista de links ao fim; checklist de onboarding derivado de dados reais ou removido após a matrícula.
-- [ ] **Step 4:** Rodar e ver passar.
-- [ ] **Step 5:** Commit `refactor: painel do aluno em três blocos`.
+- [x] **Step 1:** Testes: `ordem: treino, pendência (card único), faixa`; `não repete a pendência em MetricCard`; `não mostra nome e e-mail do próprio usuário`; `menor não vê financeiro`.
+- [x] **Step 2:** Rodar e ver falhar.
+- [x] **Step 3:** Remover MetricCards redundantes; frequência vira uma linha no card do treino; "Meus dados" e "Documentos" como lista de links ao fim; checklist de onboarding derivado de dados reais ou removido após a matrícula.
+- [x] **Step 4:** Rodar e ver passar.
+- [x] **Step 5:** Commit `refactor: painel do aluno em três blocos`.
 
 ### Task 5: Cartão de graduação simples (P1.6, P2.17)
 
 **Files:** `src/features/students/components/graduation-card.tsx`, `graduation-card.test.tsx`, `src/features/exams/components/student-exams-view.tsx:39-44`
 
-- [ ] **Step 1:** Testes: `mostra BeltBadge, "Próximo: Y" e frequência para o exame`; `sem barra de % até Faixa Preta`; `sem texto da Confederação`; `usa tokens (sem neutral-400/white fixos)`.
-- [ ] **Step 2:** Rodar e ver falhar.
-- [ ] **Step 3:** Reduzir para card simples; mover os "4 pilares" para um texto curto; estado vazio de exames sem ícone decorativo.
-- [ ] **Step 4:** Rodar e ver passar.
-- [ ] **Step 5:** Commit `refactor: cartão de graduação sem gamificação decorativa`.
+- [x] **Step 1:** Testes: `mostra BeltBadge, "Próximo: Y" e frequência para o exame`; `sem barra de % até Faixa Preta`; `sem texto da Confederação`; `usa tokens (sem neutral-400/white fixos)`.
+- [x] **Step 2:** Rodar e ver falhar.
+- [x] **Step 3:** Reduzir para card simples; mover os "4 pilares" para um texto curto; estado vazio de exames sem ícone decorativo.
+- [x] **Step 4:** Rodar e ver passar.
+- [x] **Step 5:** Commit `refactor: cartão de graduação sem gamificação decorativa`.
 
 ### Task 6: Matrícula em passos com rascunho (P1.8, P1.9)
 
@@ -103,11 +105,11 @@ As do plano mestre e do contrato. Menor nunca recebe dado financeiro (`showFinan
 **Interfaces:**
 - Produces: `EnrollmentStepper({ steps: Array<{ id: "pessoais" | "saude" | "treino" | "documentos"; title: string; isValid: boolean }>; current: number })` mostrando "Passo 2 de 4"; `useEnrollmentDraft(key: string)` que guarda o rascunho em `localStorage` (com `try/catch`) e mostra "Rascunho salvo".
 
-- [ ] **Step 1:** Testes: `avançar só com o passo válido`, `rascunho restaura os campos após recarregar`, `CPF e telefone usam inputMode numeric`, `erro de ação recebe tone explícito`.
-- [ ] **Step 2:** Rodar e ver falhar.
-- [ ] **Step 3:** Dividir em 4 passos; validação no blur; barra de progresso simples no lugar do card lateral de 11 itens; tom do erro vindo da action.
-- [ ] **Step 4:** Rodar e ver passar.
-- [ ] **Step 5:** Commit `feat: matrícula em quatro passos com rascunho local`.
+- [x] **Step 1:** Testes: `avançar só com o passo válido`, `rascunho restaura os campos após recarregar`, `CPF e telefone usam inputMode numeric`, `erro de ação recebe tone explícito`.
+- [x] **Step 2:** Rodar e ver falhar.
+- [x] **Step 3:** Dividir em 4 passos; validação no blur; barra de progresso simples no lugar do card lateral de 11 itens; tom do erro vindo da action.
+- [x] **Step 4:** Rodar e ver passar.
+- [x] **Step 5:** Commit `feat: matrícula em quatro passos com rascunho local`.
 
 ### Task 7: Fechamento da área
 

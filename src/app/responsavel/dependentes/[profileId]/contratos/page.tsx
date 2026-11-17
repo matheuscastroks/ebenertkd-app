@@ -1,3 +1,4 @@
+import { DependentContext } from "@/features/families/components/dependent-context";
 import { Suspense } from "react";
 import Link from "next/link";
 import { PortalShell } from "@/components/dashboard/portal-shell";
@@ -44,7 +45,7 @@ async function DependentContractsList({
         return (
           <Card
             key={contract.$id}
-            className="border-border/80 shadow-sm transition-all hover:border-border"
+            className="border-border/80 shadow-sm transition-colors hover:border-border"
           >
             <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5">
               <div className="flex items-start gap-3">
@@ -104,6 +105,7 @@ export default async function DependentContractsPage({
       ]}
     >
       <div className="w-full min-w-0 space-y-4">
+        <DependentContext guardian={guardian} profileId={profileId} section="contratos" />
         <Suspense fallback={<ListItemsSkeleton count={2} />}>
           <DependentContractsList guardian={guardian} profileId={profileId} />
         </Suspense>

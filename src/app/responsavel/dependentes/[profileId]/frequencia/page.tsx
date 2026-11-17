@@ -1,3 +1,4 @@
+import { DependentContext } from "@/features/families/components/dependent-context";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { AttendanceHistory } from "@/features/classes/components/attendance-history";
@@ -55,7 +56,8 @@ export default async function DependentAttendancePage({
       title="Frequência do aluno"
       subtitle="Acompanhe a assiduidade, presenças e histórico de aulas mês a mês."
     >
-      <div className="w-full min-w-0">
+      <div className="w-full min-w-0 space-y-4">
+        <DependentContext guardian={guardian} profileId={profileId} section="frequencia" />
         <Suspense key={month} fallback={<AttendanceCalendarSkeleton />}>
           <DependentAttendanceContent
             guardian={guardian}

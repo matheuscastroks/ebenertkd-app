@@ -1,3 +1,4 @@
+import { DependentContext } from "@/features/families/components/dependent-context";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Profile } from "@/features/auth/types";
@@ -55,7 +56,8 @@ export async function EnrollmentWorkspace({
 
   return (
     <PortalShell profile={actor} activePath={activePath} title={`Matrícula · ${target.full_name}`} subtitle="Preencha os dados por etapa e salve para continuar depois.">
-      <div className="w-full min-w-0">
+      <div className="w-full min-w-0 space-y-4">
+        {actor.capabilities.includes("guardian") && actor.$id !== target.$id ? <DependentContext guardian={actor} profileId={target.$id} section="matricula" /> : null}
         <EnrollmentForm
           bundle={toClientData(bundle)}
           targetProfileId={target.$id}

@@ -136,7 +136,7 @@ async function GuardianMinorsList({ guardian }: { guardian: Profile }) {
       {minors.map((minor) => (
         <Card
           key={minor.$id}
-          className="transition-all hover:border-primary/40"
+          className="transition-colors hover:border-primary/40"
         >
           <CardHeader className="pb-3">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -146,7 +146,7 @@ async function GuardianMinorsList({ guardian }: { guardian: Profile }) {
                   photoDocumentId={photoIds.get(minor.$id)}
                 />
                 <div className="min-w-0">
-                  <CardTitle className="text-base font-bold truncate">
+                  <CardTitle className="text-base font-semibold truncate">
                     {minor.full_name}
                   </CardTitle>
                   <p className="text-xs text-muted-foreground mt-0.5">
@@ -400,7 +400,7 @@ export default async function DependentsPage({
 
         <section className="space-y-4">
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-foreground">
+            <h2 className="text-base sm:text-lg font-semibold text-foreground">
               Dependentes cadastrados
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground">

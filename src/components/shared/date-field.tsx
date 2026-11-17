@@ -20,7 +20,7 @@ export function formatLocalDate(date?: Date) {
   return date && isValid(date) ? format(date, "yyyy-MM-dd") : "";
 }
 
-export function DateField({ id, name, label, defaultValue, min, max, required = false, description, className }: {
+export function DateField({ id, name, label, defaultValue, min, max, required = false, description, className, onValueChange }: {
   id: string;
   name: string;
   label: string;
@@ -30,6 +30,7 @@ export function DateField({ id, name, label, defaultValue, min, max, required = 
   required?: boolean;
   description?: string;
   className?: string;
+  onValueChange?: (value: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Date | undefined>(() => parseLocalDate(defaultValue));
@@ -60,6 +61,7 @@ export function DateField({ id, name, label, defaultValue, min, max, required = 
             captionLayout={minDate || maxDate ? "dropdown" : "label"}
             onSelect={(date) => {
               setSelected(date);
+              onValueChange?.(formatLocalDate(date));
               if (date) setOpen(false);
             }}
           />

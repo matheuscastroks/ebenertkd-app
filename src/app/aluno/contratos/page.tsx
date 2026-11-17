@@ -38,7 +38,7 @@ async function StudentContractsList({ profile }: { profile: Profile }) {
         return (
           <Card
             key={contract.$id}
-            className="border-border/80 shadow-sm transition-all hover:border-border"
+            className="border-border/80 shadow-sm transition-colors hover:border-border"
           >
             <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5">
               <div className="flex items-start gap-3">

@@ -37,7 +37,7 @@ export function BeltProgressionPill({
     return (
       <div
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-background/80 px-2 py-1 shadow-xs transition-colors backdrop-blur-xs",
+          "inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2 py-1 shadow-xs transition-colors ",
           size === "sm" && "text-xs py-0.5 px-1.5",
           size === "lg" && "text-sm py-1.5 px-3",
           className
@@ -75,7 +75,7 @@ export function BeltProgressionPill({
             showGub={showGub}
             className={cn(
               "ring-1 ring-primary/20 font-semibold",
-              targetTheme.isBlackBelt && "ring-amber-500/30"
+              targetTheme.isBlackBelt && "ring-primary"
             )}
           />
         </div>

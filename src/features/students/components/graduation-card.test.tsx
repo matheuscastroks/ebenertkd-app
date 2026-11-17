@@ -1,34 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { GraduationCard } from "@/features/students/components/graduation-card";
+import { GraduationCard } from "./graduation-card";
 
-describe("GraduationCard", () => {
-  it("renders student belt and evolution towards black belt", () => {
-    render(
-      <GraduationCard
-        currentBelt="Amarela"
-        gub={8}
-        startedAtTkd="2025-01-15T00:00:00.000Z"
-        attendanceRate={85}
-      />
-    );
-
-    expect(screen.getByText("Jornada de Graduação")).toBeInTheDocument();
-    expect(screen.getByText("8º GUB · Confederação Brasileira de Taekwondo")).toBeInTheDocument();
-    expect(screen.getByText("Próximo objetivo:")).toBeInTheDocument();
-    expect(screen.getByText(/Faixa Ponta Verde/)).toBeInTheDocument();
-    expect(screen.getByText(/85% · Apto para exame/)).toBeInTheDocument();
+describe("graduação simples", () => {
+  it("mostra faixa, próximo objetivo e frequência sem porcentagem até a preta", () => {
+    render(<GraduationCard currentBelt="Amarela" gub={8} attendanceRate={85} />);
+    expect(screen.getByText(/Próximo: Faixa Ponta Verde/)).toBeInTheDocument();
+    expect(screen.getByText(/Frequência para o exame: 85%/)).toBeInTheDocument();
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Confederação/)).not.toBeInTheDocument();
   });
-
-  it("handles black belt graduation without next step", () => {
-    render(<GraduationCard currentBelt="Preta" gub={0} />);
-    expect(screen.getByText("Faixa Preta (1º Dan)")).toBeInTheDocument();
-    expect(screen.getByText("100% concluído")).toBeInTheDocument();
-  });
-
-  it("treats Preta and Preta 1º Dan as the exact same graduation", () => {
+  it("reconhece preta e não inventa um próximo GUB", () => {
     render(<GraduationCard currentBelt="Preta 1º Dan" gub={0} />);
-    expect(screen.getAllByText("Faixa Preta").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("Faixa Preta (1º Dan)")).toBeInTheDocument();
+    expect(screen.getByText(/Graduação Dan/)).toBeInTheDocument();
+    expect(screen.queryByText(/Próximo:/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/100%/)).not.toBeInTheDocument();
   });
 });

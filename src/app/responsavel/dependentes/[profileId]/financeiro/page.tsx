@@ -1,3 +1,4 @@
+import { DependentContext } from "@/features/families/components/dependent-context";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { OperationToast } from "@/components/shared/operation-toast";
@@ -28,6 +29,7 @@ export default async function GuardianBillingPage({
       subtitle="Acompanhe as mensalidades e envie comprovantes de pagamento em nome do aluno."
     >
       <div className="w-full min-w-0 space-y-4">
+        <DependentContext guardian={actor} profileId={profileId} section="financeiro" />
         {query.updated ? (
           <OperationToast
             tone="success"

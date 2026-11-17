@@ -40,7 +40,7 @@ export function PhoneField({
         id={id}
         name={name}
         type="tel"
-        inputMode="tel"
+        inputMode="numeric"
         value={value}
         onChange={handleChange}
         placeholder={placeholder}

@@ -1,3 +1,4 @@
+import { DependentContext } from "@/features/families/components/dependent-context";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { ListItemsSkeleton } from "@/components/skeletons";
@@ -37,7 +38,8 @@ export default async function DependentExamsPage({ params }: { params: Promise<{
       title="Exames do aluno"
       subtitle="Veja os exames de faixa agendados, a taxa de cada um e os resultados anteriores."
     >
-      <div className="w-full min-w-0">
+      <div className="w-full min-w-0 space-y-4">
+        <DependentContext guardian={guardian} profileId={profileId} section="exames" />
         <Suspense fallback={<ListItemsSkeleton count={2} />}>
           <DependentExamsContent guardian={guardian} profileId={profileId} />
         </Suspense>

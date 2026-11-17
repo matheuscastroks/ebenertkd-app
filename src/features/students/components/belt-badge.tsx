@@ -398,7 +398,7 @@ export function BeltBadge({
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-md border border-neutral-200/90 dark:border-neutral-800 bg-neutral-100/90 dark:bg-neutral-900/70 text-neutral-800 dark:text-neutral-200 font-sans select-none transition-all shadow-xs",
+        "inline-flex items-center gap-1.5 rounded-md border border-neutral-200/90 dark:border-neutral-800 bg-neutral-100/90 dark:bg-neutral-900/70 text-neutral-800 dark:text-neutral-200 font-sans select-none transition-colors shadow-xs",
         size === "sm" && "h-6 px-2 text-xs",
         size === "md" && "h-7 px-2.5 text-xs",
         size === "lg" && "h-8 px-3 text-sm",
@@ -410,7 +410,7 @@ export function BeltBadge({
       <span
         aria-hidden="true"
         className={cn(
-          "relative inline-flex items-center overflow-hidden rounded-[2px] border border-black/25 shrink-0 shadow-xs",
+          "relative inline-flex items-center overflow-hidden rounded-sm border border-black/25 shrink-0 shadow-xs",
           size === "sm" && "h-3 w-6",
           size === "md" && "h-3.5 w-7",
           size === "lg" && "h-4 w-9",

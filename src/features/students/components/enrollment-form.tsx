@@ -1,639 +1,110 @@
-import Link from "next/link";
-import type { ReactNode } from "react";
-import { CheckCircle2, Circle, FileText, ImageIcon } from "lucide-react";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import { saveEnrollmentDraftAction, submitEnrollmentAction } from "@/app/actions/enrollment";
 import { OperationToast } from "@/components/shared/operation-toast";
-import { DateField } from "@/components/shared/date-field";
-import { FileField } from "@/components/shared/file-field";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
-import { PhoneField } from "@/components/shared/phone-field";
-import { AddressFields } from "@/components/shared/address-fields";
-import { StatusBadge } from "@/components/shared/status-badge";
-import {
-  Attachment,
-  AttachmentContent,
-  AttachmentDescription,
-  AttachmentMedia,
-  AttachmentTitle
-} from "@/components/ui/attachment";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field as FormField, FieldDescription, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { TrainingClass } from "@/features/classes/types";
-import { DUE_DAY_OPTIONS } from "@/features/students/options";
-import { GraduationFields } from "@/features/students/components/graduation-fields";
-import { StudentAvatar } from "@/features/students/components/student-avatar";
-import { BeltBadge } from "@/features/students/components/belt-badge";
 import type { EnrollmentBundle } from "@/features/students/types";
+import { formatAddress } from "@/lib/address";
+import { EnrollmentStepper, type EnrollmentStep } from "./enrollment-stepper";
+import { PersonalEnrollmentStep, HealthEnrollmentStep, TrainingEnrollmentStep, DocumentsEnrollmentStep } from "./enrollment-steps";
+import { useEnrollmentDraft } from "./use-enrollment-draft";
 
-const dateValue = (value?: string | null) => value?.slice(0, 10) ?? "";
-const labels = {
-  profile_photo: "Foto do aluno",
-  medical_certificate: "Atestado médico"
-} as const;
+type Feedback = { tone: "success" | "error" | "info" | "warning"; title: string };
+const stepComponents = [PersonalEnrollmentStep, HealthEnrollmentStep, TrainingEnrollmentStep, DocumentsEnrollmentStep];
+const initialSteps: EnrollmentStep[] = [
+  { id: "pessoais", title: "Dados pessoais", isValid: false },
+  { id: "saude", title: "Saúde", isValid: false },
+  { id: "treino", title: "Treino", isValid: false },
+  { id: "documentos", title: "Documentos", isValid: false },
+];
 
-const statusLabels: Record<string, string> = {
-  draft: "Rascunho",
-  submitted: "Enviada",
-  under_review: "Em análise",
-  awaiting_signature: "Aguardando assinatura",
-  active: "Ativa",
-  paused: "Pausada",
-  cancelled: "Cancelada",
-  awaiting_renewal: "Aguardando renovação"
-};
-
-const documentStatusLabels: Record<string, string> = {
-  pending: "Aguardando análise",
-  approved: "Aprovado",
-  rejected: "Precisa de correção"
-};
-
-function Field({
-  label,
-  name,
-  defaultValue,
-  type = "text",
-  required = false,
-  ...props
-}: {
-  label: string;
-  name: string;
-  defaultValue?: string | number;
-  type?: string;
-  required?: boolean;
-  min?: number;
-  max?: number;
-  placeholder?: string;
-  autoComplete?: string;
+export function EnrollmentForm({ bundle, targetProfileId, classes, message, feedback }: {
+  bundle: EnrollmentBundle; targetProfileId: string; classes: TrainingClass[]; message?: string; feedback?: Feedback | null;
 }) {
-  const id = `enrollment-${name}`;
-  return (
-    <FormField>
-      <FieldLabel htmlFor={id}>
-        {label}
-        {required ? " *" : ""}
-      </FieldLabel>
-      <Input
-        id={id}
-        name={name}
-        type={type}
-        defaultValue={defaultValue}
-        required={required}
-        {...props}
-      />
-    </FormField>
-  );
-}
+  const formRef = useRef<HTMLFormElement>(null);
+  const draft = useEnrollmentDraft(`${targetProfileId}:${bundle.enrollment.$id}:${bundle.enrollment.revision}`);
+  const [current, setCurrent] = useState(0);
+  const [steps, setSteps] = useState(initialSteps);
+  const [error, setError] = useState("");
+  const success = feedback?.tone === "success";
+  useEffect(() => {
+    if (success) {
+      try {
+        const prefix = `enrollment-draft:${targetProfileId}:${bundle.enrollment.$id}:`;
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key?.startsWith(prefix)) localStorage.removeItem(key);
+        }
+      } catch { /* Sem armazenamento disponível. */ }
+    }
+  }, [success, targetProfileId, bundle.enrollment.$id, bundle.enrollment.revision]);
 
-function Section({
-  number,
-  title,
-  description,
-  children
-}: {
-  number: string;
-  title: string;
-  description: string;
-  children: ReactNode;
-}) {
-  return (
-    <section className="rounded-2xl border bg-card p-5 md:p-6 shadow-xs space-y-4">
-      <div className="flex items-start gap-3">
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-          {number}
-        </span>
-        <div>
-          <h2 className="text-base font-semibold text-foreground tracking-tight">{title}</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
-        </div>
+  const stored = success ? {} : draft.values;
+  const restoredBundle: EnrollmentBundle = {
+    ...bundle,
+    student: { ...bundle.student, ...stored,
+      ...(stored.gub !== undefined ? { gub: stored.gub === "" ? null : Number(stored.gub) } : {}),
+      ...(stored.address_street !== undefined ? { address: formatAddress({ street: stored.address_street, number: stored.address_number ?? "", complement: stored.address_complement ?? "", neighborhood: stored.address_neighborhood ?? "", city: stored.address_city ?? "", state: stored.address_state ?? "", cep: stored.address_cep ?? "" }) } : {}),
+    },
+    enrollment: { ...bundle.enrollment, ...(stored.requested_due_day !== undefined ? { requested_due_day: stored.requested_due_day === "" ? null : Number(stored.requested_due_day) } : {}) },
+  } as EnrollmentBundle;
+
+  const validateStep = (index: number, report: boolean) => {
+    const fieldset = formRef.current?.querySelector<HTMLFieldSetElement>(`fieldset[data-step="${index}"]`);
+    const invalid = Array.from(fieldset?.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input, select, textarea") ?? []).find((input) => !input.disabled && !input.checkValidity());
+    const data = formRef.current ? new FormData(formRef.current) : new FormData();
+    const missingDate = index === 0 && !data.get("birth_date") ? "enrollment-birth-date" : index === 2 && !data.get("started_at_tkd") ? "enrollment-tkd-start" : null;
+    const isValid = !invalid && !missingDate;
+    setSteps((previous) => previous.map((step, i) => i === index ? { ...step, isValid } : step));
+    if (!isValid && report) {
+      setError("Confira os campos obrigatórios deste passo.");
+      setCurrent(index);
+      invalid?.setAttribute("aria-invalid", "true");
+      invalid?.setAttribute("aria-describedby", "enrollment-validation-error");
+      requestAnimationFrame(() => { if (missingDate) document.getElementById(missingDate)?.focus(); else { invalid?.focus(); invalid?.reportValidity(); } });
+    }
+    return isValid;
+  };
+  const saveLocal = (changed: Record<string, string> = {}) => {
+    if (!formRef.current) return;
+    const values: Record<string, string> = {};
+    new FormData(formRef.current).forEach((value, key) => { if (typeof value === "string") values[key] = value; });
+    draft.save({ ...values, ...changed });
+  };
+  const notice = feedback ?? (message ? { tone: "info" as const, title: message } : null);
+  if (!draft.ready) return <Skeleton className="h-48 w-full" aria-label="Carregando matrícula" />;
+  return <div className="space-y-4">
+    <h2 className="text-base font-semibold">Ficha de matrícula</h2>
+    {notice ? <OperationToast tone={notice.tone} title={notice.title} clearParams={["saved", "submitted", "error"]} /> : null}
+    {feedback?.tone === "error" ? <Alert variant="destructive"><AlertDescription>{feedback.title}</AlertDescription></Alert> : null}
+    <EnrollmentStepper current={current} steps={steps} />
+    <p className="text-sm text-muted-foreground">{draft.saved && !success ? "Rascunho salvo" : "Preencha os dados para continuar."} Os arquivos precisam ser selecionados novamente após recarregar.</p>
+    {error ? <Alert id="enrollment-validation-error" variant="destructive"><AlertDescription>{error}</AlertDescription></Alert> : null}
+    <form ref={formRef} noValidate className="space-y-4" onChange={() => saveLocal()} onBlur={(event) => {
+      const target = event.target;
+      if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement) target.setAttribute("aria-invalid", String(!target.checkValidity()));
+      validateStep(current, false);
+      saveLocal();
+    }} onSubmit={(event) => {
+      const button = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+      if (button?.formNoValidate) return;
+      for (let i = 0; i < steps.length; i++) {
+        if (!validateStep(i, true)) { event.preventDefault(); return; }
+      }
+      setError("");
+    }}>
+      <input type="hidden" name="target_profile_id" value={targetProfileId} />
+      {stepComponents.map((Step, index) => <fieldset key={initialSteps[index].id} data-step={index} hidden={index !== current} className="space-y-4"><legend className="sr-only">{initialSteps[index].title}</legend><Step bundle={restoredBundle} classes={classes} onValueChange={(name, value) => saveLocal({ [name]: value })} /></fieldset>)}
+      <div className="flex flex-wrap items-center gap-3 border-t border-border pt-4">
+        <Button type="button" variant="outline" className="min-h-11" disabled={current === 0} onClick={() => { setError(""); setCurrent(current - 1); }}>Voltar</Button>
+        {current < 3 ? <Button type="button" className="min-h-11" onClick={() => { saveLocal(); if (validateStep(current, true)) { setError(""); setCurrent(current + 1); } }}>Avançar</Button> : <FormSubmitButton className="min-h-11" formAction={bundle.enrollment.status === "draft" ? submitEnrollmentAction : saveEnrollmentDraftAction} pendingLabel="Enviando…">{bundle.enrollment.status === "draft" ? "Enviar para análise" : "Salvar alterações"}</FormSubmitButton>}
+        <FormSubmitButton className="min-h-11" variant="outline" formAction={saveEnrollmentDraftAction} formNoValidate pendingLabel="Salvando…">Salvar rascunho</FormSubmitButton>
       </div>
-      <Separator />
-      {children}
-    </section>
-  );
-}
-
-export function EnrollmentForm({
-  bundle,
-  targetProfileId,
-  classes,
-  message,
-  feedback: initialFeedback
-}: {
-  bundle: EnrollmentBundle;
-  targetProfileId: string;
-  classes: TrainingClass[];
-  message?: string;
-  feedback?: { tone: "success" | "error" | "info" | "warning"; title: string } | null;
-}) {
-  const { student, enrollment, documents } = bundle;
-  const today = new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" });
-  const isDraft = enrollment.status === "draft";
-  const feedback = initialFeedback ?? (message ? {
-    tone: message.includes("não") || message.includes("Adicione") || message.includes("erro") ? "error" as const : "success" as const,
-    title: message
-  } : null);
-  const selectableClasses = classes.filter(
-    (item) => item.status === "active" || item.$id === student.training_class_id
-  );
-  const profilePhoto = documents.find(
-    (document) => document.document_type === "profile_photo" && document.status !== "rejected"
-  );
-  const medicalCertificate = documents.find(
-    (document) => document.document_type === "medical_certificate" && document.status !== "rejected"
-  );
-
-  const checklistItems = [
-    { label: "Nome completo", ok: Boolean(student.full_name) },
-    { label: "CPF", ok: Boolean(student.cpf) },
-    { label: "Data de nascimento", ok: Boolean(student.birth_date) },
-    { label: "WhatsApp", ok: Boolean(student.whatsapp) },
-    { label: "Endereço completo", ok: Boolean(student.address) },
-    { label: "Contato de emergência", ok: Boolean(student.emergency_contact_name && student.emergency_contact_phone) },
-    { label: "Início no Taekwondo", ok: Boolean(student.started_at_tkd) },
-    { label: "Graduação / Faixa", ok: Boolean(student.current_belt) },
-    { label: "Turma de treino", ok: Boolean(student.training_class_id) },
-    { label: "Dia de vencimento", ok: Boolean(enrollment.requested_due_day) },
-    { label: "Foto do aluno", ok: Boolean(profilePhoto) }
-  ];
-
-  const completed = checklistItems.filter((item) => item.ok).length;
-  const progress = Math.round((completed / checklistItems.length) * 100);
-
-  const statusTone =
-    enrollment.status === "cancelled"
-      ? "danger"
-      : enrollment.status === "active"
-        ? "success"
-        : enrollment.status === "awaiting_renewal"
-          ? "warning"
-          : enrollment.status === "draft"
-            ? "neutral"
-            : "info";
-
-  return (
-    <div className="space-y-6">
-      {feedback ? (
-        <OperationToast
-          tone={feedback.tone}
-          title={feedback.title}
-          clearParams={["saved", "submitted", "error"]}
-        />
-      ) : null}
-
-      <form className="space-y-6">
-        <input type="hidden" name="target_profile_id" value={targetProfileId} />
-
-        <div className="grid gap-6 lg:grid-cols-12 lg:items-start">
-          {/* Coluna principal do formulário (8 colunas no desktop) */}
-          <div className="space-y-6 lg:col-span-8">
-            <fieldset className="space-y-6">
-              {/* Seção 1: Dados pessoais (Grid 12 colunas) */}
-              <Section
-                number="1"
-                title="Dados pessoais"
-                description="Informações fundamentais de identificação do aluno."
-              >
-                <div className="grid gap-4 sm:grid-cols-12">
-                  <div className="sm:col-span-12 lg:col-span-6">
-                    <Field
-                      label="Nome completo"
-                      name="full_name"
-                      defaultValue={student.full_name}
-                      required
-                      autoComplete="name"
-                    />
-                  </div>
-                  <div className="sm:col-span-6 lg:col-span-3">
-                    <Field
-                      label="CPF"
-                      name="cpf"
-                      defaultValue={student.cpf ?? ""}
-                      required
-                      placeholder="Somente números"
-                    />
-                  </div>
-                  <div className="sm:col-span-6 lg:col-span-3">
-                    <DateField
-                      id="enrollment-birth-date"
-                      name="birth_date"
-                      label="Data de nascimento"
-                      defaultValue={dateValue(student.birth_date)}
-                      min="1920-01-01"
-                      max={today}
-                      required
-                    />
-                  </div>
-                </div>
-              </Section>
-
-              {/* Seção 2: Contato e Endereço */}
-              <Section
-                number="2"
-                title="Contato e endereço"
-                description="Canais para contato da coordenação e endereço residencial com busca automática por CEP."
-              >
-                <div className="grid gap-4 sm:grid-cols-12">
-                  <div className="sm:col-span-12 sm:col-span-6">
-                    <PhoneField
-                      id="enrollment-whatsapp"
-                      label="WhatsApp"
-                      name="whatsapp"
-                      defaultValue={student.whatsapp ?? ""}
-                      required
-                    />
-                  </div>
-                  <div className="sm:col-span-12 sm:col-span-6">
-                    <PhoneField
-                      id="enrollment-guardian-contact"
-                      label="Contato do responsável"
-                      name="guardian_contact"
-                      defaultValue={student.guardian_contact ?? ""}
-                      placeholder="(21) 9 6518-8988"
-                    />
-                  </div>
-                  <div className="sm:col-span-12">
-                    <AddressFields
-                      defaultValue={student.address}
-                      required={!isDraft}
-                    />
-                  </div>
-                </div>
-              </Section>
-
-              {/* Seção 3: Contato de emergência */}
-              <Section
-                number="3"
-                title="Contato de emergência"
-                description="Pessoa autorizada a ser acionada em caso de necessidade médica ou urgente."
-              >
-                <div className="grid gap-4 sm:grid-cols-12">
-                  <div className="sm:col-span-12 lg:col-span-5">
-                    <Field
-                      label="Nome do contato"
-                      name="emergency_contact_name"
-                      defaultValue={student.emergency_contact_name ?? ""}
-                      required
-                    />
-                  </div>
-                  <div className="sm:col-span-6 lg:col-span-3">
-                    <Field
-                      label="Parentesco / Relação"
-                      name="emergency_contact_relationship"
-                      defaultValue={student.emergency_contact_relationship ?? ""}
-                      required
-                    />
-                  </div>
-                  <div className="sm:col-span-6 lg:col-span-4">
-                    <PhoneField
-                      id="enrollment-emergency-phone"
-                      label="Telefone de emergência"
-                      name="emergency_contact_phone"
-                      defaultValue={student.emergency_contact_phone ?? ""}
-                      required
-                    />
-                  </div>
-                </div>
-              </Section>
-
-              {/* Seção 4: Taekwondo e Turma */}
-              <Section
-                number="4"
-                title="Taekwondo"
-                description="Histórico marcial, graduação atual e turma semanal desejada."
-              >
-                <div className="space-y-4">
-                  <div className="grid gap-4 sm:grid-cols-12">
-                    <div className="sm:col-span-12 sm:col-span-6">
-                      <DateField
-                        id="enrollment-tkd-start"
-                        name="started_at_tkd"
-                        label="Início no Taekwondo"
-                        defaultValue={dateValue(student.started_at_tkd)}
-                        min="1950-01-01"
-                        max={today}
-                        required
-                      />
-                    </div>
-                    <div className="sm:col-span-12 sm:col-span-6">
-                      <FormField>
-                        <FieldLabel htmlFor="training-class">Turma desejada *</FieldLabel>
-                        <Select
-                          name="training_class_id"
-                          defaultValue={student.training_class_id ?? ""}
-                          required
-                        >
-                          <SelectTrigger id="training-class" className="w-full">
-                            <SelectValue placeholder="Selecione uma turma" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {selectableClasses.map((item) => (
-                              <SelectItem key={item.$id} value={item.$id}>
-                                {item.name} · {item.weekdays.map((day) => day.slice(0, 3)).join("/")} ·{" "}
-                                {item.start_time}–{item.end_time}
-                                {item.status === "inactive" ? " (inativa)" : ""}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {selectableClasses.length === 0 ? (
-                          <FieldDescription className="text-destructive">
-                            O professor ainda não cadastrou turmas disponíveis.
-                          </FieldDescription>
-                        ) : null}
-                      </FormField>
-                    </div>
-                  </div>
-                  <GraduationFields defaultBelt={student.current_belt} defaultGub={student.gub} />
-                </div>
-              </Section>
-
-              {/* Seção 5: Saúde e Cuidados */}
-              <Section
-                number="5"
-                title="Saúde e bem-estar"
-                description="Informações confidenciais acessíveis somente ao professor e responsáveis para segurança do praticante."
-              >
-                <div className="grid gap-4 sm:grid-cols-12">
-                  <div className="sm:col-span-12 sm:col-span-4">
-                    <FormField>
-                      <FieldLabel htmlFor="health-condition">Possui condição de saúde? *</FieldLabel>
-                      <Select
-                        name="health_condition"
-                        defaultValue={student.health_condition ?? ""}
-                        required
-                      >
-                        <SelectTrigger id="health-condition" className="w-full">
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="no">Não</SelectItem>
-                          <SelectItem value="yes">Sim</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormField>
-                  </div>
-                  <div className="sm:col-span-12 sm:col-span-8">
-                    <Field
-                      label="Medicamentos de uso contínuo"
-                      name="medications"
-                      defaultValue={student.medications ?? ""}
-                      placeholder="Se houver, liste aqui"
-                    />
-                  </div>
-                  <FormField className="sm:col-span-12">
-                    <FieldLabel htmlFor="health-details">Detalhes da condição de saúde</FieldLabel>
-                    <Textarea
-                      id="health-details"
-                      name="health_details"
-                      defaultValue={student.health_details ?? ""}
-                      placeholder="Informações adicionais relevantes para o treino"
-                      rows={2}
-                    />
-                  </FormField>
-                  <div className="sm:col-span-12 sm:col-span-6">
-                    <Field
-                      label="Alergias"
-                      name="allergies"
-                      defaultValue={student.allergies ?? ""}
-                      placeholder="Medicamentos, alimentos ou outras"
-                    />
-                  </div>
-                  <div className="sm:col-span-12 sm:col-span-6">
-                    <Field
-                      label="Lesões anteriores ou restrições físicas"
-                      name="injuries"
-                      defaultValue={student.injuries ?? ""}
-                      placeholder="Cirurgias, articulações, etc."
-                    />
-                  </div>
-                </div>
-              </Section>
-
-              {/* Seção 6: Preferência de pagamento */}
-              <Section
-                number="6"
-                title="Preferência de pagamento"
-                description="Escolha o melhor dia para o vencimento da mensalidade. Será homologado na revisão contratual."
-              >
-                <FormField className="max-w-xs">
-                  <FieldLabel htmlFor="requested-due-day">Dia de vencimento preferido *</FieldLabel>
-                  <Select
-                    name="requested_due_day"
-                    defaultValue={
-                      enrollment.requested_due_day ? String(enrollment.requested_due_day) : ""
-                    }
-                    required
-                  >
-                    <SelectTrigger id="requested-due-day" className="w-full">
-                      <SelectValue placeholder="Selecione o dia" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DUE_DAY_OPTIONS.map((day) => (
-                        <SelectItem key={day} value={String(day)}>
-                          Dia {day} de cada mês
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormField>
-              </Section>
-
-              {/* Seção 7: Documentos */}
-              <Section
-                number="7"
-                title="Documentos"
-                description="Arquivos seguros de até 5 MB. A foto é obrigatória para conclusão e emissão de graduação."
-              >
-                <div className="grid gap-5 md:grid-cols-2">
-                  <div className="flex items-start gap-4 rounded-xl border bg-muted/20 p-4">
-                    <StudentAvatar
-                      name={student.full_name}
-                      photoDocumentId={profilePhoto?.$id}
-                      size="lg"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <FileField
-                        name="profile_photo"
-                        label="Foto do aluno *"
-                        accept="image/jpeg,image/png,image/webp"
-                        description={
-                          profilePhoto
-                            ? "Envie outro arquivo somente se desejar substituir a foto atual."
-                            : "Obrigatória. JPG, PNG ou WebP, até 5 MB."
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="rounded-xl border bg-muted/20 p-4">
-                    <FileField
-                      name="medical_certificate"
-                      label="Atestado médico"
-                      accept="image/jpeg,image/png,image/webp,application/pdf"
-                      description="Recomendado para prática esportiva. Imagem ou PDF, até 5 MB."
-                    />
-                  </div>
-
-                  {documents.length > 0 ? (
-                    <div className="flex flex-wrap gap-3 md:col-span-2">
-                      {documents.map((document) => (
-                        <Attachment key={document.$id}>
-                          <AttachmentMedia>
-                            {document.document_type === "profile_photo" ? (
-                              <ImageIcon aria-hidden="true" />
-                            ) : (
-                              <FileText aria-hidden="true" />
-                            )}
-                          </AttachmentMedia>
-                          <AttachmentContent>
-                            <AttachmentTitle>
-                              <Link
-                                className="underline"
-                                href={`/api/student-documents/${document.$id}`}
-                              >
-                                {labels[document.document_type]}
-                              </Link>
-                            </AttachmentTitle>
-                            <AttachmentDescription>
-                              {document.status === "rejected"
-                                ? document.rejection_reason
-                                  ? `Correção: ${document.rejection_reason}`
-                                  : "Precisa de correção"
-                                : documentStatusLabels[document.status] ?? document.status}
-                            </AttachmentDescription>
-                          </AttachmentContent>
-                        </Attachment>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              </Section>
-            </fieldset>
-          </div>
-
-          {/* Coluna lateral Sticky no Desktop (4 colunas) */}
-          <div className="space-y-4 lg:col-span-4 lg:sticky lg:top-6">
-            <Card className="border-primary/20 bg-card shadow-sm">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between gap-2">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    Ficha de matrícula
-                  </CardTitle>
-                  <StatusBadge tone={statusTone}>
-                    {statusLabels[enrollment.status] ?? enrollment.status}
-                  </StatusBadge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Resumo do Aluno */}
-                <div className="flex items-center gap-3 rounded-lg border bg-muted/20 p-3">
-                  <StudentAvatar
-                    name={student.full_name}
-                    photoDocumentId={profilePhoto?.$id}
-                    size="md"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-sm truncate">{student.full_name || "Novo Aluno"}</p>
-                    <div className="mt-0.5 flex items-center gap-2">
-                      <BeltBadge belt={student.current_belt} gub={student.gub} size="sm" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Barra de Progresso */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-xs text-muted-foreground font-medium">
-                    <span>Progresso dos dados essenciais</span>
-                    <span>{completed} de {checklistItems.length} ({progress}%)</span>
-                  </div>
-                  <Progress
-                    value={progress}
-                    aria-label={`${completed} de ${checklistItems.length} itens essenciais preenchidos`}
-                  />
-                </div>
-
-                {/* Checklist resumido */}
-                <div className="space-y-1.5 pt-1 text-xs">
-                  <p className="font-medium text-muted-foreground">Itens essenciais:</p>
-                  <div className="grid grid-cols-1 gap-1 max-h-48 overflow-y-auto pr-1">
-                    {checklistItems.map((item) => (
-                      <div
-                        key={item.label}
-                        className={`flex items-center gap-2 py-0.5 ${
-                          item.ok ? "text-foreground font-medium" : "text-muted-foreground"
-                        }`}
-                      >
-                        {item.ok ? (
-                          <CheckCircle2 className="size-3.5 text-success shrink-0" aria-hidden="true" />
-                        ) : (
-                          <Circle className="size-3.5 text-muted-foreground/40 shrink-0" aria-hidden="true" />
-                        )}
-                        <span className="truncate">{item.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground">
-                  <p className="font-medium text-foreground">
-                    {isDraft ? "Rascunho editável" : "Cadastro em dia"}
-                  </p>
-                  <p className="mt-1">
-                    {isDraft
-                      ? "Preencha os campos obrigatórios e envie para análise pela barra de ações abaixo."
-                      : "Você pode atualizar seus dados cadastrais, endereço e saúde a qualquer momento."}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Barra de ação persistente (única no DOM, acessível em qualquer rolagem) */}
-        {isDraft ? (
-          <div className="sticky bottom-20 z-10 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-background/95 p-4 shadow-lg backdrop-blur md:bottom-3">
-            <p className="text-xs text-muted-foreground hidden sm:block">
-              {completed === checklistItems.length
-                ? "Todos os campos essenciais estão preenchidos."
-                : `${checklistItems.length - completed} item(ns) pendente(s) para conclusão total.`}
-            </p>
-            <div className="flex flex-wrap items-center gap-3">
-              <FormSubmitButton
-                variant="outline"
-                formAction={saveEnrollmentDraftAction}
-                pendingLabel="Salvando…"
-                formNoValidate
-              >
-                Salvar rascunho
-              </FormSubmitButton>
-              <FormSubmitButton formAction={submitEnrollmentAction} pendingLabel="Enviando…">
-                Enviar para análise
-              </FormSubmitButton>
-            </div>
-          </div>
-        ) : (
-          <div className="sticky bottom-20 z-10 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-background/95 p-4 shadow-lg backdrop-blur md:bottom-3">
-            <p className="text-xs text-muted-foreground">
-              Você pode atualizar suas informações cadastrais, de contato, emergência e saúde a qualquer momento.
-            </p>
-            <FormSubmitButton
-              formAction={saveEnrollmentDraftAction}
-              pendingLabel="Salvando alterações…"
-              formNoValidate
-            >
-              Salvar alterações
-            </FormSubmitButton>
-          </div>
-        )}
-      </form>
-    </div>
-  );
+    </form>
+  </div>;
 }
