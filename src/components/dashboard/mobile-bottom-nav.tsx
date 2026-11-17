@@ -2,39 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Activity,
-  Award,
-  Bell,
-  Building2,
-  CalendarCheck2,
-  ClipboardList,
-  FileSignature,
-  LayoutDashboard,
-  Menu,
-  UserRound,
-  UsersRound,
-  WalletCards,
-  type LucideIcon
-} from "lucide-react";
+import { Bell, LayoutDashboard, Menu, type LucideIcon } from "lucide-react";
+import { NAV_ICONS } from "@/lib/navigation/nav-icons";
 import { useSidebar } from "@/components/ui/sidebar";
 import type { AppSidebarNavItem } from "@/components/dashboard/app-sidebar";
-import type { SidebarNavIcon } from "@/lib/navigation/routes";
 import { cn } from "@/lib/utils";
-
-const navIcons: Record<SidebarNavIcon, LucideIcon> = {
-  dashboard: LayoutDashboard,
-  notifications: Bell,
-  enrollment: ClipboardList,
-  students: UsersRound,
-  classes: Building2,
-  exams: Award,
-  attendance: CalendarCheck2,
-  family: UserRound,
-  contracts: FileSignature,
-  billing: WalletCards,
-  system: Activity
-};
 
 export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] }) {
   const pathname = usePathname();
@@ -47,7 +19,7 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
   const notificationsItem = navItems.find((i) => i.icon === "notifications");
 
   // 3. Identificar os itens centrais mais relevantes (treino, financeiro, turmas, alunos, dependentes)
-  const candidateIcons: Array<keyof typeof navIcons> = [
+  const candidateIcons: Array<keyof typeof NAV_ICONS> = [
     "attendance",
     "classes",
     "billing",
@@ -71,14 +43,14 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
   const bottomTabs: Array<{
     label: string;
     href?: string;
-    icon: typeof LayoutDashboard;
+    icon: LucideIcon;
     badge?: number;
     active?: boolean;
     isMenuTrigger?: boolean;
   }> = [];
 
   if (homeItem) {
-    const Icon = navIcons[homeItem.icon ?? "dashboard"] ?? LayoutDashboard;
+    const Icon = NAV_ICONS[homeItem.icon ?? "dashboard"] ?? LayoutDashboard;
     const isHomeActive = homeItem.exact
       ? pathname === homeItem.href
       : pathname === homeItem.href || pathname.startsWith(`${homeItem.href}/`);
@@ -91,7 +63,7 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
   }
 
   for (const item of middleItems) {
-    const Icon = navIcons[item.icon ?? "dashboard"] ?? LayoutDashboard;
+    const Icon = NAV_ICONS[item.icon ?? "dashboard"] ?? LayoutDashboard;
     const isActive = item.exact
       ? pathname === item.href
       : pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -124,7 +96,7 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
   return (
     <nav
       aria-label="Navegação móvel principal"
-      className="fixed inset-x-0 bottom-0 z-40 block border-t bg-background/95 pb-[env(safe-area-inset-bottom)] shadow-lg backdrop-blur-md md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 block border-t border-border bg-background pb-[env(safe-area-inset-bottom)] md:hidden"
     >
       <div className="flex h-16 items-center justify-around px-2">
         {bottomTabs.map((tab, idx) => {
@@ -132,24 +104,24 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
           const content = (
             <div
               className={cn(
-                "relative flex flex-col items-center justify-center gap-1 rounded-xl px-3 py-1.5 transition-colors",
+                "relative flex w-full min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 transition-colors duration-200 motion-reduce:transition-none",
                 tab.active
-                  ? "text-primary font-semibold"
+                  ? "text-primary-text font-semibold"
                   : "text-muted-foreground hover:text-foreground active:scale-95"
               )}
             >
               <div className="relative">
-                <Icon className={cn("size-5", tab.active ? "stroke-[2.5]" : "stroke-2")} aria-hidden="true" />
+                <Icon className={cn("size-5 stroke-2")} aria-hidden="true" />
                 {tab.badge && tab.badge > 0 ? (
                   <span
-                    className="absolute -top-1 -right-2 flex size-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground animate-in zoom-in-50"
+                    className="absolute -top-1 -right-2 flex size-4 items-center justify-center rounded-full bg-destructive text-xs font-semibold text-destructive-foreground"
                     aria-label={`${tab.badge} notificações`}
                   >
                     {tab.badge > 9 ? "9+" : tab.badge}
                   </span>
                 ) : null}
               </div>
-              <span className="text-[11px] tracking-tight">{tab.label}</span>
+              <span className="w-full truncate text-center text-sm">{tab.label}</span>
               {tab.active ? (
                 <span className="absolute bottom-0 h-0.5 w-6 rounded-full bg-primary" aria-hidden="true" />
               ) : null}
@@ -162,7 +134,7 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
                 key={`tab-menu-${idx}`}
                 type="button"
                 onClick={() => setOpenMobile(true)}
-                className="flex flex-1 items-center justify-center touch-manipulation"
+                className="flex min-h-11 min-w-0 flex-1 items-center justify-center touch-manipulation"
                 aria-label="Abrir menu completo"
               >
                 {content}
@@ -174,7 +146,7 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
             <Link
               key={tab.href}
               href={tab.href!}
-              className="flex flex-1 items-center justify-center touch-manipulation"
+              className="flex min-h-11 min-w-0 flex-1 items-center justify-center touch-manipulation"
               aria-current={tab.active ? "page" : undefined}
             >
               {content}

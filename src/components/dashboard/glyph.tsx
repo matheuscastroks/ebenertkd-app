@@ -7,7 +7,7 @@ export function Glyph({ label, className = "" }: GlyphProps) {
   return (
     <span
       aria-hidden="true"
-      className={`inline-flex h-5 min-w-5 items-center justify-center text-sm font-bold ${className}`.trim()}
+      className={`inline-flex h-5 min-w-5 items-center justify-center text-sm font-semibold ${className}`.trim()}
     >
       {label}
     </span>

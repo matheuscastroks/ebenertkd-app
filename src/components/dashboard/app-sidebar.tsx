@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Activity, Award, Bell, Building2, CalendarCheck2, ChevronRight, ClipboardList, FileSignature, LayoutDashboard, UserRound, UsersRound, WalletCards } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import { NAV_ICONS } from "@/lib/navigation/nav-icons";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Sidebar,
@@ -28,22 +29,9 @@ import type { SidebarNavItem } from "@/lib/navigation/routes";
 
 export type AppSidebarNavItem = SidebarNavItem;
 
-const navIcons = {
-  dashboard: LayoutDashboard,
-  notifications: Bell,
-  enrollment: ClipboardList,
-  students: UsersRound,
-  classes: Building2,
-  exams: Award,
-  attendance: CalendarCheck2,
-  family: UserRound,
-  contracts: FileSignature,
-  billing: WalletCards,
-  system: Activity
-};
-
 function NavigationItem({ item }: { item: AppSidebarNavItem }) {
   const { isMobile, setOpenMobile } = useSidebar();
+  const Icon = NAV_ICONS[item.icon ?? "dashboard"];
   const handleNavClick = () => {
     if (isMobile) {
       setOpenMobile(false);
@@ -58,13 +46,12 @@ function NavigationItem({ item }: { item: AppSidebarNavItem }) {
     );
   }
 
-  const Icon = navIcons[item.icon ?? "dashboard"];
   if (!item.children?.length) {
     return (
       <SidebarMenuItem>
         <SidebarMenuButton asChild isActive={item.active} tooltip={item.label}>
           <Link href={item.href} onClick={handleNavClick}>
-            <Icon aria-hidden="true" />
+            <Icon aria-hidden="true" className="size-4 shrink-0" strokeWidth={2} />
             <span>{item.label}</span>
           </Link>
         </SidebarMenuButton>
@@ -87,7 +74,7 @@ function NavigationItem({ item }: { item: AppSidebarNavItem }) {
       <SidebarMenuItem>
         <SidebarMenuButton asChild isActive={item.active} tooltip={item.label}>
           <Link href={item.href} onClick={handleNavClick}>
-            <Icon aria-hidden="true" />
+            <Icon aria-hidden="true" className="size-4 shrink-0" strokeWidth={2} />
             <span>{item.label}</span>
           </Link>
         </SidebarMenuButton>
@@ -95,7 +82,7 @@ function NavigationItem({ item }: { item: AppSidebarNavItem }) {
           <SidebarMenuAction aria-label={`Alternar submenu de ${item.label}`}>
             <ChevronRight
               aria-hidden="true"
-              className="transition-transform group-data-[state=open]/collapsible:rotate-90"
+              className="transition-transform duration-200 motion-reduce:transition-none group-data-[state=open]/collapsible:rotate-90"
             />
           </SidebarMenuAction>
         </CollapsibleTrigger>
@@ -139,7 +126,7 @@ export function AppSidebar({
         <div className="flex items-center gap-2">
           <Image src="/brand-icon.png" alt="Símbolo da Ebener TKD" width={44} height={44} unoptimized className="size-11 shrink-0 object-contain group-data-[collapsible=icon]:size-6" />
           <div className="min-w-0 flex-1 space-y-1 group-data-[collapsible=icon]:hidden">
-            <p className="font-display text-sm font-bold tracking-wide">Ebener TKD</p>
+            <p className="font-display text-sm font-semibold">Ebener TKD</p>
             <p className="text-xs text-muted-foreground">Sua academia</p>
           </div>
         </div>

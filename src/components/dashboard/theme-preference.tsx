@@ -40,13 +40,13 @@ export function ThemePreference() {
               type="button"
               onClick={() => changeTheme(setTheme, value)}
               className={cn(
-                "flex flex-col items-center justify-center gap-2 rounded-xl border p-3.5 text-xs font-semibold transition-all h-20 outline-none select-none",
+                "flex flex-col items-center justify-center gap-2 rounded-xl border p-3.5 text-xs font-semibold transition-colors duration-200 motion-reduce:transition-none h-20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring select-none",
                 isActive
-                  ? "border-primary bg-primary/10 text-primary shadow-xs ring-1 ring-primary"
+                  ? "border-primary bg-primary/10 text-primary-text shadow-xs ring-1 ring-primary"
                   : "border-border/60 bg-muted/20 text-muted-foreground hover:bg-muted/40 hover:text-foreground"
               )}
             >
-              <Icon className={cn("size-5", isActive ? "text-primary" : "text-muted-foreground")} />
+              <Icon className={cn("size-5", isActive ? "text-primary-text" : "text-muted-foreground")} />
               <span>{label}</span>
             </button>
           );

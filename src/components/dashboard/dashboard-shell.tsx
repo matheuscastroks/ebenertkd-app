@@ -71,7 +71,7 @@ export function DashboardShell({
           <SidebarTrigger className="mt-0.5 size-9 shrink-0 md:size-8" />
           <div className="space-y-1 min-w-0 flex-1">
             {breadcrumbs ? <PageBreadcrumb items={breadcrumbs} /> : null}
-            <h1 className="font-display text-xl font-bold tracking-tight sm:text-2xl md:text-3xl break-words">
+            <h1 className="font-display text-xl font-semibold tracking-tight sm:text-2xl md:text-3xl break-words">
               {title}
             </h1>
             <p className="text-xs text-muted-foreground sm:text-sm">{subtitle}</p>
