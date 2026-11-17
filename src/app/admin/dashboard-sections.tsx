@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { MetricCard } from "@/components/shared/metric-card";
 import { listEnrollmentsForReview } from "@/features/students/service";
@@ -39,9 +38,28 @@ export async function UrgentTasksSection() {
   </section>;
 }
 
+/** Hora atual em São Paulo no formato HH:MM, para destacar o próximo treino do dia. */
+function nowTime() {
+  return new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "America/Sao_Paulo" }).format(new Date());
+}
+
 export async function TodayClassesSection() {
   const classes = (await listTrainingClasses()).filter((item) => item.status === "active" && item.weekdays.includes(getTodayWeekday())).sort((a, b) => a.start_time.localeCompare(b.start_time));
-  return <section className="space-y-3" aria-label="Treinos de hoje"><h2 className="text-base font-semibold">Treinos de hoje</h2>{classes.length ? <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{classes.map((item) => <Card key={item.$id}><CardHeader><CardTitle>{item.name}</CardTitle></CardHeader><CardContent className="space-y-3"><p className="text-sm">{item.start_time} às {item.end_time}</p><p className="text-sm text-muted-foreground">{item.location || "Local não informado"}</p><Button asChild className="min-h-11 w-full"><Link href={adminClassPath(item.$id)}>Fazer chamada</Link></Button></CardContent></Card>)}</div> : <p className="text-sm text-muted-foreground">Nenhum treino agendado para hoje.</p>}</section>;
+  const now = nowTime();
+  // Só o próximo treino (ou o que está acontecendo) recebe a ação primária da tela.
+  const nextId = (classes.find((item) => item.end_time > now) ?? classes.at(-1))?.$id;
+  return <section className="space-y-3" aria-label="Treinos de hoje">
+    <h2 className="text-base font-semibold">Treinos de hoje</h2>
+    {classes.length ? <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+      {classes.map((item) => <li key={item.$id} className="flex flex-wrap items-center justify-between gap-3 p-4">
+        <div className="min-w-0">
+          <p className="text-sm font-medium">{item.name}</p>
+          <p className="text-sm text-muted-foreground"><span className="tabular-nums">{item.start_time} às {item.end_time}</span> · {item.location || "Local não informado"}</p>
+        </div>
+        <Button asChild variant={item.$id === nextId ? "default" : "outline"} className="min-h-11"><Link href={adminClassPath(item.$id)}>Fazer chamada</Link></Button>
+      </li>)}
+    </ul> : <p className="text-sm text-muted-foreground">Nenhum treino agendado para hoje. A grade fica em Turmas.</p>}
+  </section>;
 }
 
 export async function AdminMetricsSection() {

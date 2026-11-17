@@ -46,8 +46,8 @@ export function ChargeActions({
           trigger={
             <Button
               size="sm"
-              variant={proof ? "default" : "outline"}
-              className="h-9 touch-manipulation font-semibold"
+              variant={proof ? "outline" : "ghost"}
+              className="min-h-11 touch-manipulation md:min-h-9"
             >
               {proof ? "Revisar comprovante" : "Gerenciar"}
             </Button>
@@ -67,9 +67,9 @@ export function ChargeActions({
             <TabsContent value="proof" className="pt-4 space-y-4">
               {proof ? (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border p-3">
                     <div className="flex items-center gap-2 text-sm font-medium">
-                      <FileText className="size-4 text-primary-text shrink-0" aria-hidden="true" />
+                      <FileText className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                       <span>Comprovante anexado pelo aluno (v{proof.version})</span>
                     </div>
                     <Button asChild size="sm" variant="outline">
@@ -86,10 +86,10 @@ export function ChargeActions({
                   </div>
 
                   {/* Aprovar Comprovante */}
-                  <ConfirmationForm id={`approve-${instanceId}-${proof.$id}`} action={decidePaymentProofAction} className="rounded-xl border border-success/30 bg-success/5 p-4 space-y-3">
+                  <ConfirmationForm id={`approve-${instanceId}-${proof.$id}`} action={decidePaymentProofAction} className="space-y-3 rounded-xl border border-border p-4">
                     <input type="hidden" name="proof_id" value={proof.$id} />
                     <input type="hidden" name="decision" value="approved" />
-                    <p className="text-xs font-semibold text-success">
+                    <p className="text-sm font-semibold">
                       Aprovar recebimento
                     </p>
                     <div className="grid gap-3 sm:grid-cols-2">
@@ -110,11 +110,11 @@ export function ChargeActions({
                   {/* Recusar Comprovante */}
                   <ConfirmationForm
                     id={`reject-form-${instanceId}-${proof.$id}`} action={decidePaymentProofAction}
-                    className="rounded-xl border border-destructive/20 bg-destructive/5 p-4 space-y-3"
+                    className="space-y-3 rounded-xl border border-border p-4"
                   >
                     <input type="hidden" name="proof_id" value={proof.$id} />
                     <input type="hidden" name="decision" value="rejected" />
-                    <p className="text-xs font-semibold text-destructive">
+                    <p className="text-sm font-semibold">
                       Recusar comprovante
                     </p>
                     <Field>
@@ -130,7 +130,7 @@ export function ChargeActions({
                         O aluno receberá esta orientação no portal e poderá enviar um novo arquivo.
                       </FieldDescription>
                     </Field>
-                    <ConsequenceDialog trigger={<Button type="button" variant="destructive" className="min-h-11">Recusar comprovante</Button>} title="Recusar comprovante?" summary={summary} effect="O aluno receberá o motivo e poderá enviar outro comprovante. A cobrança continua em aberto." confirmLabel="Recusar comprovante" destructive action={decidePaymentProofAction} formId={`reject-form-${instanceId}-${proof.$id}`} />
+                    <ConsequenceDialog trigger={<Button type="button" variant="outline" className="min-h-11 text-destructive">Recusar comprovante</Button>} title="Recusar comprovante?" summary={summary} effect="O aluno receberá o motivo e poderá enviar outro comprovante. A cobrança continua em aberto." confirmLabel="Recusar comprovante" destructive action={decidePaymentProofAction} formId={`reject-form-${instanceId}-${proof.$id}`} />
                   </ConfirmationForm>
                 </div>
               ) : null}
@@ -227,7 +227,7 @@ export function ChargeActions({
       ) : null}
 
       {payment ? (
-        <ConsequenceDialog trigger={<Button size="sm" variant="outline" className="min-h-11">Estornar</Button>} title={`Estornar pagamento de ${studentName}?`} summary={[...summary.filter((item) => item.label !== "Valor"), { label: "Valor estornado", value: formatBrl(payment.amount_cents) }, { label: "Pagamento original", value: new Date(payment.paid_at).toLocaleDateString("pt-BR", { timeZone: "UTC" }) }]} effect="A cobrança volta a ficar em aberto: Pendente ou Em atraso, conforme o vencimento. O estorno ficará registrado no histórico." confirmLabel="Confirmar estorno" destructive action={reversePaymentAction}>
+        <ConsequenceDialog trigger={<Button size="sm" variant="ghost" className="min-h-11 md:min-h-9">Estornar</Button>} title={`Estornar pagamento de ${studentName}?`} summary={[...summary.filter((item) => item.label !== "Valor"), { label: "Valor estornado", value: formatBrl(payment.amount_cents) }, { label: "Pagamento original", value: new Date(payment.paid_at).toLocaleDateString("pt-BR", { timeZone: "UTC" }) }]} effect="A cobrança volta a ficar em aberto: Pendente ou Em atraso, conforme o vencimento. O estorno ficará registrado no histórico." confirmLabel="Confirmar estorno" destructive action={reversePaymentAction}>
           <input type="hidden" name="payment_id" value={payment.$id} />
           <Field><FieldLabel htmlFor={`reversal-${instanceId}-${payment.$id}`}>Motivo do estorno</FieldLabel><Input id={`reversal-${instanceId}-${payment.$id}`} name="reason" required minLength={3} /></Field>
         </ConsequenceDialog>

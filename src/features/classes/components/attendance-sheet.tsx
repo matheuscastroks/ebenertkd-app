@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import type { AttendanceStatus } from "@/features/classes/attendance-rules";
 import { cn } from "cn";
@@ -27,9 +26,9 @@ type AttendanceRow = {
 };
 
 const options: { value: AttendanceStatus; label: string; icon: typeof Check; active: string }[] = [
-  { value: "present", label: "Presente", icon: Check, active: "border-success bg-success/15 text-success-foreground font-semibold" },
-  { value: "absent", label: "Falta", icon: CircleSlash2, active: "border-destructive bg-destructive/15 text-destructive font-semibold" },
-  { value: "excused", label: "Justificada", icon: ShieldCheck, active: "border-warning bg-warning/15 text-warning-foreground font-semibold" }
+  { value: "present", label: "Presente", icon: Check, active: "border-success bg-success-soft text-success-foreground" },
+  { value: "absent", label: "Falta", icon: CircleSlash2, active: "border-destructive bg-danger-soft text-danger-text" },
+  { value: "excused", label: "Justificada", icon: ShieldCheck, active: "border-warning bg-warning-soft text-warning-foreground" }
 ];
 
 export function AttendanceSheet({ classId, lessonId, lessonCompleted, rows, notice }: { classId: string; lessonId: string; lessonCompleted: boolean; rows: AttendanceRow[]; notice?: "saved" | "reason" | "error" }) {
@@ -50,35 +49,35 @@ export function AttendanceSheet({ classId, lessonId, lessonCompleted, rows, noti
     <div className="sticky top-3 z-10 space-y-3 rounded-xl border bg-background p-4 shadow-xs">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="font-semibold text-sm sm:text-base">{selectedCount} de {rows.length} alunos marcados</p>
+          <p className="text-base font-semibold tabular-nums">{selectedCount} de {rows.length} alunos marcados</p>
           <p className="text-sm text-muted-foreground">Salvar só ao concluir</p>
         </div>
         <Button
           type="button"
           variant="outline"
           size="sm"
+          disabled={rows.length === 0 || complete}
           className="min-h-11 touch-manipulation font-medium"
           onClick={() => setStatuses((current) => ({ ...Object.fromEntries(rows.map((row) => [row.classEnrollmentId, "present"])), ...current }))}
         >
-          <Check className="size-4 mr-1.5 text-success" aria-hidden="true" />
+          <Check className="size-4" aria-hidden="true" />
           Marcar restantes como presentes
         </Button>
       </div>
       <Progress value={rows.length ? (selectedCount / rows.length) * 100 : 0} aria-label={`${selectedCount} de ${rows.length} alunos marcados`} />
     </div>
 
-    {rows.length === 0 ? <EmptyState title="Turma sem alunos ativos" description="Ative uma matrícula vinculada a esta turma antes de realizar a chamada." /> : rows.map((row) => <Card key={row.classEnrollmentId} className="border-border shadow-xs">
+    {rows.length === 0 ? <EmptyState title="Turma sem alunos ativos" description="Ative uma matrícula vinculada a esta turma antes de realizar a chamada." /> : rows.map((row) => <Card key={row.classEnrollmentId}>
       <CardContent className="space-y-3 p-4">
         <div className="flex items-center gap-3">
           <StudentAvatar name={row.studentName} photoDocumentId={row.photoDocumentId} size="md" />
           <div className="min-w-0 flex-1">
-            <p className="truncate font-semibold text-sm sm:text-base">{row.studentName}</p>
+            <p className="truncate text-base font-medium">{row.studentName}</p>
             <div className="mt-0.5">
               <BeltBadge belt={row.belt} gub={row.gub} size="sm" />
             </div>
           </div>
         </div>
-        <Separator />
         <div className="grid grid-cols-1 gap-2 min-[390px]:grid-cols-3" role="group" aria-label={`Presença de ${row.studentName}`}>
           {options.map(({ value, label, icon: Icon, active }) => <Button key={value} type="button" variant="outline" className={cn("h-11 touch-manipulation text-sm", statuses[row.classEnrollmentId] === value && active)} aria-pressed={statuses[row.classEnrollmentId] === value} onClick={() => setStatuses((current) => ({ ...current, [row.classEnrollmentId]: value }))}><Icon aria-hidden="true" />{label}</Button>)}
         </div>

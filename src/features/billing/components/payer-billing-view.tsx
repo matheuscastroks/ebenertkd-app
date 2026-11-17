@@ -9,10 +9,11 @@ import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CopyPixButton } from "@/features/billing/components/copy-pix-button";
+import { formatCompetence } from "@/features/billing/format-competence";
 import { filterPayerCharges, type PayerChargeView } from "@/features/billing/payer-billing-filters";
 import type { BillingSettings, Charge, PaymentProof } from "@/features/billing/types";
 
@@ -26,6 +27,26 @@ const labels = { pending: "Pendente", proof_under_review: "Em análise", paid: "
 const tones: Record<keyof typeof labels, StatusTone> = { pending: "warning", proof_under_review: "info", paid: "success", overdue: "danger", cancelled: "neutral" };
 const money = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value / 100);
 const date = (value: string) => new Date(value).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+const typeLabels: Record<Charge["charge_type"], string> = { monthly_fee: "Mensalidade", enrollment_fee: "Taxa de matrícula", exam_fee: "Taxa de exame", exit_fee: "Taxa de saída" };
+const ALL_MONTHS = "all";
+
+/** Título legível da cobrança: troca a competência crua ("2026-10") por "out/2026". */
+export function chargeTitle(charge: Pick<Charge, "description" | "competence" | "charge_type">) {
+  const readable = formatCompetence(charge.competence);
+  const base = charge.description?.trim() || typeLabels[charge.charge_type] || "Cobrança";
+  if (readable === "—") return base;
+  if (!base.includes(charge.competence)) return base;
+  const [before, after] = base.split(charge.competence, 2);
+  const prefix = before.replace(/[\s·-]+$/, "");
+  return `${prefix ? `${prefix} · ` : ""}${readable}${after ?? ""}`;
+}
+
+const isPayable = (charge: Charge) => charge.status === "pending" || charge.status === "overdue";
+
+/** A cobrança mais urgente (atrasada primeiro, depois a de vencimento mais próximo) recebe a única ação primária. */
+export function mostUrgentChargeId(charges: Charge[]) {
+  return [...charges].filter(isPayable).sort((a, b) => (a.status === b.status ? a.due_date.localeCompare(b.due_date) : a.status === "overdue" ? -1 : 1))[0]?.$id;
+}
 
 function ChargeDetails({ charge, proof, settings, profileId }: { charge: Charge; proof?: PaymentProof; settings: BillingSettings | null; profileId?: string }) {
   const canUpload = charge.status === "pending" || charge.status === "overdue" || charge.status === "proof_under_review";
@@ -46,22 +67,24 @@ export function PayerBillingView({ charges, proofs, settings, profileId, initial
   const currentPage = Math.min(page, totalPages);
   const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   const changeView = (next: PayerChargeView) => { setView(next); setPage(1); };
+  const urgentId = useMemo(() => mostUrgentChargeId(charges), [charges]);
+  const months = useMemo(() => [...new Set(charges.map((charge) => charge.competence).filter((value) => formatCompetence(value) !== "—"))].sort().reverse(), [charges]);
 
   const details = (charge: Charge) => {
-    const isPayable = charge.status === "pending" || charge.status === "overdue";
+    const payable = isPayable(charge);
     const isReview = charge.status === "proof_under_review";
-    const triggerLabel = isPayable ? "Pagar mensalidade" : isReview ? "Ver envio" : "Detalhes";
-    const triggerVariant = isPayable ? "default" : "outline";
+    const triggerLabel = payable ? "Pagar" : isReview ? "Ver envio" : "Detalhes";
+    const triggerVariant = payable && charge.$id === urgentId ? "default" : "outline";
 
     return (
       <ResponsiveDialog
         trigger={
-          <Button size="sm" variant={triggerVariant} className="min-h-11 font-medium touch-manipulation">
+          <Button size="sm" variant={triggerVariant} className="min-h-11 font-medium touch-manipulation" aria-label={`${triggerLabel}: ${chargeTitle(charge)}`}>
             {triggerLabel}
           </Button>
         }
-        title={charge.description}
-        description={`Cobrança referente a ${charge.competence}.`}
+        title={chargeTitle(charge)}
+        description={`${typeLabels[charge.charge_type] ?? "Cobrança"} referente a ${formatCompetence(charge.competence)}.`}
       >
         <ChargeDetails
           charge={charge}
@@ -73,11 +96,11 @@ export function PayerBillingView({ charges, proofs, settings, profileId, initial
     );
   };
   return <div className="space-y-5">
-    <div className="flex flex-wrap gap-2" aria-label="Filtrar pagamentos por situação">{views.map((option) => <Button key={option.value} type="button" variant={view === option.value ? "default" : "outline"} size="sm" onClick={() => changeView(option.value)} aria-pressed={view === option.value}>{option.label}</Button>)}</div>
-    <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]"><InputGroup className="h-10"><InputGroupAddon><Search className="size-4" aria-hidden="true" /></InputGroupAddon><InputGroupInput aria-label="Buscar cobrança" placeholder="Buscar cobrança" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} /></InputGroup><Input aria-label="Filtrar por mês" type="month" value={competence} onChange={(event) => { setCompetence(event.target.value); setPage(1); }} /></div>
+    <div className="flex flex-wrap gap-2" aria-label="Filtrar pagamentos por situação">{views.map((option) => <Button key={option.value} type="button" variant="outline" size="sm" className="min-h-11 sm:min-h-9 aria-pressed:border-foreground aria-pressed:bg-muted aria-pressed:text-foreground" onClick={() => changeView(option.value)} aria-pressed={view === option.value}>{option.label}</Button>)}</div>
+    <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]"><InputGroup className="h-10"><InputGroupAddon><Search className="size-4" aria-hidden="true" /></InputGroupAddon><InputGroupInput aria-label="Buscar cobrança" placeholder="Buscar cobrança" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} /></InputGroup><Select value={competence || ALL_MONTHS} onValueChange={(value) => { setCompetence(value === ALL_MONTHS ? "" : value); setPage(1); }}><SelectTrigger aria-label="Filtrar por mês" className="w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value={ALL_MONTHS}>Todos os meses</SelectItem>{months.map((value) => <SelectItem key={value} value={value}>{formatCompetence(value)}</SelectItem>)}</SelectContent></Select></div>
     {filtered.length === 0 ? <EmptyState icon={<WalletCards className="size-5" aria-hidden="true" />} title="Nenhum pagamento encontrado" description="Experimente outro filtro ou período." /> : <>
-      <div className="hidden overflow-hidden rounded-xl border border-border/50 bg-card shadow-xs md:block"><Table><TableHeader><TableRow><TableHead>Cobrança</TableHead><TableHead>Competência</TableHead><TableHead>Vencimento</TableHead><TableHead>Valor</TableHead><TableHead>Situação</TableHead><TableHead className="text-right">Ação</TableHead></TableRow></TableHeader><TableBody>{visible.map((charge) => <TableRow key={charge.$id}><TableCell className="font-medium">{charge.description}</TableCell><TableCell>{charge.competence}</TableCell><TableCell>{date(charge.due_date)}</TableCell><TableCell className="font-semibold tabular-nums">{money(charge.amount_cents)}</TableCell><TableCell><StatusBadge tone={tones[charge.status]}>{labels[charge.status]}</StatusBadge></TableCell><TableCell className="text-right">{details(charge)}</TableCell></TableRow>)}</TableBody></Table></div>
-      <div className="divide-y divide-border/40 overflow-hidden rounded-xl border border-border/50 bg-card shadow-xs md:hidden">{visible.map((charge) => <div key={charge.$id} className="space-y-3 p-4"><div className="flex items-start justify-between gap-3"><div><p className="font-medium">{charge.description}</p><p className="text-sm text-muted-foreground">Vence {date(charge.due_date)}</p></div><StatusBadge tone={tones[charge.status]}>{labels[charge.status]}</StatusBadge></div><div className="flex items-center justify-between"><p className="font-semibold tabular-nums">{money(charge.amount_cents)}</p>{details(charge)}</div></div>)}</div>
+      <div className="hidden overflow-hidden rounded-xl border border-border/50 bg-card shadow-xs md:block"><Table><TableHeader><TableRow><TableHead>Cobrança</TableHead><TableHead>Competência</TableHead><TableHead>Vencimento</TableHead><TableHead>Valor</TableHead><TableHead>Situação</TableHead><TableHead className="text-right">Ação</TableHead></TableRow></TableHeader><TableBody>{visible.map((charge) => <TableRow key={charge.$id}><TableCell className="font-medium">{chargeTitle(charge)}</TableCell><TableCell>{formatCompetence(charge.competence)}</TableCell><TableCell>{date(charge.due_date)}</TableCell><TableCell className="font-semibold tabular-nums">{money(charge.amount_cents)}</TableCell><TableCell><StatusBadge tone={tones[charge.status]}>{labels[charge.status]}</StatusBadge></TableCell><TableCell className="text-right">{details(charge)}</TableCell></TableRow>)}</TableBody></Table></div>
+      <div className="divide-y divide-border/40 overflow-hidden rounded-xl border border-border/50 bg-card shadow-xs md:hidden">{visible.map((charge) => <div key={charge.$id} className="space-y-3 p-4"><div className="flex items-start justify-between gap-3"><div><p className="font-medium">{chargeTitle(charge)}</p><p className="text-sm text-muted-foreground">Vence {date(charge.due_date)}</p></div><StatusBadge tone={tones[charge.status]}>{labels[charge.status]}</StatusBadge></div><div className="flex items-center justify-between"><p className="font-semibold tabular-nums">{money(charge.amount_cents)}</p>{details(charge)}</div></div>)}</div>
       <nav className="flex flex-wrap items-center justify-between gap-3" aria-label="Páginas de cobranças"><p className="text-sm text-muted-foreground">{(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} de {filtered.length}</p><div className="flex items-center gap-2"><Button type="button" variant="outline" size="icon-sm" aria-label="Página anterior" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}><ChevronLeft aria-hidden="true" /></Button><span className="text-sm tabular-nums">{currentPage} / {totalPages}</span><Button type="button" variant="outline" size="icon-sm" aria-label="Próxima página" disabled={currentPage === totalPages} onClick={() => setPage(currentPage + 1)}><ChevronRight aria-hidden="true" /></Button></div></nav>
     </>}
   </div>;

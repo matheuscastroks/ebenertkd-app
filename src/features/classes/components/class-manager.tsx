@@ -42,7 +42,7 @@ function WeekdayFields({ selected = [], idSuffix }: { selected?: string[]; idSuf
           <label
             key={day}
             htmlFor={`weekday-${day}-${idSuffix}`}
-            className="flex items-center gap-2 rounded-lg border border-border/50 bg-surface-recessed/60 px-3 py-2 text-sm font-medium transition-colors hover:bg-surface-recessed cursor-pointer touch-manipulation "
+            className="flex min-h-11 cursor-pointer touch-manipulation items-center gap-2 rounded-lg border border-border bg-card px-3 text-sm font-medium transition-colors duration-150 hover:bg-muted motion-reduce:transition-none"
           >
             <Checkbox
               id={`weekday-${day}-${idSuffix}`}
@@ -140,16 +140,10 @@ export function ClassManager({ classes, notice, noticeTone = "success" }: { clas
         />
       ) : null}
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-            Turmas
-            
-          </h2>
-          <p className="text-sm text-muted-foreground sm:text-sm">
-            Gerencie os horários, dias de treino e capacidade de alunos por turma.
-          </p>
-        </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">
+          {classes.length === 0 ? "" : `${classes.filter((item) => item.status === "active").length} de ${classes.length} turma${classes.length === 1 ? "" : "s"} ativa${classes.length === 1 ? "" : "s"}`}
+        </p>
 
         <ResponsiveDialog
           trigger={
@@ -174,7 +168,7 @@ export function ClassManager({ classes, notice, noticeTone = "success" }: { clas
         {classes.length === 0 ? (
           <EmptyState
             title="Nenhuma turma cadastrada"
-            description="Crie a primeira turma da academia para permitir que os alunos selecionem seus horários no cadastro."
+            description="Use Nova turma para cadastrar o primeiro horário. Os alunos escolhem a turma no cadastro."
           />
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
@@ -218,15 +212,15 @@ export function ClassManager({ classes, notice, noticeTone = "success" }: { clas
 
                     <div className="flex flex-wrap items-center gap-1 pt-2">
                       {trainingClass.weekdays.map((day) => (
-                        <Badge key={day} variant="secondary" className="px-2 py-0.5 text-sm font-semibold">
+                        <Badge key={day} variant="secondary" className="px-2 py-0.5 text-sm font-medium">
                           {weekdayLabels[day] ?? day.slice(0, 3)}
                         </Badge>
                       ))}
                     </div>
                   </CardHeader>
 
-                  <CardContent className="flex flex-wrap gap-2 pt-3 border-t border-border/40">
-                    <Button asChild size="sm" className="min-h-11 touch-manipulation">
+                  <CardContent className="flex flex-wrap gap-2 border-t border-border pt-3">
+                    <Button asChild size="sm" variant="outline" className="min-h-11 touch-manipulation">
                       <Link href={adminClassPath(trainingClass.$id)}>
                         <CalendarCheck2 className="size-4 mr-1.5" aria-hidden="true" />
                         Fazer chamada
@@ -235,7 +229,7 @@ export function ClassManager({ classes, notice, noticeTone = "success" }: { clas
 
                     <ResponsiveDialog
                       trigger={
-                        <Button variant="outline" size="sm" className="min-h-11 touch-manipulation">
+                        <Button variant="ghost" size="sm" className="min-h-11 touch-manipulation">
                           <Pencil className="size-3.5 mr-1.5" aria-hidden="true" />
                           Editar
                         </Button>

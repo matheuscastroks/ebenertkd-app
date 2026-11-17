@@ -1,15 +1,7 @@
 import { operationFailureSummary } from "@/features/billing/components/operation-failure-summary";
 import { Suspense } from "react";
-import {
-  Activity,
-  Archive,
-  CheckCircle2,
-  CircleHelp,
-  Database,
-  HardDrive,
-  ShieldCheck,
-  TriangleAlert,
-} from "lucide-react";
+import { CheckCircle2, CircleHelp, TriangleAlert } from "lucide-react";
+import { SystemSummary } from "./system-summary";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,37 +46,32 @@ function RunCard({
   description,
   run,
   level,
-  icon,
 }: {
   title: string;
   description: string;
   run?: AutomationRun;
   level: HealthLevel;
-  icon: React.ReactNode;
 }) {
   return (
-    <Card className="border-border/80 shadow-xs">
+    <Card>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3">
-            
-            <div>
-              <CardTitle className="text-base font-semibold">{title}</CardTitle>
-              <CardDescription className="text-xs">{description}</CardDescription>
-            </div>
+          <div>
+            <CardTitle className="text-base font-semibold">{title}</CardTitle>
+            <CardDescription>{description}</CardDescription>
           </div>
           <StatusBadge tone={levelTones[level]}>{levelLabels[level]}</StatusBadge>
         </div>
       </CardHeader>
       <CardContent className="space-y-3 pt-0">
         <Separator />
-        <div className="flex items-center justify-between gap-4 text-xs sm:text-sm">
-          <span className="text-muted-foreground">Último estado:</span>
-          <span className="font-semibold text-foreground">{runLabel(run)}</span>
+        <div className="flex items-center justify-between gap-4 text-sm">
+          <span className="text-muted-foreground">Último estado</span>
+          <span className="font-medium text-foreground">{runLabel(run)}</span>
         </div>
-        <div className="flex items-center justify-between gap-4 text-xs sm:text-sm">
-          <span className="text-muted-foreground">Última execução:</span>
-          <span className="text-right tabular-nums text-foreground font-mono text-xs">
+        <div className="flex items-center justify-between gap-4 text-sm">
+          <span className="text-muted-foreground">Última execução</span>
+          <span className="text-right tabular-nums text-foreground">
             {dateTime(run?.finished_at ?? run?.created_at)}
           </span>
         </div>
@@ -104,7 +91,7 @@ function ConfigurationItem({
 }) {
   return (
     <div className="flex items-center justify-between gap-3 py-2.5">
-      <div className="flex items-center gap-2 text-xs sm:text-sm">
+      <div className="flex items-center gap-2 text-sm">
         {ready ? (
           <CheckCircle2 className="size-4 text-success-foreground dark:text-success-foreground shrink-0" aria-hidden="true" />
         ) : (
@@ -129,6 +116,8 @@ async function SystemHealthContent() {
   return (
     <TooltipProvider>
       <div className="w-full min-w-0 space-y-6">
+        <SystemSummary health={health} />
+
         {/* Rotinas Automáticas */}
         <section className="grid gap-4 sm:grid-cols-2">
           <RunCard
@@ -136,25 +125,23 @@ async function SystemHealthContent() {
             description="Cobranças, vencimentos e lembretes automáticos"
             run={health.lastCron}
             level={health.cronHealth.level}
-            icon={<Activity className="size-5" aria-hidden="true" />}
           />
           <RunCard
             title="Backup externo"
             description="Cópia cifrada em nuvem (Google Drive)"
             run={health.lastBackup}
             level={health.backupHealth.level}
-            icon={<Archive className="size-5" aria-hidden="true" />}
           />
         </section>
 
         {/* Armazenamento e Configurações */}
         <section className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
-          <Card className="border-border/80 shadow-xs">
+          <Card>
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <CardTitle className="text-base font-semibold">Armazenamento privado</CardTitle>
-                  <CardDescription className="text-xs">
+                  <CardDescription>
                     Fotos de perfil, atestados médicos, contratos assinados e comprovantes
                   </CardDescription>
                 </div>
@@ -173,12 +160,11 @@ async function SystemHealthContent() {
                     {health.storage.totalFiles} arquivo{health.storage.totalFiles === 1 ? "" : "s"} armazenado{health.storage.totalFiles === 1 ? "" : "s"}
                   </p>
                 </div>
-                <HardDrive className="size-8 text-muted-foreground/60" aria-hidden="true" />
               </div>
 
               {health.storage.percentage === undefined ? (
-                <p className="rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground">
-                  Defina <code>APPWRITE_STORAGE_QUOTA_BYTES</code> no servidor para ativar os alertas automáticos de 70% e 85%.
+                <p className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
+                  Sem cota definida. Peça ao suporte técnico para configurar o limite e ativar os avisos de 70% e 85% de uso.
                 </p>
               ) : (
                 <div className="space-y-1.5">
@@ -200,14 +186,14 @@ async function SystemHealthContent() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/80 shadow-xs">
+          <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-semibold">Configuração e integrações</CardTitle>
-              <CardDescription className="text-xs">
+              <CardDescription>
                 Diagnóstico de conexão com os serviços essenciais.
               </CardDescription>
             </CardHeader>
-            <CardContent className="divide-y divide-border/50 pt-0">
+            <CardContent className="divide-y divide-border pt-0">
               <ConfigurationItem
                 label="Backup externo"
                 ready={health.configuration.backup}
@@ -228,21 +214,14 @@ async function SystemHealthContent() {
         </section>
 
         {/* Falhas Recentes */}
-        <Card className="border-border/80 shadow-xs">
+        <Card>
           <CardHeader className="pb-3">
-            <div className="flex items-start gap-3">
-              <Database className="mt-0.5 size-5 text-muted-foreground" aria-hidden="true" />
-              <div>
-                <CardTitle className="text-base font-semibold">Falhas recentes</CardTitle>
-                <CardDescription className="text-xs">
-                  Histórico de execuções com erro que exigem atenção da administração.
-                </CardDescription>
-              </div>
-            </div>
+            <CardTitle className="text-base font-semibold">Falhas recentes</CardTitle>
+            <CardDescription>Execuções com erro que precisam de atenção.</CardDescription>
           </CardHeader>
           <CardContent className="pt-1">
             {health.failures.length ? (
-              <div className="divide-y divide-border/50">
+              <div className="divide-y divide-border">
                 {health.failures.map((failure) => (
                   <div
                     key={failure.$id}
@@ -257,15 +236,12 @@ async function SystemHealthContent() {
                         <span className="block text-sm">{operationFailureSummary(failure.details)}</span>
                       </p>
                     </div>
-                    <div className="space-y-2"><StatusBadge tone="danger">Falhou</StatusBadge><details className="text-sm"><summary className="cursor-pointer text-primary-text">Ver detalhes da execução</summary><p>Rotina: {failure.job === "backup" ? "Backup externo" : "Rotina diária"}. Estado: falha na execução.</p><p>Início: {dateTime(failure.started_at)}</p><p>Identificador: {failure.$id}</p><p>Consulte o registro desta execução no painel de operação para identificar a causa e repetir a rotina após corrigir o problema.</p></details></div>
+                    <div className="space-y-2"><StatusBadge tone="danger">Falhou</StatusBadge><details className="text-sm"><summary className="flex min-h-11 cursor-pointer items-center text-primary-text">Ver detalhes da execução</summary><p>Rotina: {failure.job === "backup" ? "Backup externo" : "Rotina diária"}. Estado: falha na execução.</p><p>Início: {dateTime(failure.started_at)}</p><p>Identificador: {failure.$id}</p><p>Envie este identificador ao suporte técnico para investigar a causa e repetir a rotina.</p></details></div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="flex items-center gap-3 rounded-xl bg-success-soft p-4 text-xs sm:text-sm text-success-foreground dark:text-success-foreground border border-border">
-                <ShieldCheck className="size-5 shrink-0 text-success-foreground dark:text-success-foreground" aria-hidden="true" />
-                <span>Nenhuma falha recente registrada nas automações operacionais.</span>
-              </div>
+              <p className="text-sm text-muted-foreground">Nenhuma falha recente nas rotinas automáticas.</p>
             )}
           </CardContent>
         </Card>
@@ -277,6 +253,7 @@ async function SystemHealthContent() {
 function SystemHealthSkeleton() {
   return (
     <div className="w-full min-w-0 space-y-6">
+      <Skeleton className="h-20 rounded-xl" />
       <div className="grid gap-4 sm:grid-cols-2">
         <Skeleton className="h-36 rounded-xl" />
         <Skeleton className="h-36 rounded-xl" />
@@ -298,7 +275,7 @@ export default async function SystemPage() {
       profile={profile}
       activePath={ROUTES.adminSystem}
       title="Sistema e operação"
-      subtitle="Acompanhe rotinas automáticas, cópias de segurança criptografadas e capacidade de armazenamento."
+      subtitle="Rotinas automáticas, backup e espaço de armazenamento."
       breadcrumbs={[{ label: "Sistema e operação" }]}
     >
       <Suspense fallback={<SystemHealthSkeleton />}>

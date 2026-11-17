@@ -34,6 +34,15 @@ describe("dashboard do professor", () => {
     ] as never);
     render(await TodayClassesSection());
     expect(screen.getAllByRole("link", { name: "Fazer chamada" })[0]).toHaveAttribute("href", "/admin/turmas/t1");
-    expect(screen.getAllByText("Local não informado")).toHaveLength(2);
+    expect(screen.getAllByText(/Local não informado/)).toHaveLength(2);
+  });
+  it("reserva a ação primária para um único treino do dia", async () => {
+    vi.mocked(listTrainingClasses).mockResolvedValue([
+      { $id: "t1", name: "Manhã", status: "active", weekdays: ["Segunda"], start_time: "00:00", end_time: "00:01" },
+      { $id: "t2", name: "Noite", status: "active", weekdays: ["Segunda"], start_time: "23:58", end_time: "23:59" },
+    ] as never);
+    render(await TodayClassesSection());
+    const links = screen.getAllByRole("link", { name: "Fazer chamada" });
+    expect(links.filter((link) => link.dataset.variant === "default")).toHaveLength(1);
   });
 });

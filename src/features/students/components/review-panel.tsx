@@ -110,14 +110,8 @@ export function ReviewPanel({
             size="lg"
           />
           <div>
-            <Link href={ROUTES.adminEnrollments} className="text-sm text-muted-foreground hover:underline">
-              ← Voltar para lista de matrículas
-            </Link>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight md:text-3xl">
-              {student.full_name}
-            </h1>
             <p className="text-sm text-muted-foreground">
-              CPF: {student.cpf || "Não informado"} · Faixa: {currentBelt ? `Faixa ${currentBelt}` : "Não informada"} {student.gub ? `(${student.gub}º GUB)` : (student.gub === 0 ? "(Dan)" : "")}
+              CPF {student.cpf || "não informado"} · {currentBelt ? `Faixa ${currentBelt}` : "Faixa não informada"} {student.gub ? `(${student.gub}º GUB)` : (student.gub === 0 ? "(Dan)" : "")}
             </p>
           </div>
         </div>
@@ -150,12 +144,11 @@ export function ReviewPanel({
         <div className="space-y-6 lg:col-span-7">
           {/* Card de Dados para Revisão */}
           <Card className="overflow-hidden border-border/80 shadow-xs">
-            <CardHeader className="bg-muted/30 pb-4">
+            <CardHeader className="pb-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <User className="size-5 text-primary-text" aria-hidden="true" />
                   <div>
-                    <CardTitle className="text-lg">Ficha cadastral do aluno</CardTitle>
+                    <CardTitle className="text-base font-semibold">Ficha cadastral do aluno</CardTitle>
                     <CardDescription>
                       Conferência detalhada dos dados pessoais, contato, emergência, turma e cuidados de saúde.
                     </CardDescription>
@@ -265,7 +258,7 @@ export function ReviewPanel({
                       Condição informada
                     </Badge>
                   ) : (
-                    <Badge variant="outline" className="gap-1 text-success border-success/40 bg-success/5">
+                    <Badge variant="outline" className="gap-1">
                       <CheckCircle2 className="size-3 text-success" aria-hidden="true" />
                       Sem restrições declaradas
                     </Badge>
@@ -303,17 +296,14 @@ export function ReviewPanel({
           {/* Documentos e Anexos */}
           <Card className="shadow-xs">
             <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <FileText className="size-5 text-primary-text" aria-hidden="true" />
-                <CardTitle className="text-lg">Documentos e Anexos</CardTitle>
-              </div>
+              <CardTitle className="text-base font-semibold">Documentos e anexos</CardTitle>
               <CardDescription>
                 A foto é item cadastral. O atestado médico requer validação da administração antes da assinatura.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               {/* Card da Foto */}
-              <div className="flex items-start justify-between gap-3 rounded-xl border bg-muted/20 p-4">
+              <div className="flex items-start justify-between gap-3 rounded-xl border border-border p-4">
                 <div className="flex items-start gap-3">
                   <ImageIcon className="size-5 text-muted-foreground mt-0.5 shrink-0" aria-hidden="true" />
                   <div>
@@ -391,14 +381,14 @@ export function ReviewPanel({
                       <input type="hidden" name="student_id" value={student.$id} />
                       <input type="hidden" name="document_id" value={medicalCertificate.$id} />
                       <input type="hidden" name="decision" value="approved" />
-                      <FormSubmitButton className="min-h-11" size="sm" pendingLabel="Aprovando…">
+                      <FormSubmitButton variant="outline" className="min-h-11" size="sm" pendingLabel="Aprovando…">
                         Aprovar atestado
                       </FormSubmitButton>
                     </form>
 
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button className="min-h-11" variant="destructive" size="sm">
+                        <Button className="min-h-11 text-destructive" variant="outline" size="sm">
                           Reprovar
                         </Button>
                       </AlertDialogTrigger>
@@ -433,7 +423,7 @@ export function ReviewPanel({
                     </AlertDialog>
                   </div>
                 ) : medicalCertificate?.status === "approved" ? (
-                  <p className="text-sm text-success flex items-center gap-1.5 pt-1">
+                  <p className="flex items-center gap-1.5 pt-1 text-sm text-muted-foreground">
                     <CheckCircle2 className="size-3.5" aria-hidden="true" />
                     Atestado validado pela administração.
                   </p>
@@ -476,10 +466,7 @@ export function ReviewPanel({
           {/* Card de Condições Financeiras e Contrato */}
           <Card className="shadow-xs">
             <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <Calendar className="size-5 text-primary-text" aria-hidden="true" />
-                <CardTitle className="text-lg">Condições financeiras e contrato</CardTitle>
-              </div>
+              <CardTitle className="text-base font-semibold">Condições financeiras e contrato</CardTitle>
               <CardDescription>
                 Valores e vigência de 1 ano pré-preenchidos com base no dia {dueDay}. Ajuste conforme necessário antes de salvar.
               </CardDescription>
@@ -567,7 +554,7 @@ export function ReviewPanel({
 
                 <Separator />
 
-                <FormSubmitButton className="min-h-11 w-full" pendingLabel="Salvando condições…">
+                <FormSubmitButton variant="outline" className="min-h-11 w-full" pendingLabel="Salvando condições…">
                   Salvar condições contratuais
                 </FormSubmitButton>
               </form>
@@ -576,9 +563,9 @@ export function ReviewPanel({
 
           {/* Card de Conclusão / Renovação */}
           {enrollment.status === "awaiting_renewal" ? (
-            <Card className="shadow-xs border-primary/20 bg-primary/[0.02]">
+            <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Renovar contrato</CardTitle>
+                <CardTitle className="text-base font-semibold">Renovar contrato</CardTitle>
                 <CardDescription>
                   Uma nova versão será emitida mantendo o histórico anterior preservado.
                 </CardDescription>
@@ -600,38 +587,33 @@ export function ReviewPanel({
               </CardContent>
             </Card>
           ) : (
-            <Card className="border-primary/20 bg-primary/[0.025] shadow-xs">
+            <Card>
               <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <FileCheck className="size-5 text-primary-text" aria-hidden="true" />
-                  <CardTitle className="text-base">Concluir análise e emitir contrato</CardTitle>
-                </div>
+                <CardTitle className="text-base font-semibold">Concluir análise e emitir contrato</CardTitle>
                 <CardDescription>
                   A assinatura digital é liberada após conferência dos dados, validação do atestado médico e confirmação das condições financeiras.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Checklist de requisitos para liberar assinatura */}
-                <div className="space-y-2 rounded-lg border bg-background/60 p-3 text-sm">
-                  <p className="font-semibold text-muted-foreground text-sm">
-                    Status dos pré-requisitos:
-                  </p>
+                <div className="space-y-2 rounded-lg border border-border p-3 text-sm">
+                  <p className="font-medium">Pré-requisitos</p>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Foto cadastrada:</span>
-                    <span className={isPhotoUploaded ? "text-success font-medium" : "text-warning font-medium"}>
-                      {isPhotoUploaded ? "✓ Presente" : "⚠ Não enviada"}
+                    <span className={isPhotoUploaded ? "font-medium text-foreground" : "font-medium text-warning-foreground"}>
+                      {isPhotoUploaded ? "Presente" : "Não enviada"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Atestado médico:</span>
-                    <span className={isMedApproved ? "text-success font-medium" : "text-muted-foreground font-medium"}>
-                      {isMedApproved ? "✓ Aprovado" : "Pendente/Opcional"}
+                    <span className={isMedApproved ? "font-medium text-foreground" : "font-medium text-muted-foreground"}>
+                      {isMedApproved ? "Aprovado" : "Pendente ou opcional"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Turma vinculada:</span>
-                    <span className={student.training_class ? "text-success font-medium" : "text-muted-foreground font-medium"}>
-                      {student.training_class ? "✓ Definida" : "Não definida"}
+                    <span className={student.training_class ? "font-medium text-foreground" : "font-medium text-muted-foreground"}>
+                      {student.training_class ? "Definida" : "Não definida"}
                     </span>
                   </div>
                 </div>
