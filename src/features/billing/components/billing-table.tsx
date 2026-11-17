@@ -144,7 +144,7 @@ export function BillingTable({
                         photoDocumentId={photosByStudent.get(charge.student_id)}
                         size="sm"
                       />
-                      <div>
+                      <div className="min-w-0 max-w-64 whitespace-normal">
                         <p className="font-medium text-foreground text-sm">
                           {names.get(charge.student_id) ?? "Aluno"}
                         </p>

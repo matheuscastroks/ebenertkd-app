@@ -44,8 +44,8 @@ export function DashboardFrame({
         role={role}
         avatarUrl={avatarUrl}
       />
-      <SidebarInset>
-        <div className="flex-1 p-4 pb-20 md:p-6 md:pb-6">
+      <SidebarInset className="min-w-0">
+        <div className="min-w-0 flex-1 p-4 pb-20 md:p-6 md:pb-6">
           <div className="flex w-full min-w-0 flex-col gap-6">{children}</div>
         </div>
       </SidebarInset>

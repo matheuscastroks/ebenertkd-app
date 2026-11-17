@@ -3,22 +3,16 @@ import { cn } from "cn";
 import { Card, CardContent } from "@/components/ui/card";
 import type { StatusTone } from "@/components/shared/status-badge";
 
-const accents: Record<StatusTone, string> = {
-  neutral: "bg-foreground",
-  info: "bg-info",
-  success: "bg-success",
-  warning: "bg-warning",
-  danger: "bg-destructive"
-};
+// Só o estado de alerta muda a cor do número; os demais tons seguem o texto padrão.
+const valueTone: Partial<Record<StatusTone, string>> = { danger: "text-destructive" };
 
 export function MetricCard({ label, value, helper, tone = "neutral", icon }: { label: string; value: ReactNode; helper?: string; tone?: StatusTone; icon?: ReactNode }) {
   return (
-    <Card className="relative overflow-hidden transition-colors duration-200 hover:translate-y-[-1px]">
-      <div className={cn("absolute inset-y-0 left-0 w-1", accents[tone])} aria-hidden="true" />
+    <Card>
       <CardContent className="flex items-start justify-between gap-3 p-5">
         <div className="min-w-0">
           <p className="text-xs font-medium text-muted-foreground">{label}</p>
-          <div className="mt-1.5 text-2xl font-semibold tracking-tight text-foreground tabular-nums">{value}</div>
+          <div className={cn("mt-1.5 text-2xl font-semibold tracking-tight text-foreground tabular-nums", valueTone[tone])}>{value}</div>
           {helper ? <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{helper}</p> : null}
         </div>
         {icon ? (

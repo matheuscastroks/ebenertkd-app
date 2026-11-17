@@ -39,14 +39,14 @@ export type RoleOnboardingConfig = {
 
 export const ONBOARDING_CONFIGS: Record<OnboardingRole, RoleOnboardingConfig> = {
   admin: {
-    welcomeTitle: "Bem-vindo ao Centro de Comando Ebener TKD",
-    welcomeSubtitle: "Gerencie turmas, acompanhe matrículas e controle exames de graduação com máxima clareza.",
+    welcomeTitle: "Bem-vindo à Ebener TKD",
+    welcomeSubtitle: "Gerencie turmas, matrículas, exames de faixa e cobranças em um só lugar.",
     welcomeHighlight: "Mestre Ebener Santos",
-    ahaMomentDescription: "Tenha em mãos a chamada de treinos em 1 toque, controle financeiro via PIX e bancas de graduação organizadas.",
+    ahaMomentDescription: "Faça a chamada, confira comprovantes PIX e organize os exames de faixa.",
     benefitBullets: [
-      { title: "Chamada de Presença Táctil", desc: "Registre presenças de turmas inteiras no dojang em segundos." },
-      { title: "Bancas de Exames de 1 Toque", desc: "Avalie candidatos organizados por faixas sem pilhas de papel." },
-      { title: "Financeiro Descomplicado", desc: "Controle mensalidades e aprove comprovantes PIX instantaneamente." }
+      { title: "Chamada das aulas", desc: "Registre a presença de uma turma inteira em poucos toques." },
+      { title: "Exames de faixa", desc: "Veja os candidatos por faixa e registre o resultado." },
+      { title: "Financeiro", desc: "Acompanhe mensalidades e confira os comprovantes PIX." }
     ],
     questions: [
       {
@@ -68,20 +68,20 @@ export const ONBOARDING_CONFIGS: Record<OnboardingRole, RoleOnboardingConfig> = 
         ]
       }
     ],
-    pushTitle: "Alertas imediatos da Secretaria",
-    pushDescription: "Fique sabendo no exato instante em que novos comprovantes PIX forem enviados ou quando alunos submeterem pedidos de matrícula.",
-    primaryActionLabel: "Acessar Painel da Academia",
+    pushTitle: "Avisos da secretaria",
+    pushDescription: "Receba um aviso quando chegar um comprovante PIX ou uma nova matrícula.",
+    primaryActionLabel: "Ir para o painel",
     primaryActionHref: "/admin"
   },
   adult_student: {
-    welcomeTitle: "Sua Jornada Marcial na Ebener TKD",
-    welcomeSubtitle: "Acompanhe seu treino, sua frequência e sua trilha de evolução de faixas rumo à Faixa Preta.",
+    welcomeTitle: "Bem-vindo à Ebener TKD",
+    welcomeSubtitle: "Acompanhe seus treinos, sua frequência e a evolução das suas faixas.",
     welcomeHighlight: "Praticante de Taekwondo",
-    ahaMomentDescription: "Visualize exatamente quantos treinos faltam para sua próxima graduação e mantenha sua disciplina marcial no topo.",
+    ahaMomentDescription: "Veja seu próximo treino, sua faixa atual e o que falta para o próximo exame.",
     benefitBullets: [
-      { title: "Trilha da Faixa Preta", desc: "Veja seu GUB atual, o poomsae da graduação e os requisitos do próximo exame." },
-      { title: "Frequência e Assiduidade", desc: "Histórico completo das suas presenças e alertas dos próximos treinos." },
-      { title: "Financeiro e Contratos", desc: "Acesse chave PIX da academia e assine contratos diretamente pelo app." }
+      { title: "Minha faixa", desc: "Veja sua graduação atual, o poomsae e o próximo exame." },
+      { title: "Frequência", desc: "Histórico das suas presenças e próximos treinos." },
+      { title: "Financeiro e contratos", desc: "Pague mensalidades por PIX e assine contratos pelo app." }
     ],
     questions: [
       {
@@ -104,20 +104,20 @@ export const ONBOARDING_CONFIGS: Record<OnboardingRole, RoleOnboardingConfig> = 
         ]
       }
     ],
-    pushTitle: "Notificações de Treinos e Bancas",
-    pushDescription: "Receba avisos quando a presença da sua aula for confirmada e saiba em primeira mão quando abrirem as inscrições para o exame de faixas.",
-    primaryActionLabel: "Ver Minha Graduação e Treinos",
+    pushTitle: "Avisos de treino e exame",
+    pushDescription: "Receba avisos de aula, mensalidade e exames de faixa neste aparelho.",
+    primaryActionLabel: "Ver meus treinos",
     primaryActionHref: "/aluno"
   },
   minor_student: {
-    welcomeTitle: "Bem-vindo ao Dojang Ebener TKD!",
-    welcomeSubtitle: "Aqui você acompanha suas faixas, seus treinos e aprende a disciplina dos campeões.",
+    welcomeTitle: "Bem-vindo à Ebener TKD",
+    welcomeSubtitle: "Aqui você acompanha seus treinos e a evolução das suas faixas.",
     welcomeHighlight: "Jovem Atleta",
-    ahaMomentDescription: "Veja sua faixa colorida brilhar no aplicativo e acompanhe sua evolução aula após aula.",
+    ahaMomentDescription: "Veja sua faixa atual e as aulas de que você participou.",
     benefitBullets: [
-      { title: "Minhas Faixas", desc: "Veja a cor da sua faixa e qual é o próximo golpe ou poomsae a aprender." },
-      { title: "Chamada dos Treinos", desc: "Confira todas as aulas que você participou com seu mestre." },
-      { title: "Espírito Marcial", desc: "Aprenda respeito, foco, perseverança e autocontrole." }
+      { title: "Minha faixa", desc: "Veja a cor da sua faixa e o próximo poomsae." },
+      { title: "Presenças", desc: "Confira as aulas de que você participou." },
+      { title: "Mensagens da academia", desc: "Veja os avisos do professor e da secretaria." }
     ],
     questions: [
       {
@@ -130,20 +130,20 @@ export const ONBOARDING_CONFIGS: Record<OnboardingRole, RoleOnboardingConfig> = 
         ]
       }
     ],
-    pushTitle: "Lembretes dos Treinos",
-    pushDescription: "Ative para não esquecer o horário do seu dojang e se preparar com o dobok impecável!",
-    primaryActionLabel: "Entrar no Dojang",
+    pushTitle: "Lembretes de treino",
+    pushDescription: "Ative para não esquecer o horário das suas aulas.",
+    primaryActionLabel: "Ir para o painel",
     primaryActionHref: "/aluno"
   },
   guardian: {
-    welcomeTitle: "Portal da Família Ebener TKD",
-    welcomeSubtitle: "Acompanhe de perto a segurança, o desenvolvimento e as conquistas marciais do seu dependente.",
+    welcomeTitle: "Portal da família",
+    welcomeSubtitle: "Acompanhe a presença, as faixas e as mensalidades de quem você acompanha.",
     welcomeHighlight: "Responsável pelo Aluno",
-    ahaMomentDescription: "Saiba exatamente quando seu dependente chega e conclui a aula, com transparência total da academia.",
+    ahaMomentDescription: "Veja as presenças, a faixa e as pendências de cada dependente.",
     benefitBullets: [
-      { title: "Presença em Tempo Real", desc: "Saiba quando a chamada foi concluída pelo professor na aula." },
-      { title: "Acompanhamento da Graduação", desc: "Veja a evolução das faixas e a data prevista para o exame de graduação." },
-      { title: "Facilidade de Pagamento", desc: "Chave PIX e envio de comprovante com baixa rápida sem fila." }
+      { title: "Presença", desc: "Veja quando o professor registrou a chamada da aula." },
+      { title: "Graduação", desc: "Veja a faixa atual e a data do próximo exame." },
+      { title: "Pagamentos", desc: "Pague por PIX e envie o comprovante pelo app." }
     ],
     questions: [
       {
@@ -164,9 +164,9 @@ export const ONBOARDING_CONFIGS: Record<OnboardingRole, RoleOnboardingConfig> = 
         ]
       }
     ],
-    pushTitle: "Alertas de Presença e Mensalidade",
-    pushDescription: "Receba aviso no celular assim que a chamada do treino for feita no dojang e lembretes amigáveis de vencimento.",
-    primaryActionLabel: "Acessar Ficha do Dependente",
+    pushTitle: "Avisos de presença e mensalidade",
+    pushDescription: "Receba avisos de presença e lembretes de vencimento neste aparelho.",
+    primaryActionLabel: "Ver meus dependentes",
     primaryActionHref: "/responsavel"
   }
 };
