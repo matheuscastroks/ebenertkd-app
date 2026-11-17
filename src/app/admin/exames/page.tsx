@@ -51,9 +51,9 @@ async function ExamEventsContent() {
     <div className="space-y-6">
       {/* 1. Barra de KPIs Operacionais (Topo da Página) */}
       <section aria-label="Métricas de Exames" className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-        <Card className="depth-raised border-border/80 relative overflow-hidden">
+        <Card className="shadow-xs border-border/80 relative overflow-hidden">
           <CardContent className="p-5 flex items-start gap-4">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary-text border border-primary/20">
               <CalendarDays className="size-5" />
             </div>
             <div className="min-w-0 flex-1">
@@ -78,7 +78,7 @@ async function ExamEventsContent() {
           </CardContent>
         </Card>
 
-        <Card className="depth-raised border-border/80 relative overflow-hidden">
+        <Card className="shadow-xs border-border/80 relative overflow-hidden">
           <CardContent className="p-5 flex items-start gap-4">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
               <Users className="size-5" />
@@ -97,7 +97,7 @@ async function ExamEventsContent() {
           </CardContent>
         </Card>
 
-        <Card className="depth-raised border-border/80 relative overflow-hidden">
+        <Card className="shadow-xs border-border/80 relative overflow-hidden">
           <CardContent className="p-5 flex items-start gap-4">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
               <DollarSign className="size-5" />
@@ -162,7 +162,7 @@ async function ExamEventsContent() {
               return (
                 <Card
                   key={event.$id}
-                  className="depth-raised rounded-2xl border-border/80 hover:border-primary/50 transition-all hover:shadow-md flex flex-col justify-between"
+                  className="shadow-xs rounded-2xl border-border/80 hover:border-primary/50 transition-all hover:shadow-md flex flex-col justify-between"
                 >
                   <CardContent className="p-5 space-y-4">
                     {/* Header Row: Visual Calendar Block + Main Info */}

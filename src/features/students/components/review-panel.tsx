@@ -153,7 +153,7 @@ export function ReviewPanel({
             <CardHeader className="bg-muted/30 pb-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <User className="size-5 text-primary" aria-hidden="true" />
+                  <User className="size-5 text-primary-text" aria-hidden="true" />
                   <div>
                     <CardTitle className="text-lg">Ficha cadastral do aluno</CardTitle>
                     <CardDescription>
@@ -167,7 +167,7 @@ export function ReviewPanel({
             <CardContent className="space-y-6 pt-6">
               {/* Bloco A: Identificação e Contato */}
               <div>
-                <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                   <Phone className="size-4" aria-hidden="true" /> Identificação e Contato
                 </h3>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 text-sm">
@@ -200,7 +200,7 @@ export function ReviewPanel({
 
               {/* Bloco B: Contato de Emergência */}
               <div>
-                <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                   <Users className="size-4" aria-hidden="true" /> Contato de Emergência
                 </h3>
                 <div className="mt-3 grid gap-3 sm:grid-cols-3 text-sm">
@@ -225,7 +225,7 @@ export function ReviewPanel({
 
               {/* Bloco C: Taekwondo e Turma */}
               <div>
-                <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                   <Award className="size-4" aria-hidden="true" /> Taekwondo e Turma
                 </h3>
                 <div className="mt-3 grid gap-3 sm:grid-cols-3 text-sm">
@@ -256,7 +256,7 @@ export function ReviewPanel({
               {/* Bloco D: Saúde e Cuidados */}
               <div>
                 <div className="flex items-center justify-between">
-                  <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                  <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                     <HeartPulse className="size-4" aria-hidden="true" /> Saúde e Cuidados
                   </h3>
                   {student.health_condition === "yes" ? (
@@ -304,7 +304,7 @@ export function ReviewPanel({
           <Card className="shadow-xs">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
-                <FileText className="size-5 text-primary" aria-hidden="true" />
+                <FileText className="size-5 text-primary-text" aria-hidden="true" />
                 <CardTitle className="text-lg">Documentos e Anexos</CardTitle>
               </div>
               <CardDescription>
@@ -321,7 +321,7 @@ export function ReviewPanel({
                     {profilePhoto ? (
                       <Link
                         href={`/api/student-documents/${profilePhoto.$id}`}
-                        className="text-xs text-primary underline mt-0.5 block"
+                        className="text-xs text-primary-text underline mt-0.5 block"
                         target="_blank"
                       >
                         Visualizar imagem original
@@ -352,7 +352,7 @@ export function ReviewPanel({
                       {medicalCertificate ? (
                         <Link
                           href={`/api/student-documents/${medicalCertificate.$id}`}
-                          className="text-xs text-primary underline mt-0.5 block"
+                          className="text-xs text-primary-text underline mt-0.5 block"
                           target="_blank"
                         >
                           Abrir documento enviado
@@ -477,7 +477,7 @@ export function ReviewPanel({
           <Card className="shadow-xs">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
-                <Calendar className="size-5 text-primary" aria-hidden="true" />
+                <Calendar className="size-5 text-primary-text" aria-hidden="true" />
                 <CardTitle className="text-lg">Condições financeiras e contrato</CardTitle>
               </div>
               <CardDescription>
@@ -603,7 +603,7 @@ export function ReviewPanel({
             <Card className="border-primary/20 bg-primary/[0.025] shadow-xs">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
-                  <FileCheck className="size-5 text-primary" aria-hidden="true" />
+                  <FileCheck className="size-5 text-primary-text" aria-hidden="true" />
                   <CardTitle className="text-base">Concluir análise e emitir contrato</CardTitle>
                 </div>
                 <CardDescription>
@@ -613,7 +613,7 @@ export function ReviewPanel({
               <CardContent className="space-y-4">
                 {/* Checklist de requisitos para liberar assinatura */}
                 <div className="space-y-2 rounded-lg border bg-background/60 p-3 text-xs">
-                  <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[11px]">
+                  <p className="font-semibold text-muted-foreground text-xs">
                     Status dos pré-requisitos:
                   </p>
                   <div className="flex items-center justify-between">

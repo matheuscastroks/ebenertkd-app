@@ -50,7 +50,7 @@ export function EditStudentDialog({
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
-            <UserPen className="size-5 text-primary" aria-hidden="true" />
+            <UserPen className="size-5 text-primary-text" aria-hidden="true" />
             Editar Dados do Aluno
           </DialogTitle>
           <DialogDescription>
@@ -63,7 +63,7 @@ export function EditStudentDialog({
 
           {/* 1. Identificação Básica */}
           <div>
-            <h4 className="font-semibold text-xs tracking-wider uppercase text-muted-foreground mb-3">
+            <h4 className="font-semibold text-xs text-muted-foreground mb-3">
               Identificação
             </h4>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -133,7 +133,7 @@ export function EditStudentDialog({
 
           {/* 2. Graduação */}
           <div>
-            <h4 className="font-semibold text-xs tracking-wider uppercase text-muted-foreground mb-3">
+            <h4 className="font-semibold text-xs text-muted-foreground mb-3">
               Graduação Marcial
             </h4>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -146,7 +146,7 @@ export function EditStudentDialog({
 
           {/* 3. Contato e Endereço */}
           <div>
-            <h4 className="font-semibold text-xs tracking-wider uppercase text-muted-foreground mb-3">
+            <h4 className="font-semibold text-xs text-muted-foreground mb-3">
               Contato e Localização
             </h4>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -179,7 +179,7 @@ export function EditStudentDialog({
 
           {/* 4. Contato de Emergência */}
           <div>
-            <h4 className="font-semibold text-xs tracking-wider uppercase text-muted-foreground mb-3">
+            <h4 className="font-semibold text-xs text-muted-foreground mb-3">
               Contato de Emergência
             </h4>
             <div className="grid gap-3 sm:grid-cols-3">
@@ -218,7 +218,7 @@ export function EditStudentDialog({
 
           {/* 5. Saúde e Cuidados */}
           <div>
-            <h4 className="font-semibold text-xs tracking-wider uppercase text-muted-foreground mb-3">
+            <h4 className="font-semibold text-xs text-muted-foreground mb-3">
               Saúde e Cuidados
             </h4>
             <div className="space-y-3">

@@ -72,7 +72,7 @@ export function ChargeActions({
                 <div className="space-y-4">
                   <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-3">
                     <div className="flex items-center gap-2 text-sm font-medium">
-                      <FileText className="size-4 text-primary shrink-0" aria-hidden="true" />
+                      <FileText className="size-4 text-primary-text shrink-0" aria-hidden="true" />
                       <span>Comprovante anexado pelo aluno (v{proof.version})</span>
                     </div>
                     <Button asChild size="sm" variant="outline">
@@ -92,7 +92,7 @@ export function ChargeActions({
                   <form action={decidePaymentProofAction} className="rounded-xl border border-success/30 bg-success/5 p-4 space-y-3">
                     <input type="hidden" name="proof_id" value={proof.$id} />
                     <input type="hidden" name="decision" value="approved" />
-                    <p className="text-xs font-semibold uppercase tracking-wider text-success">
+                    <p className="text-xs font-semibold text-success">
                       Aprovar recebimento
                     </p>
                     <div className="grid gap-3 sm:grid-cols-2">
@@ -120,7 +120,7 @@ export function ChargeActions({
                   >
                     <input type="hidden" name="proof_id" value={proof.$id} />
                     <input type="hidden" name="decision" value="rejected" />
-                    <p className="text-xs font-semibold uppercase tracking-wider text-destructive">
+                    <p className="text-xs font-semibold text-destructive">
                       Recusar comprovante
                     </p>
                     <Field>

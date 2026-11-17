@@ -104,13 +104,13 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
         <div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Award className="size-5 text-primary" />
+              <Award className="size-5 text-primary-text" />
               <h2 className="text-base sm:text-lg font-bold text-foreground">
                 Mesa de Avaliação da Banca
               </h2>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary-text border border-primary/20">
                 {bundle.participants.length} {bundle.participants.length === 1 ? "candidato" : "candidatos"}
               </span>
               {registeredCount > 0 && (
@@ -126,7 +126,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
         </div>
 
         {bundle.participants.length === 0 ? (
-          <Card className="depth-raised rounded-2xl border-border/80">
+          <Card className="shadow-xs rounded-2xl border-border/80">
             <CardContent className="flex flex-col items-center justify-center p-12 text-center">
               <Users className="size-12 text-muted-foreground/40 mb-3" />
               <p className="font-semibold text-foreground text-base">
@@ -174,7 +174,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                         <Card
                           key={participant.$id}
                           className={cn(
-                            "depth-raised rounded-2xl border-border/80 transition-all",
+                            "shadow-xs rounded-2xl border-border/80 transition-all",
                             isApproved && "bg-emerald-500/5 border-emerald-500/30 dark:bg-emerald-950/20",
                             isFailed && "bg-rose-500/5 border-rose-500/30 dark:bg-rose-950/20",
                             isAbsent && "bg-amber-500/5 border-amber-500/30 dark:bg-amber-950/20"
@@ -388,11 +388,11 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
       {/* ======================================================== */}
       <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-6">
         {/* Card 1: Alunos Elegíveis para Inscrição */}
-        <Card className="depth-raised rounded-2xl border-border/80">
+        <Card className="shadow-xs rounded-2xl border-border/80">
           <CardHeader className="p-4 pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <UserPlus className="size-4 text-primary" />
+                <UserPlus className="size-4 text-primary-text" />
                 <CardTitle className="text-base font-bold">Alunos elegíveis</CardTitle>
               </div>
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
@@ -504,10 +504,10 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
         </Card>
 
         {/* Card 2: Resumo e Informações do Evento */}
-        <Card className="depth-raised rounded-2xl border-border/80">
+        <Card className="shadow-xs rounded-2xl border-border/80">
           <CardHeader className="p-4 pb-2">
             <CardTitle className="text-sm font-bold flex items-center gap-2">
-              <Info className="size-4 text-primary" />
+              <Info className="size-4 text-primary-text" />
               Dados do Evento
             </CardTitle>
           </CardHeader>
@@ -666,12 +666,12 @@ export default async function ExamDetailPage({
         ) : null}
 
         {/* Resumo Proeminente do Evento (Topo) */}
-        <Card className="depth-raised rounded-2xl border-border/80 overflow-hidden bg-gradient-to-r from-card via-card to-muted/20">
+        <Card className="shadow-xs rounded-2xl border-border/80 overflow-hidden bg-gradient-to-r from-card via-card to-muted/20">
           <CardContent className="p-5 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="space-y-1.5 min-w-0">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary-text border border-primary/20 shrink-0">
                     <Award className="size-5" />
                   </div>
                   <h1 className="text-xl sm:text-2xl font-black text-foreground truncate">

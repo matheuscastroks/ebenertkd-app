@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Calendar, CalendarPlus, ClipboardCheck, Clock, MapPin, Sparkles } from "lucide-react";
+import { Calendar, CalendarPlus, ClipboardCheck, Clock, MapPin } from "lucide-react";
 import { createLessonAction } from "@/app/actions/attendance";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { DateField } from "@/components/shared/date-field";
@@ -83,12 +83,11 @@ export default async function ClassLessonsPage({
           <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <span className="text-xs font-semibold text-muted-foreground">
                   Agenda da turma
                 </span>
                 {todayLesson ? (
-                  <Badge variant="default" className="text-[11px] font-semibold">
-                    <Sparkles className="size-3 mr-1" aria-hidden="true" />
+                  <Badge variant="default" className="text-xs font-semibold">
                     Aula de hoje pronta
                   </Badge>
                 ) : null}
@@ -216,7 +215,7 @@ export default async function ClassLessonsPage({
                               })}
                             </CardTitle>
                             {isLessonToday ? (
-                              <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                              <Badge variant="outline" className="text-xs px-1.5 py-0">
                                 Hoje
                               </Badge>
                             ) : null}

@@ -78,7 +78,7 @@ async function UrgentTasksSection() {
       <div className="grid gap-4 md:grid-cols-2">
         {/* Matrículas Pendentes */}
         {pendingEnrollments.length > 0 ? (
-          <Card variant="floating" className="border-warning/30">
+          <Card className="border-warning/30">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -97,7 +97,7 @@ async function UrgentTasksSection() {
               {pendingEnrollments.slice(0, 3).map((item) => (
                 <div
                   key={item.student.$id}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-surface-recessed/60 p-2.5 text-sm depth-recessed"
+                  className="flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-surface-recessed/60 p-2.5 text-sm "
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <StudentAvatar
@@ -129,7 +129,7 @@ async function UrgentTasksSection() {
 
         {/* Comprovantes PIX Pendentes */}
         {pendingProofs.length > 0 ? (
-          <Card variant="floating" className="border-warning/30">
+          <Card className="border-warning/30">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -148,7 +148,7 @@ async function UrgentTasksSection() {
               {pendingProofs.slice(0, 3).map((charge) => (
                 <div
                   key={charge.$id}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-surface-recessed/60 p-2.5 text-sm depth-recessed"
+                  className="flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-surface-recessed/60 p-2.5 text-sm "
                 >
                   <div className="min-w-0 space-y-0.5">
                     <p className="truncate font-medium text-foreground text-xs sm:text-sm">
@@ -183,7 +183,7 @@ async function TodayClassesSection() {
     <section className="space-y-3" aria-label="Treinos de hoje">
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
-          <CalendarCheck2 className="size-5 text-primary" aria-hidden="true" />
+          <CalendarCheck2 className="size-5 text-primary-text" aria-hidden="true" />
           <span>Treinos de hoje ({todayWeekday})</span>
         </h2>
         <Button asChild variant="ghost" size="sm" className="h-7 text-xs">
@@ -345,7 +345,7 @@ async function ExamsAndShortcutsSection() {
             </Button>
             <Button asChild variant="outline" size="sm" className="h-10 font-medium">
               <Link href={ROUTES.notifications}>
-                <Megaphone className="size-4 mr-1.5 text-primary" aria-hidden="true" />
+                <Megaphone className="size-4 mr-1.5 text-primary-text" aria-hidden="true" />
                 Enviar aviso aos alunos
               </Link>
             </Button>

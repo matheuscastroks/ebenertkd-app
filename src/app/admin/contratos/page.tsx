@@ -18,7 +18,7 @@ async function TemplateCardStatus() {
   return (
     <>
       <div className="flex items-center justify-between">
-        <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary-text">
           <FileSignature className="size-5" />
         </div>
         {hasPublished ? (
@@ -45,7 +45,7 @@ function TemplateCardFallback() {
   return (
     <>
       <div className="flex items-center justify-between">
-        <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary-text">
           <FileSignature className="size-5" />
         </div>
         <Skeleton className="h-5 w-28 rounded-full" />

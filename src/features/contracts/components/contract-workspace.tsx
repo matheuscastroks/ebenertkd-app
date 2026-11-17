@@ -49,7 +49,7 @@ export function ContractWorkspace({
         <CardHeader className="border-b border-border/40 pb-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary-text">
                 {hasSignedPdf ? <FileCheck className="size-5" /> : <FileText className="size-5" />}
               </div>
               <div>

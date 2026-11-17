@@ -84,7 +84,7 @@ export default async function StudentAccessPage({
         <Card className="border-border/80 shadow-xs">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <KeyRound className="size-4 text-primary" />
+              <KeyRound className="size-4 text-primary-text" />
               <CardTitle className="text-base font-semibold">Como funciona o acesso de alunos menores</CardTitle>
             </div>
           </CardHeader>

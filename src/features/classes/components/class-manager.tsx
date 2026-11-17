@@ -44,7 +44,7 @@ function WeekdayFields({ selected = [], idSuffix }: { selected?: string[]; idSuf
           <label
             key={day}
             htmlFor={`weekday-${day}-${idSuffix}`}
-            className="flex items-center gap-2 rounded-lg border border-border/50 bg-surface-recessed/60 px-3 py-2 text-sm font-medium transition-colors hover:bg-surface-recessed cursor-pointer touch-manipulation depth-recessed"
+            className="flex items-center gap-2 rounded-lg border border-border/50 bg-surface-recessed/60 px-3 py-2 text-sm font-medium transition-colors hover:bg-surface-recessed cursor-pointer touch-manipulation "
           >
             <Checkbox
               id={`weekday-${day}-${idSuffix}`}
@@ -227,7 +227,7 @@ export function ClassManager({ classes, notice }: { classes: TrainingClass[]; no
 
                     <div className="flex flex-wrap items-center gap-1 pt-2">
                       {trainingClass.weekdays.map((day) => (
-                        <Badge key={day} variant="secondary" className="px-2 py-0.5 text-[11px] font-semibold">
+                        <Badge key={day} variant="secondary" className="px-2 py-0.5 text-xs font-semibold">
                           {weekdayLabels[day] ?? day.slice(0, 3)}
                         </Badge>
                       ))}

@@ -107,7 +107,7 @@ export default async function ContractTemplatePage({
           <Card className="border-border/80 shadow-sm">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
-                <FileCode className="size-4 text-primary" />
+                <FileCode className="size-4 text-primary-text" />
                 <CardTitle className="text-base font-semibold">Variáveis disponíveis</CardTitle>
               </div>
               <CardDescription className="text-xs">
@@ -131,7 +131,7 @@ export default async function ContractTemplatePage({
           <Card className="border-border/80 shadow-sm">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
-                <History className="size-4 text-primary" />
+                <History className="size-4 text-primary-text" />
                 <CardTitle className="text-base font-semibold">Histórico de versões</CardTitle>
               </div>
               <CardDescription className="text-xs">
@@ -149,7 +149,7 @@ export default async function ContractTemplatePage({
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-sm">Versão {version.version}</span>
                         {version.$id === template?.published_version_id && (
-                          <Badge variant="outline" className="border-emerald-500/40 bg-emerald-50 text-[10px] text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
+                          <Badge variant="outline" className="border-emerald-500/40 bg-emerald-50 text-xs text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
                             Vigente
                           </Badge>
                         )}

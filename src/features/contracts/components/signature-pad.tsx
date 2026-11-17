@@ -77,7 +77,7 @@ export function SignaturePad({ contractId, content }: { contractId: string; cont
       {/* Box de Leitura com Barra de Progresso/Status */}
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs">
-          <span className="font-semibold text-muted-foreground uppercase tracking-wider">
+          <span className="font-semibold text-muted-foreground">
             Texto integral do contrato
           </span>
           {read ? (
@@ -112,7 +112,7 @@ export function SignaturePad({ contractId, content }: { contractId: string; cont
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold flex items-center gap-2">
-            <FileSignature className="size-4 text-primary" />
+            <FileSignature className="size-4 text-primary-text" />
             Assinatura manuscrita digital
           </span>
           <Button
