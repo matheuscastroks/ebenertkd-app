@@ -31,6 +31,8 @@ Todas as de [00-orquestracao-mestre](./2026-11-17-00-orquestracao-mestre.md#glob
 
 ## Registro de progresso
 
+- Validação global de 2026-11-17: build, lint e typecheck aprovados; 118 arquivos/428 testes passaram. E2E públicos desktop/mobile: 18/18. Gates de telas autenticadas e piloto permanecem abertos; relatório em docs/implementation/validacao-retomada-2026-11-17.md.
+
 - 2026-11-17 (revisão): drawer deixa de renderizar mensagem de caixa vazia quando a consulta falha. Onboarding só fecha e atualiza a rota quando save/skip retornam `success`; erros retornados e falhas de rede mantêm o passo, preferências e Alert inline, com nova tentativa disponível. Conclusão desabilitada durante persistência. Red: 4 falhas observadas e 1 rejeição não tratada; green: 10/10 testes nos dois arquivos afetados, sem rejeições. Lint direcionado aprovado (exit 0).
 
 - 2026-11-17 (Codex): tarefas 1–5 implementadas. Abas Entrar/Criar conta com teclado; acesso de menor separado; erro inline ligado aos campos; confirmação de senha nativa; exclusão em seção própria e consequência compatível com a retenção do histórico. Onboarding sem cards decorativos, Progress e Esc retornando um passo sem concluir. NotificationItem compartilhado pelo inbox e drawer, abas reais, falha de consulta explícita e rollback de leitura em lote. Textos da recuperação e indisponibilidade de cadastro simplificados.
@@ -110,4 +112,4 @@ Todas as de [00-orquestracao-mestre](./2026-11-17-00-orquestracao-mestre.md#glob
 
 - [ ] **Step 1:** `npm run typecheck && npm run lint && npm test && npm run build`.
 - [ ] **Step 2:** Conferir tema claro/escuro e 375px de largura no navegador (login, configurações, onboarding, avisos).
-- [ ] **Step 3:** Marcar este plano como concluído, atualizar a tabela do plano mestre, abrir PR.
+- [ ] **Step 3:** Marcar este plano como concluído, atualizar a tabela do plano mestre, registrar commit e enviar à main após validação.

@@ -10,7 +10,7 @@
 
 **Spec:** [plano mestre](./2026-11-17-00-orquestracao-mestre.md); [contrato de design](../../ux/contrato-de-design.md); auditoria "operação do professor" de 2026-11-17.
 
-**Branch:** `feat/ux-admin-operacao`. **Depende de:** Onda 1.
+**Execução atual:** `main`, com commits por responsabilidade e push automático autorizados pelo dono. As dependências de código da Fundação estão integradas; homologação visual protegida aguarda projeto isolado.
 
 ## Global Constraints
 
@@ -30,6 +30,8 @@ As do plano mestre e do contrato de design.
 - Bloqueios: nenhum bloqueio de código.
 
 ## Registro de progresso
+
+- Validação global de 2026-11-17: build, lint e typecheck aprovados; 118 arquivos/428 testes passaram. E2E públicos desktop/mobile: 18/18. Gates de telas autenticadas e piloto permanecem abertos; relatório em docs/implementation/validacao-retomada-2026-11-17.md.
 
 - 2026-11-17: tarefas 1–5 implementadas diretamente na main por autorização do dono. Testes direcionados: 6 arquivos, 15 testes passando (`.tmp-operation-green.log` e `.tmp-manager-green.log`); inclui falha de consulta, identificação da cobrança, ordenação de treinos, preservação da chamada, rollback de turma, filtros e ação conforme status. Ordenação de matrículas permanece limitada à página atual, com aviso explícito conforme alternativa prevista na tarefa 4. Validação visual e gates globais ficam pendentes. Não houve acesso ao Appwrite de produção.
 - 2026-11-17: plano criado.
@@ -96,4 +98,4 @@ As do plano mestre e do contrato de design.
 
 - [ ] **Step 1:** `npm run typecheck && npm run lint && npm test && npm run build`; remover as exceções desta área da lista do teste `design-contract` (plano 01, tarefa 7).
 - [ ] **Step 2:** Conferir dashboard, chamada e matrículas em 375px, claro e escuro.
-- [ ] **Step 3:** Atualizar este plano e o mestre; abrir PR.
+- [ ] **Step 3:** Atualizar este plano e o mestre; registrar commit e enviar à main após validação.

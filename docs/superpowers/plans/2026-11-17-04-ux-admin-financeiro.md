@@ -10,7 +10,7 @@
 
 **Spec:** [plano mestre](./2026-11-17-00-orquestracao-mestre.md); [contrato de design](../../ux/contrato-de-design.md) regra 12; auditoria "financeiro e documentos" de 2026-11-17.
 
-**Branch:** `feat/ux-admin-financeiro`. **Depende de:** Onda 1.
+**Execução atual:** `main`, com commits por responsabilidade e push automático autorizados pelo dono. As dependências de código da Fundação estão integradas; homologação visual protegida aguarda projeto isolado.
 
 ## Global Constraints
 
@@ -30,6 +30,8 @@ As do plano mestre e do contrato. Regras de domínio financeiro (centavos, estor
 - Bloqueios: nenhum para implementação local; não houve acesso ou deploy em produção.
 
 ## Registro de progresso
+
+- Validação global de 2026-11-17: build, lint e typecheck aprovados; 118 arquivos/428 testes passaram. E2E públicos desktop/mobile: 18/18. Gates de telas autenticadas e piloto permanecem abertos; relatório em docs/implementation/validacao-retomada-2026-11-17.md.
 
 - 2026-11-17: tarefas 1–5 implementadas diretamente na main por autorização do dono. `ConsequenceDialog` mantém as actions e as regras financeiras existentes; `ConfirmationForm` protege Enter e preserva salvar rascunho. Resumos leem valor/data/taxa/justificativa dos campos reais antes de confirmar. Assinatura digitada gera a mesma imagem PNG já aceita pelo servidor, sem alterar o contrato da action.
 - 2026-11-17: testes direcionados comprovaram cancelamento sem envio, pendência/duplo envio, motivo em branco, confirmação de rescisão/publicação, competência, filtros, resultado de exame e assinatura alternativa. O gráfico `billing-trend-chart` foi removido após confirmar ausência de consumidores com `rg`. Falhas operacionais exibem causa classificada sem expor mensagens brutas do backend. Validação visual, build e suíte integral são registrados pelo coordenador no fechamento.
@@ -100,4 +102,4 @@ As do plano mestre e do contrato. Regras de domínio financeiro (centavos, estor
 
 - [ ] **Step 1:** `npm run typecheck && npm run lint && npm test && npm run build`; remover as exceções desta área do teste `design-contract`.
 - [ ] **Step 2:** Conferir as telas em 375px, claro e escuro.
-- [ ] **Step 3:** Atualizar este plano e o mestre; abrir PR.
+- [ ] **Step 3:** Atualizar este plano e o mestre; registrar commit e enviar à main após validação.

@@ -10,7 +10,7 @@
 
 **Spec:** [plano mestre](./2026-11-17-00-orquestracao-mestre.md); [contrato de design](../../ux/contrato-de-design.md); auditoria "portais" de 2026-11-17. Exames do portal: PR #2.
 
-**Branch:** `feat/ux-portais`. **Depende de:** Onda 1 e do PR #2 mesclado.
+**Execução atual:** `main`, com commits por responsabilidade e push automático autorizados pelo dono. As dependências de código da Fundação estão integradas; homologação visual protegida aguarda projeto isolado.
 
 ## Global Constraints
 
@@ -31,6 +31,8 @@ As do plano mestre e do contrato. Menor nunca recebe dado financeiro (`showFinan
 - Bloqueios: E2E_APPWRITE_PROJECT_ID não configurado; ambiente atual de produção não será usado na homologação.
 
 ## Registro de progresso
+
+- Validação global de 2026-11-17: build, lint e typecheck aprovados; 118 arquivos/428 testes passaram. E2E públicos desktop/mobile: 18/18. Gates de telas autenticadas e piloto permanecem abertos; relatório em docs/implementation/validacao-retomada-2026-11-17.md.
 
 - 2026-11-17: helper financeiro inclui comprovante em análise e ordena vencimentos; falhas de pagamentos/contratos do responsável têm estado explícito. Nome/seleção de dependente nas cinco seções, autorizado no servidor. Painel do aluno em treino/pendência/faixa, sem consulta financeira para menor. Frequência vazia usa —. Graduação simplificada e matrícula em quatro componentes com rascunho local isolado, datas/selects/uploads preservados. Testes direcionados e revisão cruzada aprovados; revisão encontrou e corrigiu fuso São Paulo e sincronização do switch de turma no plano03. Submissão completa da matrícula coberta em jsdom com adaptação documentada para File/FormData. Commits diretos na main autorizados.
 
@@ -115,4 +117,4 @@ As do plano mestre e do contrato. Menor nunca recebe dado financeiro (`showFinan
 
 - [ ] **Step 1:** `npm run typecheck && npm run lint && npm test && npm run build`; remover as exceções desta área do teste `design-contract`.
 - [ ] **Step 2:** Conferir os portais em 375px, claro e escuro, com conta de aluno adulto, menor e responsável de 2 filhos (projeto Appwrite separado).
-- [ ] **Step 3:** Atualizar este plano e o mestre; abrir PR.
+- [ ] **Step 3:** Atualizar este plano e o mestre; registrar commit e enviar à main após validação.

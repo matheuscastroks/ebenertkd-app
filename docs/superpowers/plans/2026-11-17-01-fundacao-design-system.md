@@ -10,7 +10,7 @@
 
 **Spec:** [contrato de design](../../ux/contrato-de-design.md); [plano mestre](./2026-11-17-00-orquestracao-mestre.md).
 
-**Branch:** `feat/fundacao-design`. **Bloqueia:** planos 02 a 05.
+**Execução atual:** `main`, com commits por responsabilidade e push automático autorizados pelo dono. As dependências de código da Fundação estão integradas; homologação visual protegida aguarda projeto isolado.
 
 ## Global Constraints
 
@@ -30,6 +30,8 @@ Todas as do [plano mestre](./2026-11-17-00-orquestracao-mestre.md#global-constra
 - Bloqueios: nenhum de produto. Direção visual preservada, sem motion; commits diretos na main autorizados em 2026-11-17.
 
 ## Registro de progresso
+
+- Validação global de 2026-11-17: build, lint e typecheck aprovados; 118 arquivos/428 testes passaram. E2E públicos desktop/mobile: 18/18. Gates de telas autenticadas e piloto permanecem abertos; relatório em docs/implementation/validacao-retomada-2026-11-17.md.
 
 - 2026-11-17: correções de integração: UTF-8 estrito, Progress expõe valor acessível, Tabs usa atributos Radix corretos, Poppins oficial local com OFL. Build Webpack completo aprovado; scripts dev/build passam a usar Webpack por falha interna recorrente do Turbopack neste Windows. Conferência pública em 375px/claro/escuro realizada; telas protegidas aguardam projeto isolado.
 
@@ -127,4 +129,4 @@ Todas as do [plano mestre](./2026-11-17-00-orquestracao-mestre.md#global-constra
 
 - [ ] **Step 1:** `npm run typecheck && npm run lint && npm test && npm run build`.
 - [ ] **Step 2:** Conferir login, dashboard do professor, painel do aluno em claro/escuro e 375px.
-- [ ] **Step 3:** Atualizar este plano e a tabela do plano mestre; abrir PR; mesclar antes de liberar a Onda 2.
+- [ ] **Step 3:** Atualizar este plano e a tabela do plano mestre; registrar commit e enviar à main após validação; mesclar antes de liberar a Onda 2.

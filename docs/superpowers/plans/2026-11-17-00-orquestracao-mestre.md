@@ -55,7 +55,7 @@ Legenda: `[x]` feito e mesclado, `[~]` em andamento/PR aberto, `[ ]` pendente.
 - [x] Recuperação de lembretes integrada no PR #7; deploy e verificação operacional ainda pendentes.
 - [x] Página `/privacidade` (PR #8, mesclado). Revisão jurídica e campos do professor pendentes.
 - [ ] Configurar Google Drive/OAuth e chave de backup, ensaiar restauração; validar configuração VAPID no ambiente publicado (local preenchido).
-- [~] Dependências disponíveis; verificações isoladas dos worktrees em .claude. Validar typecheck, lint, testes e build antes de encerrar.
+- [x] Ambiente local validado: build Webpack, lint, typecheck, 428 testes e 18 E2E públicos aprovados.
 
 ### Onda 1 — Fundação de design (bloqueia a Onda 2)
 
@@ -76,9 +76,11 @@ Legenda: `[x]` feito e mesclado, `[~]` em andamento/PR aberto, `[ ]` pendente.
 - [x] Revisão cruzada de subagentes/tech lead das áreas 01–05, com correções e commits separados na main.
 - [ ] Piloto com o professor e duas famílias (docs/pilot-script.md).
 
-## Registro de progresso
+## Registro de progresso (mais recente primeiro)
 
-- 2026-11-17: implementação das áreas 02–05 integrada em commits por responsabilidade; revisão cruzada corrigiu falhas de persistência do onboarding, estado de turma, fuso São Paulo, submissão da matrícula e confirmações responsivas. Suíte completa: 114 arquivos/406 testes aprovados; testes adicionais de isolamento do cliente Appwrite aprovados. Build Webpack, lint e typecheck aprovados; conferência pública Playwright 8/8 em Edge, com rede externa bloqueada. Telas autenticadas, ciclo E2E real, dispositivos, piloto e operação Drive permanecem gates abertos. (mais recente primeiro)
+- 2026-11-17: fechamento técnico local: 118 arquivos/428 testes e 18 E2E públicos desktop/mobile aprovados; build, lint e typecheck passaram. PWA não recarrega na primeira instalação; cliente e diagnóstico Appwrite respeitam o ambiente configurado. Guarda de design sem exceções. Relatório: docs/implementation/validacao-retomada-2026-11-17.md. Criação do projeto isolado de homologação bloqueada pela revisão automática; aprovação específica solicitada, recurso não criado.
+
+- 2026-11-17: implementação das áreas 02–05 integrada em commits por responsabilidade; revisão cruzada corrigiu falhas de persistência do onboarding, estado de turma, fuso São Paulo, submissão da matrícula e confirmações responsivas. Suíte completa: 114 arquivos/406 testes aprovados; testes adicionais de isolamento do cliente Appwrite aprovados. Build Webpack, lint e typecheck aprovados; conferência pública Playwright 8/8 em Edge, com rede externa bloqueada. Telas autenticadas, ciclo E2E real, dispositivos, piloto e operação Drive permanecem gates abertos.
 
 - 2026-11-17: rotina diária (`appwrite/functions/daily-operations`) agora cobre os dias desde a última execução concluída em `automation_runs` (máximo 14) e recupera lembretes de pagamento e avisos de renovação de contrato perdidos; módulo puro `reminders.js` com 13 testes. Validado com executor sem dependências e `node --check`; o `vitest` do repositório não foi rodado (`node_modules` em reinstalação). **Falta:** rodar `npm test`, `typecheck` e lint após a reinstalação; rebase sobre o PR #5 (também altera `main.js`, em trechos distintos); e, só com autorização explícita do dono, `npm run appwrite:deploy-function -- daily-operations` e conferir `covered_days` em `automation_runs`.
 

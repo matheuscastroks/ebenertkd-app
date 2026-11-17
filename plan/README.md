@@ -1,5 +1,7 @@
 # Plano mestre de implementação
 
+> Retomada de 2026-11-17: o estado atual, responsabilidades e gates de conclusão estão em [Orquestração mestre](../docs/superpowers/plans/2026-11-17-00-orquestracao-mestre.md). Este índice mantém o histórico das fases do produto. A execução atual ocorre na main, em commits separados, conforme decisão do dono.
+
 Este diretório transforma o planejamento do sistema da academia em fases executáveis. O produto será um PWA Next.js hospedado no Appwrite Cloud, com Appwrite Auth, TablesDB, Storage, Functions e Messaging. A implementação prioriza fluxos funcionais antes do refinamento visual.
 
 ## Ordem de execução
