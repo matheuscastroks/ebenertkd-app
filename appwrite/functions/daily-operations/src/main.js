@@ -1,6 +1,7 @@
 import { createDecipheriv, createHash } from "node:crypto";
 import { AppwriteException, Client, Query, TablesDB } from "node-appwrite";
 import webpush from "web-push";
+import { DEFAULT_PREFERENCES, pushAllowed, pushPayload } from "./push-rules.js";
 import { safeErrorMessage } from "./safe-error.js";
 
 const databaseId = process.env.APPWRITE_DATABASE_ID ?? "ebenertkd";
@@ -67,8 +68,26 @@ async function financialRecipients(tables, studentId) {
   return Promise.all(links.map((link) => tables.getRow({ databaseId, tableId: "profiles", rowId: link.guardian_profile_id })));
 }
 
+async function preferencesFor(tables, accountId) {
+  try {
+    return await tables.getRow({ databaseId, tableId: "notification_preferences", rowId: accountId });
+  } catch (cause) {
+    if (cause instanceof AppwriteException && cause.code === 404) return DEFAULT_PREFERENCES;
+    throw cause;
+  }
+}
+
 async function deliverPush(tables, notification, recipient) {
   if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY || !process.env.VAPID_SUBJECT || !process.env.PUSH_SUBSCRIPTION_ENCRYPTION_KEY) return;
+  // Falha fechada: se não der para ler a preferência, não envia push (o aviso segue na caixa interna).
+  let preferences;
+  try {
+    preferences = await preferencesFor(tables, recipient.account_id);
+  } catch (cause) {
+    console.error(`push_preferences_unavailable: ${safeErrorMessage(cause)}`);
+    return;
+  }
+  if (!pushAllowed(notification.kind, preferences)) return;
   webpush.setVapidDetails(process.env.VAPID_SUBJECT, process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY, process.env.VAPID_PRIVATE_KEY);
   const subscriptions = await listAll(tables, "push_subscriptions", [Query.equal("profile_id", [recipient.profile_id]), Query.equal("status", ["active"])]);
   for (const subscription of subscriptions) {
@@ -81,7 +100,7 @@ async function deliverPush(tables, notification, recipient) {
       delivery = await tables.createRow({ databaseId, tableId: "notification_deliveries", rowId, permissions: [], data: { notification_id: notification.$id, recipient_id: recipient.$id, subscription_id: subscription.$id, channel: "push", status: "pending", attempts: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } });
     }
     try {
-      await webpush.sendNotification(decryptSubscription(subscription.subscription_ciphertext), JSON.stringify({ title: "Ebenert KD", body: "Você tem um novo aviso no aplicativo.", url: "/avisos", tag: notification.$id }));
+      await webpush.sendNotification(decryptSubscription(subscription.subscription_ciphertext), JSON.stringify(pushPayload(notification)));
       await tables.updateRow({ databaseId, tableId: "notification_deliveries", rowId, data: { status: "sent", attempts: delivery.attempts + 1, delivered_at: new Date().toISOString(), last_error: null, updated_at: new Date().toISOString() } });
     } catch (cause) {
       const expired = cause?.statusCode === 404 || cause?.statusCode === 410;
@@ -110,7 +129,12 @@ async function createNotification(tables, { title, body, dedupeKey, recipients, 
       if (!(cause instanceof AppwriteException) || cause.code !== 409) throw cause;
       recipient = await tables.getRow({ databaseId, tableId: "notification_recipients", rowId: recipientId });
     }
-    await deliverPush(tables, notification, recipient);
+    try {
+      await deliverPush(tables, notification, recipient);
+    } catch (cause) {
+      // O push é complementar: falha aqui não pode abortar a rotina nem os demais destinatários.
+      console.error(`push_delivery_failed: ${safeErrorMessage(cause)}`);
+    }
   }
 }
 

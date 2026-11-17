@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { isPushConfigured } from "@/features/notifications/push-config";
 import { Bell, Plus } from "lucide-react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { OperationToast } from "@/components/shared/operation-toast";
@@ -28,11 +29,7 @@ async function HeaderActionButtons({ profile }: { profile: Profile }) {
     hasActivePushSubscription(profile),
     profile.role === "admin" ? listNotificationAudienceOptions() : Promise.resolve(null),
   ]);
-  const pushConfigured = Boolean(
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY &&
-    process.env.VAPID_PRIVATE_KEY &&
-    process.env.PUSH_SUBSCRIPTION_ENCRYPTION_KEY
-  );
+  const pushConfigured = isPushConfigured();
 
   return (
     <>

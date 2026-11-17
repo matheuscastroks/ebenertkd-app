@@ -3,6 +3,7 @@ import "server-only";
 import { createHash, randomUUID } from "node:crypto";
 import { ID, Query } from "node-appwrite";
 import { z } from "zod";
+import { isSafeActionUrl } from "@/features/notifications/action-url";
 import type { Profile } from "@/features/auth/types";
 import type { ClassEnrollment, TrainingClass } from "@/features/classes/types";
 import { deliverNotificationPush } from "@/features/notifications/push-service";
@@ -17,7 +18,7 @@ const publishSchema = z.object({
   body: z.string().trim().min(3).max(4000),
   audience: z.enum(["all", "class", "profile"]),
   audienceId: z.string().trim().max(36).optional(),
-  actionUrl: z.string().trim().max(512).refine((value) => !value || value.startsWith("/"), "invalid_action_url").optional()
+  actionUrl: z.string().trim().max(512).refine((value) => !value || isSafeActionUrl(value), "invalid_action_url").optional()
 }).superRefine((value, ctx) => {
   if (value.audience !== "all" && !value.audienceId) ctx.addIssue({ code: "custom", path: ["audienceId"], message: "target_required" });
 });
