@@ -31,6 +31,8 @@ Todas as do [plano mestre](./2026-11-17-00-orquestracao-mestre.md#global-constra
 
 ## Registro de progresso
 
+- Validação da retomada: typecheck e lint passaram; 5 arquivos / 23 testes direcionados passaram (controles, navegação, contraste, contrato de design e onboarding). Suíte completa ainda em execução. Build padrão falha no processo PostCSS/Turbopack; alternativa Webpack encontra ENOTFOUND para fonts.googleapis.com. Não foi feito deploy nem push.
+
 - 2026-11-17: retomada na main atualizada; WIP preservado em stash. Fundação implementada com três subagentes; ícones estáticos, controles, superfícies, skeletons e guarda sem exceções para Fundação. Migrações mínimas de consumidores incluídas. Validação visual e fechamento ainda pendentes.
 
 - 2026-11-17: plano criado.
