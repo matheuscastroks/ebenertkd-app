@@ -22,7 +22,8 @@ export const ROUTES = {
   studentBilling: "/aluno/financeiro",
   guardian: "/responsavel",
   guardianDependents: "/responsavel/dependentes",
-  settings: "/configuracoes"
+  settings: "/configuracoes",
+  privacy: "/privacidade"
 } as const;
 
 export type SidebarNavIcon = "dashboard" | "notifications" | "enrollment" | "students" | "classes" | "exams" | "attendance" | "family" | "contracts" | "billing" | "system";

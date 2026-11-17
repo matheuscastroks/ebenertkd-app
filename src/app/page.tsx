@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthEntry } from "@/components/auth/auth-entry";
 import { resolveDashboardPath } from "@/lib/auth/auth-utils";
@@ -56,6 +57,13 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           registrationError={registrationError}
           registered={params.registered === "1"}
         />
+        <p className="text-center text-xs text-muted-foreground">
+          Ao usar o portal, você confirma ter lido a{" "}
+          <Link href="/privacidade" className="font-medium text-primary underline-offset-4 hover:underline">
+            Política de Privacidade
+          </Link>
+          .
+        </p>
       </div>
     </main>
   );
