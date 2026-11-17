@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { navigationForProfile, ROUTES } from "@/lib/navigation/routes";
+import { guardianExamsPath, navigationForProfile, ROUTES } from "@/lib/navigation/routes";
 
 describe("navigationForProfile", () => {
   it("builds the admin hierarchy with server-provided counts", () => {
@@ -21,5 +21,13 @@ describe("navigationForProfile", () => {
     expect(minor.some((item) => item.href === ROUTES.notifications)).toBe(true);
     const adultGuardian = navigationForProfile({ role: "adult_student", capabilities: ["guardian"] });
     expect(adultGuardian.some((item) => item.href === ROUTES.guardianDependents)).toBe(true);
+  });
+
+  it("gives every student, minor or adult, a link to their exams", () => {
+    for (const role of ["minor_student", "adult_student"] as const) {
+      const exams = navigationForProfile({ role, capabilities: ["student"] }).find((item) => item.href === ROUTES.studentExams);
+      expect(exams).toMatchObject({ icon: "exams", group: "Treino" });
+    }
+    expect(guardianExamsPath("minor 1")).toBe("/responsavel/dependentes/minor%201/exames");
   });
 });

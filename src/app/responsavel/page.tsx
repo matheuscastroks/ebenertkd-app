@@ -25,6 +25,7 @@ import {
   guardianBillingPath,
   guardianContractsPath,
   guardianEnrollmentPath,
+  guardianExamsPath,
   ROUTES
 } from "@/lib/navigation/routes";
 import {
@@ -182,12 +183,15 @@ async function GuardianMinorsOverview({ guardian }: { guardian: Profile }) {
                 </div>
               ) : null}
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 pt-1">
                 <Button asChild variant="outline" size="sm" className="h-9 text-xs font-medium">
                   <Link href={guardianEnrollmentPath(minor.$id)}>Ficha</Link>
                 </Button>
                 <Button asChild variant="outline" size="sm" className="h-9 text-xs font-medium">
                   <Link href={guardianAttendancePath(minor.$id)}>Frequência</Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="h-9 text-xs font-medium">
+                  <Link href={guardianExamsPath(minor.$id)}>Exames</Link>
                 </Button>
                 <Button asChild variant="outline" size="sm" className="h-9 text-xs font-medium">
                   <Link href={guardianBillingPath(minor.$id)}>Financeiro</Link>

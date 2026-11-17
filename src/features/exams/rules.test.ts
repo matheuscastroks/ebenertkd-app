@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { assertNextGraduation, examChargeCancellation, sortBeltHistoryNewestFirst } from "@/features/exams/rules";
-import type { BeltHistory } from "@/features/exams/types";
+import { assertNextGraduation, examChargeCancellation, groupStudentExams, sortBeltHistoryNewestFirst, type StudentExamEntry } from "@/features/exams/rules";
+import type { BeltHistory, ExamEvent, ExamParticipant } from "@/features/exams/types";
 
 describe("exam rules", () => {
   it("accepts only the next coherent GUB and belt", () => {
@@ -23,5 +23,36 @@ describe("exam rules", () => {
     const input = [oldest, newest];
     expect(sortBeltHistoryNewestFirst(input).map((item) => item.$id)).toEqual(["new", "old"]);
     expect(input.map((item) => item.$id)).toEqual(["old", "new"]);
+  });
+});
+
+describe("groupStudentExams", () => {
+  const entry = (id: string, date: string, participantStatus: ExamParticipant["status"], eventStatus: ExamEvent["status"] = "planned"): StudentExamEntry => ({
+    participant: { $id: id, status: participantStatus } as ExamParticipant,
+    event: { $id: `event-${id}`, event_date: date, status: eventStatus } as ExamEvent
+  });
+
+  it("lists open registrations as upcoming, soonest first", () => {
+    const { upcoming } = groupStudentExams([
+      entry("late", "2026-12-10T12:00:00.000Z", "registered", "confirmed"),
+      entry("soon", "2026-11-30T12:00:00.000Z", "registered")
+    ]);
+    expect(upcoming.map((item) => item.participant.$id)).toEqual(["soon", "late"]);
+  });
+
+  it("moves graded exams and cancelled events to history, newest first", () => {
+    const { upcoming, past } = groupStudentExams([
+      entry("approved", "2025-06-10T12:00:00.000Z", "approved", "completed"),
+      entry("event-cancelled", "2026-10-01T12:00:00.000Z", "registered", "cancelled"),
+      entry("absent", "2026-03-01T12:00:00.000Z", "absent", "completed")
+    ]);
+    expect(upcoming).toEqual([]);
+    expect(past.map((item) => item.participant.$id)).toEqual(["event-cancelled", "absent", "approved"]);
+  });
+
+  it("hides registrations the teacher removed", () => {
+    const { upcoming, past } = groupStudentExams([entry("removed", "2026-12-01T12:00:00.000Z", "cancelled")]);
+    expect(upcoming).toEqual([]);
+    expect(past).toEqual([]);
   });
 });
