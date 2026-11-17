@@ -1,6 +1,6 @@
 "use client";
 
-import { Award, CheckCircle2, Sparkles, Shield, Trophy } from "lucide-react";
+import { Award, CheckCircle2, Shield, Trophy } from "lucide-react";
 import type { RoleOnboardingConfig } from "../types";
 
 export function OnboardingWelcomeStep({
@@ -14,13 +14,12 @@ export function OnboardingWelcomeStep({
     <div className="space-y-6 py-2">
       {/* Header com badge & saudação */}
       <div className="space-y-2 text-center sm:text-left">
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400">
-          <Sparkles className="size-3.5" />
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary-text">
           <span>{config.welcomeHighlight}</span>
         </div>
 
         <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-          Olá, {userName.split(" ")[0]}! 👋
+          Olá, {userName.split(" ")[0]}
         </h2>
 
         <p className="text-sm text-muted-foreground leading-relaxed">
@@ -35,7 +34,7 @@ export function OnboardingWelcomeStep({
             <Trophy className="size-4" />
           </div>
           <div className="space-y-1">
-            <p className="font-semibold text-primary">Seu Momento de Valor</p>
+            <p className="font-semibold text-primary-text">Seu Momento de Valor</p>
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
               {config.ahaMomentDescription}
             </p>
@@ -45,7 +44,7 @@ export function OnboardingWelcomeStep({
 
       {/* Benefícios Chave (3 Pilares) */}
       <div className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="text-xs font-semibold text-muted-foreground">
           O que você pode fazer no app:
         </p>
 

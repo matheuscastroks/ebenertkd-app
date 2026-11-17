@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, ChevronDown, ChevronUp, Circle, Sparkles } from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp, Circle, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -39,12 +39,12 @@ export function OnboardingChecklist({
   };
 
   return (
-    <Card className="border-primary/30 bg-gradient-to-r from-primary/5 via-card to-card shadow-xs overflow-hidden">
+    <Card className="border-primary/30 overflow-hidden">
       <CardHeader className="p-4 pb-3">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Sparkles className="size-4" />
+            <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary-text">
+              <ListChecks className="size-4" />
             </div>
             <div>
               <CardTitle className="text-sm font-bold text-foreground">

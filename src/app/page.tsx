@@ -41,7 +41,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             className="mx-auto size-16 object-contain"
             priority
           />
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
+          <p className="text-xs font-bold text-primary-text">
             Ebener Taekwondo
           </p>
           <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">

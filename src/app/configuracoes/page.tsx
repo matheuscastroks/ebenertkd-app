@@ -36,7 +36,7 @@ export default async function SettingsPage() {
           <div className="space-y-6">
             <section className="space-y-3">
               <div className="flex items-center gap-2">
-                <Moon className="size-5 text-primary" aria-hidden="true" />
+                <Moon className="size-5 text-primary-text" aria-hidden="true" />
                 <h2 className="text-base sm:text-lg font-bold text-foreground">Aparência</h2>
               </div>
               <ThemePreference />
@@ -44,7 +44,7 @@ export default async function SettingsPage() {
 
             <section className="space-y-3">
               <div className="flex items-center gap-2">
-                <Shield className="size-5 text-primary" aria-hidden="true" />
+                <Shield className="size-5 text-primary-text" aria-hidden="true" />
                 <h2 className="text-base sm:text-lg font-bold text-foreground">Sessão e Segurança</h2>
               </div>
               <Card className="border-border/80 shadow-xs">
@@ -89,7 +89,7 @@ export default async function SettingsPage() {
           <div className="space-y-6">
             <section className="space-y-3">
               <div className="flex items-center gap-2">
-                <Bell className="size-5 text-primary" aria-hidden="true" />
+                <Bell className="size-5 text-primary-text" aria-hidden="true" />
                 <h2 className="text-base sm:text-lg font-bold text-foreground">Notificações</h2>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground">

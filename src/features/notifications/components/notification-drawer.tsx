@@ -159,7 +159,7 @@ export function NotificationDrawer({
         <SheetHeader className="border-b px-6 py-4">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary-text">
                 <Bell className="size-5" aria-hidden="true" />
               </div>
               <div>
@@ -192,7 +192,7 @@ export function NotificationDrawer({
               {unreadItems.length > 0 && (
                 <Badge
                   variant={activeTab === "unread" ? "secondary" : "default"}
-                  className="ml-1.5 px-1.5 py-0 text-[10px]"
+                  className="ml-1.5 px-1.5 py-0 text-xs"
                 >
                   {unreadItems.length}
                 </Badge>
@@ -208,7 +208,7 @@ export function NotificationDrawer({
               <History className="size-3.5 mr-1" aria-hidden="true" />
               Histórico
               {historyItems.length > 0 && (
-                <Badge variant="outline" className="ml-1.5 px-1.5 py-0 text-[10px]">
+                <Badge variant="outline" className="ml-1.5 px-1.5 py-0 text-xs">
                   {historyItems.length}
                 </Badge>
               )}
@@ -220,7 +220,7 @@ export function NotificationDrawer({
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
           {loading && items.length === 0 ? (
             <div className="flex h-40 flex-col items-center justify-center gap-2 text-muted-foreground">
-              <Loader2 className="size-6 animate-spin text-primary" />
+              <Loader2 className="size-6 animate-spin text-primary-text" />
               <p className="text-sm">Carregando avisos…</p>
             </div>
           ) : activeTab === "unread" ? (
@@ -228,7 +228,7 @@ export function NotificationDrawer({
               <EmptyState
                 title="Tudo em dia!"
                 description="Você leu todos os avisos recentes. Os comunicados antigos ficam salvos no histórico."
-                icon={<CheckCircle2 className="size-7 text-primary" aria-hidden="true" />}
+                icon={<CheckCircle2 className="size-7 text-primary-text" aria-hidden="true" />}
                 action={
                   historyItems.length > 0 ? (
                     <Button
@@ -320,7 +320,7 @@ export function NotificationDrawer({
                         variant="outline"
                         onClick={() => handleMarkAsRead(item.recipient.$id)}
                         disabled={marking.has(item.recipient.$id)}
-                        className="h-8 text-xs gap-1.5 font-medium hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+                        className="h-8 text-xs gap-1.5 font-medium hover:bg-primary/10 hover:text-primary-text hover:border-primary/30"
                       >
                         <Check className="size-3.5" aria-hidden="true" />
                         Marcar como lido
@@ -350,7 +350,7 @@ export function NotificationDrawer({
                         <StatusBadge tone="neutral">
                           {kindLabels[item.notification.kind]}
                         </StatusBadge>
-                        <Badge variant="outline" className="text-[10px] text-muted-foreground py-0">
+                        <Badge variant="outline" className="text-xs text-muted-foreground py-0">
                           Lido
                         </Badge>
                       </div>
@@ -395,7 +395,7 @@ export function NotificationDrawer({
         </div>
         <div className="border-t bg-muted/20 px-6 py-3 flex items-center justify-between text-xs text-muted-foreground">
           <span>Central de comunicados</span>
-          <Button asChild variant="link" size="sm" className="h-auto p-0 text-xs text-primary font-medium">
+          <Button asChild variant="link" size="sm" className="h-auto p-0 text-xs text-primary-text font-medium">
             <Link href="/avisos" onClick={() => onOpenChange(false)}>
               Abrir central completa &rarr;
             </Link>

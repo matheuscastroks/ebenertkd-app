@@ -30,7 +30,7 @@ export function ReplayOnboardingCard({ role }: { role: AppRole }) {
     <Card className="border-border/80 shadow-xs">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary-text">
             <Compass className="size-5" />
           </div>
           <div>

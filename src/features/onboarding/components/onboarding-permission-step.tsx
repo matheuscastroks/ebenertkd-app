@@ -69,7 +69,7 @@ export function OnboardingPermissionStep({
       </div>
 
       {/* Card Ilustrativo de Benefício */}
-      <div className="rounded-2xl border border-primary/20 bg-gradient-to-b from-primary/10 to-transparent p-6 text-center space-y-4">
+      <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 text-center space-y-4">
         <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
           <Bell className="size-7" />
         </div>
@@ -89,7 +89,7 @@ export function OnboardingPermissionStep({
             100% Seguro
           </span>
           <span className="flex items-center gap-1.5">
-            <Smartphone className="size-4 text-primary" />
+            <Smartphone className="size-4 text-primary-text" />
             Direto no seu celular
           </span>
         </div>

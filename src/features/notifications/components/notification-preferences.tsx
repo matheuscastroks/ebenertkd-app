@@ -62,7 +62,7 @@ export function NotificationPreferences({
             className="flex items-center justify-between gap-4 p-4 transition-colors hover:bg-muted/10 min-h-[56px]"
           >
             <div className="flex items-start gap-3 min-w-0 flex-1">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary mt-0.5">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary-text mt-0.5">
                 <Icon className="size-4" aria-hidden="true" />
               </div>
               <div className="min-w-0 flex-1">

@@ -98,7 +98,7 @@ export function OnboardingModal({
         {/* Top Header com Progresso & Pular */}
         <div className="border-b border-border/60 bg-muted/30 px-6 pt-5 pb-3">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <span className="text-xs font-semibold text-muted-foreground">
               Passo {step} de 3 · {stepLabels[step]}
             </span>
 

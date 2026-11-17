@@ -136,7 +136,7 @@ export function NotificationInbox({ items: initialItems }: { items: InboxItem[] 
               {totalUnread > 0 && (
                 <Badge
                   variant={activeTab === "unread" ? "secondary" : "default"}
-                  className="ml-1.5 px-1.5 py-0 text-[10px]"
+                  className="ml-1.5 px-1.5 py-0 text-xs"
                 >
                   {totalUnread}
                 </Badge>
@@ -152,7 +152,7 @@ export function NotificationInbox({ items: initialItems }: { items: InboxItem[] 
               <History className="size-3.5 mr-1" aria-hidden="true" />
               Histórico
               {totalHistory > 0 && (
-                <Badge variant="outline" className="ml-1.5 px-1.5 py-0 text-[10px]">
+                <Badge variant="outline" className="ml-1.5 px-1.5 py-0 text-xs">
                   {totalHistory}
                 </Badge>
               )}
@@ -183,7 +183,7 @@ export function NotificationInbox({ items: initialItems }: { items: InboxItem[] 
           <EmptyState
             title="Tudo em dia!"
             description="Você leu todos os comunicados recentes. O histórico de avisos anteriores continua disponível."
-            icon={<CheckCircle2 className="size-6 text-primary" aria-hidden="true" />}
+            icon={<CheckCircle2 className="size-6 text-primary-text" aria-hidden="true" />}
             action={
               totalHistory > 0 ? (
                 <Button
@@ -217,7 +217,7 @@ export function NotificationInbox({ items: initialItems }: { items: InboxItem[] 
             {unreadItems.map((item) => (
               <div
                 key={item.recipient.$id}
-                className="flex flex-col gap-2.5 rounded-xl border border-border/50 bg-card p-4 depth-raised transition-all duration-150 hover:border-primary/40"
+                className="flex flex-col gap-2.5 rounded-xl border border-border/50 bg-card p-4 shadow-xs transition-all duration-150 hover:border-primary/40"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
@@ -271,7 +271,7 @@ export function NotificationInbox({ items: initialItems }: { items: InboxItem[] 
                     size="sm"
                     variant="outline"
                     onClick={() => handleMarkAsRead(item.recipient.$id)}
-                    className="h-8 text-xs gap-1.5 font-medium hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+                    className="h-8 text-xs gap-1.5 font-medium hover:bg-primary/10 hover:text-primary-text hover:border-primary/30"
                   >
                     <Check className="size-3.5" aria-hidden="true" />
                     Marcar como lido
@@ -301,7 +301,7 @@ export function NotificationInbox({ items: initialItems }: { items: InboxItem[] 
                     <StatusBadge tone="neutral">
                       {kindLabels[item.notification.kind]}
                     </StatusBadge>
-                    <Badge variant="outline" className="text-[10px] text-muted-foreground py-0">
+                    <Badge variant="outline" className="text-xs text-muted-foreground py-0">
                       Lido
                     </Badge>
                   </div>

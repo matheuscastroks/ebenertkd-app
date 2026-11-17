@@ -31,7 +31,7 @@ describe("OnboardingModal", () => {
     );
 
     expect(screen.getByText(/Passo 1 de 3/i)).toBeInTheDocument();
-    expect(screen.getByText(/Olá, Ebener!/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Olá, Ebener$/i)).toBeInTheDocument();
     expect(screen.getByText(/Mestre Ebener Santos/i)).toBeInTheDocument();
     expect(screen.getByText(/Pular apresentação/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Continuar/i })).toBeInTheDocument();

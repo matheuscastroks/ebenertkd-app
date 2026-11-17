@@ -74,7 +74,7 @@ export function PushPermissionCard({
   return (
     <div className="space-y-4 rounded-xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs">
       <div className="flex items-start gap-3">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary-text">
           <Smartphone aria-hidden="true" className="size-5" />
         </div>
         <div>
