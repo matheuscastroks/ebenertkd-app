@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { CheckCircle2, Circle, FileText, ImageIcon, Sparkles } from "lucide-react";
+import { CheckCircle2, Circle, FileText, ImageIcon } from "lucide-react";
 import { saveEnrollmentDraftAction, submitEnrollmentAction } from "@/app/actions/enrollment";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { DateField } from "@/components/shared/date-field";
@@ -523,7 +523,6 @@ export function EnrollmentForm({
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between gap-2">
                   <CardTitle className="text-base flex items-center gap-2">
-                    <Sparkles className="size-4 text-primary" aria-hidden="true" />
                     Ficha de matrícula
                   </CardTitle>
                   <StatusBadge tone={statusTone}>

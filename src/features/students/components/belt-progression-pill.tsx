@@ -45,7 +45,7 @@ export function BeltProgressionPill({
         aria-label={`Progressão de faixa: ${fromBelt ?? `${fromGub}º GUB`} para ${targetBelt ?? `${targetGub}º GUB`}`}
       >
         <div className="flex items-center gap-1 text-muted-foreground">
-          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/80 hidden sm:inline">
+          <span className="text-xs font-medium text-muted-foreground/80 hidden sm:inline">
             Atual:
           </span>
           <BeltBadge
@@ -65,7 +65,7 @@ export function BeltProgressionPill({
         />
 
         <div className="flex items-center gap-1">
-          <span className="text-[10px] font-medium uppercase tracking-wider text-primary/80 hidden sm:inline">
+          <span className="text-xs font-medium text-primary-text/80 hidden sm:inline">
             Alvo:
           </span>
           <BeltBadge

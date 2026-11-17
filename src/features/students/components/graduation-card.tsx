@@ -11,7 +11,6 @@ import {
   HelpCircle,
   Info,
   ShieldCheck,
-  Sparkles,
   Swords,
   Target,
   Zap
@@ -86,7 +85,7 @@ export function GraduationCard({
       <CardHeader className="bg-muted/40 pb-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20 depth-recessed">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary-text border border-primary/20 ">
               <Award className="size-4" aria-hidden="true" />
             </div>
             <div>
@@ -105,7 +104,7 @@ export function GraduationCard({
               <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2 text-lg">
-                    <Award className="size-5 text-primary" aria-hidden="true" />
+                    <Award className="size-5 text-primary-text" aria-hidden="true" />
                     Como Funciona o Exame de Faixa
                   </DialogTitle>
                   <DialogDescription>
@@ -116,12 +115,12 @@ export function GraduationCard({
                 <div className="space-y-4 pt-2 text-sm text-foreground">
                   {/* Pilares do Exame */}
                   <div>
-                    <h4 className="font-semibold text-xs tracking-wider uppercase text-muted-foreground mb-2">
+                    <h4 className="font-semibold text-xs text-muted-foreground mb-2">
                       4 Pilares Avaliados no Exame
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <div className="rounded-lg border bg-card p-3 space-y-1">
-                        <div className="flex items-center gap-1.5 font-medium text-xs text-primary">
+                        <div className="flex items-center gap-1.5 font-medium text-xs text-primary-text">
                           <Target className="size-3.5" />
                           <span>Poomsae (Formas)</span>
                         </div>
@@ -131,7 +130,7 @@ export function GraduationCard({
                       </div>
 
                       <div className="rounded-lg border bg-card p-3 space-y-1">
-                        <div className="flex items-center gap-1.5 font-medium text-xs text-primary">
+                        <div className="flex items-center gap-1.5 font-medium text-xs text-primary-text">
                           <Swords className="size-3.5" />
                           <span>Kyorugi (Luta)</span>
                         </div>
@@ -141,7 +140,7 @@ export function GraduationCard({
                       </div>
 
                       <div className="rounded-lg border bg-card p-3 space-y-1">
-                        <div className="flex items-center gap-1.5 font-medium text-xs text-primary">
+                        <div className="flex items-center gap-1.5 font-medium text-xs text-primary-text">
                           <Zap className="size-3.5" />
                           <span>Gyeokpa (Quebramento)</span>
                         </div>
@@ -151,7 +150,7 @@ export function GraduationCard({
                       </div>
 
                       <div className="rounded-lg border bg-card p-3 space-y-1">
-                        <div className="flex items-center gap-1.5 font-medium text-xs text-primary">
+                        <div className="flex items-center gap-1.5 font-medium text-xs text-primary-text">
                           <BookOpen className="size-3.5" />
                           <span>Teoria & Atitude</span>
                         </div>
@@ -179,7 +178,7 @@ export function GraduationCard({
                   {/* Tempo até a Faixa Preta */}
                   <div className="rounded-lg border bg-muted/40 p-3 space-y-2">
                     <div className="flex items-center gap-1.5 text-xs font-semibold">
-                      <Clock className="size-4 text-primary" />
+                      <Clock className="size-4 text-primary-text" />
                       Tempo Médio até a Faixa Preta (1º Dan)
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed">
@@ -200,9 +199,9 @@ export function GraduationCard({
 
       <CardContent className="space-y-4 pt-4">
         {/* Banner elegante da graduação atual */}
-        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 overflow-hidden rounded-xl border border-white/10 dark:border-white/5 bg-neutral-900 text-white dark:bg-neutral-950 p-4 depth-floating">
+        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 overflow-hidden rounded-xl border border-white/10 dark:border-white/5 bg-neutral-900 text-white dark:bg-neutral-950 p-4 shadow-md">
           {/* Faixa marcial visual horizontal decorativa */}
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-primary via-amber-400 to-primary/40 pointer-events-none" />
+          <div className="absolute top-0 inset-x-0 h-1 bg-primary pointer-events-none" />
 
           {/* Ponteira marcial à direita */}
           <div className="absolute right-0 top-0 bottom-0 w-8 border-l border-white/10 pointer-events-none hidden sm:flex items-center justify-center">
@@ -216,10 +215,10 @@ export function GraduationCard({
 
           <div className="relative z-10 space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-mono">
+              <span className="text-xs text-neutral-400 font-mono">
                 Graduação Atual
               </span>
-              <span className="rounded bg-neutral-800 px-1.5 py-0.5 text-[10px] text-neutral-300 font-medium">
+              <span className="rounded bg-neutral-800 px-1.5 py-0.5 text-xs text-neutral-300 font-medium">
                 {activeGub > 0 ? `${activeGub}º GUB` : "Dan"}
               </span>
             </div>
@@ -255,7 +254,6 @@ export function GraduationCard({
         <div className="space-y-2 pt-1">
           <div className="flex items-center justify-between text-xs">
             <span className="font-medium text-muted-foreground flex items-center gap-1">
-              <Sparkles className="size-3 text-primary" aria-hidden="true" />
               Evolução até a Faixa Preta (1º Dan)
             </span>
             <span className="font-semibold tabular-nums text-foreground">
@@ -295,7 +293,7 @@ export function GraduationCard({
 
         {/* Próximo Objetivo e Requisitos */}
         {nextStep && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-border/50 bg-surface-recessed/60 p-3.5 text-xs depth-recessed">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-border/50 bg-surface-recessed/60 p-3.5 text-xs ">
             <div className="space-y-0.5">
               <p className="text-muted-foreground">Próximo objetivo:</p>
               <p className="font-medium text-foreground">
@@ -307,7 +305,7 @@ export function GraduationCard({
                 <span className="text-muted-foreground">Frequência:</span>
                 <Badge
                   variant={attendanceRate >= 75 ? "secondary" : "outline"}
-                  className="text-[11px]"
+                  className="text-xs"
                 >
                   {attendanceRate}% {attendanceRate >= 75 ? "· Apto para exame" : "· Mínimo 75%"}
                 </Badge>

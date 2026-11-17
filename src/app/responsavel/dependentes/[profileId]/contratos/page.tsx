@@ -48,7 +48,7 @@ async function DependentContractsList({
           >
             <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5">
               <div className="flex items-start gap-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary-text">
                   {isSigned ? <FileCheck className="size-5" /> : <FileText className="size-5" />}
                 </div>
                 <div>

@@ -437,7 +437,7 @@ export function BeltBadge({
       {showGub && (resolvedGub != null || config.dan != null) && (
         <span
           className={cn(
-            "rounded px-1 py-0.5 text-[10px] font-medium leading-none shrink-0",
+            "rounded px-1 py-0.5 text-xs font-medium leading-none shrink-0",
             config.isBlackBelt
               ? "bg-amber-400/20 text-amber-700 dark:text-amber-300 font-semibold"
               : "bg-neutral-200/80 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400"

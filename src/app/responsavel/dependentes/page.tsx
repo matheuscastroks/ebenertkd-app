@@ -163,35 +163,35 @@ async function GuardianMinorsList({ guardian }: { guardian: Profile }) {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 pt-1">
               <Button asChild variant="outline" className="h-11 font-medium text-xs sm:text-sm">
                 <Link href={guardianEnrollmentPath(minor.$id)}>
-                  <FileText className="mr-1.5 size-4 text-primary shrink-0" />
+                  <FileText className="mr-1.5 size-4 text-primary-text shrink-0" />
                   Ficha de matrícula
                 </Link>
               </Button>
 
               <Button asChild variant="outline" className="h-11 font-medium text-xs sm:text-sm">
                 <Link href={guardianAttendancePath(minor.$id)}>
-                  <CalendarCheck2 className="mr-1.5 size-4 text-primary shrink-0" />
+                  <CalendarCheck2 className="mr-1.5 size-4 text-primary-text shrink-0" />
                   Frequência
                 </Link>
               </Button>
 
               <Button asChild variant="outline" className="h-11 font-medium text-xs sm:text-sm">
                 <Link href={guardianExamsPath(minor.$id)}>
-                  <Award className="mr-1.5 size-4 text-primary shrink-0" />
+                  <Award className="mr-1.5 size-4 text-primary-text shrink-0" />
                   Exames
                 </Link>
               </Button>
 
               <Button asChild variant="outline" className="h-11 font-medium text-xs sm:text-sm">
                 <Link href={guardianContractsPath(minor.$id)}>
-                  <FileCheck2 className="mr-1.5 size-4 text-primary shrink-0" />
+                  <FileCheck2 className="mr-1.5 size-4 text-primary-text shrink-0" />
                   Contratos
                 </Link>
               </Button>
 
               <Button asChild variant="outline" className="h-11 font-medium text-xs sm:text-sm">
                 <Link href={guardianBillingPath(minor.$id)}>
-                  <CreditCard className="mr-1.5 size-4 text-primary shrink-0" />
+                  <CreditCard className="mr-1.5 size-4 text-primary-text shrink-0" />
                   Financeiro / PIX
                 </Link>
               </Button>
@@ -199,7 +199,7 @@ async function GuardianMinorsList({ guardian }: { guardian: Profile }) {
 
             {/* Gestão de Credenciais e Segurança */}
             <Collapsible>
-              <div className="rounded-xl border border-border/50 bg-surface-recessed/60 p-3.5 depth-recessed">
+              <div className="rounded-xl border border-border/50 bg-surface-recessed/60 p-3.5 ">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <KeyRound className="size-4 text-muted-foreground" />

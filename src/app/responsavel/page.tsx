@@ -123,7 +123,7 @@ async function GuardianMinorsOverview({ guardian }: { guardian: Profile }) {
             </CardHeader>
 
             <CardContent className="space-y-4 pt-1">
-              <div className="rounded-xl border border-border/50 bg-surface-recessed/60 p-3.5 space-y-2 text-xs sm:text-sm depth-recessed">
+              <div className="rounded-xl border border-border/50 bg-surface-recessed/60 p-3.5 space-y-2 text-xs sm:text-sm ">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground flex items-center gap-1.5">
                     <Clock className="size-3.5" />
@@ -132,7 +132,7 @@ async function GuardianMinorsOverview({ guardian }: { guardian: Profile }) {
                   <span className="font-medium text-foreground">
                     {nextSchedule ? (
                       nextSchedule.isToday ? (
-                        <span className="text-primary font-semibold">Hoje ({nextSchedule.startTime})</span>
+                        <span className="text-primary-text font-semibold">Hoje ({nextSchedule.startTime})</span>
                       ) : (
                         `${nextSchedule.dayLabel} às ${nextSchedule.startTime}`
                       )
@@ -172,7 +172,7 @@ async function GuardianMinorsOverview({ guardian }: { guardian: Profile }) {
               </div>
 
               {pendingContract ? (
-                <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs sm:text-sm depth-raised">
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs sm:text-sm shadow-xs">
                   <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 min-w-0">
                     <FileSignature className="size-4 shrink-0" />
                     <span className="truncate">Contrato de matrícula pendente</span>

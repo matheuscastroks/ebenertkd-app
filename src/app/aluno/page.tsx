@@ -28,7 +28,6 @@ import {
   CreditCard,
   FileText,
   MapPin,
-  Sparkles,
   UserPen,
   UserPlus,
   UsersRound,
@@ -94,7 +93,7 @@ async function StudentDashboardDynamic({
 
       {/* 1. Status de Matrícula (Hierarquia de tarefas essenciais) */}
       {isEnrollmentIncomplete ? (
-        <Card variant="floating" className="border-warning/40">
+        <Card className="border-warning/40">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <AlertCircle className="size-5 text-warning" aria-hidden="true" />
@@ -114,7 +113,7 @@ async function StudentDashboardDynamic({
           </CardContent>
         </Card>
       ) : isEnrollmentUnderReview ? (
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-info/40 bg-info/5 px-4 py-3 text-sm depth-raised">
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-info/40 bg-info/5 px-4 py-3 text-sm shadow-xs">
           <div className="flex items-center gap-2">
             <AlertCircle className="size-4 text-info shrink-0" aria-hidden="true" />
             <span>Sua matrícula foi enviada e está em análise pelo professor.</span>
@@ -127,11 +126,11 @@ async function StudentDashboardDynamic({
 
       {/* 2. Próximo Treino do Aluno (Card Hero Operacional) */}
       <Card
-        variant="floating"
+       
         className={cn(
           "relative overflow-hidden transition-all",
           nextTraining?.isToday
-            ? "border-primary/40 bg-gradient-to-br from-primary/10 via-card to-card dark:from-primary/15 dark:via-card dark:to-card"
+            ? "border-primary/50"
             : "hover:border-primary/30"
         )}
       >
@@ -141,11 +140,10 @@ async function StudentDashboardDynamic({
               <div className="flex items-center gap-2">
                 {nextTraining?.isToday ? (
                   <Badge variant="default" className="text-xs font-semibold px-2.5 py-0.5 shadow-xs">
-                    <Sparkles className="size-3 mr-1" aria-hidden="true" />
-                    Hoje tem treino!
+                    Hoje tem treino
                   </Badge>
                 ) : (
-                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <span className="text-xs font-semibold text-muted-foreground">
                     Próximo treino na academia
                   </span>
                 )}
@@ -173,7 +171,7 @@ async function StudentDashboardDynamic({
             ) : (
               <span className="flex items-center gap-1">
                 <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
-                <span>Dojô Ebenézer TKD</span>
+                <span>Ebener TKD</span>
               </span>
             )}
             {studentClass?.weekdays ? (
@@ -212,7 +210,7 @@ async function StudentDashboardDynamic({
       {/* 3. Situação Financeira com Ação Direta (se houver cobrança) */}
       {!minor && outstanding ? (
         <Card
-          variant="floating"
+         
           className={cn(
             isOverdue
               ? "border-destructive/40"
