@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Bell, Moon, Shield, User } from "lucide-react";
 import { isPushConfigured } from "@/features/notifications/push-config";
 import { PortalShell } from "@/components/dashboard/portal-shell";
@@ -70,6 +71,13 @@ export default async function SettingsPage() {
                   </div>
                 </CardContent>
               </Card>
+              <p className="text-xs text-muted-foreground">
+                Saiba como tratamos seus dados na{" "}
+                <Link href={ROUTES.privacy} className="font-medium text-primary underline-offset-4 hover:underline">
+                  Política de Privacidade
+                </Link>
+                .
+              </p>
             </section>
 
             <section className="space-y-3">
