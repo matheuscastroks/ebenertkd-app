@@ -6,10 +6,24 @@ import { Eye, EyeOff } from "lucide-react";
 import { loginAdultAction, loginMinorAction } from "@/app/actions/auth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
+export function PasswordToggle({ visible, onToggle }: { visible: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="absolute right-0 top-0 flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
+      aria-label={visible ? "Ocultar senha" : "Ver senha"}
+      aria-pressed={visible}
+    >
+      {visible ? <EyeOff className="size-4" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
+    </button>
+  );
+}
+
+/** Formulário de entrada. O adulto entra com e-mail; o aluno menor, com usuário criado pelo professor. */
 export function LoginCard({
   type,
   errorMessage
@@ -20,112 +34,90 @@ export function LoginCard({
   const [showPassword, setShowPassword] = useState(false);
   const isMinor = type === "minor";
   const action = isMinor ? loginMinorAction : loginAdultAction;
+  const errorId = `login-error-${type}`;
+  const describedBy = errorMessage ? errorId : undefined;
 
   return (
-    <Card className="border-border/80 shadow-xs">
-      <CardContent className="space-y-6 p-5 sm:p-6">
-        <div className="flex items-start gap-3">
-          <div className="space-y-0.5">
-            <h2 className="font-semibold text-base sm:text-lg">
-              {isMinor ? "Acesso do aluno menor" : "Acesso de adultos"}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {isMinor
-                ? "Entre com seu usuário e senha fornecidos pelo professor."
-                : "Professores, alunos maiores e responsáveis."}
-            </p>
-          </div>
+    <div className="space-y-5">
+      {isMinor ? (
+        <div className="space-y-1">
+          <h2 className="text-base font-semibold">Acesso do aluno menor</h2>
+          <p className="text-sm text-muted-foreground">Use o usuário e a senha que o professor entregou.</p>
         </div>
+      ) : null}
 
-        {errorMessage ? (
-          <Alert variant="destructive" role="alert" id={`login-error-${type}`}>
-            <AlertDescription>{errorMessage}</AlertDescription>
-          </Alert>
-        ) : null}
+      {errorMessage ? (
+        <Alert variant="destructive" role="alert" id={errorId}>
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      ) : null}
 
-        <form action={action} className="space-y-4">
-          {isMinor ? (
-            <Field>
-              <FieldLabel htmlFor="login-username">Nome de usuário</FieldLabel>
-              <div className="relative">
-
-                <Input
-                  id="login-username"
-                  name="username"
-                  autoComplete="username"
-                  placeholder="ex.: joao.silva"
-                  className="h-11 text-sm"
-                  aria-invalid={Boolean(errorMessage)}
-                  aria-describedby={errorMessage ? `login-error-${type}` : undefined}
-                  required
-                />
-              </div>
-            </Field>
-          ) : (
-            <Field>
-              <FieldLabel htmlFor="login-email">E-mail</FieldLabel>
-              <div className="relative">
-
-                <Input
-                  id="login-email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="voce@exemplo.com"
-                  className="h-11 text-sm"
-                  aria-invalid={Boolean(errorMessage)}
-                  aria-describedby={errorMessage ? `login-error-${type}` : undefined}
-                  required
-                />
-              </div>
-            </Field>
-          )}
-
+      <form action={action} className="space-y-4">
+        {isMinor ? (
           <Field>
-            <div className="flex items-center justify-between">
-              <FieldLabel htmlFor={`login-password-${type}`}>Senha</FieldLabel>
-              {!isMinor ? (
-                <Link
-                  href="/recuperar"
-                  className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-                >
-                  Esqueci minha senha
-                </Link>
-              ) : null}
-            </div>
-            <div className="relative">
-
-              <Input
-                id={`login-password-${type}`}
-                name="password"
-                type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
-                className="h-11 pr-12 text-sm"
-                placeholder="Sua senha"
-                aria-invalid={Boolean(errorMessage)}
-                aria-describedby={errorMessage ? `login-error-${type}` : undefined}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-0 top-0 flex size-11 items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label={showPassword ? "Ocultar senha" : "Ver senha"}
-              >
-                {showPassword ? (
-                  <EyeOff className="size-4" aria-hidden="true" />
-                ) : (
-                  <Eye className="size-4" aria-hidden="true" />
-                )}
-              </button>
-            </div>
+            <FieldLabel htmlFor="login-username">Nome de usuário</FieldLabel>
+            <Input
+              id="login-username"
+              name="username"
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
+              placeholder="ex.: joao.silva"
+              className="h-11"
+              aria-invalid={Boolean(errorMessage)}
+              aria-describedby={describedBy}
+              required
+            />
           </Field>
+        ) : (
+          <Field>
+            <FieldLabel htmlFor="login-email">E-mail</FieldLabel>
+            <Input
+              id="login-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder="voce@exemplo.com"
+              className="h-11"
+              aria-invalid={Boolean(errorMessage)}
+              aria-describedby={describedBy}
+              required
+            />
+          </Field>
+        )}
 
-          <FormSubmitButton className="h-11 w-full text-sm font-semibold touch-manipulation" pendingLabel="Entrando…">
-            Entrar
-          </FormSubmitButton>
-        </form>
-      </CardContent>
-    </Card>
+        <Field>
+          <div className="flex items-center justify-between gap-3">
+            <FieldLabel htmlFor={`login-password-${type}`}>Senha</FieldLabel>
+            {!isMinor ? (
+              <Link
+                href="/recuperar"
+                className="-my-3 inline-flex min-h-11 items-center rounded-lg text-sm text-muted-foreground underline-offset-4 transition-colors duration-150 hover:text-foreground hover:underline! focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 motion-reduce:transition-none"
+              >
+                Esqueci minha senha
+              </Link>
+            ) : null}
+          </div>
+          <div className="relative">
+            <Input
+              id={`login-password-${type}`}
+              name="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              className="h-11 pr-12"
+              aria-invalid={Boolean(errorMessage)}
+              aria-describedby={describedBy}
+              required
+            />
+            <PasswordToggle visible={showPassword} onToggle={() => setShowPassword((prev) => !prev)} />
+          </div>
+          {isMinor ? <FieldDescription>Esqueceu a senha? Peça uma nova ao professor.</FieldDescription> : null}
+        </Field>
+
+        <FormSubmitButton className="h-11 w-full touch-manipulation" pendingLabel="Entrando…">
+          Entrar
+        </FormSubmitButton>
+      </form>
+    </div>
   );
 }
