@@ -52,6 +52,7 @@ Legenda: `[x]` feito e mesclado, `[~]` em andamento/PR aberto, `[ ]` pendente.
 - [~] Exames no portal do aluno e do responsável (PR #2).
 - [~] Backup cifrado para o Drive: correções, scripts e guia `docs/backup-setup.md` (PR #4).
 - [~] Notificações push: correções, `push:generate-keys`, guia `docs/notificacoes.md` (PR #5).
+- [~] Rotina diária recupera lembretes de pagamento e avisos de renovação de dias perdidos (branch `feat/rotina-diaria-recuperacao`; PR aberto, **sem deploy**).
 - [~] Página `/privacidade` (agente de frontend; PR a abrir).
 - [ ] Ação do dono: configurar Google Drive/OAuth e variáveis VAPID (guias nos PRs #4 e #5).
 - [ ] Ambiente local: `node_modules` do repositório principal foi corrompido por instalação interrompida; reinstalar (`npm ci`) antes de rodar o app.
@@ -76,6 +77,8 @@ Legenda: `[x]` feito e mesclado, `[~]` em andamento/PR aberto, `[ ]` pendente.
 - [ ] Piloto com o professor e duas famílias (docs/pilot-script.md).
 
 ## Registro de progresso (mais recente primeiro)
+
+- 2026-11-17: rotina diária (`appwrite/functions/daily-operations`) agora cobre os dias desde a última execução concluída em `automation_runs` (máximo 14) e recupera lembretes de pagamento e avisos de renovação de contrato perdidos; módulo puro `reminders.js` com 13 testes. Validado com executor sem dependências e `node --check`; o `vitest` do repositório não foi rodado (`node_modules` em reinstalação). **Falta:** rodar `npm test`, `typecheck` e lint após a reinstalação; rebase sobre o PR #5 (também altera `main.js`, em trechos distintos); e, só com autorização explícita do dono, `npm run appwrite:deploy-function -- daily-operations` e conferir `covered_days` em `automation_runs`.
 
 - 2026-11-17: auditorias UX das 4 áreas concluídas; planos 00, 02, 03, 04, 05 escritos. Plano 01 aguarda a auditoria de fundação.
 
