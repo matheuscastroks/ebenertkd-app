@@ -10,6 +10,7 @@ import type { AppNotification, BrowserPushSubscription, NotificationDelivery, No
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { safeErrorMessage } from "@/lib/security/safe-error";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { buildPushPayload } from "@/features/notifications/push-payload";
 import { getNotificationPreferences, pushAllowed } from "@/features/notifications/preferences-service";
 
 const subscriptionSchema = z.object({
@@ -70,7 +71,7 @@ export async function deliverNotificationPush(notification: AppNotification, rec
 
     try {
       const target = decryptSubscription(subscription.subscription_ciphertext);
-      await webpush.sendNotification(target, JSON.stringify({ title: "Ebener TKD", body: "Você tem um novo aviso no aplicativo.", url: notification.action_url ?? "/avisos", tag: notification.$id }));
+      await webpush.sendNotification(target, JSON.stringify(buildPushPayload(notification)));
       await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationDeliveries, rowId, data: { status: "sent", attempts: delivery.attempts + 1, delivered_at: new Date().toISOString(), last_error: null, updated_at: new Date().toISOString() } });
     } catch (error) {
       const statusCode = typeof error === "object" && error && "statusCode" in error ? Number(error.statusCode) : 0;

@@ -1,4 +1,5 @@
 import { Bell, Moon, Shield, User } from "lucide-react";
+import { isPushConfigured } from "@/features/notifications/push-config";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { ThemePreference } from "@/components/dashboard/theme-preference";
 import { NotificationPreferences } from "@/features/notifications/components/notification-preferences";
@@ -18,11 +19,7 @@ export default async function SettingsPage() {
     getNotificationPreferences(profile.account_id),
     hasActivePushSubscription(profile),
   ]);
-  const pushConfigured = Boolean(
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY &&
-      process.env.VAPID_PRIVATE_KEY &&
-      process.env.PUSH_SUBSCRIPTION_ENCRYPTION_KEY
-  );
+  const pushConfigured = isPushConfigured();
 
   return (
     <PortalShell

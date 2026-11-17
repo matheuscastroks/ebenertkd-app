@@ -1,51 +1,75 @@
 app:
-  - 'src/app/**'
-  - 'src/components/**'
-  - 'src/features/**'
-  - 'public/**'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/app/**'
+          - 'src/components/**'
+          - 'src/features/**'
+          - 'public/**'
 
 ci:
-  - '.github/**'
-  - '.github/workflows/**'
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/**'
+          - '.github/workflows/**'
 
 infra:
-  - 'scripts/appwrite/**'
-  - 'appwrite/**'
-  - 'scripts/**'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'scripts/appwrite/**'
+          - 'appwrite/**'
+          - 'scripts/**'
 
 docs:
-  - 'docs/**'
-  - 'plan/**'
-  - '*.md'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'docs/**'
+          - 'plan/**'
+          - '*.md'
 
 auth:
-  - 'src/**/auth/**'
-  - 'src/features/auth/**'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/**/auth/**'
+          - 'src/features/auth/**'
 
 notifications:
-  - 'src/**/notifications/**'
-  - 'src/features/notifications/**'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/**/notifications/**'
+          - 'src/features/notifications/**'
 
 billing:
-  - 'src/**/billing/**'
-  - 'src/features/billing/**'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/**/billing/**'
+          - 'src/features/billing/**'
 
 students:
-  - 'src/**/students/**'
-  - 'src/features/students/**'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/**/students/**'
+          - 'src/features/students/**'
 
 families:
-  - 'src/**/families/**'
-  - 'src/features/families/**'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/**/families/**'
+          - 'src/features/families/**'
 
 classes:
-  - 'src/**/classes/**'
-  - 'src/features/classes/**'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/**/classes/**'
+          - 'src/features/classes/**'
 
 contracts:
-  - 'src/**/contracts/**'
-  - 'src/features/contracts/**'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/**/contracts/**'
+          - 'src/features/contracts/**'
 
 exams:
-  - 'src/**/exams/**'
-  - 'src/features/exams/**'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/**/exams/**'
+          - 'src/features/exams/**'
