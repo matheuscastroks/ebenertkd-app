@@ -20,7 +20,9 @@ Ambas recebem uma chave dinâmica da execução e registram uma chave idempotent
 
 ## Backup cifrado no Google Drive
 
-Use uma conta Google dedicada, pasta privada e credencial OAuth limitada a `drive.file`. Coloque a tela de consentimento em produção: refresh tokens emitidos para aplicativos em teste podem expirar em sete dias. Configure `GOOGLE_DRIVE_CLIENT_ID`, `GOOGLE_DRIVE_CLIENT_SECRET`, `GOOGLE_DRIVE_REFRESH_TOKEN`, `GOOGLE_DRIVE_FOLDER_ID` e uma `BACKUP_ENCRYPTION_KEY` aleatória de 32 bytes em base64.
+Passo a passo completo para configurar: [backup-setup.md](backup-setup.md).
+
+Use uma conta Google dedicada, pasta privada e credencial OAuth limitada a `drive.file`. Com esse escopo o app só enxerga pastas que ele mesmo criou: obtenha o `GOOGLE_DRIVE_FOLDER_ID` com `npm run backup:drive-token`, não criando a pasta à mão. Coloque a tela de consentimento em produção: refresh tokens emitidos para aplicativos em teste podem expirar em sete dias. Configure `GOOGLE_DRIVE_CLIENT_ID`, `GOOGLE_DRIVE_CLIENT_SECRET`, `GOOGLE_DRIVE_REFRESH_TOKEN`, `GOOGLE_DRIVE_FOLDER_ID` e uma `BACKUP_ENCRYPTION_KEY` aleatória de 32 bytes em base64.
 
 A chave cifra cada objeto com AES-256-GCM antes do upload e não deve ficar no Drive nem somente no Appwrite. Mantenha uma cópia em um gerenciador de senhas ou cofre externo. A política mantém sete cópias diárias e quatro semanais completas. O RPO esperado é de 24 horas; uma pasta incompleta nunca é considerada restaurável.
 
