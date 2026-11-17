@@ -6,7 +6,10 @@
 - **Web Push** (PWA): inscrição feita no navegador (`PushPermissionCard` e etapa de onboarding), salva cifrada (AES-256-GCM) em `push_subscriptions`. Envio por `web-push` no app (avisos publicados pelo admin) e na Function `daily-operations` (lembretes de pagamento e falha da rotina).
 - **Idempotência**: o aviso usa `dedupe_key` (na Function o id da linha é derivado dela); destinatário e entrega (`notification_deliveries`) usam id estável `hash(destinatário:inscrição)`. Entrega já `sent` nunca é reenviada; `failed` é tentada de novo na próxima execução.
 - **Inscrição expirada**: resposta 404/410 do serviço de push marca a inscrição como `expired` e a entrega como `expired`.
-- **Preferências** por categoria (`announcements_enabled`, `financial_enabled`, `system_enabled`), aplicadas tanto no app quanto na Function. Menores de idade não têm a categoria financeira (vai para os responsáveis).
+- **Validação**: as variáveis são lidas cruas (sem `trim`); espaço ou quebra de linha tornam a variável inválida. Também é verificado que a chave pública corresponde à privada (par coerente, ponto `0x04`) e que o subject não usa domínio de exemplo.
+- **Falha fechada na Function**: se a preferência de um destinatário não puder ser lida (erro diferente de 404), o push dele não é enviado e o erro é registrado, mas o aviso permanece na caixa interna e a rotina segue para os demais. Falhas de entrega push também não abortam a rotina.
+- **Links**: `action_url` só aceita caminhos internos (`/x`, nunca `//host`, `\`, quebras de linha ou URL absoluta); o service worker ainda recusa qualquer origem diferente e abre `/avisos`.
+- **Preferências** por categoria (`announcements_enabled`, `financial_enabled`, `system_enabled`; só `false` explícito bloqueia, `null` conta como ativado), aplicadas tanto no app quanto na Function. Menores de idade não têm a categoria financeira (vai para os responsáveis).
 - O texto do push é genérico ("Você tem um novo aviso no aplicativo.") para não expor dados financeiros na tela bloqueada.
 
 ## Variáveis necessárias
@@ -24,10 +27,11 @@ O app só considera o push configurado quando as quatro são válidas (`src/feat
 
 1. Gere as chaves (nada é gravado em arquivo):
    ```
-   npm run push:generate-keys -- mailto:seu-email@exemplo.com
+   npm run -s push:generate-keys -- mailto:professor@seudominio.com.br
    ```
+   O subject é **obrigatório** e precisa ser real: domínios de exemplo (`example.com/.org/.net`) e `localhost` são recusados. O `-s` evita eco extra do npm; não cole a saída em chats, tickets ou logs.
 2. Copie as quatro linhas para o `.env.local` (e para as variáveis do ambiente de produção/hospedagem do app). Não commite nem compartilhe a chave privada.
-3. Coloque as **mesmas** quatro variáveis na Function `daily-operations` (Console Appwrite > Functions > daily-operations > Settings > Variables). O script `npm run appwrite:deploy-function` também sincroniza essas variáveis a partir do `.env.local`; reimplante a Function depois de alterá-las.
+3. Coloque as **mesmas** quatro variáveis na Function `daily-operations` (Console Appwrite > Functions > daily-operations > Settings > Variables). O comando `npm run appwrite:deploy-function -- daily-operations` sincroniza essas variáveis a partir do `.env.local`, mas **exige as cinco variáveis preenchidas** (`APPWRITE_DATABASE_ID` mais as quatro de push) e aborta com `Missing function variables` se faltar alguma; reimplante a Function depois de alterá-las.
 4. Faça novo build/deploy do app (a chave pública entra no bundle).
 5. Em Admin > Sistema, confira que "Push" aparece como configurado.
 6. Teste:
@@ -51,7 +55,7 @@ Recomendação: ativar primeiro o push (barato e já pronto) e decidir o e-mail 
 
 ## Checklist de ação humana
 
-- [ ] Gerar as chaves com `npm run push:generate-keys` e guardá-las em local seguro.
+- [ ] Gerar as chaves com `npm run -s push:generate-keys -- mailto:email-real` e guardá-las em local seguro.
 - [ ] Definir um `VAPID_SUBJECT` com e-mail real.
 - [ ] Preencher as 4 variáveis no ambiente do app (produção) e na Function `daily-operations`.
 - [ ] Reimplantar a Function e fazer novo deploy do app.

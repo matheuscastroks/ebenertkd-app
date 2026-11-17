@@ -78,8 +78,16 @@ async function preferencesFor(tables, accountId) {
 }
 
 async function deliverPush(tables, notification, recipient) {
-  if (!pushAllowed(notification.kind, await preferencesFor(tables, recipient.account_id))) return;
   if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY || !process.env.VAPID_SUBJECT || !process.env.PUSH_SUBSCRIPTION_ENCRYPTION_KEY) return;
+  // Falha fechada: se não der para ler a preferência, não envia push (o aviso segue na caixa interna).
+  let preferences;
+  try {
+    preferences = await preferencesFor(tables, recipient.account_id);
+  } catch (cause) {
+    console.error(`push_preferences_unavailable: ${safeErrorMessage(cause)}`);
+    return;
+  }
+  if (!pushAllowed(notification.kind, preferences)) return;
   webpush.setVapidDetails(process.env.VAPID_SUBJECT, process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY, process.env.VAPID_PRIVATE_KEY);
   const subscriptions = await listAll(tables, "push_subscriptions", [Query.equal("profile_id", [recipient.profile_id]), Query.equal("status", ["active"])]);
   for (const subscription of subscriptions) {
@@ -121,7 +129,12 @@ async function createNotification(tables, { title, body, dedupeKey, recipients, 
       if (!(cause instanceof AppwriteException) || cause.code !== 409) throw cause;
       recipient = await tables.getRow({ databaseId, tableId: "notification_recipients", rowId: recipientId });
     }
-    await deliverPush(tables, notification, recipient);
+    try {
+      await deliverPush(tables, notification, recipient);
+    } catch (cause) {
+      // O push é complementar: falha aqui não pode abortar a rotina nem os demais destinatários.
+      console.error(`push_delivery_failed: ${safeErrorMessage(cause)}`);
+    }
   }
 }
 

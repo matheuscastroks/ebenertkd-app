@@ -59,7 +59,14 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const target = new URL(event.notification.data?.url ?? "/avisos", self.location.origin).href;
+  let resolved;
+  try {
+    resolved = new URL(event.notification.data?.url ?? "/avisos", self.location.origin);
+  } catch {
+    resolved = null;
+  }
+  // Nunca abre outra origem: payload inesperado cai em /avisos.
+  const target = (resolved && resolved.origin === self.location.origin ? resolved : new URL("/avisos", self.location.origin)).href;
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
       const existing = clients.find((client) => client.url === target);

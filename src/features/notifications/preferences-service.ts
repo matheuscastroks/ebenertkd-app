@@ -4,16 +4,13 @@ import { unstable_cache } from "next/cache";
 import { AppwriteException } from "node-appwrite";
 import type { Models } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
-import type { NotificationKind } from "@/features/notifications/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 
-export type NotificationPreferences = {
-  announcements_enabled: boolean;
-  financial_enabled: boolean;
-  system_enabled: boolean;
-};
+import { pushAllowed, type NotificationPreferences } from "@/features/notifications/preference-rules";
+
+export { pushAllowed, type NotificationPreferences };
 
 type PreferencesRow = Models.Row & NotificationPreferences & { account_id: string; updated_at: string };
 
@@ -22,12 +19,6 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
   financial_enabled: true,
   system_enabled: true
 };
-
-export function pushAllowed(kind: NotificationKind, preferences: NotificationPreferences) {
-  if (kind === "announcement") return preferences.announcements_enabled;
-  if (kind === "payment_reminder") return preferences.financial_enabled;
-  return preferences.system_enabled;
-}
 
 export const getNotificationPreferences = unstable_cache(
   async (accountId: string): Promise<NotificationPreferences> => {
