@@ -125,7 +125,7 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
                   <TableCell>
                     <BeltBadge belt={student.current_belt} gub={student.gub} size="sm" />
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="max-w-48 whitespace-normal text-sm text-muted-foreground">
                     {student.training_class ?? "Não informada"}
                   </TableCell>
                   <TableCell className="text-sm font-medium">
