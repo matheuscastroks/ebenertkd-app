@@ -1,43 +1,51 @@
 import { AppwriteException, Client, Query, Storage, TablesDB, Users } from "node-appwrite";
-import { backupIdsToDelete, buildManifest } from "./backup-rules.js";
+import { backupIdsToDelete, backupTableIds, buildManifest } from "./backup-rules.js";
 import { encryptBuffer, sha256 } from "./crypto.js";
-import { deleteBackupFolder, findOrCreateBackupFolder, getAccessToken, listBackupFolders, markBackupComplete, uploadEncryptedObject } from "./drive.js";
+import { deleteBackupFolder, findOrCreateBackupFolder, getAccessToken, listBackupFolders, markBackupComplete, markBackupIncomplete, uploadEncryptedObject } from "./drive.js";
 import { safeErrorMessage } from "./safe-error.js";
 
 const databaseId = process.env.APPWRITE_DATABASE_ID ?? "ebenertkd";
 const bucketId = process.env.APPWRITE_STORAGE_BUCKET_ID ?? "private-files";
-const tableIds = ["profiles", "guardian_student_links", "training_classes", "class_enrollments", "lessons", "attendance_records", "exam_events", "exam_participants", "belt_history", "students", "enrollments", "student_documents", "enrollment_reviews", "contract_templates", "contract_versions", "contracts", "contract_signatures", "cancellation_requests", "charges", "payment_proofs", "payments", "payment_reversals", "billing_settings", "notifications", "notification_recipients", "push_subscriptions", "notification_deliveries", "audit_events", "automation_runs"];
 
 async function listAllRows(tables, tableId) {
   const rows = [];
   let cursor;
+  let total;
   do {
     const page = await tables.listRows({ databaseId, tableId, queries: [Query.limit(500), ...(cursor ? [Query.cursorAfter(cursor)] : [])] });
     rows.push(...page.rows);
     cursor = page.rows.length === 500 ? page.rows.at(-1).$id : undefined;
+    total = page.total;
   } while (cursor);
+  if (typeof total === "number" && rows.length !== total) throw new Error(`table_export_incomplete:${tableId}`);
   return rows;
 }
 
 async function listAllUsers(users) {
   const rows = [];
   let cursor;
+  let total;
   do {
     const page = await users.list({ queries: [Query.limit(100), ...(cursor ? [Query.cursorAfter(cursor)] : [])] });
     rows.push(...page.users);
     cursor = page.users.length === 100 ? page.users.at(-1).$id : undefined;
+    total = page.total;
   } while (cursor);
+  if (typeof total === "number" && rows.length !== total) throw new Error("users_export_incomplete");
   return rows;
 }
 
 async function listAllFiles(storage) {
   const files = [];
   let cursor;
+  let total;
   do {
     const page = await storage.listFiles({ bucketId, queries: [Query.limit(100), ...(cursor ? [Query.cursorAfter(cursor)] : [])] });
     files.push(...page.files);
     cursor = page.files.length === 100 ? page.files.at(-1).$id : undefined;
+    total = page.total;
   } while (cursor);
+  if (typeof total === "number" && files.length !== total) throw new Error("files_export_incomplete");
   return files;
 }
 
@@ -96,12 +104,14 @@ async function main({ req, res, log, error }) {
     const parentId = process.env.GOOGLE_DRIVE_FOLDER_ID;
     if (!parentId) throw new Error("drive_folder_missing");
     const folder = await findOrCreateBackupFolder(token, parentId, backupId, date);
+    // Uma nova tentativa no mesmo dia reutiliza a pasta: ela deixa de ser restaurável até concluir de novo.
+    if (folder.appProperties?.status === "complete") await markBackupIncomplete(token, folder.id);
     const objects = [];
     const references = new Set();
     const accountRows = sanitizedUsers(await listAllUsers(users));
     await saveEncryptedObject(token, folder.id, objects, { name: "users.json.enc", kind: "users", records: accountRows.length, plaintext: Buffer.from(JSON.stringify(accountRows)) });
 
-    for (const tableId of tableIds) {
+    for (const tableId of backupTableIds) {
       const rows = await listAllRows(tables, tableId);
       for (const row of rows) for (const [key, value] of Object.entries(row)) if (key.endsWith("file_id") && typeof value === "string") references.add(value);
       await saveEncryptedObject(token, folder.id, objects, { name: `tables/${tableId}.json.enc`, kind: "table", records: rows.length, plaintext: Buffer.from(JSON.stringify(rows)) });
@@ -124,15 +134,31 @@ async function main({ req, res, log, error }) {
     await uploadEncryptedObject(token, folder.id, "complete.json.enc", encryptedComplete.envelope, { kind: "complete", plaintextSha256: encryptedComplete.plaintextSha256, ciphertextSha256: encryptedComplete.ciphertextSha256 });
     await markBackupComplete(token, folder.id, encryptedManifest.ciphertextSha256);
 
-    const folders = await listBackupFolders(token, parentId);
-    const deletes = backupIdsToDelete(folders.map((item) => ({ id: item.id, date: item.appProperties?.date ?? item.createdTime, complete: item.appProperties?.status === "complete" })));
-    for (const folderId of deletes) await deleteBackupFolder(token, folderId);
-
     const finishedAt = new Date().toISOString();
-    const details = { backupId, folderId: folder.id, objects: manifest.totals.objects, records: manifest.totals.records, bytes: manifest.totals.bytes, durationMs: Date.parse(finishedAt) - started.getTime(), retainedDeleted: deletes.length, manifestCiphertextSha256: encryptedManifest.ciphertextSha256 };
+    const details = { backupId, folderId: folder.id, objects: manifest.totals.objects, records: manifest.totals.records, bytes: manifest.totals.bytes, durationMs: Date.parse(finishedAt) - started.getTime(), manifestCiphertextSha256: encryptedManifest.ciphertextSha256 };
     await tables.updateRow({ databaseId, tableId: "automation_runs", rowId: run.$id, data: { status: "completed", finished_at: finishedAt, details: JSON.stringify(details) } });
+    run = undefined;
+
+    // A retenção nunca invalida um backup já concluído: falhas só viram aviso.
+    let retention = { deleted: 0, failures: 0 };
+    try {
+      const folders = await listBackupFolders(token, parentId);
+      const deletes = backupIdsToDelete(folders.map((item) => ({ id: item.id, date: item.appProperties?.date ?? item.createdTime, complete: item.appProperties?.status === "complete" })));
+      for (const folderId of deletes) {
+        try {
+          await deleteBackupFolder(token, folderId);
+          retention.deleted += 1;
+        } catch {
+          retention.failures += 1;
+        }
+      }
+    } catch (cause) {
+      retention = { ...retention, failures: retention.failures + 1 };
+      log(`Retenção do backup ${backupId} falhou: ${safeErrorMessage(cause)}`);
+    }
+    if (retention.failures) log(`Retenção do backup ${backupId}: ${retention.failures} falha(s).`);
     log(`Backup ${backupId} completed with ${manifest.totals.objects} objects.`);
-    return res.json({ ok: true, idempotencyKey, ...details });
+    return res.json({ ok: true, idempotencyKey, ...details, retainedDeleted: retention.deleted, retentionFailures: retention.failures });
   } catch (cause) {
     const message = safeErrorMessage(cause);
     if (run?.$id) await tables.updateRow({ databaseId, tableId: "automation_runs", rowId: run.$id, data: { status: "failed", finished_at: new Date().toISOString(), details: JSON.stringify({ backupId, error: message.slice(0, 240) }) } }).catch(() => undefined);
