@@ -3,8 +3,8 @@ import { expect, test } from "@playwright/test";
 test("exibe a entrada pública sem dados privados", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Acesse sua conta" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Adulto" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Menor" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Adulto" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Menor" })).toBeVisible();
 });
 
 test("redireciona URLs protegidas quando não há sessão", async ({ page }) => {
