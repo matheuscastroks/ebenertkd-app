@@ -179,24 +179,31 @@
   --font-sans: var(--font-body);
 }
 
-* {
-  box-sizing: border-box;
-  border-color: var(--border);
-}
+/*
+ * Padrões de elemento ficam em @layer base: fora de camada, venceriam utilitários
+ * do Tailwind como `border-transparent`, `aria-invalid:border-destructive` e `hover:underline`.
+ */
+@layer base {
+  * {
+    box-sizing: border-box;
+    border-color: var(--border);
+  }
 
-html { min-height: 100%; }
+  html { min-height: 100%; }
 
-body {
-  min-height: 100vh;
-  margin: 0;
-  color: var(--foreground);
-  font-family: var(--font-body), sans-serif;
-  background: var(--background);
+  body {
+    min-height: 100vh;
+    margin: 0;
+    color: var(--foreground);
+    font-family: var(--font-body), sans-serif;
+    background: var(--background);
+  }
+
+  a { text-decoration: none; }
+  ::selection { background: var(--accent); }
 }
 
 .font-display { font-family: var(--font-body), sans-serif; }
-a { text-decoration: none; }
-::selection { background: var(--accent); }
 
 [data-slot="button"]:focus-visible {
   outline: 2px solid var(--foreground);
