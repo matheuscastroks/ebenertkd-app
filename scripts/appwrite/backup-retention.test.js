@@ -36,4 +36,10 @@ describe("retenção do backup", () => {
   it("remove pastas incompletas anteriores à cópia completa mais recente", () => {
     expect(backupIdsToDelete([complete(0), { id: "velha", date: day(3), complete: false }])).toEqual(["velha"]);
   });
+
+  it("trata a virada de ano ISO: 31/12 e 01/01 são a mesma semana", () => {
+    const recent = Array.from({ length: 7 }, (_, index) => ({ id: `r${index}`, date: `2027-02-${String(10 + index).padStart(2, "0")}`, complete: true }));
+    const backups = [...recent, { id: "a", date: "2027-01-01", complete: true }, { id: "b", date: "2026-12-31", complete: true }];
+    expect(backupIdsToDelete(backups)).toEqual(["b"]);
+  });
 });

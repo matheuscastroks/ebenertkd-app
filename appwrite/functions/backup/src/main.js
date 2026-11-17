@@ -24,22 +24,28 @@ async function listAllRows(tables, tableId) {
 async function listAllUsers(users) {
   const rows = [];
   let cursor;
+  let total;
   do {
     const page = await users.list({ queries: [Query.limit(100), ...(cursor ? [Query.cursorAfter(cursor)] : [])] });
     rows.push(...page.users);
     cursor = page.users.length === 100 ? page.users.at(-1).$id : undefined;
+    total = page.total;
   } while (cursor);
+  if (typeof total === "number" && rows.length !== total) throw new Error("users_export_incomplete");
   return rows;
 }
 
 async function listAllFiles(storage) {
   const files = [];
   let cursor;
+  let total;
   do {
     const page = await storage.listFiles({ bucketId, queries: [Query.limit(100), ...(cursor ? [Query.cursorAfter(cursor)] : [])] });
     files.push(...page.files);
     cursor = page.files.length === 100 ? page.files.at(-1).$id : undefined;
+    total = page.total;
   } while (cursor);
+  if (typeof total === "number" && files.length !== total) throw new Error("files_export_incomplete");
   return files;
 }
 
@@ -128,22 +134,31 @@ async function main({ req, res, log, error }) {
     await uploadEncryptedObject(token, folder.id, "complete.json.enc", encryptedComplete.envelope, { kind: "complete", plaintextSha256: encryptedComplete.plaintextSha256, ciphertextSha256: encryptedComplete.ciphertextSha256 });
     await markBackupComplete(token, folder.id, encryptedManifest.ciphertextSha256);
 
-    const folders = await listBackupFolders(token, parentId);
-    const deletes = backupIdsToDelete(folders.map((item) => ({ id: item.id, date: item.appProperties?.date ?? item.createdTime, complete: item.appProperties?.status === "complete" })));
-    let retentionFailures = 0;
-    for (const folderId of deletes) {
-      try {
-        await deleteBackupFolder(token, folderId);
-      } catch {
-        retentionFailures += 1;
-      }
-    }
-
     const finishedAt = new Date().toISOString();
-    const details = { backupId, folderId: folder.id, objects: manifest.totals.objects, records: manifest.totals.records, bytes: manifest.totals.bytes, durationMs: Date.parse(finishedAt) - started.getTime(), retainedDeleted: deletes.length - retentionFailures, retentionFailures, manifestCiphertextSha256: encryptedManifest.ciphertextSha256 };
+    const details = { backupId, folderId: folder.id, objects: manifest.totals.objects, records: manifest.totals.records, bytes: manifest.totals.bytes, durationMs: Date.parse(finishedAt) - started.getTime(), manifestCiphertextSha256: encryptedManifest.ciphertextSha256 };
     await tables.updateRow({ databaseId, tableId: "automation_runs", rowId: run.$id, data: { status: "completed", finished_at: finishedAt, details: JSON.stringify(details) } });
+    run = undefined;
+
+    // A retenção nunca invalida um backup já concluído: falhas só viram aviso.
+    let retention = { deleted: 0, failures: 0 };
+    try {
+      const folders = await listBackupFolders(token, parentId);
+      const deletes = backupIdsToDelete(folders.map((item) => ({ id: item.id, date: item.appProperties?.date ?? item.createdTime, complete: item.appProperties?.status === "complete" })));
+      for (const folderId of deletes) {
+        try {
+          await deleteBackupFolder(token, folderId);
+          retention.deleted += 1;
+        } catch {
+          retention.failures += 1;
+        }
+      }
+    } catch (cause) {
+      retention = { ...retention, failures: retention.failures + 1 };
+      log(`Retenção do backup ${backupId} falhou: ${safeErrorMessage(cause)}`);
+    }
+    if (retention.failures) log(`Retenção do backup ${backupId}: ${retention.failures} falha(s).`);
     log(`Backup ${backupId} completed with ${manifest.totals.objects} objects.`);
-    return res.json({ ok: true, idempotencyKey, ...details });
+    return res.json({ ok: true, idempotencyKey, ...details, retainedDeleted: retention.deleted, retentionFailures: retention.failures });
   } catch (cause) {
     const message = safeErrorMessage(cause);
     if (run?.$id) await tables.updateRow({ databaseId, tableId: "automation_runs", rowId: run.$id, data: { status: "failed", finished_at: new Date().toISOString(), details: JSON.stringify({ backupId, error: message.slice(0, 240) }) } }).catch(() => undefined);

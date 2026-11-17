@@ -28,10 +28,10 @@ Use uma conta Google dedicada ao backup (não a pessoal), com verificação em d
 ## Parte B. Gerar a chave de cifra (local)
 
 ```bash
-npm run backup:generate-key
+npm run -s backup:generate-key
 ```
 
-O comando imprime uma chave de 32 bytes em base64 apenas no terminal e não grava arquivo. Copie o valor imediatamente para dois lugares: `.env.local` (`BACKUP_ENCRYPTION_KEY=`) e o cofre externo da Parte F. Rodar de novo gera outra chave; **trocar a chave depois de existirem backups torna os backups antigos ilegíveis**, então gere uma única vez.
+Use `npm run -s` para que o npm não ecoe cabeçalhos extras. O comando imprime uma chave de 32 bytes em base64 apenas no terminal e não grava arquivo. Copie o valor imediatamente para dois lugares: `.env.local` (`BACKUP_ENCRYPTION_KEY=`) e o cofre externo da Parte F. Rodar de novo gera outra chave; **trocar a chave depois de existirem backups torna os backups antigos ilegíveis**, então gere uma única vez.
 
 ## Parte C. Obter o refresh token e a pasta (local + SOMENTE O DONO no navegador)
 
@@ -39,12 +39,14 @@ O comando imprime uma chave de 32 bytes em base64 apenas no terminal e não grav
 2. Rode:
 
    ```bash
-   npm run backup:drive-token
+   npm run -s backup:drive-token
    ```
 
 3. O script abre o navegador (ou imprime a URL para você abrir). **[SOMENTE O DONO]** entre com a conta Google dedicada, aceite o aviso de app não verificado se aparecer (Avançado > Acessar) e clique em **Continuar/Permitir** para o acesso a arquivos criados pelo app.
-4. De volta ao terminal, o script imprime duas linhas: `GOOGLE_DRIVE_REFRESH_TOKEN=...` e `GOOGLE_DRIVE_FOLDER_ID=...`. Copie ambas para `.env.local`. Nada é gravado em arquivo. Use `--no-folder` (`npm run backup:drive-token -- --no-folder`) se não quiser criar a pasta.
+4. De volta ao terminal, o script imprime duas linhas: `GOOGLE_DRIVE_REFRESH_TOKEN=...` e `GOOGLE_DRIVE_FOLDER_ID=...`. Copie ambas para `.env.local`. Nada é gravado em arquivo. O refresh token é impresso antes da criação da pasta: se a criação falhar (por exemplo, Drive API não ativada), o token continua válido; ative a API e rode de novo. Use `--no-folder` (`npm run -s backup:drive-token -- --no-folder`) se não quiser criar a pasta.
 5. Confira no Drive da conta dedicada que a pasta `EbenerTKD Backups` existe e **não está compartilhada** com ninguém.
+
+**Aviso sobre o terminal:** a chave e o token ficam no scrollback do terminal e na área de transferência. Depois de copiá-los, limpe o terminal (`clear`/`cls` e feche a aba) e não grave a sessão em log nem compartilhe a tela.
 
 Se o script disser que não veio refresh token, abra https://myaccount.google.com/permissions com a conta dedicada, remova o acesso do app e rode de novo.
 
@@ -62,6 +64,8 @@ Confirme antes que `.env.local` aponta para o projeto Appwrite correto: o comand
 
 **Opção 2: pelo console. [SOMENTE O DONO]** Em Appwrite Console > projeto > **Functions > backup > Settings > Environment variables**, crie estas variáveis marcando **Secret** nas cinco primeiras: `GOOGLE_DRIVE_CLIENT_ID`, `GOOGLE_DRIVE_CLIENT_SECRET`, `GOOGLE_DRIVE_REFRESH_TOKEN`, `GOOGLE_DRIVE_FOLDER_ID`, `BACKUP_ENCRYPTION_KEY`. Variáveis não secretas: `APPWRITE_DATABASE_ID` (`ebenertkd`), `APPWRITE_STORAGE_BUCKET_ID` (`private-files`) e `APP_VERSION`. Depois, em **Settings > Scopes**, garanta `users.read`, `rows.read`, `rows.write`, `buckets.read`, `files.read`, timeout 900 s, e publique o código da pasta `appwrite/functions/backup` (entrypoint `src/main.js`, comando de build `npm install`).
 
+**Depois do deploy da Function, remova `BACKUP_ENCRYPTION_KEY` e `GOOGLE_DRIVE_REFRESH_TOKEN` do `.env.local`** (mantenha-os apenas no cofre e na Function). Eles só voltam ao `.env.local` durante um ensaio de restauração (Parte G). Atenção: um novo `npm run appwrite:deploy-function -- backup` exige as variáveis no ambiente de novo; para só republicar o código, use o console.
+
 Resumo de onde cada variável vai:
 
 | Variável | `.env.local` | Function `backup` |
@@ -78,7 +82,7 @@ Resumo de onde cada variável vai:
 1. Appwrite Console > **Functions > backup > Executions > Execute now** (corpo vazio). Aguarde terminar (pode levar minutos; o limite é 15 minutos).
 2. Resultado esperado: status `completed` e resposta com `ok: true`. Em caso de falha, a execução devolve `ok: false` e o motivo sanitizado aparece em `automation_runs` (campo `details`); admins também recebem o aviso "Falha no backup diário".
 3. Appwrite Console > **Databases > ebenertkd > automation_runs**: deve existir a linha `backup-AAAAMMDD-v1` com `job=backup`, `status=completed` e `details` com `objects`, `records`, `bytes`, `manifestCiphertextSha256`. Também aparece em `/admin/sistema`.
-4. Google Drive (conta dedicada) > `EbenerTKD Backups` > pasta `backup-AAAAMMDD`. Clique com o botão direito > **Detalhes** não mostra propriedades de app; para confirmar `status=complete` use o ensaio de restauração (Parte G) em modo simulação, que recusa pastas não completas, ou o registro `automation_runs`. Confirme que a pasta contém `manifest.json.enc`, `complete.json.enc`, `users.json.enc`, `tables/*.json.enc` (30 tabelas) e `files/*.bin.enc`, todos com extensão `.enc` (nada legível).
+4. Google Drive (conta dedicada) > `EbenerTKD Backups` > pasta `backup-AAAAMMDD`. A interface do Drive **não mostra** as propriedades do app, então o `status=complete` da pasta só se confere por `automation_runs` (`completed`) ou rodando a simulação do restore (Parte G.4), que recusa pastas não completas. Confirme também que a pasta contém `manifest.json.enc`, `complete.json.enc`, `users.json.enc`, `tables/*.json.enc` (30 tabelas) e `files/*.bin.enc`, todos com extensão `.enc` (nada legível).
 5. Executar de novo no mesmo dia é seguro: a run já concluída responde `duplicate: true`; se a anterior falhou, a pasta é revertida para incompleta e refeita.
 
 ## Parte F. Guardar a chave de recuperação (SOMENTE O DONO)
@@ -91,7 +95,7 @@ Resumo de onde cada variável vai:
 
 1. **[SOMENTE O DONO]** No Appwrite Cloud crie um projeto novo e vazio (ex.: `ebenertkd-restore-test`) e uma API key com escopos de usuários, bancos, tabelas, linhas, buckets e arquivos (leitura e escrita).
 2. No `.env.local` preencha `RESTORE_APPWRITE_ENDPOINT`, `RESTORE_APPWRITE_PROJECT_ID`, `RESTORE_APPWRITE_API_KEY`, `RESTORE_APPWRITE_DATABASE_ID`, `RESTORE_APPWRITE_STORAGE_BUCKET_ID`, `RESTORE_STORAGE_QUOTA_BYTES` e `RESTORE_GOOGLE_DRIVE_FOLDER_ID` (ID da pasta `backup-AAAAMMDD`, obtido na URL do Drive). Use as mesmas credenciais Google e a `BACKUP_ENCRYPTION_KEY` do cofre.
-3. Aplique o schema no projeto de teste (apontando temporariamente as variáveis `APPWRITE_*` para ele): `npm run infra:apply`.
+3. Aplique o schema no projeto de teste **sem editar os `APPWRITE_*` do `.env.local`**. Defina as variáveis `APPWRITE_ENDPOINT`, `APPWRITE_PROJECT_ID`, `APPWRITE_API_KEY`, `APPWRITE_DATABASE_ID` e `APPWRITE_STORAGE_BUCKET_ID` do projeto de teste somente na sessão do shell (variáveis do shell têm precedência sobre o `.env.local`; no PowerShell: `$env:APPWRITE_PROJECT_ID = "..."`) ou use um arquivo `.env.restore` fora do repositório carregado manualmente nessa sessão. **Antes de cada comando (`npm run infra:apply`, `npm run backup:restore`), confira o ID do projeto** (`$env:APPWRITE_PROJECT_ID` / `echo $APPWRITE_PROJECT_ID`) e confirme que não é `6ab4c32e00317977eeb6` (produção). Feche o shell ao terminar para descartar as variáveis. Se usar `.env.restore`, nunca o commite.
 4. Simulação (não grava nada, valida hashes, versão, cota e destino vazio):
 
    ```bash
@@ -105,6 +109,11 @@ Resumo de onde cada variável vai:
    ```
 
 6. Compare as contagens do relatório `reports/restore-*.json` e abra fotos, atestados e comprovantes no projeto de teste. Registre duração e divergências. Apague a API key e o projeto de teste ao terminar. O script recusa o projeto de origem e o de produção.
+
+## Riscos de perda de acesso
+
+- **Client ID/secret perdidos ou projeto Google Cloud recriado**: as pastas antigas foram criadas por aquele app e, com `drive.file`, outro client não as enxerga pela API. O backup novo passaria a falhar ou criaria outra pasta sem as cópias antigas. Plano B: baixe manualmente os arquivos `.enc` pela interface do Drive (a conta dedicada continua dona deles) e restaure com a chave. Guarde client ID/secret no cofre junto com a chave.
+- **Trocar `GOOGLE_DRIVE_FOLDER_ID`**: a nova pasta começa vazia; cópias e contagem de retenção anteriores não são herdadas e a pasta antiga não é limpa automaticamente.
 
 ## Operação contínua
 
