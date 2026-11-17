@@ -26,6 +26,7 @@ import { APPWRITE_SESSION_COOKIE } from "@/lib/appwrite/ids";
 import { ROUTES } from "@/lib/navigation/routes";
 import { appwriteSessionCookie, createAppwriteSessionClient } from "@/lib/appwrite/session";
 import { getCurrentProfile } from "@/lib/auth/session";
+import { revokePushSubscription } from "@/features/notifications/push-service";
 
 const genericLoginError = encodeURIComponent("Credenciais inválidas.");
 
@@ -137,9 +138,18 @@ export async function confirmRecoveryAction(formData: FormData) {
   redirect("/?message=password_updated");
 }
 
-export async function logoutAction() {
-  const appwrite = await createAppwriteSessionClient();
+export async function logoutAction(formData?: FormData) {
+  const endpoint = formData?.get("push_endpoint");
+  if (typeof endpoint === "string" && endpoint.length > 0 && endpoint.length <= 2048) {
+    try {
+      const actor = await getCurrentProfile();
+      if (actor) await revokePushSubscription(actor, endpoint);
+    } catch {
+      // Push cleanup must not block signing out; revoke is scoped to actor + endpoint.
+    }
+  }
   try {
+    const appwrite = await createAppwriteSessionClient();
     await appwrite?.account.deleteSession({ sessionId: "current" });
   } catch {
     // Remove the local cookie even if the remote session is already expired.

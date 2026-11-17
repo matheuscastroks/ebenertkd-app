@@ -20,7 +20,7 @@
 - Alvo de toque mínimo 44px no mobile; texto de corpo mínimo `text-sm`; foco visível; `prefers-reduced-motion` respeitado.
 - Sem gradientes decorativos, brilhos, ícones em quadrados coloridos, cards aninhados, emojis ou badges em excesso. Cores só por token (`success`, `warning`, `destructive`, `info`, `primary`), nunca `emerald-*`/`amber-*` fixos.
 - Arquivos de fundação têm **um único dono** (ver Propriedade). Quem não é o dono não os edita; pede a mudança ao dono.
-- Commits em português com assunto convencional, terminando com `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`. PR com impacto, decisões, validação e `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
+- Commits em português com assunto convencional e autoria real; nesta retomada não é exigido PR, conforme autorização do dono.
 - Validar antes do PR: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`.
 - Nunca acessar nem alterar o projeto Appwrite de produção `6ab4c32e00317977eeb6` em testes automatizados.
 
@@ -51,10 +51,10 @@ Legenda: `[x]` feito e mesclado, `[~]` em andamento/PR aberto, `[ ]` pendente.
 - [x] CI destravado: dependências vulneráveis, `labeler.yml`, testes E2E das abas (PR #3, mesclado).
 - [x] Exames no portal do aluno e do responsável (PR #2, mesclado).
 - [x] Backup cifrado para o Drive: correções, scripts e guia `docs/backup-setup.md` (PR #4, mesclado; configuração operacional pendente).
-- [x] Notificações push: correções, `push:generate-keys`, guia `docs/notificacoes.md` (PR #5, mesclado; revogação no logout pendente).
+- [x] Notificações push integradas (#5); logout revoga a inscrição do aparelho e limpa rascunhos locais. VAPID configurado localmente; entrega real em dispositivo ainda precisa de homologação.
 - [x] Recuperação de lembretes integrada no PR #7; deploy e verificação operacional ainda pendentes.
 - [x] Página `/privacidade` (PR #8, mesclado). Revisão jurídica e campos do professor pendentes.
-- [ ] Ação do dono: configurar Google Drive/OAuth e variáveis VAPID (guias nos PRs #4 e #5).
+- [ ] Configurar Google Drive/OAuth e chave de backup, ensaiar restauração; validar configuração VAPID no ambiente publicado (local preenchido).
 - [~] Dependências disponíveis; verificações isoladas dos worktrees em .claude. Validar typecheck, lint, testes e build antes de encerrar.
 
 ### Onda 1 — Fundação de design (bloqueia a Onda 2)
@@ -64,19 +64,21 @@ Legenda: `[x]` feito e mesclado, `[~]` em andamento/PR aberto, `[ ]` pendente.
 
 ### Onda 2 — Áreas em paralelo (após a Onda 1)
 
-- [ ] Plano 02 — Entrada e conta
-- [ ] Plano 03 — Operação do professor
-- [ ] Plano 04 — Financeiro e documentos
-- [ ] Plano 05 — Portais aluno e responsável
+- [~] Plano 02 — Entrada e conta — implementado; revisão e fechamento em validação
+- [~] Plano 03 — Operação do professor — implementado; revisão e fechamento em validação
+- [~] Plano 04 — Financeiro e documentos — implementado; revisão e fechamento em validação
+- [~] Plano 05 — Portais aluno e responsável — implementado; revisão e fechamento em validação
 
 ### Onda 3 — QA e fechamento
 
 - [ ] Rodada de QA: fluxos críticos com contas de teste num projeto Appwrite **separado** (nunca produção).
-- [ ] E2E autenticado cobrindo: cadastro→aprovação→contrato→cobrança→comprovante→aprovação; turma→chamada→exame.
-- [ ] Revisão de tech lead de cada PR; mesclar na ordem 01, 02–05.
+- [~] E2E de ciclo completo e família implementados com guard contra produção; execução aguarda projeto Appwrite isolado (tests/e2e/LIFECYCLE.md).
+- [x] Revisão cruzada de subagentes/tech lead das áreas 01–05, com correções e commits separados na main.
 - [ ] Piloto com o professor e duas famílias (docs/pilot-script.md).
 
-## Registro de progresso (mais recente primeiro)
+## Registro de progresso
+
+- 2026-11-17: implementação das áreas 02–05 integrada em commits por responsabilidade; revisão cruzada corrigiu falhas de persistência do onboarding, estado de turma, fuso São Paulo, submissão da matrícula e confirmações responsivas. Suíte completa: 114 arquivos/406 testes aprovados; testes adicionais de isolamento do cliente Appwrite aprovados. Build Webpack, lint e typecheck aprovados; conferência pública Playwright 8/8 em Edge, com rede externa bloqueada. Telas autenticadas, ciclo E2E real, dispositivos, piloto e operação Drive permanecem gates abertos. (mais recente primeiro)
 
 - 2026-11-17: rotina diária (`appwrite/functions/daily-operations`) agora cobre os dias desde a última execução concluída em `automation_runs` (máximo 14) e recupera lembretes de pagamento e avisos de renovação de contrato perdidos; módulo puro `reminders.js` com 13 testes. Validado com executor sem dependências e `node --check`; o `vitest` do repositório não foi rodado (`node_modules` em reinstalação). **Falta:** rodar `npm test`, `typecheck` e lint após a reinstalação; rebase sobre o PR #5 (também altera `main.js`, em trechos distintos); e, só com autorização explícita do dono, `npm run appwrite:deploy-function -- daily-operations` e conferir `covered_days` em `automation_runs`.
 
