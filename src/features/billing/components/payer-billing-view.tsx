@@ -50,13 +50,13 @@ export function PayerBillingView({ charges, proofs, settings, profileId, initial
   const details = (charge: Charge) => {
     const isPayable = charge.status === "pending" || charge.status === "overdue";
     const isReview = charge.status === "proof_under_review";
-    const triggerLabel = isPayable ? "Pagar via PIX" : isReview ? "Ver envio" : "Detalhes";
+    const triggerLabel = isPayable ? "Pagar mensalidade" : isReview ? "Ver envio" : "Detalhes";
     const triggerVariant = isPayable ? "default" : "outline";
 
     return (
       <ResponsiveDialog
         trigger={
-          <Button size="sm" variant={triggerVariant} className="h-9 font-semibold touch-manipulation">
+          <Button size="sm" variant={triggerVariant} className="min-h-11 font-medium touch-manipulation">
             {triggerLabel}
           </Button>
         }

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 import { ResponsiveDataView } from "@/components/shared/responsive-data-view";
 import { SortableTableHead } from "@/components/shared/sortable-table-head";
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";
@@ -8,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ChargeActions } from "@/features/billing/components/charge-actions";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
 import type { Charge, Payment, PaymentProof } from "@/features/billing/types";
+import { formatCompetence } from "@/features/billing/format-competence";
 import { useTableSort } from "@/hooks/use-table-sort";
 
 const money = (value: number) =>
@@ -41,6 +44,18 @@ export function BillingTable({
   proofsByCharge: Map<string, PaymentProof>;
   payments: Payment[];
 }) {
+  useEffect(() => {
+    const revealCharge = () => {
+      const hash = decodeURIComponent(window.location.hash.slice(1));
+      if (!hash.startsWith("cobranca-")) return;
+      const target = window.matchMedia("(max-width: 767px)").matches ? hash.replace("cobranca-", "cobranca-mobile-") : hash;
+      document.getElementById(target)?.scrollIntoView({ block: "center" });
+    };
+    revealCharge();
+    window.addEventListener("hashchange", revealCharge);
+    return () => window.removeEventListener("hashchange", revealCharge);
+  }, [charges]);
+
   const {
     sortedItems,
     sortKey,
@@ -103,7 +118,7 @@ export function BillingTable({
                   onToggle={toggleSort}
                 />
                 <SortableTableHead
-                  title="Valor"
+                  title="Valor" className="text-right [&_button]:ml-auto"
                   sortKey="amount"
                   currentSortKey={sortKey}
                   currentDirection={sortDirection}
@@ -121,7 +136,7 @@ export function BillingTable({
             </TableHeader>
             <TableBody>
               {sortedItems.map((charge) => (
-                <TableRow key={charge.$id} className="hover:bg-muted/20 transition-colors">
+                <TableRow id={`cobranca-${charge.$id}`} key={charge.$id} className="hover:bg-muted/20 transition-colors">
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <StudentAvatar
@@ -137,11 +152,11 @@ export function BillingTable({
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm">{charge.competence}</TableCell>
+                  <TableCell className="text-sm">{formatCompetence(charge.competence)}</TableCell>
                   <TableCell className="text-sm">
                     {new Date(charge.due_date).toLocaleDateString("pt-BR", { timeZone: "UTC" })}
                   </TableCell>
-                  <TableCell className="font-medium tabular-nums text-sm">
+                  <TableCell className="font-medium tabular-nums text-sm text-right">
                     {money(charge.amount_cents)}
                   </TableCell>
                   <TableCell>
@@ -157,7 +172,7 @@ export function BillingTable({
       mobile={
         <div className="space-y-3">
           {sortedItems.map((charge) => (
-            <Card key={charge.$id}>
+            <Card id={`cobranca-mobile-${charge.$id}`} key={charge.$id}>
               <CardContent className="space-y-4 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">

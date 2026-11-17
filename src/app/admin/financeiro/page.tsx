@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ChargeStatus } from "@/features/billing/types";
 import { BillingTable } from "@/features/billing/components/billing-table";
-import { BillingFilters } from "@/features/billing/components/billing-filters";
+import { BillingFilters, BillingToolbar } from "@/features/billing/components/billing-filters";
 import { getBillingOverview, getBillingSummary } from "@/features/billing/report-service";
 import { getBillingSettings } from "@/features/billing/settings-service";
 import { listTrainingClasses } from "@/features/classes/service";
@@ -62,6 +62,7 @@ export default async function AdminBillingPage({
       title="Painel financeiro"
       subtitle="Acompanhe mensalidades, conciliação de PIX e conferência de comprovantes."
       breadcrumbs={[{ label: "Financeiro" }]}
+      headerActions={<Suspense fallback={null}><BillingToolbarContent /></Suspense>}
     >
       <div className="w-full min-w-0 space-y-6">
         <Suspense fallback={<MetricCardsSkeleton count={4} />}>
@@ -97,19 +98,21 @@ export default async function AdminBillingPage({
 }
 
 async function BillingFiltersContent() {
-  const [classes, settings] = await Promise.all([listTrainingClasses(true), getBillingSettings()]);
-  return <BillingFilters classes={toClientData(classes)} settings={toClientData(settings)} />;
+  const classes = await listTrainingClasses(true);
+  return <BillingFilters classes={toClientData(classes)} />;
 }
+
+async function BillingToolbarContent() { const settings = await getBillingSettings(); return <BillingToolbar settings={toClientData(settings)} />; }
 
 async function BillingMetrics() {
   const summary = await getBillingSummary();
   return (
     <div className="space-y-2">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="Recebido no mês" value={money(summary.receivedCents)} tone="success" />
-        <MetricCard label="A receber" value={money(summary.pendingCents)} tone="warning" />
-        <MetricCard label="Em atraso" value={money(summary.overdueCents)} tone="danger" />
-        <MetricCard label="Comprovantes em análise" value={money(summary.underReviewCents)} tone="info" />
+        <Link href={`${ROUTES.adminBilling}?status=paid`} className="rounded-xl focus-visible:outline-2 focus-visible:outline-ring" aria-label="Filtrar: Recebido no mês"><MetricCard label="Recebido no mês" value={money(summary.receivedCents)} tone="success" /></Link>
+        <Link href={`${ROUTES.adminBilling}?status=pending`} className="rounded-xl focus-visible:outline-2 focus-visible:outline-ring" aria-label="Filtrar: A receber"><MetricCard label="A receber" value={money(summary.pendingCents)} tone="warning" /></Link>
+        <Link href={`${ROUTES.adminBilling}?status=overdue`} className="rounded-xl focus-visible:outline-2 focus-visible:outline-ring" aria-label="Filtrar: Em atraso"><MetricCard label="Em atraso" value={money(summary.overdueCents)} tone="danger" /></Link>
+        <Link href={`${ROUTES.adminBilling}?status=proof_under_review`} className="rounded-xl focus-visible:outline-2 focus-visible:outline-ring" aria-label="Filtrar: Comprovantes em análise"><MetricCard label="Comprovantes em análise" value={money(summary.underReviewCents)} tone="info" /></Link>
       </div>
       <p className="text-xs text-muted-foreground">
         {summary.paidCharges}{" "}

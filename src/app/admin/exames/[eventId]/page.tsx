@@ -1,9 +1,9 @@
+import { ExamResultActions } from "@/features/billing/components/exam-result-actions";
 import { Suspense } from "react";
 import {
   addExamParticipantAction,
   cancelExamEventAction,
   cancelExamParticipantAction,
-  recordExamResultAction,
 } from "@/app/actions/exams";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { OperationToast } from "@/components/shared/operation-toast";
@@ -105,7 +105,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Award className="size-5 text-primary-text" />
-              <h2 className="text-base sm:text-lg font-bold text-foreground">
+              <h2 className="text-base sm:text-lg font-semibold text-foreground">
                 Mesa de Avaliação da Banca
               </h2>
             </div>
@@ -114,7 +114,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                 {bundle.participants.length} {bundle.participants.length === 1 ? "candidato" : "candidatos"}
               </span>
               {registeredCount > 0 && (
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-warning-soft text-warning-foreground dark:text-warning-foreground border border-border">
                   {registeredCount} pendente{registeredCount > 1 ? "s" : ""}
                 </span>
               )}
@@ -149,7 +149,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                       gub={group.targetGub}
                       size="sm"
                     />
-                    <h3 className="text-sm font-bold text-foreground">
+                    <h3 className="text-sm font-semibold text-foreground">
                       Candidatos a Faixa {group.targetBelt} ({group.targetGub === 0 ? "1º Dan" : `${group.targetGub}º GUB`})
                     </h3>
                   </div>
@@ -174,10 +174,10 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                         <Card
                           key={participant.$id}
                           className={cn(
-                            "shadow-xs rounded-2xl border-border/80 transition-all",
-                            isApproved && "bg-emerald-500/5 border-emerald-500/30 dark:bg-emerald-950/20",
-                            isFailed && "bg-rose-500/5 border-rose-500/30 dark:bg-rose-950/20",
-                            isAbsent && "bg-amber-500/5 border-amber-500/30 dark:bg-amber-950/20"
+                            "shadow-xs rounded-2xl border-border/80 transition-colors",
+                            isApproved && "bg-success-soft border-border dark:bg-success-soft",
+                            isFailed && "bg-danger-soft border-border dark:bg-danger-soft",
+                            isAbsent && "bg-warning-soft border-border dark:bg-warning-soft"
                           )}
                         >
                           <CardContent className="p-4 sm:p-5 space-y-3">
@@ -190,7 +190,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                                   className="size-11"
                                 />
                                 <div className="min-w-0">
-                                  <h4 className="font-bold text-sm sm:text-base text-foreground truncate">
+                                  <h4 className="font-semibold text-sm sm:text-base text-foreground truncate">
                                     {student!.full_name}
                                   </h4>
                                   <div className="mt-1">
@@ -225,64 +225,9 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                             {/* Área de Avaliação Táctil de 1 Toque (quando registrado) */}
                             {isRegistered && bundle.event.status !== "completed" && bundle.event.status !== "cancelled" ? (
                               <div className="pt-2 border-t border-border/50">
-                                <form
-                                  action={recordExamResultAction}
-                                  className="rounded-xl bg-muted/30 dark:bg-muted/15 border border-border/60 p-3.5 space-y-3"
-                                >
-                                  <input type="hidden" name="participant_id" value={participant.$id} />
-                                  <input type="hidden" name="event_id" value={eventId} />
-
-                                  <div className="space-y-1.5">
-                                    <label
-                                      htmlFor={`notes-${participant.$id}`}
-                                      className="text-xs font-semibold text-muted-foreground"
-                                    >
-                                      Parecer / Feedback técnico da banca (opcional)
-                                    </label>
-                                    <Input
-                                      id={`notes-${participant.$id}`}
-                                      name="notes"
-                                      placeholder="Ex.: Ótima postura nos chutes, lapidar o Poomsae Taegeuk..."
-                                      className="h-9 text-xs bg-background"
-                                    />
-                                  </div>
-
-                                  {/* Botões de Ação Ergonômica de 1 Toque */}
-                                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                                    <div className="flex items-center gap-2">
-                                      <FormSubmitButton
-                                        name="result"
-                                        value="approved"
-                                        className="h-9 px-3.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-xs"
-                                        pendingLabel="Aprovando…"
-                                      >
-                                        <CheckCircle2 className="mr-1.5 size-3.5" />
-                                        Aprovar aluno
-                                      </FormSubmitButton>
-
-                                      <FormSubmitButton
-                                        name="result"
-                                        value="failed"
-                                        variant="outline"
-                                        className="h-9 px-3 text-xs border-rose-300 text-rose-700 hover:bg-rose-50 dark:border-rose-800 dark:text-rose-300 font-semibold"
-                                        pendingLabel="Reprovando…"
-                                      >
-                                        <XCircle className="mr-1.5 size-3.5" />
-                                        Reprovar
-                                      </FormSubmitButton>
-
-                                      <FormSubmitButton
-                                        name="result"
-                                        value="absent"
-                                        variant="ghost"
-                                        className="h-9 px-2.5 text-xs text-muted-foreground hover:bg-muted font-medium"
-                                        pendingLabel="Marcando…"
-                                      >
-                                        <MinusCircle className="mr-1.5 size-3.5" />
-                                        Ausente
-                                      </FormSubmitButton>
-                                    </div>
-
+                                <div className="space-y-3">
+                                  <ExamResultActions participantId={participant.$id} eventId={eventId} name={student!.full_name} currentBelt={student!.current_belt ?? "Sem faixa"} targetBelt={participant.target_belt} feeCents={charge?.amount_cents ?? bundle.event.default_fee_cents} />
+                                  <div className="flex justify-end">
                                     {/* Cancelar Inscrição */}
                                     <AlertDialog>
                                       <AlertDialogTrigger asChild>
@@ -339,27 +284,27 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                                       </AlertDialogContent>
                                     </AlertDialog>
                                   </div>
-                                </form>
+                                </div>
                               </div>
                             ) : (
                               /* Resultado Já Homologado */
                               <div
                                 className={cn(
                                   "rounded-xl border p-3 space-y-1 text-xs",
-                                  isApproved && "border-emerald-300/60 bg-emerald-50/50 text-emerald-950 dark:border-emerald-800/60 dark:bg-emerald-950/30 dark:text-emerald-200",
-                                  isFailed && "border-rose-300/60 bg-rose-50/50 text-rose-950 dark:border-rose-800/60 dark:bg-rose-950/30 dark:text-rose-200",
-                                  isAbsent && "border-amber-300/60 bg-amber-50/50 text-amber-950 dark:border-amber-800/60 dark:bg-amber-950/30 dark:text-amber-200"
+                                  isApproved && "border-border bg-success-soft text-success-foreground dark:border-border dark:bg-success-soft dark:text-success-foreground",
+                                  isFailed && "border-border bg-danger-soft text-destructive dark:border-border dark:bg-danger-soft dark:text-destructive",
+                                  isAbsent && "border-border bg-warning-soft text-warning-foreground dark:border-border dark:bg-warning-soft dark:text-warning-foreground"
                                 )}
                               >
                                 <div className="flex items-center justify-between font-semibold">
                                   <span className="flex items-center gap-1.5">
-                                    {isApproved && <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />}
-                                    {isFailed && <XCircle className="size-4 text-rose-600 dark:text-rose-400" />}
-                                    {isAbsent && <MinusCircle className="size-4 text-amber-600 dark:text-amber-400" />}
+                                    {isApproved && <CheckCircle2 className="size-4 text-success-foreground dark:text-success-foreground" />}
+                                    {isFailed && <XCircle className="size-4 text-destructive dark:text-destructive" />}
+                                    {isAbsent && <MinusCircle className="size-4 text-warning-foreground dark:text-warning-foreground" />}
                                     Parecer da banca: {participantLabels[participant.status]}
                                   </span>
                                   {isApproved && (
-                                    <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">
+                                    <span className="text-sm font-semibold text-success-foreground dark:text-success-foreground  ">
                                       Graduação Homologada
                                     </span>
                                   )}
@@ -393,7 +338,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <UserPlus className="size-4 text-primary-text" />
-                <CardTitle className="text-base font-bold">Alunos elegíveis</CardTitle>
+                <CardTitle className="text-base font-semibold">Alunos elegíveis</CardTitle>
               </div>
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
                 {bundle.eligibleStudents.length} aptos
@@ -430,7 +375,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                           <p className="truncate font-semibold text-xs text-foreground">
                             {student!.full_name}
                           </p>
-                          <p className="text-[11px] text-muted-foreground truncate">
+                          <p className="text-sm text-muted-foreground truncate">
                             ➔ Faixa {targetBelt}
                           </p>
                         </div>
@@ -506,7 +451,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
         {/* Card 2: Resumo e Informações do Evento */}
         <Card className="shadow-xs rounded-2xl border-border/80">
           <CardHeader className="p-4 pb-2">
-            <CardTitle className="text-sm font-bold flex items-center gap-2">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
               <Info className="size-4 text-primary-text" />
               Dados do Evento
             </CardTitle>
@@ -520,13 +465,13 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
             </div>
             <div className="flex items-center justify-between py-1 border-b border-border/40">
               <span className="text-muted-foreground">Taxa padrão:</span>
-              <span className="font-bold font-mono text-foreground">
+              <span className="font-semibold font-mono text-foreground">
                 {formatBrl(bundle.event.default_fee_cents)}
               </span>
             </div>
             <div className="flex items-center justify-between py-1 border-b border-border/40">
               <span className="text-muted-foreground">Arrecadação prevista:</span>
-              <span className="font-bold font-mono text-foreground">
+              <span className="font-semibold font-mono text-foreground">
                 {formatBrl(
                   bundle.participants.reduce((sum, p) => sum + p.participant.fee_cents, 0)
                 )}
@@ -549,7 +494,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                 <ShieldAlert className="size-4" />
                 <span>Zona Administrativa</span>
               </div>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Deseja cancelar este exame de graduação? Inscrições ativas devem ser tratadas individualmente.
               </p>
               <AlertDialog>
@@ -666,7 +611,7 @@ export default async function ExamDetailPage({
         ) : null}
 
         {/* Resumo Proeminente do Evento (Topo) */}
-        <Card className="shadow-xs rounded-2xl border-border/80 overflow-hidden bg-gradient-to-r from-card via-card to-muted/20">
+        <Card className="shadow-xs rounded-2xl border-border/80 overflow-hidden    ">
           <CardContent className="p-5 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="space-y-1.5 min-w-0">
@@ -674,7 +619,7 @@ export default async function ExamDetailPage({
                   <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary-text border border-primary/20 shrink-0">
                     <Award className="size-5" />
                   </div>
-                  <h1 className="text-xl sm:text-2xl font-black text-foreground truncate">
+                  <h1 className="text-xl sm:text-2xl font-semibold text-foreground truncate">
                     {event.name}
                   </h1>
                 </div>

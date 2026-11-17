@@ -45,83 +45,20 @@ const tones = {
 
 async function ExamEventsContent() {
   const overview = await getExamsOverview();
-  const { events, nextUpcomingEvent, daysUntilNext, totalActiveParticipants, totalProjectedRevenueCents } = overview;
+  const { events, nextUpcomingEvent, totalActiveParticipants, totalProjectedRevenueCents } = overview;
 
   return (
     <div className="space-y-6">
       {/* 1. Barra de KPIs Operacionais (Topo da Página) */}
-      <section aria-label="Métricas de Exames" className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-        <Card className="shadow-xs border-border/80 relative overflow-hidden">
-          <CardContent className="p-5 flex items-start gap-4">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary-text border border-primary/20">
-              <CalendarDays className="size-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Próximo Exame
-              </span>
-              <p className="text-xl font-bold text-foreground mt-1 truncate">
-                {nextUpcomingEvent
-                  ? daysUntilNext === 0
-                    ? "Hoje!"
-                    : daysUntilNext === 1
-                      ? "Amanhã"
-                      : `Faltam ${daysUntilNext} dias`
-                  : "Nenhum agendado"}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                {nextUpcomingEvent
-                  ? `${nextUpcomingEvent.name} · ${new Date(nextUpcomingEvent.event_date).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", timeZone: "UTC" })}`
-                  : "Crie um novo evento para abrir inscrições"}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-xs border-border/80 relative overflow-hidden">
-          <CardContent className="p-5 flex items-start gap-4">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
-              <Users className="size-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Candidatos Inscritos
-              </span>
-              <p className="text-xl font-bold text-foreground mt-1">
-                {totalActiveParticipants} {totalActiveParticipants === 1 ? "aluno" : "alunos"}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Aguardando avaliação nas bancas ativas
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-xs border-border/80 relative overflow-hidden">
-          <CardContent className="p-5 flex items-start gap-4">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-              <DollarSign className="size-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Previsão de Taxas
-              </span>
-              <p className="text-xl font-bold text-foreground font-mono mt-1">
-                {formatBrl(totalProjectedRevenueCents)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Total acumulado nas inscrições ativas
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
+      <p className="text-sm text-muted-foreground" aria-label="Métricas de exames">
+        Próximo exame: {nextUpcomingEvent ? new Date(nextUpcomingEvent.event_date).toLocaleDateString("pt-BR", { timeZone: "UTC" }) : "nenhum agendado"} · {totalActiveParticipants} inscritos · Taxas previstas: {formatBrl(totalProjectedRevenueCents)}
+      </p>
 
       {/* 2. Lista de Exames com Calendário Visual */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-foreground">Eventos agendados</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-foreground">Eventos agendados</h2>
             <p className="text-xs sm:text-sm text-muted-foreground">
               Selecione um evento para avaliar candidatos na banca, gerenciar cobranças e homologar graduações.
             </p>
@@ -162,7 +99,7 @@ async function ExamEventsContent() {
               return (
                 <Card
                   key={event.$id}
-                  className="shadow-xs rounded-2xl border-border/80 hover:border-primary/50 transition-all hover:shadow-md flex flex-col justify-between"
+                  className="shadow-xs rounded-2xl border-border/80 hover:border-primary/50 transition-colors hover:shadow-md flex flex-col justify-between"
                 >
                   <CardContent className="p-5 space-y-4">
                     {/* Header Row: Visual Calendar Block + Main Info */}
@@ -181,7 +118,7 @@ async function ExamEventsContent() {
                       >
                         <span
                           className={cn(
-                            "w-full text-[10px] font-bold tracking-wider py-0.5 uppercase",
+                            "w-full text-sm font-semibold  py-0.5 ",
                             event.status === "completed"
                               ? "bg-muted text-muted-foreground"
                               : event.status === "cancelled"
@@ -191,10 +128,10 @@ async function ExamEventsContent() {
                         >
                           {monthStr}
                         </span>
-                        <span className="text-xl font-black text-foreground py-1 leading-none">
+                        <span className="text-xl font-semibold text-foreground py-1 leading-none">
                           {dayStr}
                         </span>
-                        <span className="text-[9px] text-muted-foreground pb-1 font-medium">
+                        <span className="text-sm text-muted-foreground pb-1 font-medium">
                           {yearStr}
                         </span>
                       </div>
@@ -212,7 +149,7 @@ async function ExamEventsContent() {
                           )}
                         </div>
 
-                        <h3 className="font-bold text-base text-foreground leading-snug line-clamp-2 pt-0.5">
+                        <h3 className="font-semibold text-base text-foreground leading-snug line-clamp-2 pt-0.5">
                           {event.name}
                         </h3>
 
@@ -232,10 +169,10 @@ async function ExamEventsContent() {
                     {/* Footer Row: Preço e Botão de Ação */}
                     <div className="flex items-center justify-between gap-3 pt-3 border-t border-border/50">
                       <div className="flex flex-col">
-                        <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">
+                        <span className="text-sm   text-muted-foreground font-medium">
                           Taxa individual
                         </span>
-                        <span className="text-sm font-bold font-mono text-foreground">
+                        <span className="text-sm font-semibold font-mono text-foreground">
                           {formatBrl(event.default_fee_cents)}
                         </span>
                       </div>

@@ -26,7 +26,7 @@ export function CopyPixButton({ value }: { value: string }) {
       type="button"
       size="sm"
       variant={copied ? "default" : "outline"}
-      className="h-9 gap-1.5 touch-manipulation font-medium transition-all"
+      className="h-9 gap-1.5 touch-manipulation font-medium transition-colors"
       onClick={handleCopy}
       aria-label="Copiar chave PIX"
     >

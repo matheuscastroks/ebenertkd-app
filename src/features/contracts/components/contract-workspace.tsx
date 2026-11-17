@@ -49,9 +49,7 @@ export function ContractWorkspace({
         <CardHeader className="border-b border-border/40 pb-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary-text">
-                {hasSignedPdf ? <FileCheck className="size-5" /> : <FileText className="size-5" />}
-              </div>
+              
               <div>
                 <CardTitle className="text-lg">Contrato de {contract.student_name}</CardTitle>
                 <CardDescription className="text-xs sm:text-sm mt-0.5">
@@ -79,10 +77,10 @@ export function ContractWorkspace({
         <CardContent className="pt-6">
           {hasSignedPdf ? (
             <div className="space-y-5">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04] p-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-border bg-success-soft p-4">
                 <div className="space-y-1">
                   <p className="font-semibold text-sm text-foreground flex items-center gap-2">
-                    <FileCheck className="size-4 text-emerald-600 dark:text-emerald-400" />
+                    <FileCheck className="size-4 text-success-foreground dark:text-success-foreground" />
                     Documento assinado digitalmente e preservado
                   </p>
                   <p className="text-xs text-muted-foreground break-all font-mono">

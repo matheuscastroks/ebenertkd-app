@@ -1,5 +1,11 @@
+"use client";
+
+import { useId } from "react";
+import { ConfirmationForm } from "@/features/billing/components/confirmation-form";
+import { ConsequenceDialog } from "./consequence-dialog";
+import { formatBrl } from "@/lib/money";
 import Link from "next/link";
-import { CheckCircle2, ExternalLink, FileText, XCircle } from "lucide-react";
+import { ExternalLink, FileText } from "lucide-react";
 import {
   adjustChargeAction,
   decidePaymentProofAction,
@@ -13,17 +19,6 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
-} from "@/components/ui/alert-dialog";
 import type { Charge, Payment, PaymentProof } from "@/features/billing/types";
 import { centsToReaisInput } from "@/lib/money";
 
@@ -40,6 +35,8 @@ export function ChargeActions({
   proof?: PaymentProof;
   payment?: Payment;
 }) {
+  const instanceId = useId();
+  const summary = [{ label: "Aluno", value: studentName }, { label: "Valor", value: formatBrl(charge.amount_cents) }, { label: "Competência", value: new Date(`${charge.competence}-01T12:00:00Z`).toLocaleDateString("pt-BR", { month: "short", year: "numeric", timeZone: "UTC" }).replace(". de ", "/").replace(" de ", "/") }];
   const actionable = ["pending", "overdue", "proof_under_review"].includes(charge.status);
 
   return (
@@ -89,7 +86,7 @@ export function ChargeActions({
                   </div>
 
                   {/* Aprovar Comprovante */}
-                  <form action={decidePaymentProofAction} className="rounded-xl border border-success/30 bg-success/5 p-4 space-y-3">
+                  <ConfirmationForm id={`approve-${instanceId}-${proof.$id}`} action={decidePaymentProofAction} className="rounded-xl border border-success/30 bg-success/5 p-4 space-y-3">
                     <input type="hidden" name="proof_id" value={proof.$id} />
                     <input type="hidden" name="decision" value="approved" />
                     <p className="text-xs font-semibold text-success">
@@ -97,7 +94,7 @@ export function ChargeActions({
                     </p>
                     <div className="grid gap-3 sm:grid-cols-2">
                       <DateField
-                        id={`paid-at-${proof.$id}`}
+                        id={`paid-at-${instanceId}-${proof.$id}`}
                         name="paid_at"
                         label="Data efetiva do pagamento"
                         defaultValue={today()}
@@ -105,17 +102,14 @@ export function ChargeActions({
                         required
                       />
                       <div className="flex items-end">
-                        <FormSubmitButton className="w-full h-11 touch-manipulation font-semibold" pendingLabel="Aprovando…">
-                          <CheckCircle2 className="size-4 mr-1.5" aria-hidden="true" />
-                          Aprovar comprovante
-                        </FormSubmitButton>
+                        <ConsequenceDialog trigger={<Button type="button" className="min-h-11">Aprovar comprovante</Button>} title="Aprovar comprovante?" summary={[...summary, { label: "Data do pagamento", value: today(), field: "paid_at", kind: "date" }]} effect="A cobrança será marcada como paga e o aluno verá a confirmação." confirmLabel="Aprovar comprovante" action={decidePaymentProofAction} formId={`approve-${instanceId}-${proof.$id}`} />
                       </div>
                     </div>
-                  </form>
+                  </ConfirmationForm>
 
                   {/* Recusar Comprovante */}
-                  <form
-                    action={decidePaymentProofAction}
+                  <ConfirmationForm
+                    id={`reject-form-${instanceId}-${proof.$id}`} action={decidePaymentProofAction}
                     className="rounded-xl border border-destructive/20 bg-destructive/5 p-4 space-y-3"
                   >
                     <input type="hidden" name="proof_id" value={proof.$id} />
@@ -124,9 +118,9 @@ export function ChargeActions({
                       Recusar comprovante
                     </p>
                     <Field>
-                      <FieldLabel htmlFor={`reject-${proof.$id}`}>Motivo da recusa</FieldLabel>
+                      <FieldLabel htmlFor={`reject-${instanceId}-${proof.$id}`}>Motivo da recusa</FieldLabel>
                       <Input
-                        id={`reject-${proof.$id}`}
+                        id={`reject-${instanceId}-${proof.$id}`}
                         name="reason"
                         placeholder="Ex.: comprovante ilegível, valor divergente ou comprovante de agendamento"
                         className="h-11 text-sm"
@@ -136,26 +130,19 @@ export function ChargeActions({
                         O aluno receberá esta orientação no portal e poderá enviar um novo arquivo.
                       </FieldDescription>
                     </Field>
-                    <FormSubmitButton
-                      variant="destructive"
-                      className="w-full sm:w-auto h-11 touch-manipulation font-semibold"
-                      pendingLabel="Recusando…"
-                    >
-                      <XCircle className="size-4 mr-1.5" aria-hidden="true" />
-                      Recusar comprovante
-                    </FormSubmitButton>
-                  </form>
+                    <ConsequenceDialog trigger={<Button type="button" variant="destructive" className="min-h-11">Recusar comprovante</Button>} title="Recusar comprovante?" summary={summary} effect="O aluno receberá o motivo e poderá enviar outro comprovante. A cobrança continua em aberto." confirmLabel="Recusar comprovante" destructive action={decidePaymentProofAction} formId={`reject-form-${instanceId}-${proof.$id}`} />
+                  </ConfirmationForm>
                 </div>
               ) : null}
             </TabsContent>
 
             <TabsContent value="payment" className="pt-4">
-              <form action={recordManualPaymentAction} className="grid gap-4 sm:grid-cols-2">
+              <ConfirmationForm id={`manual-${instanceId}-${charge.$id}`} action={recordManualPaymentAction} className="grid gap-4 sm:grid-cols-2">
                 <input type="hidden" name="charge_id" value={charge.$id} />
                 <Field>
-                  <FieldLabel htmlFor={`amount-${charge.$id}`}>Valor recebido (R$)</FieldLabel>
+                  <FieldLabel htmlFor={`amount-${instanceId}-${charge.$id}`}>Valor recebido (R$)</FieldLabel>
                   <Input
-                    id={`amount-${charge.$id}`}
+                    id={`amount-${instanceId}-${charge.$id}`}
                     name="amount_reais"
                     type="number"
                     inputMode="decimal"
@@ -167,7 +154,7 @@ export function ChargeActions({
                   />
                 </Field>
                 <DateField
-                  id={`manual-paid-at-${charge.$id}`}
+                  id={`manual-paid-at-${instanceId}-${charge.$id}`}
                   name="paid_at"
                   label="Data do pagamento"
                   defaultValue={today()}
@@ -175,9 +162,9 @@ export function ChargeActions({
                   required
                 />
                 <Field className="sm:col-span-2">
-                  <FieldLabel htmlFor={`notes-${charge.$id}`}>Observação interna</FieldLabel>
+                  <FieldLabel htmlFor={`notes-${instanceId}-${charge.$id}`}>Observação interna</FieldLabel>
                   <Input
-                    id={`notes-${charge.$id}`}
+                    id={`notes-${instanceId}-${charge.$id}`}
                     name="notes"
                     placeholder="Ex.: PIX conferido no extrato bancário do Banco Inter"
                     className="h-11 text-sm"
@@ -185,20 +172,18 @@ export function ChargeActions({
                   />
                 </Field>
                 <div className="sm:col-span-2">
-                  <FormSubmitButton className="w-full sm:w-auto h-11 touch-manipulation font-semibold" pendingLabel="Confirmando…">
-                    Confirmar pagamento manual
-                  </FormSubmitButton>
+                  <ConsequenceDialog trigger={<Button type="button" className="min-h-11">Confirmar pagamento manual</Button>} title="Registrar pagamento manual?" summary={[...summary.filter((item) => item.label !== "Valor"), { label: "Valor recebido", value: formatBrl(charge.amount_cents), field: "amount_reais", kind: "money" }, { label: "Data do pagamento", value: today(), field: "paid_at", kind: "date" }]} effect="A cobrança será marcada como paga. Confira o recebimento antes de confirmar." confirmLabel="Registrar pagamento" action={recordManualPaymentAction} formId={`manual-${instanceId}-${charge.$id}`} />
                 </div>
-              </form>
+              </ConfirmationForm>
             </TabsContent>
 
             <TabsContent value="adjustment" className="pt-4">
               <form action={adjustChargeAction} className="grid gap-4 sm:grid-cols-2">
                 <input type="hidden" name="charge_id" value={charge.$id} />
                 <Field>
-                  <FieldLabel htmlFor={`adjust-amount-${charge.$id}`}>Novo valor (R$)</FieldLabel>
+                  <FieldLabel htmlFor={`adjust-amount-${instanceId}-${charge.$id}`}>Novo valor (R$)</FieldLabel>
                   <Input
-                    id={`adjust-amount-${charge.$id}`}
+                    id={`adjust-amount-${instanceId}-${charge.$id}`}
                     name="amount_reais"
                     type="number"
                     inputMode="decimal"
@@ -210,16 +195,16 @@ export function ChargeActions({
                   />
                 </Field>
                 <DateField
-                  id={`due-${charge.$id}`}
+                  id={`due-${instanceId}-${charge.$id}`}
                   name="due_date"
                   label="Novo vencimento"
                   defaultValue={charge.due_date.slice(0, 10)}
                   required
                 />
                 <Field className="sm:col-span-2">
-                  <FieldLabel htmlFor={`reason-${charge.$id}`}>Motivo do ajuste</FieldLabel>
+                  <FieldLabel htmlFor={`reason-${instanceId}-${charge.$id}`}>Motivo do ajuste</FieldLabel>
                   <Input
-                    id={`reason-${charge.$id}`}
+                    id={`reason-${instanceId}-${charge.$id}`}
                     name="reason"
                     placeholder="Ex.: Concessão de bolsa parcial ou desconto acordado"
                     className="h-11 text-sm"
@@ -242,40 +227,10 @@ export function ChargeActions({
       ) : null}
 
       {payment ? (
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button size="sm" variant="outline" className="h-9 touch-manipulation">
-              Estornar
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Estornar pagamento de {studentName}?</AlertDialogTitle>
-              <AlertDialogDescription>
-                O pagamento voltará a constar como pendente. Esta operação ficará registrada no histórico de auditoria.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <form action={reversePaymentAction} className="space-y-4">
-              <input type="hidden" name="payment_id" value={payment.$id} />
-              <Field>
-                <FieldLabel htmlFor={`reversal-${payment.$id}`}>Motivo do estorno</FieldLabel>
-                <Input
-                  id={`reversal-${payment.$id}`}
-                  name="reason"
-                  placeholder="Ex.: comprovante duplicado ou cancelamento a pedido"
-                  className="h-11 text-sm"
-                  required
-                />
-              </Field>
-              <AlertDialogFooter>
-                <AlertDialogCancel type="button">Cancelar</AlertDialogCancel>
-                <AlertDialogAction type="submit" variant="destructive">
-                  Confirmar estorno
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </form>
-          </AlertDialogContent>
-        </AlertDialog>
+        <ConsequenceDialog trigger={<Button size="sm" variant="outline" className="min-h-11">Estornar</Button>} title={`Estornar pagamento de ${studentName}?`} summary={[...summary.filter((item) => item.label !== "Valor"), { label: "Valor estornado", value: formatBrl(payment.amount_cents) }, { label: "Pagamento original", value: new Date(payment.paid_at).toLocaleDateString("pt-BR", { timeZone: "UTC" }) }]} effect="A cobrança volta a ficar em aberto: Pendente ou Em atraso, conforme o vencimento. O estorno ficará registrado no histórico." confirmLabel="Confirmar estorno" destructive action={reversePaymentAction}>
+          <input type="hidden" name="payment_id" value={payment.$id} />
+          <Field><FieldLabel htmlFor={`reversal-${instanceId}-${payment.$id}`}>Motivo do estorno</FieldLabel><Input id={`reversal-${instanceId}-${payment.$id}`} name="reason" required minLength={3} /></Field>
+        </ConsequenceDialog>
       ) : null}
     </div>
   );

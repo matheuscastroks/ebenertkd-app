@@ -13,6 +13,7 @@ export function SignaturePad({ contractId, content }: { contractId: string; cont
   const [read, setRead] = useState(false);
   const [drawn, setDrawn] = useState(false);
   const [drawing, setDrawing] = useState(false);
+  const [typedName, setTypedName] = useState("");
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -65,7 +66,22 @@ export function SignaturePad({ contractId, content }: { contractId: string; cont
       action={signContractAction}
       onSubmit={() => {
         if (signatureInputRef.current && canvasRef.current) {
-          signatureInputRef.current.value = canvasRef.current.toDataURL("image/png");
+          const canvas = canvasRef.current;
+          if (typedName.trim().length >= 3) {
+            const context = canvas.getContext("2d");
+            if (context) {
+              context.save();
+              context.setTransform(1, 0, 0, 1, 0, 0);
+              context.clearRect(0, 0, canvas.width, canvas.height);
+              context.fillStyle = "#ffffff";
+              context.fillRect(0, 0, canvas.width, canvas.height);
+              context.fillStyle = "#0f172a";
+              context.font = `${Math.max(18, Math.floor(canvas.height / 5))}px sans-serif`;
+              context.fillText(typedName.trim(), 16, canvas.height / 2, canvas.width - 32);
+              context.restore();
+            }
+          }
+          signatureInputRef.current.value = canvas.toDataURL("image/png");
         }
       }}
       className="space-y-5"
@@ -81,11 +97,11 @@ export function SignaturePad({ contractId, content }: { contractId: string; cont
             Texto integral do contrato
           </span>
           {read ? (
-            <span className="flex items-center gap-1 font-medium text-emerald-600 dark:text-emerald-400">
+            <span className="flex items-center gap-1 font-medium text-success-foreground dark:text-success-foreground">
               <CheckCircle2 className="size-3.5" /> Leitura confirmada
             </span>
           ) : (
-            <span className="flex items-center gap-1 font-medium text-amber-600 dark:text-amber-400">
+            <span className="flex items-center gap-1 font-medium text-warning-foreground dark:text-warning-foreground">
               <Info className="size-3.5" /> Role até o fim para liberar a assinatura
             </span>
           )}
@@ -127,9 +143,11 @@ export function SignaturePad({ contractId, content }: { contractId: string; cont
           </Button>
         </div>
 
-        <div className="relative rounded-xl border-2 border-dashed border-border/80 bg-white dark:bg-zinc-950 overflow-hidden">
+        <div className="relative rounded-xl border-2 border-dashed border-border/80 bg-white overflow-hidden">
           <canvas
             ref={canvasRef}
+            aria-label="Área para desenhar sua assinatura"
+            role="img"
             onPointerDown={start}
             onPointerMove={move}
             onPointerUp={() => setDrawing(false)}
@@ -143,6 +161,11 @@ export function SignaturePad({ contractId, content }: { contractId: string; cont
           )}
         </div>
       </div>
+
+      <label className="grid gap-2 text-sm font-medium" htmlFor={`typed-signature-${contractId}`}>Ou assine digitando seu nome completo
+        <input id={`typed-signature-${contractId}`} aria-label="Ou assine digitando seu nome completo" value={typedName} onChange={(event) => setTypedName(event.target.value)} autoComplete="name" maxLength={150} className="h-11 rounded-lg border border-input bg-background px-3" aria-describedby={`typed-signature-help-${contractId}`} />
+        <span id={`typed-signature-help-${contractId}`} className="text-sm font-normal text-muted-foreground">O nome digitado substitui o desenho e será incluído no documento assinado.</span>
+      </label>
 
       {/* Termo de Concordância */}
       <label className="flex items-start gap-3 rounded-xl border border-border/80 bg-muted/10 p-4 text-xs sm:text-sm cursor-pointer select-none">
@@ -160,7 +183,7 @@ export function SignaturePad({ contractId, content }: { contractId: string; cont
       {/* Botão de Envio */}
       <FormSubmitButton
         type="submit"
-        disabled={!read || !drawn}
+        disabled={!read || (!drawn && typedName.trim().length < 3)}
         className="h-11 w-full sm:w-auto font-medium"
         pendingLabel="Gravando assinatura e emitindo PDF…"
       >

@@ -1,16 +1,20 @@
+import { Field, FieldLabel } from "@/components/ui/field";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { ConfirmationForm } from "@/features/billing/components/confirmation-form";
+import { ConsequenceDialog } from "@/features/billing/components/consequence-dialog";
 import { saveContractTemplateAction } from "@/app/actions/contracts";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { ContractContentEditor } from "@/features/contracts/components/contract-content-editor";
 import { Badge } from "@/components/ui/badge";
 import { CONTRACT_VARIABLES } from "@/features/contracts/rules";
 import { DEFAULT_CONTRACT_CONTENT, getContractTemplate, listContractVersions } from "@/features/contracts/template-service";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
-import { FileCode, History, Save, Send } from "lucide-react";
+import { FileCode, History, Save } from "lucide-react";
 
 export default async function ContractTemplatePage({
   searchParams,
@@ -52,30 +56,25 @@ export default async function ContractTemplatePage({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={saveContractTemplateAction} className="space-y-5">
-              <label className="grid gap-2">
-                <span className="text-sm font-semibold">Identificação do modelo</span>
+            <ConfirmationForm id="contract-template" action={saveContractTemplateAction} className="space-y-5">
+              <Field>
+                <FieldLabel htmlFor="template-name">Identificação do modelo</FieldLabel>
                 <Input
-                  name="name"
+                  id="template-name" name="name"
                   defaultValue={template?.name ?? "Contrato de Prestação de Serviços - Taekwondo"}
                   required
                   className="h-11"
                   placeholder="Ex: Contrato padrão de matrícula"
                 />
-              </label>
+              </Field>
 
-              <label className="grid gap-2">
+              <Field>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold">Conteúdo e Cláusulas</span>
+                  <FieldLabel htmlFor="template-content">Conteúdo e cláusulas</FieldLabel>
                   <span className="text-xs text-muted-foreground">Markdown / Texto simples</span>
                 </div>
-                <Textarea
-                  name="content"
-                  defaultValue={template?.draft_content ?? DEFAULT_CONTRACT_CONTENT}
-                  className="min-h-[500px] font-mono text-xs sm:text-sm leading-relaxed rounded-xl p-4 bg-muted/10"
-                  required
-                />
-              </label>
+                <ContractContentEditor content={template?.draft_content ?? DEFAULT_CONTRACT_CONTENT} />
+              </Field>
 
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Button
@@ -88,17 +87,9 @@ export default async function ContractTemplatePage({
                   <Save className="mr-2 size-4" />
                   Salvar rascunho
                 </Button>
-                <Button
-                  name="intent"
-                  value="publish"
-                  type="submit"
-                  className="h-11 font-medium sm:flex-1"
-                >
-                  <Send className="mr-2 size-4" />
-                  Publicar nova versão
-                </Button>
+                <ConsequenceDialog trigger={<Button type="button" className="min-h-11">Publicar nova versão</Button>} title={`Publicar versão ${Math.max(0, ...versions.map((version) => version.version)) + 1}?`} summary={[{ label: "Modelo", value: template?.name ?? "Contrato padrão", field: "name" }]} effect="Novos contratos usarão esta versão. Contratos atuais não mudam." confirmLabel="Publicar versão" action={saveContractTemplateAction} formId="contract-template" values={{ intent: "publish" }} />
               </div>
-            </form>
+            </ConfirmationForm>
           </CardContent>
         </Card>
 
@@ -149,9 +140,9 @@ export default async function ContractTemplatePage({
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-sm">Versão {version.version}</span>
                         {version.$id === template?.published_version_id && (
-                          <Badge variant="outline" className="border-emerald-500/40 bg-emerald-50 text-xs text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
+                          <StatusBadge tone="success">
                             Vigente
-                          </Badge>
+                          </StatusBadge>
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">

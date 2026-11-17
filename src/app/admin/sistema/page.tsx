@@ -1,3 +1,4 @@
+import { operationFailureSummary } from "@/features/billing/components/operation-failure-summary";
 import { Suspense } from "react";
 import {
   Activity,
@@ -66,9 +67,7 @@ function RunCard({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary-text">
-              {icon}
-            </div>
+            
             <div>
               <CardTitle className="text-base font-semibold">{title}</CardTitle>
               <CardDescription className="text-xs">{description}</CardDescription>
@@ -107,9 +106,9 @@ function ConfigurationItem({
     <div className="flex items-center justify-between gap-3 py-2.5">
       <div className="flex items-center gap-2 text-xs sm:text-sm">
         {ready ? (
-          <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0" aria-hidden="true" />
+          <CheckCircle2 className="size-4 text-success-foreground dark:text-success-foreground shrink-0" aria-hidden="true" />
         ) : (
-          <TriangleAlert className="size-4 text-amber-600 dark:text-amber-400 shrink-0" aria-hidden="true" />
+          <TriangleAlert className="size-4 text-warning-foreground dark:text-warning-foreground shrink-0" aria-hidden="true" />
         )}
         <span className="font-medium text-foreground">{label}</span>
         <Tooltip>
@@ -167,7 +166,7 @@ async function SystemHealthContent() {
             <CardContent className="space-y-4 pt-1">
               <div className="flex items-end justify-between gap-4">
                 <div>
-                  <p className="text-2xl font-bold tabular-nums text-foreground">
+                  <p className="text-2xl font-semibold tabular-nums text-foreground">
                     {formatBytes(health.storage.totalBytes)}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
@@ -255,15 +254,16 @@ async function SystemHealthContent() {
                       </p>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {dateTime(failure.finished_at ?? failure.created_at)}
+                        <span className="block text-sm">{operationFailureSummary(failure.details)}</span>
                       </p>
                     </div>
-                    <StatusBadge tone="danger">Falhou</StatusBadge>
+                    <div className="space-y-2"><StatusBadge tone="danger">Falhou</StatusBadge><details className="text-sm"><summary className="cursor-pointer text-primary-text">Ver detalhes da execução</summary><p>Rotina: {failure.job === "backup" ? "Backup externo" : "Rotina diária"}. Estado: falha na execução.</p><p>Início: {dateTime(failure.started_at)}</p><p>Identificador: {failure.$id}</p><p>Consulte o registro desta execução no painel de operação para identificar a causa e repetir a rotina após corrigir o problema.</p></details></div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="flex items-center gap-3 rounded-xl bg-emerald-500/10 p-4 text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 border border-emerald-500/20">
-                <ShieldCheck className="size-5 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+              <div className="flex items-center gap-3 rounded-xl bg-success-soft p-4 text-xs sm:text-sm text-success-foreground dark:text-success-foreground border border-border">
+                <ShieldCheck className="size-5 shrink-0 text-success-foreground dark:text-success-foreground" aria-hidden="true" />
                 <span>Nenhuma falha recente registrada nas automações operacionais.</span>
               </div>
             )}
