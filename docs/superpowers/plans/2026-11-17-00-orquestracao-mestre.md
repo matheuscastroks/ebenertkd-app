@@ -49,13 +49,13 @@ Legenda: `[x]` feito e mesclado, `[~]` em andamento/PR aberto, `[ ]` pendente.
 ### Onda 0 — Operacional e correções (concluída ou em PR)
 
 - [x] CI destravado: dependências vulneráveis, `labeler.yml`, testes E2E das abas (PR #3, mesclado).
-- [~] Exames no portal do aluno e do responsável (PR #2).
-- [~] Backup cifrado para o Drive: correções, scripts e guia `docs/backup-setup.md` (PR #4).
-- [~] Notificações push: correções, `push:generate-keys`, guia `docs/notificacoes.md` (PR #5).
+- [x] Exames no portal do aluno e do responsável (PR #2, mesclado).
+- [x] Backup cifrado para o Drive: correções, scripts e guia `docs/backup-setup.md` (PR #4, mesclado). AAD no AES-GCM ficou como pendência (quebraria o formato dos backups).
+- [x] Notificações push: correções, `push:generate-keys`, guia `docs/notificacoes.md` (PR #5, mesclado). Pendência: revogar a inscrição no logout.
 - [~] Rotina diária recupera lembretes de pagamento e avisos de renovação de dias perdidos (branch `feat/rotina-diaria-recuperacao`; PR aberto, **sem deploy**).
-- [~] Página `/privacidade` (agente de frontend; PR a abrir).
+- [x] Página `/privacidade` (PR #8, mesclado). **Contém campos `[A PREENCHER PELO PROFESSOR]` e precisa de revisão jurídica antes de divulgar.**
 - [ ] Ação do dono: configurar Google Drive/OAuth e variáveis VAPID (guias nos PRs #4 e #5).
-- [ ] Ambiente local: `node_modules` do repositório principal foi corrompido por instalação interrompida; reinstalar (`npm ci`) antes de rodar o app.
+- [x] Ambiente local: `node_modules` reinstalado; servidor de desenvolvimento na porta 3000. Nunca interromper `npm install` com `timeout`.
 
 ### Onda 1 — Fundação de design (bloqueia a Onda 2)
 
@@ -78,6 +78,7 @@ Legenda: `[x]` feito e mesclado, `[~]` em andamento/PR aberto, `[ ]` pendente.
 
 ## Registro de progresso (mais recente primeiro)
 
+- 2026-11-17: Onda 0 concluída e mesclada (#2, #3, #4, #5, #6, #7, #8). Onda 1 (Fundação) em andamento pela sessão de design com o patch `.claude/visual-wip.patch`; decisão do dono: manter a direção visual, sem `motion`.
 - 2026-11-17: rotina diária (`appwrite/functions/daily-operations`) agora cobre os dias desde a última execução concluída em `automation_runs` (máximo 14) e recupera lembretes de pagamento e avisos de renovação de contrato perdidos; módulo puro `reminders.js` com 13 testes. Validado com executor sem dependências e `node --check`; o `vitest` do repositório não foi rodado (`node_modules` em reinstalação). **Falta:** rodar `npm test`, `typecheck` e lint após a reinstalação; rebase sobre o PR #5 (também altera `main.js`, em trechos distintos); e, só com autorização explícita do dono, `npm run appwrite:deploy-function -- daily-operations` e conferir `covered_days` em `automation_runs`.
 
 - 2026-11-17: auditorias UX das 4 áreas concluídas; planos 00, 02, 03, 04, 05 escritos. Plano 01 aguarda a auditoria de fundação.
