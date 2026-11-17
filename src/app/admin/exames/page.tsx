@@ -177,7 +177,7 @@ async function ExamEventsContent() {
                         </span>
                       </div>
 
-                      <Button asChild className="h-10 font-semibold px-4 shadow-xs">
+                      <Button asChild variant="outline" className="h-10 font-semibold px-4">
                         <Link href={adminExamPath(event.$id)}>
                           <span>Gerenciar banca</span>
                           <ArrowRight className="ml-1.5 size-4" />

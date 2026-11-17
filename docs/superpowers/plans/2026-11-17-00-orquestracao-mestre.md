@@ -71,7 +71,7 @@ Legenda: `[x]` feito e mesclado, `[~]` em andamento/PR aberto, `[ ]` pendente.
 
 ### Onda 3 — QA e fechamento
 
-- [ ] Rodada de QA: fluxos críticos com contas de teste num projeto Appwrite **separado** (nunca produção).
+- [x] Rodada de QA visual e de carregamento (2026-11-17): os 4 perfis (professor, adulto, responsável, menor) entram e todas as telas internas carregam (200, título correto), em 375px claro e 1280px escuro, contra o banco de desenvolvimento do dono. Defeitos achados e corrigidos (PRs #11 e seguinte): rolagem horizontal no desktop, tabelas cortando a coluna Ações, faixa colorida nos cartões de métrica, texto de marketing no onboarding, laranja repetido em Exames. Fluxo E2E completo (`tests/e2e/lifecycle.spec.ts`) segue sem execução: exige projeto Appwrite isolado.
 - [~] E2E de ciclo completo e família implementados com guard contra produção; execução aguarda projeto Appwrite isolado (tests/e2e/LIFECYCLE.md).
 - [x] Revisão cruzada de subagentes/tech lead das áreas 01–05, com correções e commits separados na main.
 - [ ] Piloto com o professor e duas famílias (docs/pilot-script.md).
