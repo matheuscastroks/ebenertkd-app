@@ -1,4 +1,5 @@
 import "server-only";
+import { isPushConfigured } from "@/features/notifications/push-config";
 
 import { Query, type Models } from "node-appwrite";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
@@ -67,7 +68,7 @@ export async function getOperationsHealth() {
     storage: { ...storage, quotaBytes, ...storageHealth(storage.totalBytes, quotaBytes) },
     configuration: {
       backup: requiredBackupVariables.every((name) => Boolean(process.env[name]?.trim())),
-      push: ["NEXT_PUBLIC_VAPID_PUBLIC_KEY", "VAPID_PRIVATE_KEY", "VAPID_SUBJECT", "PUSH_SUBSCRIPTION_ENCRYPTION_KEY"].every((name) => Boolean(process.env[name]?.trim())),
+      push: isPushConfigured(),
       storageQuota: Boolean(quotaBytes)
     }
   };

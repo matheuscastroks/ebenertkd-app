@@ -5,13 +5,8 @@ import { Bell, CheckCircle2, ShieldCheck, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { savePushSubscriptionAction } from "@/app/actions/notifications";
+import { applicationServerKey, toSubscriptionPayload } from "@/features/notifications/subscription-payload";
 import type { RoleOnboardingConfig } from "../types";
-
-function applicationServerKey(value: string) {
-  const padding = "=".repeat((4 - (value.length % 4)) % 4);
-  const base64 = (value + padding).replace(/-/g, "+").replace(/_/g, "/");
-  return Uint8Array.from(window.atob(base64), (character) => character.charCodeAt(0));
-}
 
 export function OnboardingPermissionStep({
   config,
@@ -45,13 +40,8 @@ export function OnboardingPermissionStep({
               applicationServerKey: applicationServerKey(vapidKey),
             });
             const json = subscription.toJSON();
-            if (json.endpoint && json.keys?.p256dh && json.keys?.auth) {
-              await savePushSubscriptionAction({
-                endpoint: json.endpoint,
-                p256dh: json.keys.p256dh,
-                auth: json.keys.auth,
-              });
-            }
+            const payload = toSubscriptionPayload(json);
+            if (payload) await savePushSubscriptionAction(payload);
           }
           toast.success("Notificações ativadas com sucesso!");
         } else {

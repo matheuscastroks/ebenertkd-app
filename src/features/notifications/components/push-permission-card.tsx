@@ -5,12 +5,7 @@ import { Bell, BellOff, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 import { revokePushSubscriptionAction, savePushSubscriptionAction } from "@/app/actions/notifications";
 import { Button } from "@/components/ui/button";
-
-function applicationServerKey(value: string) {
-  const padding = "=".repeat((4 - (value.length % 4)) % 4);
-  const base64 = (value + padding).replace(/-/g, "+").replace(/_/g, "/");
-  return Uint8Array.from(window.atob(base64), (character) => character.charCodeAt(0));
-}
+import { applicationServerKey, toSubscriptionPayload } from "@/features/notifications/subscription-payload";
 
 export function PushPermissionCard({
   configured,
@@ -52,14 +47,9 @@ export function PushPermissionCard({
           userVisibleOnly: true,
           applicationServerKey: applicationServerKey(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? ""),
         });
-        const json = subscription.toJSON();
-        if (!json.endpoint || !json.keys?.p256dh || !json.keys.auth) {
-          throw new Error("invalid_subscription");
-        }
-        await savePushSubscriptionAction({
-          endpoint: json.endpoint,
-          keys: { p256dh: json.keys.p256dh, auth: json.keys.auth },
-        });
+        const payload = toSubscriptionPayload(subscription.toJSON());
+        if (!payload) throw new Error("invalid_subscription");
+        await savePushSubscriptionAction(payload);
         setActive(true);
         toast.success("Notificações ativadas neste dispositivo com sucesso");
       } catch {

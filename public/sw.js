@@ -48,7 +48,7 @@ self.addEventListener("push", (event) => {
     payload = {};
   }
 
-  event.waitUntil(self.registration.showNotification(payload.title ?? "Ebenert KD", {
+  event.waitUntil(self.registration.showNotification(payload.title ?? "Ebener TKD", {
     body: payload.body ?? "Você tem um novo aviso no aplicativo.",
     icon: "/brand-icon.png",
     badge: "/brand-icon.png",
