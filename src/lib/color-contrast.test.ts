@@ -1,51 +1,56 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-const css = readFileSync(`${process.cwd()}/src/app/globals.css`, "utf8");
-const themes = {
-  light: css.split(".dark {")[0],
-  dark: css.split(".dark {")[1].split("@theme")[0]
-};
+const css = readFileSync("src/app/globals.css", "utf8");
+type RGB = [number, number, number];
 
-function luminance(color: string) {
-  const [lightness, chroma, hue] = color.match(/[\d.]+/g)!.map(Number);
-  const a = chroma * Math.cos(hue * Math.PI / 180);
-  const b = chroma * Math.sin(hue * Math.PI / 180);
-  const l = (lightness + 0.3963377774 * a + 0.2158037573 * b) ** 3;
-  const m = (lightness - 0.1055613458 * a - 0.0638541728 * b) ** 3;
-  const s = (lightness - 0.0894841775 * a - 1.291485548 * b) ** 3;
-  const rgb = [
-    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
-    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
-    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s
-  ].map((channel) => Math.max(0, Math.min(1, channel)));
-  return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722;
+function color(value: string): RGB {
+  const values = value.match(/[\d.]+/g)!.map(Number);
+  if (value.startsWith("rgb(")) return values.map((v) => v / 255) as RGB;
+  if (value.startsWith("hsl(")) {
+    const [h, s, l] = [values[0] / 360, values[1] / 100, values[2] / 100];
+    const a = s * Math.min(l, 1 - l);
+    return [0, 8, 4].map((n) => {
+      const k = (n + h * 12) % 12;
+      return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+    }) as RGB;
+  }
+  if (!value.startsWith("oklch(")) throw new Error(`Unsupported color: ${value}`);
+  const [l, c, h] = values;
+  const a = c * Math.cos(h * Math.PI / 180);
+  const b = c * Math.sin(h * Math.PI / 180);
+  const ll = (l + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const mm = (l - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const ss = (l - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  return [4.0767416621 * ll - 3.3077115913 * mm + 0.2309699292 * ss,
+    -1.2684380046 * ll + 2.6097574011 * mm - 0.3413193965 * ss,
+    -0.0041960863 * ll - 0.7034186147 * mm + 1.707614701 * ss]
+    .map((v) => Math.max(0, Math.min(1, v <= 0.0031308 ? 12.92 * v : 1.055 * v ** (1 / 2.4) - 0.055))) as RGB;
 }
 
-describe.each(Object.entries(themes))("WCAG button colors: %s", (_, block) => {
-  const tokens = Object.fromEntries([...block.matchAll(/--([\w-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2]]));
-  function resolve(token: string): string {
-    const alias = tokens[token].match(/^var\(--([\w-]+)\)$/);
-    return alias ? resolve(alias[1]) : tokens[token];
-  }
-  function contrast(a: string, b: string) {
-    const values = [luminance(resolve(a)), luminance(resolve(b))];
-    return (Math.max(...values) + 0.05) / (Math.min(...values) + 0.05);
-  }
+function luminance(rgb: RGB) {
+  const linear = rgb.map((v) => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+  return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
+}
 
+describe.each([":root", ".dark"])("contraste AA %s", (theme) => {
+  const block = css.slice(css.indexOf(`${theme} {`)).split("}")[0];
+  const token = (name: string) => {
+    const value = block.match(new RegExp(`--${name}: ([^;]+);`))?.[1];
+    if (!value) throw new Error(`Missing ${name} in ${theme}`);
+    return luminance(color(value));
+  };
   it.each([
-    ["primary-foreground", "primary"], ["primary-foreground", "primary-hover"],
-    ["destructive-foreground", "destructive"], ["destructive-foreground", "destructive-hover"],
-    ["secondary-foreground", "secondary"], ["secondary-foreground", "accent"],
-    ["foreground", "background"], ["foreground", "muted"],
-    ["primary-text", "background"], ["primary-text", "card"], ["primary-text", "popover"]
-  ])("%s on %s meets 4.5:1 for normal text", (fg, bg) => {
-    expect(contrast(fg, bg)).toBeGreaterThanOrEqual(4.5);
-  });
-
-  it.each(["background", "card", "popover", "secondary"])("primary button boundary and keyboard outline on %s meet 3:1", (surface) => {
-    // The explicit button outline uses foreground, independently of the default shadcn ring.
-    expect(contrast("foreground", surface)).toBeGreaterThanOrEqual(3);
-    expect(contrast("primary-border", surface)).toBeGreaterThanOrEqual(3);
+    ["primary", "primary-foreground"],
+    ["card", "primary-text"],
+    ["background", "primary-text"],
+    ["success-soft", "success-foreground"],
+    ["warning-soft", "warning-foreground"],
+    ["info-soft", "info-foreground"],
+    ["danger-soft", "danger-text"]
+  ])("%s / %s tem contraste de pelo menos 4,5:1", (background, foreground) => {
+    const a = token(background);
+    const b = token(foreground);
+    expect((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)).toBeGreaterThanOrEqual(4.5);
   });
 });

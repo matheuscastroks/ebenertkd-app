@@ -25,11 +25,13 @@ Todas as do [plano mestre](./2026-11-17-00-orquestracao-mestre.md#global-constra
 
 ## Status
 
-- Feito: auditoria e contrato (2026-11-17).
-- Pendente: tarefas 1 a 7.
-- Bloqueios: **decisão do dono sobre o trabalho visual não commitado** (cores `primary-text`, fonte, ícones, dependência `motion`) em `globals.css`, `layout.tsx` e ~50 arquivos. A auditoria recomenda manter a direção (`text-primary-text`, remoção de gradientes e de `uppercase`) e remover `motion`.
+- Feito: auditoria, contrato e implementação das tarefas 1–7 (2026-11-17), com revisão por subagentes.
+- Pendente: fechamento da tarefa 8, validação completa e conferência visual em 375px/claro/escuro.
+- Bloqueios: nenhum de produto. Direção visual preservada, sem motion; commits diretos na main autorizados em 2026-11-17.
 
 ## Registro de progresso
+
+- 2026-11-17: retomada na main atualizada; WIP preservado em stash. Fundação implementada com três subagentes; ícones estáticos, controles, superfícies, skeletons e guarda sem exceções para Fundação. Migrações mínimas de consumidores incluídas. Validação visual e fechamento ainda pendentes.
 
 - 2026-11-17: plano criado.
 

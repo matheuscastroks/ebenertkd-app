@@ -28,7 +28,7 @@ export function CardGridSkeleton({
       )}
     >
       {Array.from({ length: count }, (_, idx) => (
-        <Card key={idx} className="border-border/80 shadow-xs flex flex-col justify-between">
+        <Card key={idx} className="border-border shadow-xs flex flex-col justify-between">
           <CardHeader className="space-y-3 pb-3">
             <div className="flex items-start justify-between gap-3">
               <Skeleton className="size-10 rounded-xl shrink-0" />
@@ -39,7 +39,7 @@ export function CardGridSkeleton({
               <Skeleton className="h-3.5 w-1/2" />
             </div>
           </CardHeader>
-          <CardContent className="pt-3 border-t border-border/40 flex items-center justify-between gap-3">
+          <CardContent className="pt-3 border-t border-border flex items-center justify-between gap-3">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-9 w-24 rounded-lg" />
           </CardContent>

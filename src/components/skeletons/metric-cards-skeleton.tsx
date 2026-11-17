@@ -1,3 +1,4 @@
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -19,17 +20,19 @@ export function MetricCardsSkeleton({
       )}
     >
       {Array.from({ length: count }, (_, index) => (
-        <div
+        <Card
           key={index}
-          className="rounded-xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs space-y-3"
+          className="border-border shadow-xs"
         >
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-4 w-24 rounded-md" />
-            <Skeleton className="size-8 rounded-lg" />
-          </div>
-          <Skeleton className="h-8 w-32 rounded-md" />
-          <Skeleton className="h-3 w-40 rounded-md" />
-        </div>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-4 w-24 rounded-md" />
+              <Skeleton className="size-8 rounded-lg" />
+            </div>
+            <Skeleton className="h-8 w-32 rounded-md" />
+            <Skeleton className="h-3 w-40 rounded-md" />
+          </CardContent>
+        </Card>
       ))}
       <span className="sr-only">Carregando métricas…</span>
     </div>

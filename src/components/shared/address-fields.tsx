@@ -159,7 +159,7 @@ export function AddressFields({
             />
             {isLoading && (
               <div className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <Loader2 className="h-4 w-4 animate-spin text-primary-text" />
               </div>
             )}
           </div>
@@ -168,9 +168,9 @@ export function AddressFields({
               className={cn(
                 "text-xs mt-1.5 flex items-center gap-1",
                 statusMessage.type === "success" &&
-                  "text-emerald-600 dark:text-emerald-400 font-medium",
+                  "text-success-foreground font-medium",
                 statusMessage.type === "error" &&
-                  "text-amber-600 dark:text-amber-400",
+                  "text-warning-foreground",
                 statusMessage.type === "info" && "text-muted-foreground"
               )}
             >

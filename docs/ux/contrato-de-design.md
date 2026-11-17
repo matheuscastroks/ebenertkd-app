@@ -14,3 +14,9 @@ Regras que todo agente e toda tela seguem. Princípios: clareza, deferência ao 
 10. **Feedback.** Toast para sucesso transitório; `Alert` inline (`role="alert"`) para erro de formulário, ligado ao campo por `aria-describedby`; skeleton com a mesma geometria do conteúdo final.
 11. **Copy.** Português do Brasil, voz direta, verbo no infinitivo em botões ("Salvar alterações"), vocabulário do dojang definido em `docs/ux/component-contract.md`, sem exclamação nem jargão de produto. Estado vazio diz o que fazer a seguir. Nunca expor termo técnico ao usuário final ("Appwrite", "payload").
 12. **Ações irreversíveis** (aprovar pagamento, estornar, aprovar rescisão, publicar contrato) abrem `AlertDialog` com resumo da consequência: quem, quanto, quando e o que muda para o aluno.
+
+## Pares de cor para estados
+
+`StatusBadge` usa fundos opacos que mudam com o tema: `bg-success-soft text-success-foreground`, `bg-warning-soft text-warning-foreground`, `bg-info-soft text-info-foreground` e `bg-danger-soft text-danger-text`. O tom neutro usa `bg-muted text-muted-foreground`. As cores `success`, `warning` e `info` continuam disponíveis para ícones e indicadores, mas não são fundos de texto normal. Não combinar diretamente essas cores saturadas com seus `-foreground`.
+
+`src/lib/color-contrast.test.ts` verifica contraste mínimo de 4,5:1 dos pares semânticos, do botão primário e de `primary-text` sobre o canvas e o card, nos dois temas. `src/lib/design-contract-baseline.json` registra, por arquivo e regra, a dívida visual temporária anterior à revisão das áreas. O teste impede aumentar essa dívida ou introduzir desvios em arquivos novos; cada área deve reduzir suas exceções ao concluir seu plano.

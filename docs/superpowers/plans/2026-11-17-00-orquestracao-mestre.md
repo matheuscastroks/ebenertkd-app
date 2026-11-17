@@ -4,7 +4,7 @@
 
 **Goal:** entregar o app Ebener TKD funcional, com interface limpa, simples e consistente (princípios de interface da Apple: clareza, deferência ao conteúdo, hierarquia tipográfica, profundidade sutil, alvos de toque de 44pt, movimento com propósito), sem excesso decorativo ("AI slop").
 
-**Architecture:** trabalho dividido em áreas com um dono por arquivo de fundação. Ondas: 0 operacional → 1 fundação de design → 2 áreas em paralelo → 3 QA e fechamento. Cada área trabalha em uma branch própria, abre PR contra `main`, passa por revisão de tech lead/QA e só então é mesclada.
+**Architecture:** trabalho dividido em áreas com um dono por arquivo de fundação. Ondas: 0 operacional → 1 fundação de design → 2 áreas em paralelo → 3 QA e fechamento. Nesta retomada, por autorização do dono, trabalho direto na `main`, commits separados por responsabilidade e revisão com subagentes.
 
 **Tech Stack:** Next.js 16 (App Router), TypeScript estrito, Tailwind, shadcn/ui, Appwrite Cloud, Vitest, Playwright.
 
@@ -49,18 +49,18 @@ Legenda: `[x]` feito e mesclado, `[~]` em andamento/PR aberto, `[ ]` pendente.
 ### Onda 0 — Operacional e correções (concluída ou em PR)
 
 - [x] CI destravado: dependências vulneráveis, `labeler.yml`, testes E2E das abas (PR #3, mesclado).
-- [~] Exames no portal do aluno e do responsável (PR #2).
-- [~] Backup cifrado para o Drive: correções, scripts e guia `docs/backup-setup.md` (PR #4).
-- [~] Notificações push: correções, `push:generate-keys`, guia `docs/notificacoes.md` (PR #5).
-- [~] Rotina diária recupera lembretes de pagamento e avisos de renovação de dias perdidos (branch `feat/rotina-diaria-recuperacao`; PR aberto, **sem deploy**).
-- [~] Página `/privacidade` (agente de frontend; PR a abrir).
+- [x] Exames no portal do aluno e do responsável (PR #2, mesclado).
+- [x] Backup cifrado para o Drive: correções, scripts e guia `docs/backup-setup.md` (PR #4, mesclado; configuração operacional pendente).
+- [x] Notificações push: correções, `push:generate-keys`, guia `docs/notificacoes.md` (PR #5, mesclado; revogação no logout pendente).
+- [x] Recuperação de lembretes integrada no PR #7; deploy e verificação operacional ainda pendentes.
+- [x] Página `/privacidade` (PR #8, mesclado). Revisão jurídica e campos do professor pendentes.
 - [ ] Ação do dono: configurar Google Drive/OAuth e variáveis VAPID (guias nos PRs #4 e #5).
-- [ ] Ambiente local: `node_modules` do repositório principal foi corrompido por instalação interrompida; reinstalar (`npm ci`) antes de rodar o app.
+- [~] Dependências disponíveis; verificações isoladas dos worktrees em .claude. Validar typecheck, lint, testes e build antes de encerrar.
 
 ### Onda 1 — Fundação de design (bloqueia a Onda 2)
 
-- [ ] Decidir o destino do trabalho visual **não commitado** da sessão "Executar projeto (fork)" (cores `primary-text`, fonte, ícones, `motion`): absorver na Fundação ou descartar. **Sem essa decisão a Onda 1 não começa.**
-- [ ] Plano 01 executado e mesclado.
+- [x] Direção visual mantida e absorvida na Fundação, sem dependência `motion` (decisão registrada no PR #9).
+- [~] Plano 01 implementado diretamente na main; fechamento e evidência visual pendentes.
 
 ### Onda 2 — Áreas em paralelo (após a Onda 1)
 
@@ -85,8 +85,8 @@ Legenda: `[x]` feito e mesclado, `[~]` em andamento/PR aberto, `[ ]` pendente.
 ## Protocolo para quem executa
 
 1. Escolha a próxima tarefa `[ ]` do plano da sua área, na ordem.
-2. Crie/continue a branch indicada no plano; trabalhe em worktree isolado.
+2. Nesta retomada, trabalhar na `main` autorizada, sem merges de branches; preservar trabalho preexistente.
 3. Siga os passos (teste que falha → implementação → teste passa → commit).
 4. Ao terminar a tarefa, marque os checkboxes no plano da área, adicione uma linha em "Registro de progresso" do plano e atualize a tabela deste arquivo, tudo no mesmo commit.
-5. Ao terminar a área, abra o PR e peça revisão; não mescle sem revisão e CI verde.
+5. Revisar com subagentes e validar antes de encerrar; commits diretos na main autorizados.
 6. Se algo bloquear (conflito de propriedade, decisão de produto), escreva em "Bloqueios" no plano da área e pare naquela tarefa.

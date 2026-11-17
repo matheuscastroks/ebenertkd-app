@@ -16,7 +16,7 @@ export function TableRowsSkeleton({
         <div
           aria-label="Carregando tabela…"
           aria-busy="true"
-          className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs"
+          className="overflow-hidden rounded-xl border border-border bg-card shadow-xs"
         >
           <Table>
             <TableHeader>
@@ -59,7 +59,7 @@ export function TableRowsSkeleton({
           className="space-y-3"
         >
           {Array.from({ length: rows }, (_, idx) => (
-            <Card key={idx} className="border-border/80 shadow-xs">
+            <Card key={idx} className="border-border shadow-xs">
               <CardContent className="space-y-4 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
@@ -71,7 +71,7 @@ export function TableRowsSkeleton({
                   </div>
                   <Skeleton className="h-5 w-16 rounded-full" />
                 </div>
-                <div className="flex items-center justify-between pt-2 border-t border-border/40">
+                <div className="flex items-center justify-between pt-2 border-t border-border">
                   <Skeleton className="h-3 w-28" />
                   <Skeleton className="h-9 w-20 rounded-lg" />
                 </div>

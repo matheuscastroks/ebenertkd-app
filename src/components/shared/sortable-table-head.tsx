@@ -52,13 +52,13 @@ export function SortableTableHead<K extends string>({
         onClick={() => onToggle(sortKey)}
         aria-label={`${title}: ${nextDirectionLabel}`}
         className={cn(
-          "group flex h-10 w-full items-center gap-1.5 px-3 text-xs font-semibold uppercase tracking-wider transition-colors",
+          "group flex h-10 w-full items-center gap-1.5 px-3 text-xs font-semibold transition-colors",
           "hover:bg-muted/60 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-inset",
           align === "right" && "justify-end",
           align === "center" && "justify-center",
           align === "left" && "justify-start",
           isActive
-            ? "text-primary font-bold"
+            ? "text-primary-text font-semibold"
             : "text-muted-foreground hover:text-foreground"
         )}
       >
@@ -67,7 +67,7 @@ export function SortableTableHead<K extends string>({
           className={cn(
             "flex size-4 items-center justify-center transition-transform",
             isActive
-              ? "text-primary"
+              ? "text-primary-text"
               : "text-muted-foreground/40 group-hover:text-muted-foreground"
           )}
         >
