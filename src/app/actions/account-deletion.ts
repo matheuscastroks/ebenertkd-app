@@ -20,14 +20,12 @@ export async function deleteSelfAccountAction(formData: FormData) {
   }
   try {
     await deleteSelfAccount(profile);
-    // Invalidate any protected routes that depend on the profile.
-    revalidatePath("/configuracoes");
-    // Clear the session cookie (handled by the auth lib on next request) by redirecting to home.
-    redirect("/?deleted=1");
-  } catch (e) {
-    // On any failure fall back to an error flag.
+  } catch {
     redirect("/configuracoes?error=delete_self");
   }
+  // O redirect do Next lança NEXT_REDIRECT; precisa ficar fora do try para não cair no catch de erro.
+  revalidatePath("/configuracoes");
+  redirect("/?deleted=1");
 }
 
 /**
@@ -43,12 +41,11 @@ export async function deleteStudentAccountAction(formData: FormData) {
   }
   try {
     await deleteStudentAccount(admin, targetId);
-    // Invalidate the student‑access list page.
-    updateTag(CACHE_TAGS.studentAccess);
-    updateTag(CACHE_TAGS.enrollments);
-    revalidatePath(ROUTES.adminStudentAccess);
-    redirect(`${ROUTES.adminStudentAccess}?deleted=1`);
-  } catch (e) {
+  } catch {
     redirect(`${ROUTES.adminStudentAccess}?error=delete_student`);
   }
+  updateTag(CACHE_TAGS.studentAccess);
+  updateTag(CACHE_TAGS.enrollments);
+  revalidatePath(ROUTES.adminStudentAccess);
+  redirect(`${ROUTES.adminStudentAccess}?deleted=1`);
 }
