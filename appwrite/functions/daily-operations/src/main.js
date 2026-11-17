@@ -3,6 +3,7 @@ import { AppwriteException, Client, Query, TablesDB } from "node-appwrite";
 import webpush from "web-push";
 import { DEFAULT_PREFERENCES, pushAllowed, pushPayload } from "./push-rules.js";
 import { safeErrorMessage } from "./safe-error.js";
+import { pendingReminder, processingDays, reminderCopy, renewalReminderDays } from "./reminders.js";
 
 const databaseId = process.env.APPWRITE_DATABASE_ID ?? "ebenertkd";
 const eventId = (value) => createHash("sha256").update(value).digest("hex").slice(0, 36);
@@ -25,20 +26,6 @@ const withinContract = (competence, contract) => {
   return last >= contract.starts_at.slice(0, 10) && first <= contract.ends_at.slice(0, 10);
 };
 const shouldGenerate = (competence, day) => Date.parse(`${day}T00:00:00Z`) >= Date.parse(`${competence}-01T00:00:00Z`) - 7 * 86400000;
-const reminderStage = (due, day) => {
-  const difference = Math.round((Date.parse(`${day}T00:00:00Z`) - Date.parse(`${due.slice(0, 10)}T00:00:00Z`)) / 86400000);
-  if (difference === -3) return "due_minus_3";
-  if (difference === 0) return "due_today";
-  if (difference === 3) return "overdue_plus_3";
-  if (difference >= 10 && (difference - 3) % 7 === 0) return `overdue_weekly_${(difference - 3) / 7}`;
-  return null;
-};
-const reminderCopy = (stage, description) => {
-  if (stage === "due_minus_3") return { title: "Vencimento próximo", body: `${description} vence em 3 dias.` };
-  if (stage === "due_today") return { title: "Vencimento hoje", body: `${description} vence hoje.` };
-  if (stage === "overdue_plus_3") return { title: "Pagamento em atraso", body: `${description} está em atraso há 3 dias.` };
-  return { title: "Pagamento pendente", body: `${description} continua em atraso. Consulte os detalhes no aplicativo.` };
-};
 
 const decryptSubscription = (value) => {
   const key = Buffer.from(process.env.PUSH_SUBSCRIPTION_ENCRYPTION_KEY ?? "", "base64");
@@ -154,15 +141,21 @@ async function main({ req, res, log, error }) {
   let step = "contracts";
 
   try {
+    step = "last-run";
+    const lastRuns = await tables.listRows({ databaseId, tableId: "automation_runs", queries: [Query.equal("job", ["daily-operations"]), Query.orderDesc("$createdAt"), Query.limit(10)] });
+    const lastRun = lastRuns.rows.find((row) => row.status === "completed" && row.started_at.slice(0, 10) < day);
+    const coveredDays = processingDays(lastRun?.started_at.slice(0, 10), day);
+
+    step = "contracts";
     const contracts = { rows: await listAll(tables, "contracts", [Query.equal("status", ["signed"])]) };
     let reminders = 0;
     let expired = 0;
     for (const contract of contracts.rows) {
       const days = daysUntil(contract.ends_at, day);
-      if (days === 30 || days === 7) {
-        const key = `contract.renewal_${days}:${contract.$id}:${day}`;
+      for (const { day: reminderDay, left } of renewalReminderDays(contract.ends_at, coveredDays, day)) {
+        const key = `contract.renewal_${left}:${contract.$id}:${reminderDay}`;
         try {
-          await tables.createRow({ databaseId, tableId: "audit_events", rowId: eventId(key), permissions: [], data: { event_type: `contract.renewal_${days}`, entity_type: "contract", entity_id: contract.$id, metadata: JSON.stringify({ days, student_id: contract.student_id }), created_at: now.toISOString() } });
+          await tables.createRow({ databaseId, tableId: "audit_events", rowId: eventId(key), permissions: [], data: { event_type: `contract.renewal_${left}`, entity_type: "contract", entity_id: contract.$id, metadata: JSON.stringify({ days: left, student_id: contract.student_id }), created_at: now.toISOString() } });
           reminders += 1;
         } catch (cause) {
           if (!(cause instanceof AppwriteException) || cause.code !== 409) throw cause;
@@ -208,17 +201,18 @@ async function main({ req, res, log, error }) {
     const reminderCharges = await listAll(tables, "charges", [Query.equal("status", ["pending", "overdue"])]);
     let paymentReminders = 0;
     for (const charge of reminderCharges) {
-      const stage = reminderStage(charge.due_date, day);
-      if (!stage) continue;
+      const reminder = pendingReminder(charge.due_date, coveredDays, day);
+      if (!reminder) continue;
+      const { stage, daysLeft } = reminder;
       const recipients = await financialRecipients(tables, charge.student_id);
       if (!recipients.length) continue;
-      const copy = reminderCopy(stage, charge.description);
+      const copy = reminderCopy(stage, charge.description, daysLeft);
       await createNotification(tables, { ...copy, kind: "payment_reminder", dedupeKey: `payment:${charge.$id}:${stage}`, recipients });
       paymentReminders += recipients.length;
     }
 
     step = "automation-run";
-    await tables.createRow({ databaseId, tableId: "automation_runs", rowId: idempotencyKey, permissions: [], data: { job: "daily-operations", idempotency_key: idempotencyKey, status: "completed", started_at: now.toISOString(), finished_at: new Date().toISOString(), details: JSON.stringify({ phase: 6, reminders, expired, charges_created: chargesCreated, marked_overdue: markedOverdue, payment_reminders: paymentReminders }), created_at: now.toISOString() } });
+    await tables.createRow({ databaseId, tableId: "automation_runs", rowId: idempotencyKey, permissions: [], data: { job: "daily-operations", idempotency_key: idempotencyKey, status: "completed", started_at: now.toISOString(), finished_at: new Date().toISOString(), details: JSON.stringify({ phase: 6, reminders, expired, charges_created: chargesCreated, marked_overdue: markedOverdue, payment_reminders: paymentReminders, covered_days: coveredDays.length }), created_at: now.toISOString() } });
     log(`Recorded ${idempotencyKey}: ${chargesCreated} charges, ${markedOverdue} overdue`);
     return res.json({ ok: true, idempotencyKey, reminders, expired, chargesCreated, markedOverdue, paymentReminders });
   } catch (cause) {
