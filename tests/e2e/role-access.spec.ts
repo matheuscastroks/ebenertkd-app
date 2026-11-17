@@ -1,8 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
+import { assertIsolatedEnvironment, guardBrowserContext } from "./lifecycle-helpers";
 
 type Persona = { email: string; password: string; deniedLanding: RegExp };
 
-const productionProjectId = process.env.PRODUCTION_APPWRITE_PROJECT_ID;
 const isolatedProjectId = process.env.E2E_APPWRITE_PROJECT_ID;
 const personas: Record<string, Persona> = {
   adult: { email: process.env.E2E_ADULT_EMAIL ?? "", password: process.env.E2E_ADULT_PASSWORD ?? "", deniedLanding: /\/aluno$/ },
@@ -22,10 +22,9 @@ test.describe("@authenticated matriz de papéis", () => {
   test.skip(!configured, "Configure E2E_* para executar contra um projeto Appwrite isolado.");
 
   test.beforeAll(() => {
-    expect(isolatedProjectId, "E2E_APPWRITE_PROJECT_ID é obrigatório").toBeTruthy();
-    expect(isolatedProjectId, "E2E autenticado nunca pode usar produção").not.toBe(productionProjectId);
-    expect(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID, "A aplicação deve apontar para o projeto E2E").toBe(isolatedProjectId);
+    assertIsolatedEnvironment();
   });
+  test.beforeEach(async ({ context, baseURL }) => guardBrowserContext(context, baseURL!));
 
   test("administrador acessa o painel técnico", async ({ page }) => {
     await login(page, admin.email, admin.password);

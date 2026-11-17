@@ -29,8 +29,8 @@ function Block({ block }: { block: PrivacyBlock }) {
     );
   }
   return (
-    <Alert role="note" data-testid="privacy-pending" className="border-amber-500/40 bg-amber-500/10 text-foreground">
-      <TriangleAlert className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
+    <Alert role="note" data-testid="privacy-pending" className="border-border bg-warning-soft text-foreground">
+      <TriangleAlert className="text-warning-foreground dark:text-warning-foreground" aria-hidden="true" />
       <AlertTitle>Pendente de definição</AlertTitle>
       <AlertDescription>{block.text}</AlertDescription>
     </Alert>
@@ -45,15 +45,15 @@ export default function PrivacyPolicyPage() {
           <Link href="/" aria-label="Voltar ao início">
             <Image src="/brand-icon.png" alt="Ebener TKD" width={56} height={56} unoptimized className="mx-auto size-14 object-contain" />
           </Link>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Ebener Taekwondo</p>
-          <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Política de Privacidade</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Ebener Taekwondo</p>
+          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Política de Privacidade</h1>
           <p className="text-xs text-muted-foreground sm:text-sm">
             Em vigor desde <time dateTime={PRIVACY_EFFECTIVE_DATE_ISO}>{PRIVACY_EFFECTIVE_DATE}</time>
           </p>
         </header>
 
-        <Alert role="note" className="border-amber-500/40 bg-amber-500/10 text-foreground">
-          <TriangleAlert className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
+        <Alert role="note" className="border-border bg-warning-soft text-foreground">
+          <TriangleAlert className="text-warning-foreground dark:text-warning-foreground" aria-hidden="true" />
           <AlertTitle>Versão em revisão</AlertTitle>
           <AlertDescription>
             Os campos marcados como pendentes serão preenchidos pela academia. Este texto ainda passará por revisão jurídica.
@@ -76,7 +76,7 @@ export default function PrivacyPolicyPage() {
         {PRIVACY_SECTIONS.map((section) => (
           <Card key={section.id} id={section.id} className="scroll-mt-4">
             <CardHeader>
-              <h2 className="text-base font-bold sm:text-lg">{section.title}</h2>
+              <h2 className="text-base font-semibold sm:text-lg">{section.title}</h2>
             </CardHeader>
             <CardContent className="space-y-3">
               {section.blocks.map((block, index) => <Block key={index} block={block} />)}

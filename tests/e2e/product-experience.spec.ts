@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./public-fixture";
 
 test.describe("Experiência de Produto e UI/UX (Fase 9)", () => {
   test("exibe tela de entrada com identidade visual e responsividade em múltiplos viewports", async ({ page }) => {
@@ -13,8 +13,8 @@ test.describe("Experiência de Produto e UI/UX (Fase 9)", () => {
       await page.setViewportSize({ width: vp.width, height: vp.height });
       await page.goto("/");
       await expect(page.getByRole("heading", { name: "Acesse sua conta" })).toBeVisible();
-      await expect(page.getByRole("tab", { name: "Adulto" })).toBeVisible();
-      await expect(page.getByRole("tab", { name: "Menor" })).toBeVisible();
+      await expect(page.getByRole("tab", { name: "Entrar" })).toBeVisible();
+      await expect(page.getByRole("tab", { name: "Criar conta" })).toBeVisible();
     }
   });
 

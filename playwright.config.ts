@@ -1,9 +1,14 @@
 import { loadEnvConfig } from "@next/env";
 import { defineConfig, devices } from "@playwright/test";
+import { assertIsolatedEnvironment } from "./scripts/testing/e2e-environment";
 
 loadEnvConfig(process.cwd());
 
-const baseURL = process.env.E2E_BASE_URL ?? "http://127.0.0.1:3000";
+const isolated = Boolean(process.env.E2E_APPWRITE_PROJECT_ID);
+if (isolated) assertIsolatedEnvironment();
+const baseURL = process.env.E2E_BASE_URL || (isolated ? "http://127.0.0.1:3101" : "http://127.0.0.1:3000");
+const isolatedURL = new URL(baseURL);
+const isolatedPort = Number(isolatedURL.port || "80");
 const localChannel = process.env.E2E_BROWSER_CHANNEL;
 
 export default defineConfig({
@@ -19,7 +24,14 @@ export default defineConfig({
     screenshot: "only-on-failure",
     video: localChannel ? "off" : "retain-on-failure"
   },
-  webServer: process.env.E2E_BASE_URL ? undefined : {
+  webServer: isolated ? {
+    // A fresh process prevents accidentally reusing a dev server running with production credentials.
+    command: `npm run dev -- --hostname ${isolatedURL.hostname.replaceAll("[", "").replaceAll("]", "")} --port ${isolatedPort}`,
+    url: baseURL,
+    reuseExistingServer: false,
+    env: { APP_URL: baseURL, NEXT_PUBLIC_APP_URL: baseURL },
+    timeout: 120_000
+  } : process.env.E2E_BASE_URL ? undefined : {
     command: "npm run dev",
     url: baseURL,
     reuseExistingServer: !process.env.CI,
