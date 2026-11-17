@@ -32,10 +32,14 @@ export default defineConfig({
     env: { APP_URL: baseURL, NEXT_PUBLIC_APP_URL: baseURL },
     timeout: 120_000
   } : process.env.E2E_BASE_URL ? undefined : {
-    command: "npm run dev",
+    // No CI o servidor de desenvolvimento compila cada rota sob demanda e é lento demais para a hidratação;
+    // por isso o smoke público roda contra o build de produção.
+    command: process.env.CI
+      ? `npm run build && npm run start -- --hostname ${isolatedURL.hostname.replaceAll("[", "").replaceAll("]", "")} --port ${isolatedPort}`
+      : `npm run dev -- --hostname ${isolatedURL.hostname.replaceAll("[", "").replaceAll("]", "")} --port ${isolatedPort}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000
+    timeout: process.env.CI ? 420_000 : 120_000
   },
   projects: [
     { name: "desktop-chromium", use: { ...devices["Desktop Chrome"], channel: localChannel } },
