@@ -41,9 +41,11 @@ import {
   guardianBillingPath,
   guardianContractsPath,
   guardianEnrollmentPath,
+  guardianExamsPath,
   ROUTES,
 } from "@/lib/navigation/routes";
 import {
+  Award,
   CalendarCheck2,
   ChevronDown,
   CreditCard,
@@ -158,7 +160,7 @@ async function GuardianMinorsList({ guardian }: { guardian: Profile }) {
 
           <CardContent className="space-y-4 pt-1">
             {/* Atalhos Operacionais do Dependente */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 pt-1">
               <Button asChild variant="outline" className="h-11 font-medium text-xs sm:text-sm">
                 <Link href={guardianEnrollmentPath(minor.$id)}>
                   <FileText className="mr-1.5 size-4 text-primary shrink-0" />
@@ -170,6 +172,13 @@ async function GuardianMinorsList({ guardian }: { guardian: Profile }) {
                 <Link href={guardianAttendancePath(minor.$id)}>
                   <CalendarCheck2 className="mr-1.5 size-4 text-primary shrink-0" />
                   Frequência
+                </Link>
+              </Button>
+
+              <Button asChild variant="outline" className="h-11 font-medium text-xs sm:text-sm">
+                <Link href={guardianExamsPath(minor.$id)}>
+                  <Award className="mr-1.5 size-4 text-primary shrink-0" />
+                  Exames
                 </Link>
               </Button>
 

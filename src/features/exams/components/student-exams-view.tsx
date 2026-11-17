@@ -1,0 +1,159 @@
+import Link from "next/link";
+import { Award, Calendar, CreditCard, History, MapPin } from "lucide-react";
+import { EmptyState } from "@/components/shared/empty-state";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { examFeeLabels, examFeeTones, examParticipantLabels, examParticipantTones, formatExamDate } from "@/features/exams/labels";
+import type { StudentExamEntry } from "@/features/exams/rules";
+import { BeltBadge } from "@/features/students/components/belt-badge";
+import { BeltProgressionPill } from "@/features/students/components/belt-progression-pill";
+import { formatBrl } from "@/lib/money";
+
+type StudentExamsViewProps = {
+  hasStudent: boolean;
+  currentBelt?: string | null;
+  currentGub?: number | null;
+  upcoming: StudentExamEntry[];
+  past: StudentExamEntry[];
+  showFinancial: boolean;
+  billingHref?: string;
+};
+
+export function StudentExamsView({ hasStudent, currentBelt, currentGub, upcoming, past, showFinancial, billingHref }: StudentExamsViewProps) {
+  if (!hasStudent) {
+    return (
+      <EmptyState
+        icon={<Award className="size-5" aria-hidden="true" />}
+        title="Matrícula ainda não concluída"
+        description="Os exames de faixa aparecem aqui depois que a matrícula é aprovada pelo professor."
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <section aria-labelledby="upcoming-exams" className="space-y-3">
+        <h2 id="upcoming-exams" className="text-sm font-semibold text-muted-foreground">Próximos exames</h2>
+        {upcoming.length === 0 ? (
+          <Card>
+            <CardContent className="flex items-start gap-3 py-5 text-sm text-muted-foreground">
+              <Calendar className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+              <p>Nenhum exame agendado. O professor faz a inscrição quando chegar a hora da próxima faixa.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          upcoming.map((entry) => (
+            <UpcomingExamCard
+              key={entry.participant.$id}
+              entry={entry}
+              currentBelt={currentBelt}
+              currentGub={currentGub}
+              showFinancial={showFinancial}
+              billingHref={billingHref}
+            />
+          ))
+        )}
+      </section>
+
+      {past.length > 0 ? (
+        <section aria-labelledby="exam-history" className="space-y-3">
+          <h2 id="exam-history" className="text-sm font-semibold text-muted-foreground">Histórico de exames</h2>
+          <Card>
+            <CardContent className="divide-y divide-border/60 p-0">
+              {past.map((entry) => (
+                <PastExamRow key={entry.participant.$id} entry={entry} />
+              ))}
+            </CardContent>
+          </Card>
+        </section>
+      ) : null}
+    </div>
+  );
+}
+
+function UpcomingExamCard({
+  entry,
+  currentBelt,
+  currentGub,
+  showFinancial,
+  billingHref
+}: {
+  entry: StudentExamEntry;
+  currentBelt?: string | null;
+  currentGub?: number | null;
+  showFinancial: boolean;
+  billingHref?: string;
+}) {
+  const { event, participant, charge } = entry;
+  const canPay = showFinancial && billingHref && charge && (charge.status === "pending" || charge.status === "overdue");
+
+  return (
+    <Card>
+      <CardHeader className="gap-1.5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <CardTitle className="text-base font-semibold">{event.name}</CardTitle>
+          <StatusBadge tone={event.status === "confirmed" ? "info" : "neutral"}>
+            {event.status === "confirmed" ? "Data confirmada" : "Data a confirmar"}
+          </StatusBadge>
+        </div>
+        <CardDescription className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:gap-x-4">
+          <span className="inline-flex items-center gap-1.5">
+            <Calendar className="size-3.5" aria-hidden="true" />
+            {formatExamDate(event.event_date, { weekday: "long", day: "2-digit", month: "long", year: "numeric" })}
+          </span>
+          {event.location ? (
+            <span className="inline-flex items-center gap-1.5">
+              <MapPin className="size-3.5" aria-hidden="true" />
+              {event.location}
+            </span>
+          ) : null}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <BeltProgressionPill fromBelt={currentBelt} fromGub={currentGub} toBelt={participant.target_belt} toGub={participant.target_gub} />
+        {showFinancial ? (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-sm">
+            <span className="inline-flex items-center gap-2">
+              <CreditCard className="size-4 text-muted-foreground" aria-hidden="true" />
+              Taxa de exame: <strong>{formatBrl(participant.fee_cents)}</strong>
+            </span>
+            <div className="flex items-center gap-2">
+              {charge ? <StatusBadge tone={examFeeTones[charge.status]}>{examFeeLabels[charge.status]}</StatusBadge> : null}
+              {canPay ? (
+                <Button asChild size="sm" className="h-8">
+                  <Link href={billingHref}>Pagar taxa</Link>
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+function PastExamRow({ entry }: { entry: StudentExamEntry }) {
+  const { event, participant } = entry;
+  const eventCancelled = event.status === "cancelled" && participant.status === "registered";
+
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+      <div className="flex min-w-0 items-center gap-3">
+        <History className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium">{event.name}</p>
+          <p className="text-xs text-muted-foreground">{formatExamDate(event.event_date, { day: "2-digit", month: "short", year: "numeric" })}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <BeltBadge belt={participant.target_belt} gub={participant.target_gub} size="sm" />
+        {eventCancelled ? (
+          <StatusBadge tone="neutral">Exame cancelado</StatusBadge>
+        ) : (
+          <StatusBadge tone={examParticipantTones[participant.status]}>{examParticipantLabels[participant.status]}</StatusBadge>
+        )}
+      </div>
+    </div>
+  );
+}

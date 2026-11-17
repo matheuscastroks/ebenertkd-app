@@ -31,6 +31,7 @@ import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import { BeltProgressionPill } from "@/features/students/components/belt-progression-pill";
 import { getExamEvent, getExamEventBundle } from "@/features/exams/service";
+import { examEventLabels, examEventTones, examParticipantLabels, examParticipantTones } from "@/features/exams/labels";
 import { beltForGub, type GubOption } from "@/features/students/options";
 import { centsToReaisInput, formatBrl } from "@/lib/money";
 import { requireProfile } from "@/lib/auth/session";
@@ -52,35 +53,10 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const eventLabels = {
-  planned: "Planejado",
-  confirmed: "Confirmado",
-  completed: "Concluído",
-  cancelled: "Cancelado",
-} as const;
-
-const eventTones = {
-  planned: "neutral",
-  confirmed: "info",
-  completed: "success",
-  cancelled: "danger",
-} as const;
-
-const participantLabels = {
-  registered: "Inscrito",
-  approved: "Aprovado",
-  failed: "Reprovado",
-  absent: "Ausente",
-  cancelled: "Cancelado",
-} as const;
-
-const participantTones = {
-  registered: "info",
-  approved: "success",
-  failed: "danger",
-  absent: "warning",
-  cancelled: "neutral",
-} as const;
+const eventLabels = examEventLabels;
+const eventTones = examEventTones;
+const participantLabels = examParticipantLabels;
+const participantTones = examParticipantTones;
 
 async function ExamBundleSections({ eventId }: { eventId: string }) {
   const bundle = await getExamEventBundle(eventId);

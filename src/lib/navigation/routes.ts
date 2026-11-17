@@ -9,6 +9,7 @@ export const ROUTES = {
   adminClasses: "/admin/turmas",
   adminExams: "/admin/exames",
   studentAttendance: "/aluno/frequencia",
+  studentExams: "/aluno/exames",
   adminContracts: "/admin/contratos",
   adminContractTemplate: "/admin/contratos/modelo",
   adminCancellations: "/admin/contratos/cancelamentos",
@@ -124,6 +125,7 @@ export function navigationForProfile(
         ]
       },
       { label: "Minha frequência", href: ROUTES.studentAttendance, icon: "attendance", group: "Treino" },
+      { label: "Meus exames", href: ROUTES.studentExams, icon: "exams", group: "Treino" },
       { label: "Contratos", href: ROUTES.studentContracts, icon: "contracts", group: "Documentos" }
     ];
   }
@@ -142,6 +144,7 @@ export function navigationForProfile(
       ]
     },
     { label: "Minha frequência", href: ROUTES.studentAttendance, icon: "attendance", group: "Treino" },
+    { label: "Meus exames", href: ROUTES.studentExams, icon: "exams", group: "Treino" },
     { label: "Contratos", href: ROUTES.studentContracts, icon: "contracts", group: "Documentos" },
     { label: "Financeiro", href: ROUTES.studentBilling, icon: "billing", group: "Financeiro" }
   ];
@@ -207,4 +210,8 @@ export function guardianBillingPath(profileId: string) {
 
 export function guardianAttendancePath(profileId: string) {
   return `${ROUTES.guardianDependents}/${encodeURIComponent(profileId)}/frequencia`;
+}
+
+export function guardianExamsPath(profileId: string) {
+  return `${ROUTES.guardianDependents}/${encodeURIComponent(profileId)}/exames`;
 }
