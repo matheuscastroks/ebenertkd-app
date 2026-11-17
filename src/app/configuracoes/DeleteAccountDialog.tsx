@@ -23,7 +23,7 @@ export function DeleteAccountDialog() {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm" className="font-medium">
+        <Button variant="destructive" size="sm" className="h-11 font-medium">
           Excluir conta
         </Button>
       </AlertDialogTrigger>
@@ -31,13 +31,13 @@ export function DeleteAccountDialog() {
         <AlertDialogHeader>
           <AlertDialogTitle>Excluir sua conta?</AlertDialogTitle>
           <AlertDialogDescription>
-            Esta ação é <strong>irreversível</strong>. Todos os seus dados serão permanentemente
-            removidos. Para confirmar, digite <strong>EXCLUIR</strong> no campo abaixo.
+            Esta ação é <strong>irreversível</strong>. Seu acesso será encerrado e seus vínculos familiares serão revogados. Registros de histórico permanecem na academia. Para confirmar, digite <strong>EXCLUIR</strong> no campo abaixo.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <form action={deleteSelfAccountAction} className="space-y-4 pt-2">
           <Input
             name="confirm"
+            aria-label="Confirmar exclusão"
             placeholder="EXCLUIR"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
@@ -49,7 +49,7 @@ export function DeleteAccountDialog() {
             </AlertDialogCancel>
             <FormSubmitButton
               variant="destructive"
-              className="h-10"
+              className="h-11"
               disabled={!isValid}
             >
               Confirmar exclusão

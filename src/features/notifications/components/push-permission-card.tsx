@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { Bell, BellOff, Smartphone } from "lucide-react";
+import { Bell, BellOff } from "lucide-react";
 import { toast } from "sonner";
 import { revokePushSubscriptionAction, savePushSubscriptionAction } from "@/app/actions/notifications";
 import { Button } from "@/components/ui/button";
@@ -74,12 +74,9 @@ export function PushPermissionCard({
   return (
     <div className="space-y-4 rounded-xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs">
       <div className="flex items-start gap-3">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary-text">
-          <Smartphone aria-hidden="true" className="size-5" />
-        </div>
         <div>
           <p className="font-semibold text-sm text-foreground">Avisos no navegador e celular</p>
-          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+          <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">
             Receba alertas instantâneos de novos comunicados mesmo com o aplicativo fechado.
           </p>
         </div>
@@ -87,17 +84,17 @@ export function PushPermissionCard({
 
       <div className="space-y-3 pt-1">
         {!configured ? (
-          <p className="text-xs text-amber-600 dark:text-amber-400 bg-amber-500/10 p-3 rounded-lg border border-amber-500/20">
+          <p className="text-sm text-warning-foreground bg-warning-soft p-3 rounded-lg border border-border">
             O envio push ainda não foi configurado pelo administrador da academia.
           </p>
         ) : null}
         {permission === "unsupported" ? (
-          <p className="text-xs text-muted-foreground bg-muted/40 p-3 rounded-lg border border-border/40">
+          <p className="text-sm text-muted-foreground bg-muted/40 p-3 rounded-lg border border-border/40">
             Este navegador não oferece suporte a notificações web.
           </p>
         ) : null}
         {permission === "denied" ? (
-          <p className="text-xs text-amber-600 dark:text-amber-400 bg-amber-500/10 p-3 rounded-lg border border-amber-500/20">
+          <p className="text-sm text-warning-foreground bg-warning-soft p-3 rounded-lg border border-border">
             As notificações estão bloqueadas nas preferências do seu navegador. Libere a permissão para receber alertas.
           </p>
         ) : null}
@@ -107,7 +104,7 @@ export function PushPermissionCard({
             variant="outline"
             onClick={disable}
             disabled={pending}
-            className="h-11 font-medium w-full sm:w-auto border-destructive/30 text-destructive hover:bg-destructive/10"
+            className="h-11 font-medium w-full sm:w-auto "
           >
             <BellOff className="mr-2 size-4" aria-hidden="true" />
             Desativar neste dispositivo

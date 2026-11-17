@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 global.fetch = vi.fn().mockImplementation(() =>
@@ -57,13 +58,14 @@ describe("NotificationInbox", () => {
     render(<NotificationInbox items={dummyItems} />);
 
     const markButton = screen.getByRole("button", { name: "Marcar como lido" });
-    fireEvent.click(markButton);
+    const user = userEvent.setup();
+    await user.click(markButton);
 
     expect(screen.queryByText("Treino de graduação")).not.toBeInTheDocument();
-    expect(screen.getByText("Tudo em dia!")).toBeInTheDocument();
+    expect(screen.getByText("Nenhum aviso novo")).toBeInTheDocument();
 
-    const historyTab = screen.getByRole("button", { name: /^Histórico/i });
-    fireEvent.click(historyTab);
+    const historyTab = screen.getByRole("tab", { name: /^Histórico/i });
+    await user.click(historyTab);
 
     expect(screen.getByText("Treino de graduação")).toBeInTheDocument();
     expect(screen.getByText("Mensalidade disponível")).toBeInTheDocument();

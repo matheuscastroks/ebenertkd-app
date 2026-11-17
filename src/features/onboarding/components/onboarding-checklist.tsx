@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, ChevronDown, ChevronUp, Circle, ListChecks } from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp, Circle } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -43,31 +44,23 @@ export function OnboardingChecklist({
       <CardHeader className="p-4 pb-3">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary-text">
-              <ListChecks className="size-4" />
-            </div>
             <div>
-              <CardTitle className="text-sm font-bold text-foreground">
+              <CardTitle className="text-sm font-semibold text-foreground">
                 {roleTitles[role]}
               </CardTitle>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 {completedCount} de {items.length} etapas concluídas ({progressPercent}%)
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="w-24 h-1.5 rounded-full bg-border overflow-hidden hidden sm:block">
-              <div
-                className="h-full bg-primary transition-all duration-300"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
+            <Progress value={progressPercent} aria-valuenow={progressPercent} aria-label="Etapas concluídas" className="hidden w-24 sm:block" />
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="size-7"
+              className="size-11"
               onClick={() => setCollapsed((prev) => !prev)}
               aria-label={collapsed ? "Expandir checklist" : "Recolher checklist"}
             >
@@ -89,14 +82,14 @@ export function OnboardingChecklist({
                 key={item.id}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-2.5 rounded-lg border p-2.5 text-xs transition-colors",
+                  "flex min-h-11 items-center gap-2.5 rounded-lg border p-2.5 text-sm transition-colors",
                   item.completed
-                    ? "border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 text-muted-foreground line-through"
+                    ? "border-border bg-success-soft text-muted-foreground line-through"
                     : "border-border/80 bg-card hover:border-primary/50 hover:bg-muted/40 text-foreground font-medium"
                 )}
               >
                 {item.completed ? (
-                  <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <CheckCircle2 className="size-4 text-success-foreground shrink-0" />
                 ) : (
                   <Circle className="size-4 text-muted-foreground/60 shrink-0" />
                 )}

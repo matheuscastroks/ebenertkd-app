@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { OnboardingModal } from "./onboarding-modal";
 
@@ -32,7 +32,7 @@ describe("OnboardingModal", () => {
 
     expect(screen.getByText(/Passo 1 de 3/i)).toBeInTheDocument();
     expect(screen.getByText(/^Olá, Ebener$/i)).toBeInTheDocument();
-    expect(screen.getByText(/Mestre Ebener Santos/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Momento de Valor/i)).toBeNull();
     expect(screen.getByText(/Pular apresentação/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Continuar/i })).toBeInTheDocument();
   });
@@ -73,6 +73,61 @@ describe("OnboardingModal", () => {
 
     const skipButton = screen.getByRole("button", { name: /Pular apresentação/i });
     await user.click(skipButton);
-    expect(handleClose).toHaveBeenCalled();
+    await waitFor(() => expect(handleClose).toHaveBeenCalled());
   });
+});
+
+it("Esc no segundo passo retorna sem concluir", async () => {
+  const user = userEvent.setup(); const onClose = vi.fn();
+  render(<OnboardingModal role="admin" userName="Ebener" isOpen onClose={onClose} />);
+  expect(screen.getByRole("progressbar")).toBeInTheDocument();
+  expect(screen.queryByText(/Momento de Valor/)).toBeNull();
+  expect(screen.getAllByRole("button", { name: /Pular/ })).toHaveLength(1);
+  await user.click(screen.getByRole("button", { name: /Continuar/ }));
+  await user.keyboard("{Escape}");
+  expect(screen.getByText(/Passo 1 de 3/)).toBeInTheDocument(); expect(onClose).not.toHaveBeenCalled();
+});
+import { saveOnboardingAction, skipOnboardingAction } from "@/app/actions/onboarding";
+
+it("nao fecha ao falhar em pular e permite tentar novamente", async () => {
+  const user = userEvent.setup(); const onClose = vi.fn();
+  vi.mocked(skipOnboardingAction).mockResolvedValueOnce({ error: "failed_to_skip" });
+  render(<OnboardingModal role="adult_student" userName="Ana" isOpen onClose={onClose} />);
+  await waitFor(() => expect(screen.getByRole("button", { name: /Pular/ })).toBeEnabled());
+  await user.click(screen.getByRole("button", { name: /Pular/ }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(/Não foi possível salvar/);
+  expect(onClose).not.toHaveBeenCalled();
+  await waitFor(() => expect(screen.getByRole("button", { name: /Pular/ })).toBeEnabled());
+  await user.click(screen.getByRole("button", { name: /Pular/ }));
+  await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1), { timeout: 5000 });
+});
+
+it("preserva preferencias e passo quando conclusao falha", async () => {
+  const user = userEvent.setup(); const onClose = vi.fn();
+  vi.mocked(saveOnboardingAction).mockResolvedValueOnce({ error: "failed_to_save" });
+  render(<OnboardingModal role="admin" userName="Ana" isOpen onClose={onClose} />);
+  await user.click(screen.getByRole("button", { name: /Continuar/ }));
+  await user.click(screen.getByRole("radio", { name: /Controle de Aulas e Chamadas/i }));
+  await user.click(screen.getByRole("button", { name: /Continuar/ }));
+  await waitFor(() => expect(screen.getByRole("button", { name: "Agora não" })).toBeEnabled());
+  await user.click(screen.getByRole("button", { name: "Agora não" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(/Não foi possível salvar/);
+  expect(screen.getByText(/Passo 3 de 3/)).toBeInTheDocument();
+  expect(onClose).not.toHaveBeenCalled();
+  const failedPreferences = vi.mocked(saveOnboardingAction).mock.calls.at(-1)?.[0];
+  expect(Object.keys(failedPreferences ?? {})).toHaveLength(1);
+  await waitFor(() => expect(screen.getByRole("button", { name: "Agora não" })).toBeEnabled());
+  await user.click(screen.getByRole("button", { name: "Agora não" }));
+  await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1), { timeout: 5000 });
+  expect(vi.mocked(saveOnboardingAction).mock.calls.at(-1)?.[0]).toEqual(failedPreferences);
+});
+
+it("erro de rede ao pular permanece inline", async () => {
+  const user = userEvent.setup(); const onClose = vi.fn();
+  vi.mocked(skipOnboardingAction).mockRejectedValueOnce(new Error("offline"));
+  render(<OnboardingModal role="adult_student" userName="Ana" isOpen onClose={onClose} />);
+  await waitFor(() => expect(screen.getByRole("button", { name: /Pular/ })).toBeEnabled());
+  await user.click(screen.getByRole("button", { name: /Pular/ }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(/Não foi possível salvar/);
+  expect(onClose).not.toHaveBeenCalled();
 });

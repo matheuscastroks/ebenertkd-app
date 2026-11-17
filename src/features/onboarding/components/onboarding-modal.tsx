@@ -7,9 +7,10 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import {
   saveOnboardingAction,
@@ -41,6 +42,7 @@ export function OnboardingModal({
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [preferences, setPreferences] = useState<OnboardingPreferences>({});
   const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState("");
 
   const handlePreferenceChange = (key: string, value: string) => {
     setPreferences((prev) => ({ ...prev, [key]: value }));
@@ -60,21 +62,24 @@ export function OnboardingModal({
     }
   };
 
-  const handleSkip = () => {
+  const persist = (skip: boolean) => {
+    setError("");
     startTransition(async () => {
-      await skipOnboardingAction();
-      onClose();
-      router.refresh();
+      try {
+        const result = skip ? await skipOnboardingAction() : await saveOnboardingAction(preferences);
+        if (!result.success) {
+          setError("Não foi possível salvar. Tente novamente.");
+          return;
+        }
+        onClose();
+        router.refresh();
+      } catch {
+        setError("Não foi possível salvar. Tente novamente.");
+      }
     });
   };
-
-  const handleComplete = () => {
-    startTransition(async () => {
-      await saveOnboardingAction(preferences);
-      onClose();
-      router.refresh();
-    });
-  };
+  const handleSkip = () => persist(true);
+  const handleComplete = () => persist(false);
 
   const stepLabels: Record<1 | 2 | 3, string> = {
     1: "Boas-vindas",
@@ -85,9 +90,9 @@ export function OnboardingModal({
   const progressPercentage = step === 1 ? 33 : step === 2 ? 66 : 100;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleSkip()}>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open && !isPending) { if (step === 1) onClose(); else handleBack(); } }}>
       <DialogContent
-        className="max-w-xl p-0 overflow-hidden border border-border shadow-2xl rounded-2xl"
+        className="max-w-xl p-0 overflow-hidden border border-border shadow-md rounded-2xl"
         showCloseButton={false}
       >
         <DialogTitle className="sr-only">Introdução ao aplicativo Ebener TKD</DialogTitle>
@@ -98,7 +103,7 @@ export function OnboardingModal({
         {/* Top Header com Progresso & Pular */}
         <div className="border-b border-border/60 bg-muted/30 px-6 pt-5 pb-3">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-xs font-semibold text-muted-foreground">
+            <span aria-live="polite" className="text-sm font-semibold text-muted-foreground">
               Passo {step} de 3 · {stepLabels[step]}
             </span>
 
@@ -108,7 +113,7 @@ export function OnboardingModal({
               size="sm"
               onClick={handleSkip}
               disabled={isPending}
-              className="h-8 px-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+              className="h-11 px-2 text-sm font-medium text-muted-foreground hover:text-foreground"
             >
               <span>Pular apresentação</span>
               <X className="size-3.5 ml-1" />
@@ -116,13 +121,10 @@ export function OnboardingModal({
           </div>
 
           {/* Barra de Progresso Linear */}
-          <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-border/60">
-            <div
-              className="h-full bg-primary transition-all duration-300 ease-out"
-              style={{ width: `${progressPercentage}%` }}
-            />
-          </div>
+          <Progress className="mt-3" value={progressPercentage} aria-valuenow={progressPercentage} aria-label={`Passo ${step} de 3`} />
         </div>
+
+        {error ? <Alert role="alert" variant="destructive" className="mx-6 w-auto"><AlertDescription>{error}</AlertDescription></Alert> : null}
 
         {/* Corpo do Passo Atual */}
         <div className="px-6 py-4 max-h-[70vh] overflow-y-auto">
@@ -141,6 +143,7 @@ export function OnboardingModal({
           {step === 3 && (
             <OnboardingPermissionStep
               config={config}
+              pending={isPending}
               onComplete={handleComplete}
             />
           )}
@@ -156,7 +159,7 @@ export function OnboardingModal({
                 size="sm"
                 onClick={handleBack}
                 disabled={isPending}
-                className="gap-1.5"
+                className="h-11 gap-1.5"
               >
                 <ArrowLeft className="size-3.5" />
                 <span>Voltar</span>
@@ -170,7 +173,7 @@ export function OnboardingModal({
               size="sm"
               onClick={handleNext}
               disabled={isPending}
-              className="gap-1.5 font-semibold"
+              className="h-11 gap-1.5 font-semibold"
             >
               <span>Continuar</span>
               <ArrowRight className="size-3.5" />

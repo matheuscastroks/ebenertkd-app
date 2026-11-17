@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, LockKeyhole, Mail, Shield, UserRound } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { loginAdultAction, loginMinorAction } from "@/app/actions/auth";
-import { OperationToast } from "@/components/shared/operation-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -25,14 +25,11 @@ export function LoginCard({
     <Card className="border-border/80 shadow-xs">
       <CardContent className="space-y-6 p-5 sm:p-6">
         <div className="flex items-start gap-3">
-          <div className="rounded-xl border bg-muted/40 p-2.5 shrink-0 text-foreground">
-            {isMinor ? <UserRound className="size-5" /> : <Shield className="size-5" />}
-          </div>
           <div className="space-y-0.5">
             <h2 className="font-semibold text-base sm:text-lg">
               {isMinor ? "Acesso do aluno menor" : "Acesso de adultos"}
             </h2>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {isMinor
                 ? "Entre com seu usuário e senha fornecidos pelo professor."
                 : "Professores, alunos maiores e responsáveis."}
@@ -41,12 +38,9 @@ export function LoginCard({
         </div>
 
         {errorMessage ? (
-          <OperationToast
-            tone="error"
-            title="Não foi possível entrar"
-            description={errorMessage}
-            clearParams={["error", "context", "message"]}
-          />
+          <Alert variant="destructive" role="alert" id={`login-error-${type}`}>
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
         ) : null}
 
         <form action={action} className="space-y-4">
@@ -54,13 +48,15 @@ export function LoginCard({
             <Field>
               <FieldLabel htmlFor="login-username">Nome de usuário</FieldLabel>
               <div className="relative">
-                <UserRound className="pointer-events-none absolute left-3 top-3.5 size-4 text-muted-foreground" aria-hidden="true" />
+
                 <Input
                   id="login-username"
                   name="username"
                   autoComplete="username"
                   placeholder="ex.: joao.silva"
-                  className="h-11 pl-9 text-sm"
+                  className="h-11 text-sm"
+                  aria-invalid={Boolean(errorMessage)}
+                  aria-describedby={errorMessage ? `login-error-${type}` : undefined}
                   required
                 />
               </div>
@@ -69,14 +65,16 @@ export function LoginCard({
             <Field>
               <FieldLabel htmlFor="login-email">E-mail</FieldLabel>
               <div className="relative">
-                <Mail className="pointer-events-none absolute left-3 top-3.5 size-4 text-muted-foreground" aria-hidden="true" />
+
                 <Input
                   id="login-email"
                   name="email"
                   type="email"
                   autoComplete="email"
                   placeholder="voce@exemplo.com"
-                  className="h-11 pl-9 text-sm"
+                  className="h-11 text-sm"
+                  aria-invalid={Boolean(errorMessage)}
+                  aria-describedby={errorMessage ? `login-error-${type}` : undefined}
                   required
                 />
               </div>
@@ -89,27 +87,29 @@ export function LoginCard({
               {!isMinor ? (
                 <Link
                   href="/recuperar"
-                  className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                  className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                 >
                   Esqueci minha senha
                 </Link>
               ) : null}
             </div>
             <div className="relative">
-              <LockKeyhole className="pointer-events-none absolute left-3 top-3.5 size-4 text-muted-foreground" aria-hidden="true" />
+
               <Input
                 id={`login-password-${type}`}
                 name="password"
                 type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
-                className="h-11 pl-9 pr-10 text-sm"
+                className="h-11 pr-12 text-sm"
                 placeholder="Sua senha"
+                aria-invalid={Boolean(errorMessage)}
+                aria-describedby={errorMessage ? `login-error-${type}` : undefined}
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-2.5 top-2.5 flex size-6 items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="absolute right-0 top-0 flex size-11 items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label={showPassword ? "Ocultar senha" : "Ver senha"}
               >
                 {showPassword ? (

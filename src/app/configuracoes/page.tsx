@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, Moon, Shield, User } from "lucide-react";
+import { User } from "lucide-react";
 import { isPushConfigured } from "@/features/notifications/push-config";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { ThemePreference } from "@/components/dashboard/theme-preference";
@@ -12,7 +12,7 @@ import { hasActivePushSubscription } from "@/features/notifications/push-service
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { DeleteAccountDialog } from "@/app/configuracoes/DeleteAccountDialog";
+import { DeleteAccountSection } from "./delete-account-section";
 
 export default async function SettingsPage() {
   const profile = await requireProfile();
@@ -27,7 +27,7 @@ export default async function SettingsPage() {
       profile={profile}
       activePath={ROUTES.settings}
       title="Configurações da conta"
-      subtitle="Ajuste o tema visual, gerencie notificações push e administre sua sessão."
+      subtitle="Tema, notificações e sessão"
       breadcrumbs={[{ label: "Configurações" }]}
     >
       <div className="w-full min-w-0 space-y-6">
@@ -36,16 +36,16 @@ export default async function SettingsPage() {
           <div className="space-y-6">
             <section className="space-y-3">
               <div className="flex items-center gap-2">
-                <Moon className="size-5 text-primary-text" aria-hidden="true" />
-                <h2 className="text-base sm:text-lg font-bold text-foreground">Aparência</h2>
+
+                <h2 className="text-base sm:text-lg font-semibold text-foreground">Aparência</h2>
               </div>
               <ThemePreference />
             </section>
 
             <section className="space-y-3">
               <div className="flex items-center gap-2">
-                <Shield className="size-5 text-primary-text" aria-hidden="true" />
-                <h2 className="text-base sm:text-lg font-bold text-foreground">Sessão e Segurança</h2>
+
+                <h2 className="text-base sm:text-lg font-semibold text-foreground">Sessão e Segurança</h2>
               </div>
               <Card className="border-border/80 shadow-xs">
                 <CardHeader className="pb-3">
@@ -55,25 +55,23 @@ export default async function SettingsPage() {
                     </div>
                     <div>
                       <CardTitle className="text-base font-semibold">{profile.full_name}</CardTitle>
-                      <CardDescription className="text-xs">{profile.email || "Acesso de aluno menor"}</CardDescription>
+                      <CardDescription className="text-sm">{profile.email || "Acesso de aluno menor"}</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="pt-2 border-t border-border/40">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       Deseja desconectar sua conta deste navegador?
                     </p>
                     <LogoutButton />
-        <div className="mt-2">
-          <DeleteAccountDialog />
-        </div>
+
                   </div>
                 </CardContent>
               </Card>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Saiba como tratamos seus dados na{" "}
-                <Link href={ROUTES.privacy} className="font-medium text-primary underline-offset-4 hover:underline">
+                <Link href={ROUTES.privacy} className="font-medium text-primary-text underline-offset-4 hover:underline">
                   Política de Privacidade
                 </Link>
                 .
@@ -82,6 +80,7 @@ export default async function SettingsPage() {
 
             <section className="space-y-3">
               <ReplayOnboardingCard role={profile.role} />
+              <DeleteAccountSection />
             </section>
           </div>
 
@@ -89,10 +88,10 @@ export default async function SettingsPage() {
           <div className="space-y-6">
             <section className="space-y-3">
               <div className="flex items-center gap-2">
-                <Bell className="size-5 text-primary-text" aria-hidden="true" />
-                <h2 className="text-base sm:text-lg font-bold text-foreground">Notificações</h2>
+
+                <h2 className="text-base sm:text-lg font-semibold text-foreground">Notificações</h2>
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Escolha quais categorias de mensagens podem gerar alertas. Todos os avisos continuam registrados na central de avisos.
               </p>
               <NotificationPreferences

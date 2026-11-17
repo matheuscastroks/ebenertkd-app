@@ -1,21 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useRef, useState, useTransition } from "react";
-import { Bell, Check, CheckCheck, CheckCircle2, ExternalLink, History } from "lucide-react";
 import { toast } from "sonner";
-import { EmptyState } from "@/components/shared/empty-state";
-import { StatusBadge } from "@/components/shared/status-badge";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { InboxItem, NotificationKind } from "@/features/notifications/types";
-
-const kindLabels: Record<NotificationKind, string> = {
-  announcement: "Aviso",
-  payment_reminder: "Financeiro",
-  system: "Sistema"
-};
+import { NotificationItem } from "./notification-item";
+import type { InboxItem, NotificationKind } from "../types";
 
 export function NotificationInbox({ items: initialItems }: { items: InboxItem[] }) {
   const [items, setItems] = useState<InboxItem[]>(initialItems);
@@ -81,6 +72,7 @@ export function NotificationInbox({ items: initialItems }: { items: InboxItem[] 
 
   const handleMarkAllRead = async () => {
     if (totalUnread === 0) return;
+    const previousItems = items;
     const now = new Date().toISOString();
     setItems((prev) =>
       prev.map((item) => ({
@@ -100,246 +92,29 @@ export function NotificationInbox({ items: initialItems }: { items: InboxItem[] 
         window.dispatchEvent(new Event("notifications:changed"));
         toast.success("Todos os avisos foram movidos para o histórico.");
       } catch {
+        setItems(previousItems);
         toast.error("Erro ao marcar avisos como lidos.");
       }
     });
   };
 
-  return (
-    <section className="space-y-4" aria-labelledby="inbox-title">
-      {/* Cabeçalho da Caixa de Entrada */}
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 id="inbox-title" className="text-lg font-semibold">
-            {activeTab === "unread" ? "Avisos pendentes" : "Histórico de avisos"}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {activeTab === "unread"
-              ? totalUnread
-                ? `${totalUnread} ${totalUnread === 1 ? "aviso não lido" : "avisos não lidos"}`
-                : "Tudo em dia por aqui"
-              : `${totalHistory} ${totalHistory === 1 ? "aviso arquivado" : "avisos arquivados"}`}
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Alternador de Abas */}
-          <div className="flex rounded-lg border bg-muted/40 p-0.5">
-            <Button
-              type="button"
-              size="sm"
-              variant={activeTab === "unread" ? "default" : "ghost"}
-              onClick={() => setActiveTab("unread")}
-              className="h-8 text-xs"
-            >
-              Avisos
-              {totalUnread > 0 && (
-                <Badge
-                  variant={activeTab === "unread" ? "secondary" : "default"}
-                  className="ml-1.5 px-1.5 py-0 text-xs"
-                >
-                  {totalUnread}
-                </Badge>
-              )}
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant={activeTab === "history" ? "default" : "ghost"}
-              onClick={() => setActiveTab("history")}
-              className="h-8 text-xs"
-            >
-              <History className="size-3.5 mr-1" aria-hidden="true" />
-              Histórico
-              {totalHistory > 0 && (
-                <Badge variant="outline" className="ml-1.5 px-1.5 py-0 text-xs">
-                  {totalHistory}
-                </Badge>
-              )}
-            </Button>
-          </div>
-
-          {/* Filtro por Categoria */}
-          <Select
-            value={kindFilter}
-            onValueChange={(val) => setKindFilter(val as "all" | NotificationKind)}
-          >
-            <SelectTrigger className="h-8 w-36 text-xs" aria-label="Filtrar tipo de aviso">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os tipos</SelectItem>
-              <SelectItem value="announcement">Comunicados</SelectItem>
-              <SelectItem value="payment_reminder">Financeiro</SelectItem>
-              <SelectItem value="system">Sistema</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* Conteúdo da Aba Ativa */}
-      {activeTab === "unread" ? (
-        unreadItems.length === 0 ? (
-          <EmptyState
-            title="Tudo em dia!"
-            description="Você leu todos os comunicados recentes. O histórico de avisos anteriores continua disponível."
-            icon={<CheckCircle2 className="size-6 text-primary-text" aria-hidden="true" />}
-            action={
-              totalHistory > 0 ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setActiveTab("history")}
-                >
-                  Ver histórico ({totalHistory})
-                </Button>
-              ) : undefined
-            }
-          />
-        ) : (
-          <div className="space-y-3">
-            {unreadItems.length > 1 && (
-              <div className="flex justify-end pb-1">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleMarkAllRead}
-                  className="h-7 text-xs text-muted-foreground hover:text-foreground"
-                >
-                  <CheckCheck className="size-3.5 mr-1" aria-hidden="true" />
-                  Marcar todos como lidos
-                </Button>
-              </div>
-            )}
-
-            {unreadItems.map((item) => (
-              <div
-                key={item.recipient.$id}
-                className="flex flex-col gap-2.5 rounded-xl border border-border/50 bg-card p-4 shadow-xs transition-all duration-150 hover:border-primary/40"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="size-2 rounded-full bg-primary" aria-hidden="true" />
-                    <StatusBadge
-                      tone={
-                        item.notification.kind === "payment_reminder"
-                          ? "warning"
-                          : item.notification.kind === "system"
-                            ? "neutral"
-                            : "info"
-                      }
-                    >
-                      {kindLabels[item.notification.kind]}
-                    </StatusBadge>
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(item.notification.published_at).toLocaleString("pt-BR", {
-                      day: "2-digit",
-                      month: "short",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      timeZone: "America/Sao_Paulo"
-                    })}
-                  </span>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-foreground text-sm">
-                    {item.notification.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                    {item.notification.body}
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-border/50">
-                  {item.notification.action_url ? (
-                    <Button asChild variant="ghost" size="sm" className="h-8 px-2 text-xs">
-                      <Link href={item.notification.action_url}>
-                        Abrir página
-                        <ExternalLink className="size-3 ml-1" aria-hidden="true" />
-                      </Link>
-                    </Button>
-                  ) : (
-                    <div />
-                  )}
-
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleMarkAsRead(item.recipient.$id)}
-                    className="h-8 text-xs gap-1.5 font-medium hover:bg-primary/10 hover:text-primary-text hover:border-primary/30"
-                  >
-                    <Check className="size-3.5" aria-hidden="true" />
-                    Marcar como lido
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )
-      ) : (
-        /* Aba Histórico */
-        historyItems.length === 0 ? (
-          <EmptyState
-            title="Histórico vazio"
-            description="Os avisos marcados como lidos aparecerão aqui para consulta futura."
-            icon={<History className="size-6 text-muted-foreground" aria-hidden="true" />}
-          />
-        ) : (
-          <div className="space-y-3">
-            {historyItems.map((item) => (
-              <div
-                key={item.recipient.$id}
-                className="flex flex-col gap-2 rounded-xl border border-border/30 bg-surface-recessed/40 p-4 opacity-85 transition-opacity hover:opacity-100"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <StatusBadge tone="neutral">
-                      {kindLabels[item.notification.kind]}
-                    </StatusBadge>
-                    <Badge variant="outline" className="text-xs text-muted-foreground py-0">
-                      Lido
-                    </Badge>
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(item.notification.published_at).toLocaleString("pt-BR", {
-                      day: "2-digit",
-                      month: "short",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      timeZone: "America/Sao_Paulo"
-                    })}
-                  </span>
-                </div>
-
-                <div>
-                  <h3 className="font-medium text-foreground text-sm">
-                    {item.notification.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                    {item.notification.body}
-                  </p>
-                </div>
-
-                {item.notification.action_url && (
-                  <div className="pt-2 border-t border-border/50">
-                    <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-xs">
-                      <Link href={item.notification.action_url}>
-                        Abrir página
-                        <ExternalLink className="size-3 ml-1" aria-hidden="true" />
-                      </Link>
-                    </Button>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )
-      )}
-    </section>
-  );
+  return <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "unread" | "history")} className="space-y-4">
+    <TabsList className="h-auto" aria-label="Caixa de avisos">
+      <TabsTrigger value="unread" className="min-h-11">Avisos ({totalUnread})</TabsTrigger>
+      <TabsTrigger value="history" className="min-h-11">Histórico ({totalHistory})</TabsTrigger>
+    </TabsList>
+    <div className="flex flex-wrap items-center gap-3">
+      <Select value={kindFilter} onValueChange={(value) => setKindFilter(value as "all" | NotificationKind)}>
+        <SelectTrigger aria-label="Tipo de aviso" className="h-11 w-48"><SelectValue /></SelectTrigger>
+        <SelectContent><SelectItem value="all">Todos os tipos</SelectItem><SelectItem value="announcement">Avisos</SelectItem><SelectItem value="payment_reminder">Financeiro</SelectItem><SelectItem value="system">Sistema</SelectItem></SelectContent>
+      </Select>
+      {totalUnread > 1 && <Button type="button" variant="outline" className="h-11" onClick={handleMarkAllRead}>Marcar todos como lidos</Button>}
+    </div>
+    <TabsContent value="unread" className="space-y-3">
+      {unreadItems.length ? unreadItems.map((item) => <NotificationItem key={item.recipient.$id} notification={item} onMarkRead={handleMarkAsRead} />) : <p className="py-6 text-sm text-muted-foreground">Nenhum aviso novo</p>}
+    </TabsContent>
+    <TabsContent value="history" className="space-y-3">
+      {historyItems.length ? historyItems.map((item) => <NotificationItem key={item.recipient.$id} notification={item} onMarkRead={handleMarkAsRead} />) : <p className="py-6 text-sm text-muted-foreground">Histórico vazio</p>}
+    </TabsContent>
+  </Tabs>;
 }

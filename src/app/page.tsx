@@ -22,10 +22,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const registrationErrors: Record<string, string> = {
     registration_invalid: "Revise os dados. A senha deve ter pelo menos 8 caracteres.",
     registration_failed: "Não foi possível criar a conta. Confirme se o e-mail já foi usado.",
-    setup_required: "A configuração do Appwrite ainda não foi concluída."
+    setup_required: "Cadastro indisponível no momento. Fale com a academia."
   };
   const registrationError = params.context === "cadastro"
-    ? params.message ?? registrationErrors[params.error ?? ""] ?? "Não foi possível concluir o cadastro."
+    ? registrationErrors[params.error ?? ""] ?? params.message ?? "Não foi possível concluir o cadastro."
     : undefined;
 
   return (
@@ -41,13 +41,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             className="mx-auto size-16 object-contain"
             priority
           />
-          <p className="text-xs font-bold text-primary-text">
-            Ebener Taekwondo
-          </p>
-          <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
             Acesse sua conta
           </h1>
-          <p className="text-xs text-muted-foreground sm:text-sm">
+          <p className="text-sm text-muted-foreground sm:text-sm">
             Portal do aluno, responsável e gestão da academia.
           </p>
         </div>
@@ -57,9 +54,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           registrationError={registrationError}
           registered={params.registered === "1"}
         />
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-center text-sm text-muted-foreground">
           Ao usar o portal, você confirma ter lido a{" "}
-          <Link href="/privacidade" className="font-medium text-primary underline-offset-4 hover:underline">
+          <Link href="/privacidade" className="font-medium text-primary-text underline-offset-4 hover:underline">
             Política de Privacidade
           </Link>
           .

@@ -30,7 +30,7 @@ export default async function ConfirmRecoveryPage({
             className="mx-auto size-14 object-contain"
             priority
           />
-          <h1 className="font-display text-2xl font-bold tracking-tight">
+          <h1 className="font-display text-2xl font-semibold tracking-tight">
             Nova Senha de Acesso
           </h1>
           <p className="text-xs text-muted-foreground sm:text-sm">
