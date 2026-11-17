@@ -4,7 +4,6 @@ import Link from "next/link";
 import { TriangleAlert } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   PRIVACY_EFFECTIVE_DATE,
   PRIVACY_EFFECTIVE_DATE_ISO,
@@ -19,11 +18,11 @@ export const metadata: Metadata = {
 
 function Block({ block }: { block: PrivacyBlock }) {
   if (block.type === "p") {
-    return <p className="text-sm leading-relaxed text-muted-foreground">{block.text}</p>;
+    return <p className="text-sm leading-relaxed">{block.text}</p>;
   }
   if (block.type === "ul") {
     return (
-      <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-muted-foreground marker:text-primary/60">
+      <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed marker:text-muted-foreground">
         {block.items.map((item) => <li key={item}>{item}</li>)}
       </ul>
     );
@@ -39,17 +38,19 @@ function Block({ block }: { block: PrivacyBlock }) {
 
 export default function PrivacyPolicyPage() {
   return (
-    <main className="min-h-screen bg-muted/30 px-4 py-8 sm:py-12">
-      <div className="mx-auto w-full max-w-3xl space-y-6">
-        <header className="space-y-3 text-center">
-          <Link href="/" aria-label="Voltar ao início">
-            <Image src="/brand-icon.png" alt="Ebener TKD" width={56} height={56} unoptimized className="mx-auto size-14 object-contain" />
+    <main className="min-h-dvh bg-background px-4 py-8 sm:px-6 sm:py-12">
+      <article className="mx-auto w-full max-w-2xl space-y-8">
+        <header className="space-y-4">
+          <Link href="/" className="inline-flex min-h-11 items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
+            <Image src="/brand-icon.png" alt="" width={40} height={40} unoptimized className="size-10 object-contain" />
+            <span className="text-base font-semibold">Ebener TKD</span>
           </Link>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Ebener Taekwondo</p>
-          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Política de Privacidade</h1>
-          <p className="text-xs text-muted-foreground sm:text-sm">
-            Em vigor desde <time dateTime={PRIVACY_EFFECTIVE_DATE_ISO}>{PRIVACY_EFFECTIVE_DATE}</time>
-          </p>
+          <div className="space-y-1.5">
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Política de Privacidade</h1>
+            <p className="text-sm text-muted-foreground">
+              Em vigor desde <time dateTime={PRIVACY_EFFECTIVE_DATE_ISO}>{PRIVACY_EFFECTIVE_DATE}</time>
+            </p>
+          </div>
         </header>
 
         <Alert role="note" className="border-border bg-warning-soft text-foreground">
@@ -60,12 +61,15 @@ export default function PrivacyPolicyPage() {
           </AlertDescription>
         </Alert>
 
-        <nav aria-label="Seções da política" className="rounded-xl border border-border/40 bg-card p-4">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nesta página</p>
-          <ol className="grid gap-1 text-sm sm:grid-cols-2">
+        <nav aria-labelledby="privacy-toc" className="rounded-xl border border-border bg-card p-4 sm:p-5">
+          <h2 id="privacy-toc" className="mb-2 text-sm font-medium text-muted-foreground">Nesta página</h2>
+          <ol className="grid gap-x-4 sm:grid-cols-2">
             {PRIVACY_SECTIONS.map((section) => (
               <li key={section.id}>
-                <a href={`#${section.id}`} className="text-primary underline-offset-4 hover:underline">
+                <a
+                  href={`#${section.id}`}
+                  className="inline-flex min-h-11 items-center rounded-sm text-sm font-medium text-foreground underline-offset-4 hover:underline! focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                >
                   {section.title}
                 </a>
               </li>
@@ -73,23 +77,21 @@ export default function PrivacyPolicyPage() {
           </ol>
         </nav>
 
-        {PRIVACY_SECTIONS.map((section) => (
-          <Card key={section.id} id={section.id} className="scroll-mt-4">
-            <CardHeader>
-              <h2 className="text-base font-semibold sm:text-lg">{section.title}</h2>
-            </CardHeader>
-            <CardContent className="space-y-3">
+        <div className="divide-y divide-border">
+          {PRIVACY_SECTIONS.map((section) => (
+            <section key={section.id} id={section.id} aria-labelledby={`${section.id}-title`} className="scroll-mt-4 space-y-3 py-6 first:pt-0">
+              <h2 id={`${section.id}-title`} className="text-lg font-semibold">{section.title}</h2>
               {section.blocks.map((block, index) => <Block key={index} block={block} />)}
-            </CardContent>
-          </Card>
-        ))}
+            </section>
+          ))}
+        </div>
 
-        <div className="flex justify-center pb-4">
-          <Button asChild variant="outline">
+        <div className="pb-4">
+          <Button asChild variant="outline" className="min-h-11">
             <Link href="/">Voltar ao início</Link>
           </Button>
         </div>
-      </div>
+      </article>
     </main>
   );
 }

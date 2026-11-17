@@ -45,7 +45,7 @@ Quem precisar de mudança fora da sua área registra em "Bloqueios" e pede ao do
 
 - Feito: diretrizes registradas; plano criado.
 - Pendente: tarefas 1 a 5.
-- Bloqueios: nenhum.
+- Bloqueios: a regra global `* { border-color: var(--border) }` e `a { text-decoration: none }` em `globals.css` (área B) ficam fora de `@layer` e vencem utilitários como `border-transparent`, `has-checked:border-*`, `aria-invalid:border-destructive` e `hover:underline`; a entrada contorna com `!`, mas a correção global é da Task 2.
 
 ## Registro de progresso
 
@@ -55,11 +55,11 @@ Quem precisar de mudança fora da sua área registra em "Bloqueios" e pede ao do
 
 **Files:** `src/app/page.tsx`, `src/components/auth/*`, `src/app/recuperar/*`, testes em `src/components/auth/*.test.tsx`, `tests/e2e/*` se nomes mudarem.
 
-- [ ] **Step 1:** Rodar a skill `impeccable` (crítica) e registrar no PR a tarefa principal da tela (entrar), os níveis de informação e o que é decorativo hoje.
-- [ ] **Step 2:** Desenhar a nova entrada: no desktop, composição em duas áreas (identidade da academia de um lado, formulário do outro) ou coluna única refinada, escolhida e justificada; no mobile, formulário primeiro. Manter abas Entrar/Criar conta, acesso do menor, recuperação de senha e link de privacidade.
-- [ ] **Step 3:** Testes: abas acessíveis, erro de login persistente com `role="alert"`, acesso do menor, nenhum elemento decorativo sem `aria-hidden`.
-- [ ] **Step 4:** Verificar no navegador (375/1280, claro/escuro) e rodar a validação completa.
-- [ ] **Step 5:** PR com decisões e trade-offs.
+- [x] **Step 1:** Rodar a skill `impeccable` (crítica) e registrar no PR a tarefa principal da tela (entrar), os níveis de informação e o que é decorativo hoje.
+- [x] **Step 2:** Desenhar a nova entrada: no desktop, composição em duas áreas (identidade da academia de um lado, formulário do outro) ou coluna única refinada, escolhida e justificada; no mobile, formulário primeiro. Manter abas Entrar/Criar conta, acesso do menor, recuperação de senha e link de privacidade.
+- [x] **Step 3:** Testes: abas acessíveis, erro de login persistente com `role="alert"`, acesso do menor, nenhum elemento decorativo sem `aria-hidden`.
+- [x] **Step 4:** Verificar no navegador (375/1280, claro/escuro) e rodar a validação completa.
+- [x] **Step 5:** PR com decisões e trade-offs.
 
 ### Task 2 (Agente B): Estrutura e navegação
 
@@ -85,3 +85,4 @@ Quem precisar de mudança fora da sua área registra em "Bloqueios" e pede ao do
 - [ ] **Step 1:** Revisar cada PR contra as diretrizes; pedir ajustes.
 - [ ] **Step 2:** Mesclar na ordem B → A, C, D (rebase das áreas sobre B).
 - [ ] **Step 3:** Varredura visual final com os quatro perfis e registro no plano mestre.
+- 2026-11-17: Task 1 (Agente A) — nova entrada em duas áreas no desktop (identidade + formulário) e formulário primeiro no mobile; `/recuperar`, `/recuperar/confirmar` e `/privacidade` no mesmo padrão; PR `feat/entrada-premium`.

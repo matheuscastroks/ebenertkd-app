@@ -1,140 +1,120 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
 import { registerAdultAction } from "@/app/actions/auth";
+import { PasswordToggle } from "@/components/auth/login-card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { OperationToast } from "@/components/shared/operation-toast";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export function RegisterCard({ errorMessage, success }: { errorMessage?: string; success?: boolean }) {
+const ACCOUNT_TYPES = [
+  { value: "adult_student", label: "Aluno", hint: "Maior de idade" },
+  { value: "guardian", label: "Responsável", hint: "De aluno menor" }
+] as const;
+
+/** Cadastro de aluno adulto ou responsável. Menores recebem acesso pelo professor. */
+export function RegisterCard({ errorMessage }: { errorMessage?: string }) {
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
 
   return (
-    <Card className="border-border/80 shadow-xs">
-      <CardContent className="space-y-6 p-5 sm:p-6">
-        <div className="flex items-start gap-3">
-          <div className="space-y-0.5">
-            <h2 className="font-semibold text-base sm:text-lg">Criar nova conta</h2>
-            <p className="text-sm text-muted-foreground">
-              Cadastre-se como aluno adulto ou responsável familiar.
-            </p>
+    <div className="space-y-5">
+      <p className="text-sm text-muted-foreground">
+        Para alunos maiores de idade e responsáveis. O acesso de alunos menores é criado pelo professor.
+      </p>
+
+      {errorMessage ? (
+        <Alert role="alert" variant="destructive" id="register-error">
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      ) : null}
+
+      <form action={registerAdultAction} className="space-y-4" aria-describedby={errorMessage ? "register-error" : undefined}>
+        <fieldset className="space-y-2">
+          <legend className="mb-2 text-sm font-medium">Você é</legend>
+          <div className="grid grid-cols-2 gap-2">
+            {ACCOUNT_TYPES.map((option, index) => (
+              <label
+                key={option.value}
+                className="flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border border-input bg-background px-3 py-2 transition-colors duration-150 hover:bg-muted has-checked:outline-2 has-checked:-outline-offset-1 has-checked:outline-foreground has-focus-visible:ring-3 has-focus-visible:ring-ring/50 motion-reduce:transition-none dark:bg-input/20"
+              >
+                <input
+                  type="radio"
+                  name="account_type"
+                  value={option.value}
+                  defaultChecked={index === 0}
+                  className="size-4 shrink-0 accent-foreground outline-none"
+                />
+                <span className="leading-tight">
+                  <span className="block text-sm font-medium">{option.label}</span>
+                  <span className="block text-xs text-muted-foreground">{option.hint}</span>
+                </span>
+              </label>
+            ))}
           </div>
-        </div>
+        </fieldset>
 
-        {success ? (
-          <OperationToast
-            tone="success"
-            title="Conta criada com sucesso"
-            description="Você já pode entrar com seu e-mail e senha cadastrados."
-            clearParams={["registered", "context"]}
+        <Field>
+          <FieldLabel htmlFor="register-name">Nome completo</FieldLabel>
+          <Input id="register-name" name="full_name" autoComplete="name" className="h-11" required />
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor="register-email">E-mail</FieldLabel>
+          <Input
+            id="register-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder="voce@exemplo.com"
+            className="h-11"
+            required
           />
-        ) : null}
+        </Field>
 
-        {errorMessage ? (
-          <Alert role="alert" variant="destructive"><AlertDescription>{errorMessage}</AlertDescription></Alert>
-        ) : null}
+        <Field>
+          <FieldLabel htmlFor="register-password">Senha de acesso</FieldLabel>
+          <div className="relative">
+            <Input
+              id="register-password"
+              name="password"
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value);
+                const confirmation = event.target.form?.elements.namedItem("password_confirmation") as HTMLInputElement | null;
+                if (confirmation) confirmation.setCustomValidity(confirmation.value === event.target.value ? "" : "As senhas devem ser iguais.");
+              }}
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              minLength={8}
+              aria-describedby="register-password-hint"
+              className="h-11 pr-12"
+              required
+            />
+            <PasswordToggle visible={showPassword} onToggle={() => setShowPassword((prev) => !prev)} />
+          </div>
+          <FieldDescription id="register-password-hint">Pelo menos 8 caracteres.</FieldDescription>
+        </Field>
 
-        {!success ? (
-          <form action={registerAdultAction} className="space-y-4">
-            <Field>
-              <FieldLabel htmlFor="register-name">Nome completo</FieldLabel>
-              <div className="relative">
+        <Field>
+          <FieldLabel htmlFor="register-confirm-password">Confirmar senha</FieldLabel>
+          <Input
+            id="register-confirm-password"
+            name="password_confirmation"
+            type={showPassword ? "text" : "password"}
+            autoComplete="new-password"
+            minLength={8}
+            required
+            className="h-11"
+            onChange={(event) => event.target.setCustomValidity(event.target.value === password ? "" : "As senhas devem ser iguais.")}
+          />
+        </Field>
 
-                <Input
-                  id="register-name"
-                  name="full_name"
-                  autoComplete="name"
-                  placeholder="Seu nome completo"
-                  className="h-11 text-sm"
-                  required
-                />
-              </div>
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="register-email">E-mail</FieldLabel>
-              <div className="relative">
-
-                <Input
-                  id="register-email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="seu.email@exemplo.com"
-                  className="h-11 text-sm"
-                  required
-                />
-              </div>
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="register-account-type">Perfil de cadastro</FieldLabel>
-              <Select name="account_type" defaultValue="adult_student">
-                <SelectTrigger id="register-account-type" className="h-11 w-full text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="adult_student">Aluno maior de idade</SelectItem>
-                  <SelectItem value="guardian">Responsável financeiro / familiar</SelectItem>
-                </SelectContent>
-              </Select>
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="register-password">Senha de acesso</FieldLabel>
-              <div className="relative">
-
-                <Input
-                  id="register-password"
-                  name="password"
-                  value={password}
-                  onChange={(event) => {
-                    setPassword(event.target.value);
-                    const confirmation = event.target.form?.elements.namedItem("password_confirmation") as HTMLInputElement | null;
-                    if (confirmation) confirmation.setCustomValidity(confirmation.value === event.target.value ? "" : "As senhas devem ser iguais.");
-                  }}
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="new-password"
-                  minLength={8}
-                  placeholder="Crie uma senha segura"
-                  className="h-11 pr-12 text-sm"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-0 top-0 flex size-11 items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  aria-label={showPassword ? "Ocultar senha" : "Ver senha"}
-                >
-                  {showPassword ? (
-                    <EyeOff className="size-4" aria-hidden="true" />
-                  ) : (
-                    <Eye className="size-4" aria-hidden="true" />
-                  )}
-                </button>
-              </div>
-              <FieldDescription>Mínimo de 8 caracteres.</FieldDescription>
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="register-confirm-password">Confirmar senha</FieldLabel>
-              <Input id="register-confirm-password" name="password_confirmation" type={showPassword ? "text" : "password"}
-                autoComplete="new-password" minLength={8} required className="h-11"
-                onChange={(event) => event.target.setCustomValidity(event.target.value === password ? "" : "As senhas devem ser iguais.")} />
-            </Field>
-
-            <FormSubmitButton className="h-11 w-full text-sm font-semibold touch-manipulation" pendingLabel="Criando conta…">
-              Criar conta
-            </FormSubmitButton>
-          </form>
-        ) : null}
-      </CardContent>
-    </Card>
+        <FormSubmitButton className="h-11 w-full touch-manipulation" pendingLabel="Criando conta…">
+          Criar conta
+        </FormSubmitButton>
+      </form>
+    </div>
   );
 }

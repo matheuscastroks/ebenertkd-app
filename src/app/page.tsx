@@ -1,11 +1,10 @@
-import Image from "next/image";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthEntry } from "@/components/auth/auth-entry";
+import { AuthShell, AuthTextLink } from "@/components/auth/auth-shell";
 import { resolveDashboardPath } from "@/lib/auth/auth-utils";
 import { getCurrentProfile } from "@/lib/auth/session";
 
-type HomeParams = { error?: string; message?: string; context?: string; registered?: string };
+type HomeParams = { error?: string; message?: string; context?: string; registered?: string; deleted?: string };
 
 export default async function HomePage({ searchParams }: { searchParams: Promise<HomeParams> }) {
   const profile = await getCurrentProfile();
@@ -28,40 +27,29 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     ? registrationErrors[params.error ?? ""] ?? params.message ?? "Não foi possível concluir o cadastro."
     : undefined;
 
+  // Avisos de sucesso vindos de outros fluxos (nova senha, exclusão de conta) aparecem como toast.
+  const notice = params.message === "password_updated" && !params.error
+    ? { title: "Senha atualizada", description: "Entre com a nova senha.", clearParams: ["message"] }
+    : params.deleted === "1"
+      ? { title: "Conta excluída", description: "Seu acesso ao portal foi encerrado.", clearParams: ["deleted"] }
+      : undefined;
+
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-8 sm:py-12">
-      <div className="w-full max-w-md space-y-6">
-        <div className="space-y-2 text-center">
-          <Image
-            src="/brand-icon.png"
-            alt="Ebener TKD"
-            width={64}
-            height={64}
-            unoptimized
-            className="mx-auto size-16 object-contain"
-            priority
-          />
-          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-            Acesse sua conta
-          </h1>
-          <p className="text-sm text-muted-foreground sm:text-sm">
-            Portal do aluno, responsável e gestão da academia.
-          </p>
-        </div>
-        <AuthEntry
-          minorError={minorError}
-          adultError={adultError}
-          registrationError={registrationError}
-          registered={params.registered === "1"}
-        />
-        <p className="text-center text-sm text-muted-foreground">
-          Ao usar o portal, você confirma ter lido a{" "}
-          <Link href="/privacidade" className="font-medium text-primary-text underline-offset-4 hover:underline">
-            Política de Privacidade
-          </Link>
-          .
+    <AuthShell
+      title="Acesse sua conta"
+      footer={
+        <p>
+          Ao usar o portal, você confirma ter lido a <AuthTextLink href="/privacidade">Política de Privacidade</AuthTextLink>.
         </p>
-      </div>
-    </main>
+      }
+    >
+      <AuthEntry
+        minorError={minorError}
+        adultError={adultError}
+        registrationError={registrationError}
+        registered={params.registered === "1"}
+        notice={notice}
+      />
+    </AuthShell>
   );
 }
