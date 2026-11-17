@@ -49,6 +49,11 @@ export async function uploadEncryptedObject(token, folderId, name, contents, met
   return result;
 }
 
+export async function markBackupIncomplete(token, folderId) {
+  const response = await driveFetch(token, `${API}/files/${folderId}?fields=id,name,appProperties`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ appProperties: { status: "incomplete", manifestSha256: null } }) });
+  return response.json();
+}
+
 export async function markBackupComplete(token, folderId, manifestSha256) {
   const response = await driveFetch(token, `${API}/files/${folderId}?fields=id,name,appProperties`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ appProperties: { app: "ebenertkd", type: "backup", status: "complete", manifestSha256 } }) });
   return response.json();
