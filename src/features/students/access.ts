@@ -4,15 +4,13 @@ import { Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { getProfileById } from "@/features/profiles/profile-read";
 
 export async function resolveStudentProfile(actor: Profile, requestedProfileId?: string | null) {
   const targetId = requestedProfileId || actor.$id;
+  // Só a LINHA do perfil alvo vem do cache. Papel, capacidade e vínculo abaixo rodam a cada requisição.
+  const target = targetId === actor.$id ? actor : await getProfileById(targetId);
   const { tables, config } = createAppwriteAdminClient();
-  const target = await tables.getRow<Profile>({
-    databaseId: config.databaseId,
-    tableId: APPWRITE_IDS.tables.profiles,
-    rowId: targetId
-  });
 
   if (actor.role === "admin") return target;
   if (target.$id === actor.$id && actor.capabilities.includes("student")) return target;

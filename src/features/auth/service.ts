@@ -8,6 +8,8 @@ import { minorTechnicalEmail } from "@/lib/auth/auth-utils";
 import type { AppCapability } from "@/lib/auth/auth-utils";
 import type { AdultRegistration, MinorRegistration, Profile } from "@/features/auth/types";
 import { capabilitiesByRole } from "@/features/auth/permissions";
+import { invalidateTags } from "@/lib/cache/invalidate";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 export class AuthServiceError extends Error {
   constructor(public readonly code: "invalid_credentials" | "account_unavailable" | "registration_failed") {
@@ -89,6 +91,7 @@ export async function createAdultAccount(input: AdultRegistration) {
       },
       permissions: profilePermissions(accountId)
     });
+    invalidateTags(CACHE_TAGS.profiles, CACHE_TAGS.profileAccount(accountId), CACHE_TAGS.studentAccess);
     await writeAuditEvent("auth.account.created", accountId, "profile", profile.$id, {
       role: input.accountType
     }).catch(() => undefined);
@@ -148,6 +151,7 @@ export async function createMinorAccount(
         Permission.update(Role.user(guardian.account_id))
       ]
     });
+    invalidateTags(CACHE_TAGS.profiles, CACHE_TAGS.profileAccount(accountId), CACHE_TAGS.studentAccess);
     await writeAuditEvent("family.minor.created", guardian.account_id, "profile", minor.$id).catch(() => undefined);
     return minor;
   } catch (error) {
@@ -235,6 +239,7 @@ export async function promoteMinorToAdult(
       data: { status: "revoked", updated_at: new Date().toISOString() }
     })));
   }
+  invalidateTags(CACHE_TAGS.profiles, CACHE_TAGS.profileAccount(minor.account_id), CACHE_TAGS.studentAccess);
   await requestPasswordRecovery(email);
   await writeAuditEvent("auth.minor.promoted", actorAccountId, "profile", minor.$id, {
     email,

@@ -3,7 +3,17 @@ import "server-only";
 import { Query, Models } from "node-appwrite";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { invalidateTags } from "@/lib/cache/invalidate";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { Profile } from "./types";
+
+/** Conta desativada nunca pode ser servida do cache: derruba perfil, aluno, matrícula e listas. */
+function invalidateDeletedProfile(profile: Profile) {
+  invalidateTags(
+    CACHE_TAGS.profiles, CACHE_TAGS.profile(profile.$id), CACHE_TAGS.profileAccount(profile.account_id),
+    CACHE_TAGS.studentProfile(profile.$id), CACHE_TAGS.studentAccess, CACHE_TAGS.studentsAll, CACHE_TAGS.enrollments
+  );
+}
 
 export async function deleteSelfAccount(actor: Profile): Promise<{ success: boolean }> {
   if (actor.role === "admin") {
@@ -88,6 +98,7 @@ export async function deleteSelfAccount(actor: Profile): Promise<{ success: bool
     console.warn("[account-deletion] Error disabling student record:", err);
   }
 
+  invalidateDeletedProfile(actor);
   return { success: true };
 }
 
@@ -196,5 +207,6 @@ export async function deleteStudentAccount(
     console.warn("[account-deletion] Error disabling student record:", err);
   }
 
+  invalidateDeletedProfile(target);
   return { success: true };
 }
