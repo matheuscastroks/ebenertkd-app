@@ -30,3 +30,13 @@ it("mostra filtros ativos e permite removê-los", () => {
   fireEvent.click(screen.getByText("Limpar filtros"));
   expect(state.replace).toHaveBeenCalledWith("/admin/financeiro", { scroll: false });
 });
+
+it("o campo Situação mostra o texto escolhido sem precisar abrir a lista", () => {
+  state.query = "";
+  const { unmount } = render(<BillingFilters classes={[]} />);
+  expect(screen.getByLabelText("Situação")).toHaveTextContent("Todas");
+  unmount();
+  state.query = "status=overdue";
+  render(<BillingFilters classes={[]} />);
+  expect(screen.getByLabelText("Situação")).toHaveTextContent("Inadimplente");
+});
