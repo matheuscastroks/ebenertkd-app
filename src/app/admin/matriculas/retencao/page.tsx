@@ -19,7 +19,7 @@ import { requireProfile } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
 import { formatBusinessDateBr, whatsappLink } from "@/lib/dates";
 import { adminEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
-import { ArrowRight, Bell, MessageCircle } from "lucide-react";
+import { ArrowRight, Bell, MessageCircle } from "@/components/ui/icons";
 
 const RISK_LABELS: Record<RetentionRiskLevel, string> = {
   critical: "Risco crítico",

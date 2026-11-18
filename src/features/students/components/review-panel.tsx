@@ -79,7 +79,7 @@ import {
   ShieldCheck,
   Users,
   Wallet
-} from "lucide-react";
+} from "@/components/ui/icons";
 
 const dateValue = (value?: string | null) => value?.slice(0, 10) ?? "";
 

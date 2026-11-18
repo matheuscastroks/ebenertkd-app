@@ -8,7 +8,7 @@ import { StudentAccessTable } from "@/features/students/components/student-acces
 import { requireProfile } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
 import { ROUTES } from "@/lib/navigation/routes";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown } from "@/components/ui/icons";
 
 export default async function StudentAccessPage({
   searchParams,

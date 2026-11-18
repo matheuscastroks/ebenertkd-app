@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { Bell, ChevronRight, Palette, Shield, User } from "lucide-react";
+import { Bell, ChevronRight, Palette, Shield, User } from "@/components/ui/icons";
 import { isPushConfigured } from "@/features/notifications/push-config";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { ThemePreference } from "@/components/dashboard/theme-preference";

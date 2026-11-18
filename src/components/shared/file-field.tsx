@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useRef, useState } from "react";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon } from "@/components/ui/icons";
 import { FileTextIcon } from "@/components/ui/file-text";
 import { UploadIcon } from "@/components/ui/upload";
 import { XIcon } from "@/components/ui/x";

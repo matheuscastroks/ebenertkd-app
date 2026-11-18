@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useOptimistic, useState, useTransition } from "react";
-import { BellOff } from "lucide-react";
+import { BellOff } from "@/components/ui/icons";
 import { toast } from "sonner";
 import { revokePushSubscriptionAction, savePushSubscriptionAction } from "@/app/actions/notifications";
 import { BellIcon } from "@/components/ui/bell";

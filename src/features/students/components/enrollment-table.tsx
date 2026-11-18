@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Eye } from "lucide-react";
+import { Eye } from "@/components/ui/icons";
 import { ResponsiveDataView } from "@/components/shared/responsive-data-view";
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";
 import { SortableTableHead } from "@/components/shared/sortable-table-head";

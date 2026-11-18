@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, CalendarPlus, ChevronDown, ExternalLink } from "lucide-react";
+import { Calendar, CalendarPlus, ChevronDown, ExternalLink } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,

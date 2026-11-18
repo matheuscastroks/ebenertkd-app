@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTheme } from "next-themes";
 import { changeTheme } from "@/lib/theme-transition";
-import { Monitor } from "lucide-react";
+import { Monitor } from "@/components/ui/icons";
 import { MoonIcon } from "@/components/ui/moon";
 import { SunIcon } from "@/components/ui/sun";
 import { cn } from "@/lib/utils";

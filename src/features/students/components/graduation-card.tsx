@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronDown } from "@/components/ui/icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BeltBadge, getBeltConfig } from "./belt-badge";
 import { beltForGub, poomsaeForGub } from "@/features/students/options";

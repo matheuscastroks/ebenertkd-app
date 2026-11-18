@@ -3,7 +3,7 @@
 import type { ComponentType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
+import { Menu } from "@/components/ui/icons";
 import { NAV_ICONS } from "@/lib/navigation/nav-icons";
 import { useSidebar } from "@/components/ui/sidebar";
 import type { AppSidebarNavItem } from "@/components/dashboard/app-sidebar";

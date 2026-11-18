@@ -5,7 +5,7 @@ import { ConfirmationForm } from "@/features/billing/components/confirmation-for
 import { ConsequenceDialog } from "./consequence-dialog";
 import { formatBrl } from "@/lib/money";
 import Link from "next/link";
-import { ExternalLink, FileText } from "lucide-react";
+import { ExternalLink, FileText } from "@/components/ui/icons";
 import { CheckIcon } from "@/components/ui/check";
 import { XIcon } from "@/components/ui/x";
 import {

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, Plus, Trash2 } from "lucide-react";
+import { MapPin, Plus, Trash2 } from "@/components/ui/icons";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";

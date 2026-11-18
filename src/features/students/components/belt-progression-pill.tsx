@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from "@/components/ui/icons";
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import { getBeltTheme } from "@/features/students/options";
 

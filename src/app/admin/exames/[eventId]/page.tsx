@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { CheckCircle2, ChevronDown } from "lucide-react";
+import { CheckCircle2, ChevronDown } from "@/components/ui/icons";
 import {
   cancelExamEventAction,
   cancelExamParticipantAction,

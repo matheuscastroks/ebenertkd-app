@@ -11,7 +11,7 @@ import { listTrainingClasses } from "@/features/classes/service";
 import { getTodayWeekday } from "@/features/classes/schedule";
 import { listExamEvents } from "@/features/exams/service";
 import { ROUTES, adminClassPath, adminEnrollmentPath } from "@/lib/navigation/routes";
-import { Calendar, FileText, MapPin, ReceiptText } from "lucide-react";
+import { Calendar, FileText, MapPin, ReceiptText } from "@/components/ui/icons";
 
 const money = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value / 100);
 

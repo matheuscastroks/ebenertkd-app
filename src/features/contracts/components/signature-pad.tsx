@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { signContractAction } from "@/app/actions/contract-signature";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Eraser, FileSignature, Info } from "lucide-react";
+import { CheckCircle2, Eraser, FileSignature, Info } from "@/components/ui/icons";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 
 export function SignaturePad({ contractId, content }: { contractId: string; content: string }) {

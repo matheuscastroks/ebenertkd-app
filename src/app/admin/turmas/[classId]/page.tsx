@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarPlus, ChevronDown, ClipboardCheck } from "lucide-react";
+import { CalendarPlus, ChevronDown, ClipboardCheck } from "@/components/ui/icons";
 import { createLessonAction } from "@/app/actions/attendance";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { DateField } from "@/components/shared/date-field";

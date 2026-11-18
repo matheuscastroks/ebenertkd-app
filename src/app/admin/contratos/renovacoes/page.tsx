@@ -18,7 +18,7 @@ import { requireProfile } from "@/lib/auth/session";
 import { formatBusinessDateBr } from "@/lib/dates";
 import { formatBrl } from "@/lib/money";
 import { adminEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
-import { ArrowRight, RefreshCw } from "lucide-react";
+import { ArrowRight, RefreshCw } from "@/components/ui/icons";
 
 const BUCKET_LABELS: Record<RenewalBucket, string> = {
   expired: "Vencido",

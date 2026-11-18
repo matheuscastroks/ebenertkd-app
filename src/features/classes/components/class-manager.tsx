@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock, MapPin } from "lucide-react";
+import { Clock, MapPin } from "@/components/ui/icons";
 import { CalendarCheck2Icon } from "@/components/ui/calendar-check-2";
 import { PlusIcon } from "@/components/ui/plus";
 import { SquarePenIcon } from "@/components/ui/square-pen";

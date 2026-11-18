@@ -14,7 +14,7 @@ import {
   MapPin,
   Minus,
   X
-} from "lucide-react";
+} from "@/components/ui/icons";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";

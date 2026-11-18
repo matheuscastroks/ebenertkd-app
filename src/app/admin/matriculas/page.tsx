@@ -11,7 +11,7 @@ import { listEnrollmentsForReview } from "@/features/students/service";
 import { requireProfile } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
 import { ROUTES } from "@/lib/navigation/routes";
-import { KeyRound } from "lucide-react";
+import { KeyRound } from "@/components/ui/icons";
 import { TableRowsSkeleton } from "@/components/skeletons";
 
 type SearchParamsType = Promise<{

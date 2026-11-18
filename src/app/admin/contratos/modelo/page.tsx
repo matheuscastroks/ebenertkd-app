@@ -13,7 +13,7 @@ import { FRIENDLY_CONTRACT_VARIABLES } from "@/features/contracts/rules";
 import { DEFAULT_CONTRACT_CONTENT, getContractTemplate, listContractVersions } from "@/features/contracts/template-service";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
-import { Save } from "lucide-react";
+import { Save } from "@/components/ui/icons";
 
 export default async function ContractTemplatePage({
   searchParams,

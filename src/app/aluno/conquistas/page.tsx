@@ -13,7 +13,7 @@ import { StudentMonthlyProgressChart } from "@/features/students/components/jour
 import { getStudentJourneySnapshot } from "@/features/students/journey-service";
 import { requireCapability } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
-import { Award, CheckCircle2, Flame } from "lucide-react";
+import { Award, CheckCircle2, Flame } from "@/components/ui/icons";
 
 async function StudentAchievementsContent({ profile }: { profile: Profile }) {
   const snapshot = await getStudentJourneySnapshot(profile);

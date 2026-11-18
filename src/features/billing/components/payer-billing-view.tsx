@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { WalletCards } from "lucide-react";
+import { WalletCards } from "@/components/ui/icons";
 import { ChevronLeftIcon } from "@/components/ui/chevron-left";
 import { ChevronRightIcon } from "@/components/ui/chevron-right";
 import { FileTextIcon } from "@/components/ui/file-text";

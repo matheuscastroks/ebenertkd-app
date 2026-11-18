@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Award, CreditCard, History, MapPin } from "lucide-react";
+import { Award, CreditCard, History, MapPin } from "@/components/ui/icons";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";

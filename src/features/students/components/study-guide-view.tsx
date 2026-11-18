@@ -11,7 +11,7 @@ import {
   TAEKWONDO_TENETS,
   type AnnotatedStudyModule,
 } from "@/features/students/study-catalog";
-import { CheckCircle2, RotateCcw, XCircle } from "lucide-react";
+import { CheckCircle2, RotateCcw, XCircle } from "@/components/ui/icons";
 
 export function StudyGuideView({
   modules,

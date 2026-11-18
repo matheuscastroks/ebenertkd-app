@@ -21,7 +21,7 @@ import { requireProfile } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
 import { formatBrl } from "@/lib/money";
 import { adminEnrollmentPath, adminExamPath, ROUTES } from "@/lib/navigation/routes";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "@/components/ui/icons";
 
 const STATUS_LABELS: Record<ExamEligibilityStatus, string> = {
   eligible: "Apto para exame",

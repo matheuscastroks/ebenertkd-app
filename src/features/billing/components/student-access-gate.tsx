@@ -9,7 +9,7 @@ import type { StudentAppAccessStatus } from "@/features/billing/access-lock-rule
 import type { ParqStatus } from "@/features/students/parq-rules";
 import { formatBusinessDateBr } from "@/lib/dates";
 import { ROUTES } from "@/lib/navigation/routes";
-import { ArrowRight, ClipboardCheck, Lock, Wallet } from "lucide-react";
+import { ArrowRight, ClipboardCheck, Lock, Wallet } from "@/components/ui/icons";
 
 const ADULT_ALLOWED_LOCKED_PREFIXES = [
   ROUTES.studentBilling,

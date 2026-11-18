@@ -12,7 +12,7 @@ import { getStudentCalendarData } from "@/features/classes/student-calendar-serv
 import { requireCapability } from "@/lib/auth/session";
 import { formatBusinessDateBr } from "@/lib/dates";
 import { ROUTES } from "@/lib/navigation/routes";
-import { ArrowRight, Clock, MapPin } from "lucide-react";
+import { ArrowRight, Clock, MapPin } from "@/components/ui/icons";
 
 async function StudentCalendarContent({ profile }: { profile: Profile }) {
   const data = await getStudentCalendarData(profile);

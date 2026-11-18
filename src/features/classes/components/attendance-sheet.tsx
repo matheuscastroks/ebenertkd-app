@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, CircleSlash2, ShieldCheck } from "lucide-react";
+import { Check, CircleSlash2, ShieldCheck } from "@/components/ui/icons";
 import { saveAttendanceAction } from "@/app/actions/attendance";
 import { EmptyState } from "@/components/shared/empty-state";
 import { OperationToast } from "@/components/shared/operation-toast";

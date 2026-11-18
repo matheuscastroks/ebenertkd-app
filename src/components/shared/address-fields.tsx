@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useMemo, useRef, useState } from "react";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2 } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { cleanCep, formatAddress, formatCep, parseAddress } from "@/lib/address";
 import { fetchAddressByCep } from "@/lib/viacep";

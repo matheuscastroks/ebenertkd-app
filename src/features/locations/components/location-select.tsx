@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MapPin, Plus } from "lucide-react";
+import { MapPin, Plus } from "@/components/ui/icons";
 import {
   Select,
   SelectContent,

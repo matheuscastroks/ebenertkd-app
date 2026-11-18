@@ -10,7 +10,7 @@ import {
   FileText,
   ImageIcon,
   Pencil,
-} from "lucide-react";
+} from "@/components/ui/icons";
 import { StatusBadge } from "@/components/shared/status-badge";
 import {
   Attachment,

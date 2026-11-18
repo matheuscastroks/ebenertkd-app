@@ -14,7 +14,7 @@ import { requireProfile } from "@/lib/auth/session";
 import { formatBusinessDateBr } from "@/lib/dates";
 import { formatBrl } from "@/lib/money";
 import { ROUTES } from "@/lib/navigation/routes";
-import { ArrowRight, Download } from "lucide-react";
+import { ArrowRight, Download } from "@/components/ui/icons";
 
 type SearchParams = Promise<{ competence?: string }>;
 

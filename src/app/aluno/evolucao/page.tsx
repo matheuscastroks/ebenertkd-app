@@ -14,7 +14,7 @@ import { getStudentJourneySnapshot } from "@/features/students/journey-service";
 import { requireCapability } from "@/lib/auth/session";
 import { formatBusinessDateBr } from "@/lib/dates";
 import { ROUTES } from "@/lib/navigation/routes";
-import { ArrowRight, BookOpen, CheckCircle2 } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle2 } from "@/components/ui/icons";
 
 async function StudentEvolutionContent({ profile }: { profile: Profile }) {
   const snapshot = await getStudentJourneySnapshot(profile);

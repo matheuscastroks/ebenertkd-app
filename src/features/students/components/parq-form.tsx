@@ -35,7 +35,7 @@ import {
   FileSignature,
   HeartPulse,
   RefreshCw,
-} from "lucide-react";
+} from "@/components/ui/icons";
 
 const STATUS_TONES: Record<ParqStatus, StatusTone> = {
   valid: "success",

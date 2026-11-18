@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText, ImageIcon } from "lucide-react";
+import { FileText, ImageIcon } from "@/components/ui/icons";
 import { DateField } from "@/components/shared/date-field";
 import { FileField } from "@/components/shared/file-field";
 import { PhoneField } from "@/components/shared/phone-field";

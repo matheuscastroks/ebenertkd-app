@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Check, Megaphone, Sparkles, Wallet } from "lucide-react";
+import { ArrowUpRight, Check, Megaphone, Sparkles, Wallet } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import type { InboxItem, NotificationKind } from "../types";
 

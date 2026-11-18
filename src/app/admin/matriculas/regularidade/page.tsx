@@ -20,7 +20,7 @@ import { requireProfile } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
 import { formatBusinessDateBr } from "@/lib/dates";
 import { adminEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
-import { ArrowRight, Bell } from "lucide-react";
+import { ArrowRight, Bell } from "@/components/ui/icons";
 
 const STATUS_LABELS: Record<MedicalComplianceStatus, string> = {
   valid: "Atestado em dia",

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
-import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronsUpDown } from "@/components/ui/icons";
 import { TableHead } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import type { SortDirection } from "@/hooks/use-table-sort";

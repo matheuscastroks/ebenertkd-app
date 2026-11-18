@@ -1,6 +1,6 @@
 import { operationFailureSummary } from "@/features/billing/components/operation-failure-summary";
 import { Suspense } from "react";
-import { CheckCircle2, CircleHelp, TriangleAlert } from "lucide-react";
+import { CheckCircle2, CircleHelp, TriangleAlert } from "@/components/ui/icons";
 import { SystemSummary } from "./system-summary";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";

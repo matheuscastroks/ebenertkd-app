@@ -16,7 +16,7 @@ import { PARQ_STATUS_LABELS, type ParqStatus } from "@/features/students/parq-ru
 import { requireCapability } from "@/lib/auth/session";
 import { formatBusinessDateBr } from "@/lib/dates";
 import { ROUTES } from "@/lib/navigation/routes";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowRight, ShieldCheck } from "@/components/ui/icons";
 
 const MEDICAL_LABELS: Record<MedicalComplianceStatus, string> = {
   valid: "Atestado em dia",
