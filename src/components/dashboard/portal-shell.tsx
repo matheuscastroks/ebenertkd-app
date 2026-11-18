@@ -17,6 +17,7 @@ export async function PortalFrame({ profile, children }: { profile: Profile; chi
       profileEmail={email}
       role={profile.role}
       navItems={navigationForProfile(profile, { enrollments, notifications })}
+      unreadNotifications={notifications}
     >
       {children}
     </DashboardFrame>

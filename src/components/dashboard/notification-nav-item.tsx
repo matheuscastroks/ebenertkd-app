@@ -4,12 +4,18 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { NAV_ICONS } from "@/lib/navigation/nav-icons";
 import type { AnimatedIconHandle } from "@/lib/use-parent-hover-animation";
-import { SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { NotificationDrawer } from "@/features/notifications/components/notification-drawer";
+import { cn } from "@/lib/utils";
 
 const BellIcon = NAV_ICONS.notifications;
 
-export function NotificationNavItem({ initialCount, active }: { initialCount: number; active?: boolean }) {
+export function NotificationTopButton({
+  initialCount,
+  className,
+}: {
+  initialCount: number;
+  className?: string;
+}) {
   const [count, setCount] = useState(initialCount);
   const [displayCount, setDisplayCount] = useState(Math.max(1, initialCount));
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -122,35 +128,37 @@ export function NotificationNavItem({ initialCount, active }: { initialCount: nu
 
   return (
     <>
-      <SidebarMenuItem
+      <button
+        type="button"
+        onClick={() => setDrawerOpen(true)}
         onMouseEnter={() => bellIconRef.current?.startAnimation()}
         onMouseLeave={() => bellIconRef.current?.stopAnimation()}
+        aria-label={hasUnread ? `Avisos, ${count} não lidos` : "Avisos"}
+        aria-expanded={drawerOpen}
+        title={hasUnread ? `Avisos · ${count} não lidos` : "Avisos"}
+        className={cn(
+          "fixed right-4 top-4 z-30 inline-flex size-10 items-center justify-center rounded-full border border-border/80 bg-card/85 text-foreground shadow-xs backdrop-blur-md transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none md:right-6 md:top-5",
+          drawerOpen && "border-primary/40 bg-card text-primary-text",
+          className
+        )}
       >
-        <SidebarMenuButton
-          type="button"
-          onClick={() => setDrawerOpen(true)}
-          isActive={drawerOpen || active}
-          tooltip={hasUnread ? `Avisos · ${count} não lidos` : "Avisos"}
-          aria-label={hasUnread ? `Avisos, ${count} não lidos` : "Avisos"}
+        <BellIcon
+          ref={bellIconRef}
+          size={18}
+          strokeWidth={2}
+          aria-hidden="true"
+          className="flex size-4.5"
+        />
+        <span
+          className="t-badge pointer-events-none absolute -right-1 -top-1"
+          data-open={hasUnread ? "true" : "false"}
+          aria-hidden="true"
         >
-          <span className="relative inline-flex shrink-0 items-center justify-center">
-            <BellIcon ref={bellIconRef} size={16} strokeWidth={2} aria-hidden="true" className="flex size-4" />
-            <span
-              className="t-badge"
-              data-open={hasUnread ? "true" : "false"}
-              aria-hidden="true"
-            >
-              <span className="t-badge-dot size-2 rounded-full bg-primary ring-2 ring-sidebar" />
-            </span>
-          </span>
-          <span>Avisos</span>
-        </SidebarMenuButton>
-        {hasUnread ? (
-          <SidebarMenuBadge className="t-badge-pop bg-primary/15 font-semibold text-primary-text tabular-nums">
+          <span className="t-badge-dot flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold leading-none text-primary-foreground tabular-nums shadow-xs ring-2 ring-background">
             {formattedCount}
-          </SidebarMenuBadge>
-        ) : null}
-      </SidebarMenuItem>
+          </span>
+        </span>
+      </button>
       <NotificationDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />
     </>
   );

@@ -2,12 +2,16 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowRight, RefreshCw } from "lucide-react";
-import { BellIcon } from "@/components/ui/bell";
-import { StatusBadge } from "@/components/shared/status-badge";
+import { ChevronRight, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { NotificationInbox } from "./notification-inbox";
 import type { InboxItem } from "../types";
@@ -15,19 +19,19 @@ import type { InboxItem } from "../types";
 function DrawerLoadingSkeleton() {
   return (
     <div role="status" aria-busy="true" className="space-y-4">
-      <div className="grid grid-cols-2 gap-2">
-        <Skeleton className="h-11 rounded-lg" />
-        <Skeleton className="h-11 rounded-lg" />
-      </div>
-      <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
+      <Skeleton className="h-12 w-full rounded-xl" />
+      <div className="divide-y divide-border/70 overflow-hidden rounded-2xl border border-border/70 bg-card shadow-xs">
         {Array.from({ length: 3 }, (_, idx) => (
-          <div key={idx} className="space-y-2.5 p-4">
-            <div className="flex items-center justify-between gap-2">
-              <Skeleton className="h-4 w-44" />
-              <Skeleton className="h-4 w-20" />
+          <div key={idx} className="flex items-start gap-3 p-4">
+            <Skeleton className="size-9 shrink-0 rounded-xl" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <Skeleton className="h-3.5 w-24" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+              <Skeleton className="h-4 w-48" />
+              <Skeleton className="h-3.5 w-full" />
             </div>
-            <Skeleton className="h-3.5 w-full" />
-            <Skeleton className="h-3.5 w-3/4" />
           </div>
         ))}
       </div>
@@ -81,49 +85,43 @@ export function NotificationDrawer({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex h-full w-full flex-col gap-0 p-0 sm:max-w-lg">
-        <SheetHeader className="border-b border-border bg-card px-5 py-4 pr-12 text-left">
-          <div className="flex items-center gap-3">
-            <span className="relative flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/50 text-foreground">
-              <BellIcon size={18} strokeWidth={2} aria-hidden="true" />
-              <span
-                className="t-badge"
-                data-open={!loading && !error && unreadCount > 0 ? "true" : "false"}
-                aria-hidden="true"
-              >
-                <span className="t-badge-dot flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold leading-4 text-primary-foreground tabular-nums shadow-xs">
-                  {unreadCount > 99 ? "99+" : Math.max(1, unreadCount)}
-                </span>
-              </span>
-            </span>
-            <div className="min-w-0 flex-1 space-y-0.5">
-              <div className="flex flex-wrap items-center gap-2">
-                <SheetTitle className="text-base font-semibold">Avisos</SheetTitle>
-                {!loading && !error ? (
-                  <StatusBadge tone={unreadCount > 0 ? "info" : "success"}>
-                    {unreadCount > 0
-                      ? `${unreadCount} não lido${unreadCount === 1 ? "" : "s"}`
-                      : "Tudo em dia"}
-                  </StatusBadge>
-                ) : null}
-              </div>
-              <SheetDescription className="text-xs text-muted-foreground">
-                Comunicados, lembretes e atualizações da academia
-              </SheetDescription>
+      <SheetContent className="flex h-full w-full flex-col gap-0 border-l border-border/70 bg-background p-0 sm:max-w-md">
+        <SheetHeader className="border-b border-border/70 bg-background/85 px-5 pb-3.5 pt-5 pr-12 text-left backdrop-blur-md">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <SheetTitle className="font-display text-xl font-semibold tracking-tight text-foreground">
+                Avisos
+              </SheetTitle>
+              {!loading && !error ? (
+                unreadCount > 0 ? (
+                  <span className="inline-flex items-center rounded-full bg-primary/12 px-2.5 py-0.5 text-xs font-medium text-primary-text tabular-nums">
+                    {unreadCount} novo{unreadCount === 1 ? "" : "s"}
+                  </span>
+                ) : (
+                  <span className="text-xs font-medium text-muted-foreground">
+                    Tudo em dia
+                  </span>
+                )
+              ) : null}
             </div>
+            <SheetDescription className="text-xs text-muted-foreground">
+              Comunicados, lembretes e atualizações da academia
+            </SheetDescription>
           </div>
         </SheetHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto bg-background px-5 py-4">
+        <div className="min-h-0 flex-1 overflow-y-auto bg-muted/25 px-4 py-4">
           {error ? (
-            <Alert role="alert" variant="destructive" className="space-y-3">
+            <Alert role="alert" variant="destructive" className="rounded-2xl">
               <AlertDescription className="space-y-3">
-                <p>Não foi possível atualizar os avisos. Tente novamente ao abrir este painel.</p>
+                <p>
+                  Não foi possível atualizar os avisos. Tente novamente ao abrir este painel.
+                </p>
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
-                  className="min-h-10"
+                  className="min-h-10 rounded-xl"
                   onClick={() => {
                     setLoading(true);
                     setError(false);
@@ -147,13 +145,15 @@ export function NotificationDrawer({
           )}
         </div>
 
-        <div className="border-t border-border bg-card px-5 py-3.5">
-          <Button asChild variant="outline" className="h-11 w-full justify-between">
-            <Link href="/avisos" onClick={() => onOpenChange(false)}>
-              <span>Abrir central completa</span>
-              <ArrowRight className="size-4 text-muted-foreground" aria-hidden="true" />
-            </Link>
-          </Button>
+        <div className="border-t border-border/70 bg-background/90 px-3 py-2.5 backdrop-blur-md">
+          <Link
+            href="/avisos"
+            onClick={() => onOpenChange(false)}
+            className="flex min-h-11 w-full items-center justify-between rounded-xl px-3 text-sm font-medium text-primary-text transition-colors duration-(--duration-quick) hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <span>Abrir central completa</span>
+            <ChevronRight className="size-4 text-muted-foreground" aria-hidden="true" />
+          </Link>
         </div>
       </SheetContent>
     </Sheet>

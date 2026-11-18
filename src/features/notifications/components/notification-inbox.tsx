@@ -1,13 +1,19 @@
 "use client";
 
 import { useMemo, useRef, useState, useTransition } from "react";
-import { CheckCheck, Inbox } from "lucide-react";
+import { BellOff, CheckCheck } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import { NotificationItem } from "./notification-item";
 import type { InboxItem, NotificationKind } from "../types";
+
+const KIND_FILTERS: Array<{ value: "all" | NotificationKind; label: string }> = [
+  { value: "all", label: "Todos" },
+  { value: "announcement", label: "Avisos" },
+  { value: "payment_reminder", label: "Financeiro" },
+  { value: "system", label: "Sistema" },
+];
 
 export function NotificationInbox({
   items: initialItems,
@@ -105,10 +111,25 @@ export function NotificationInbox({
     });
   };
 
-  const kinds = new Set(items.map((item) => item.notification.kind));
-  const list = (entries: InboxItem[], empty: { title: string; hint: string }) =>
+  const availableKinds = useMemo(
+    () => new Set(items.map((item) => item.notification.kind)),
+    [items]
+  );
+
+  const visibleFilters = useMemo(
+    () =>
+      KIND_FILTERS.filter(
+        (filter) =>
+          filter.value === "all" ||
+          availableKinds.has(filter.value) ||
+          kindFilter === filter.value
+      ),
+    [availableKinds, kindFilter]
+  );
+
+  const renderList = (entries: InboxItem[], empty: { title: string; hint: string }) =>
     entries.length ? (
-      <div className="t-stagger divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+      <div className="t-stagger divide-y divide-border/70 overflow-hidden rounded-2xl border border-border/70 bg-card shadow-xs">
         {entries.map((item) => (
           <NotificationItem
             key={item.recipient.$id}
@@ -120,13 +141,15 @@ export function NotificationInbox({
         ))}
       </div>
     ) : (
-      <div className="t-panel-enter flex flex-col items-center justify-center gap-2.5 rounded-xl border border-border bg-card px-5 py-10 text-center shadow-xs">
-        <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <Inbox className="size-5" aria-hidden="true" />
+      <div className="t-panel-enter flex flex-col items-center justify-center gap-3 px-6 py-14 text-center">
+        <div className="flex size-12 items-center justify-center rounded-full bg-muted/80 text-muted-foreground">
+          <BellOff className="size-5 stroke-[1.75]" aria-hidden="true" />
         </div>
         <div className="space-y-1">
-          <p className="text-sm font-medium text-foreground">{empty.title}</p>
-          <p className="text-xs text-muted-foreground">{empty.hint}</p>
+          <p className="text-sm font-semibold text-foreground">{empty.title}</p>
+          <p className="max-w-xs text-xs leading-relaxed text-muted-foreground">
+            {empty.hint}
+          </p>
         </div>
       </div>
     );
@@ -135,59 +158,99 @@ export function NotificationInbox({
     <Tabs
       value={activeTab}
       onValueChange={(value) => setActiveTab(value as "unread" | "history")}
-      className="space-y-4"
+      className="space-y-3.5"
     >
-      <div className="flex flex-col gap-3">
+      <div className="space-y-2.5">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <TabsList className="grid h-auto w-full grid-cols-2 sm:w-auto" aria-label="Caixa de avisos">
-            <TabsTrigger value="unread" className="min-h-11 px-4 tabular-nums">
+          <TabsList
+            className={cn(
+              "grid h-auto grid-cols-2 rounded-xl bg-muted/80 p-1",
+              compact ? "w-full" : "w-full sm:w-auto sm:min-w-64"
+            )}
+            aria-label="Caixa de avisos"
+          >
+            <TabsTrigger
+              value="unread"
+              className="min-h-11 rounded-lg px-4 text-sm font-medium tabular-nums"
+            >
               Novos ({totalUnread})
             </TabsTrigger>
-            <TabsTrigger value="history" className="min-h-11 px-4 tabular-nums">
+            <TabsTrigger
+              value="history"
+              className="min-h-11 rounded-lg px-4 text-sm font-medium tabular-nums"
+            >
               Histórico ({totalHistory})
             </TabsTrigger>
           </TabsList>
 
-          {totalUnread > 1 && activeTab === "unread" ? (
-            <Button
+          {!compact && totalUnread > 1 && activeTab === "unread" ? (
+            <button
               type="button"
-              variant="ghost"
-              size="sm"
-              className="h-11 px-3 text-muted-foreground hover:text-foreground"
               onClick={handleMarkAllRead}
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 text-xs font-medium text-primary-text transition-colors duration-(--duration-quick) hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <CheckCheck className="size-4" aria-hidden="true" />
+              <CheckCheck className="size-3.5" aria-hidden="true" />
               Marcar todos como lidos
-            </Button>
+            </button>
           ) : null}
         </div>
 
-        {kinds.size > 1 || kindFilter !== "all" ? (
-          <Select
-            value={kindFilter}
-            onValueChange={(value) => setKindFilter(value as "all" | NotificationKind)}
-          >
-            <SelectTrigger aria-label="Tipo de aviso" className="h-10 w-full bg-card sm:w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os tipos</SelectItem>
-              <SelectItem value="announcement">Avisos</SelectItem>
-              <SelectItem value="payment_reminder">Financeiro</SelectItem>
-              <SelectItem value="system">Sistema</SelectItem>
-            </SelectContent>
-          </Select>
+        {availableKinds.size > 1 ||
+        kindFilter !== "all" ||
+        (compact && totalUnread > 1 && activeTab === "unread") ? (
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            {availableKinds.size > 1 || kindFilter !== "all" ? (
+              <div
+                role="group"
+                aria-label="Filtrar por tipo de aviso"
+                className="flex flex-wrap items-center gap-1.5"
+              >
+                {visibleFilters.map((filter) => {
+                  const selected = kindFilter === filter.value;
+                  return (
+                    <button
+                      key={filter.value}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => setKindFilter(filter.value)}
+                      className={cn(
+                        "rounded-full px-3 py-1 text-xs font-medium transition-colors duration-(--duration-quick) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        selected
+                          ? "bg-foreground text-background shadow-xs"
+                          : "bg-card text-muted-foreground ring-1 ring-border/70 hover:text-foreground"
+                      )}
+                    >
+                      {filter.label}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <span />
+            )}
+
+            {compact && totalUnread > 1 && activeTab === "unread" ? (
+              <button
+                type="button"
+                onClick={handleMarkAllRead}
+                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary-text transition-colors duration-(--duration-quick) hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <CheckCheck className="size-3.5" aria-hidden="true" />
+                Ler todos
+              </button>
+            ) : null}
+          </div>
         ) : null}
       </div>
 
       <TabsContent value="unread" className="mt-0">
-        {list(unreadItems, {
+        {renderList(unreadItems, {
           title: "Nenhum aviso novo",
           hint: "Avisos lidos ficam no Histórico.",
         })}
       </TabsContent>
       <TabsContent value="history" className="mt-0">
-        {list(historyItems, {
+        {renderList(historyItems, {
           title: "Histórico vazio",
           hint: "Os avisos aparecem aqui depois de lidos.",
         })}

@@ -92,4 +92,26 @@ describe("AppSidebar", () => {
 
     expect(container.querySelectorAll("svg").length).toBeGreaterThanOrEqual(2);
   });
+
+  it("omits notifications from the sidebar and renders no desktop collapse rail", () => {
+    const { container } = render(
+      <TooltipProvider>
+        <SidebarProvider open={true}>
+          <AppSidebar
+            badge="Aluno"
+            profileName="Camila Ferreira"
+            navItems={[
+              { label: "Visão geral", href: "/aluno", group: "Principal", icon: "dashboard", active: true },
+              { label: "Avisos", href: "/avisos", group: "Principal", icon: "notifications", badge: 3 },
+            ]}
+          />
+        </SidebarProvider>
+      </TooltipProvider>
+    );
+
+    expect(screen.getByRole("link", { name: "Visão geral" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Avisos/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Avisos/i })).not.toBeInTheDocument();
+    expect(container.querySelector('[data-sidebar="rail"]')).toBeNull();
+  });
 });

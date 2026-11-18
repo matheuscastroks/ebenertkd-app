@@ -23,11 +23,9 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  SidebarRail,
   useSidebar
 } from "@/components/ui/sidebar";
 import { AccountMenu } from "@/components/dashboard/account-menu";
-import { NotificationNavItem } from "@/components/dashboard/notification-nav-item";
 import type { SidebarNavItem } from "@/lib/navigation/routes";
 
 export type AppSidebarNavItem = SidebarNavItem;
@@ -44,14 +42,6 @@ function NavigationItem({ item }: { item: AppSidebarNavItem }) {
   };
   const startIconAnimation = () => iconRef.current?.startAnimation();
   const stopIconAnimation = () => iconRef.current?.stopAnimation();
-
-  if (item.icon === "notifications") {
-    return (
-      <div onClick={handleNavClick}>
-        <NotificationNavItem initialCount={item.badge ?? 0} active={item.active} />
-      </div>
-    );
-  }
 
   if (!item.children?.length) {
     return (
@@ -143,13 +133,14 @@ export function AppSidebar({
   role?: string;
   avatarUrl?: string;
 }) {
-  const groups = Array.from(new Set(navItems.map((item) => item.group ?? "Principal")));
+  const sidebarItems = navItems.filter((item) => item.icon !== "notifications");
+  const groups = Array.from(new Set(sidebarItems.map((item) => item.group ?? "Principal")));
   return (
-    <Sidebar collapsible="icon" variant="inset">
+    <Sidebar variant="inset">
       <SidebarHeader className="px-3 pb-2 pt-4">
-        <div className="flex items-center gap-2.5 group-data-[collapsible=icon]:justify-center">
-          <Image src="/brand-icon.png" alt="" width={36} height={36} unoptimized className="size-9 shrink-0 object-contain group-data-[collapsible=icon]:size-6" />
-          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+        <div className="flex items-center gap-2.5">
+          <Image src="/brand-icon.png" alt="" width={36} height={36} unoptimized className="size-9 shrink-0 object-contain" />
+          <div className="min-w-0 flex-1">
             <p className="font-display text-sm font-semibold leading-5">Ebener TKD</p>
             <p className="text-xs leading-4 text-muted-foreground">{badge}</p>
           </div>
@@ -158,7 +149,7 @@ export function AppSidebar({
 
       <SidebarContent className="gap-0">
         {groups.map((group, index) => {
-          const items = navItems.filter((item) => (item.group ?? "Principal") === group);
+          const items = sidebarItems.filter((item) => (item.group ?? "Principal") === group);
           // O primeiro grupo abre a navegação: o rótulo fica só para leitores de tela.
           const labelHidden = index === 0 && group === "Principal";
           return (
@@ -183,7 +174,6 @@ export function AppSidebar({
           avatarUrl={avatarUrl}
         />
       </SidebarFooter>
-      <SidebarRail />
     </Sidebar>
   );
 }

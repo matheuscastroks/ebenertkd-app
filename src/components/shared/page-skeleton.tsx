@@ -1,15 +1,12 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * Mesma geometria do cabeçalho do `DashboardShell`: barra de ferramentas (só no desktop),
+ * Mesma geometria do cabeçalho do `DashboardShell`:
  * título `text-2xl` (32px de linha) e subtítulo `text-sm` (20px de linha).
  */
 export function PageHeaderSkeleton() {
   return (
-    <div aria-hidden="true" className="flex flex-col gap-3">
-      <div className="hidden min-h-8 items-center md:flex">
-        <Skeleton className="size-6 rounded-lg" />
-      </div>
+    <div aria-hidden="true" className="flex flex-col gap-2 pr-14">
       <div className="space-y-1">
         <div className="flex h-8 items-center">
           <Skeleton className="h-7 w-56 max-w-full rounded-lg" />

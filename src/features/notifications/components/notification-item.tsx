@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Check } from "lucide-react";
-import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";
-import { Button } from "@/components/ui/button";
+import { ArrowUpRight, Check, Megaphone, Sparkles, Wallet } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { InboxItem, NotificationKind } from "../types";
 
 const labels: Record<NotificationKind, string> = {
@@ -12,13 +11,23 @@ const labels: Record<NotificationKind, string> = {
   system: "Sistema",
 };
 
-const tones: Record<NotificationKind, StatusTone> = {
-  announcement: "info",
-  payment_reminder: "warning",
-  system: "neutral",
+const iconBg: Record<NotificationKind, string> = {
+  announcement: "bg-info/12 text-info",
+  payment_reminder: "bg-warning/15 text-warning-foreground",
+  system: "bg-muted text-muted-foreground",
 };
 
-/** Uma linha da caixa de avisos: título primeiro, metadados discretos, ações só quando servem. */
+function KindIcon({ kind }: { kind: NotificationKind }) {
+  if (kind === "payment_reminder") {
+    return <Wallet className="size-4" aria-hidden="true" />;
+  }
+  if (kind === "system") {
+    return <Sparkles className="size-4" aria-hidden="true" />;
+  }
+  return <Megaphone className="size-4" aria-hidden="true" />;
+}
+
+/** Uma linha da caixa de avisos no estilo Apple Notification Center: ícone discreto, hierarquia clara e ações leves. */
 export function NotificationItem({
   notification: item,
   onMarkRead,
@@ -32,77 +41,90 @@ export function NotificationItem({
 }) {
   const unread = !item.recipient.read_at;
   const formattedDate = new Date(item.notification.published_at).toLocaleString("pt-BR", {
-    dateStyle: "short",
-    timeStyle: "short",
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
     timeZone: "America/Sao_Paulo",
   });
 
   return (
     <article
-      className={`t-interactive-row space-y-2.5 ${compact ? "p-3.5" : "p-4 sm:p-5"} ${
-        unread ? "bg-card hover:bg-muted/35" : "bg-muted/15 hover:bg-muted/30"
-      }`}
+      className={cn(
+        "t-interactive-row transition-colors duration-(--duration-quick)",
+        compact ? "px-4 py-3.5" : "px-5 py-4",
+        unread ? "bg-card hover:bg-muted/30" : "bg-card/60 hover:bg-muted/25"
+      )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-2.5">
-          {unread ? (
-            <span
-              aria-label="Não lido"
-              role="img"
-              className="mt-1.5 size-2 shrink-0 rounded-full bg-primary"
-            />
-          ) : null}
-          <div className="min-w-0 space-y-1">
-            <h3
-              className={`text-sm leading-snug text-foreground sm:text-base ${
-                unread ? "font-semibold" : "font-medium"
-              }`}
-            >
-              {item.notification.title}
-            </h3>
-            <div className="flex flex-wrap items-center gap-2">
-              <StatusBadge tone={tones[item.notification.kind]} className="text-xs">
-                {labels[item.notification.kind]}
-              </StatusBadge>
-              <time
-                dateTime={item.notification.published_at}
-                className="text-xs text-muted-foreground tabular-nums"
-              >
-                {formattedDate}
-              </time>
+      <div className="flex items-start gap-3">
+        <div
+          className={cn(
+            "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl",
+            iconBg[item.notification.kind]
+          )}
+        >
+          <KindIcon kind={item.notification.kind} />
+        </div>
+
+        <div className="min-w-0 flex-1 space-y-1">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+              {unread ? (
+                <span
+                  aria-label="Não lido"
+                  role="img"
+                  className="size-2 shrink-0 rounded-full bg-primary"
+                />
+              ) : null}
+              <span className="font-medium">{labels[item.notification.kind]}</span>
             </div>
+            <time
+              dateTime={item.notification.published_at}
+              className="shrink-0 text-xs text-muted-foreground tabular-nums"
+            >
+              {formattedDate}
+            </time>
           </div>
+
+          <h3
+            className={cn(
+              "text-sm leading-snug text-foreground",
+              unread ? "font-semibold" : "font-medium text-foreground/85"
+            )}
+          >
+            {item.notification.title}
+          </h3>
+
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+            {item.notification.body}
+          </p>
+
+          {item.notification.action_url || unread ? (
+            <div className="-mb-1.5 -ml-2 flex flex-wrap items-center gap-1 pt-0.5">
+              {item.notification.action_url ? (
+                <Link
+                  href={item.notification.action_url}
+                  onClick={onNavigate}
+                  className="inline-flex h-11 items-center gap-1 rounded-lg px-2.5 text-xs font-medium text-primary-text transition-colors duration-(--duration-quick) hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  Abrir página
+                  <ArrowUpRight className="size-3.5" aria-hidden="true" />
+                </Link>
+              ) : null}
+              {unread ? (
+                <button
+                  type="button"
+                  onClick={() => onMarkRead(item.recipient.$id)}
+                  className="inline-flex h-11 items-center gap-1 rounded-lg px-2.5 text-xs font-medium text-muted-foreground transition-colors duration-(--duration-quick) hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <Check className="size-3.5" aria-hidden="true" />
+                  Marcar como lido
+                </button>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
-
-      <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
-        {item.notification.body}
-      </p>
-
-      {item.notification.action_url || unread ? (
-        <div className="flex flex-wrap items-center gap-2 pt-1">
-          {item.notification.action_url ? (
-            <Button asChild variant="outline" size="sm" className="h-11 px-3.5">
-              <Link href={item.notification.action_url} onClick={onNavigate}>
-                Abrir página
-                <ArrowUpRight className="size-3.5" aria-hidden="true" />
-              </Link>
-            </Button>
-          ) : null}
-          {unread ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-11 px-3 text-muted-foreground hover:text-foreground"
-              onClick={() => onMarkRead(item.recipient.$id)}
-            >
-              <Check className="size-3.5" aria-hidden="true" />
-              Marcar como lido
-            </Button>
-          ) : null}
-        </div>
-      ) : null}
     </article>
   );
 }
