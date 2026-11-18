@@ -31,19 +31,14 @@ export default async function DependentExamsPage({ params }: { params: Promise<{
     <PortalShell
       profile={guardian}
       activePath={ROUTES.guardianDependents}
-      breadcrumbs={[
-        { label: "Dependentes", href: ROUTES.guardianDependents },
-        { label: "Exames de faixa" }
-      ]}
-      title="Exames do aluno"
-      subtitle="Veja os exames de faixa agendados, a taxa de cada um e os resultados anteriores."
+      breadcrumbs={[{ label: "Minha família", href: ROUTES.guardian }, { label: "Exames" }]}
+      title="Exames de faixa"
+      subtitle="Exames marcados, taxa de cada um e resultados anteriores."
     >
-      <div className="w-full min-w-0 space-y-4">
-        <DependentContext guardian={guardian} profileId={profileId} section="exames" />
-        <Suspense fallback={<ListItemsSkeleton count={2} />}>
-          <DependentExamsContent guardian={guardian} profileId={profileId} />
-        </Suspense>
-      </div>
+      <DependentContext guardian={guardian} profileId={profileId} section="exames" />
+      <Suspense fallback={<ListItemsSkeleton count={2} />}>
+        <DependentExamsContent guardian={guardian} profileId={profileId} />
+      </Suspense>
     </PortalShell>
   );
 }
