@@ -4,6 +4,7 @@ import {
   markAllNotificationsRead,
   markNotificationRead
 } from "@/features/notifications/notification-service";
+import { syncPendingNotificationsForProfile } from "@/features/notifications/pending-notifications-service";
 import { getCurrentProfile } from "@/lib/auth/session";
 
 export async function GET() {
@@ -14,6 +15,7 @@ export async function GET() {
       { status: 401, headers: { "Cache-Control": "no-store" } }
     );
   }
+  await syncPendingNotificationsForProfile(profile).catch(() => undefined);
   const items = await listInbox(profile);
   return NextResponse.json({ items }, { headers: { "Cache-Control": "no-store" } });
 }

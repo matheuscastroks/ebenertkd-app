@@ -44,7 +44,7 @@ export async function decidePaymentProof(actor: Profile, raw: unknown) {
       const row = await tables.updateRow<PaymentProof>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.paymentProofs, rowId: proof.$id, data: { status: "rejected", rejection_reason: input.reason, reviewed_by_account_id: actor.account_id, reviewed_at: now, updated_at: now }, transactionId });
       await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: charge.$id, data: { status: effectiveChargeStatus("pending", charge.due_date, now), updated_at: now }, transactionId });
       await tables.createRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.auditEvents, rowId: ID.unique(), data: { actor_account_id: actor.account_id, event_type: "billing.proof.rejected", entity_type: "payment_proof", entity_id: proof.$id, metadata: JSON.stringify({ charge_id: charge.$id, reason: input.reason }), created_at: now }, permissions: [], transactionId });
-      await notifyStudentFinancial({ studentId: charge.student_id, title: "Comprovante recusado", body: `O comprovante de ${charge.description} não foi aceito. Motivo: ${input.reason}`, dedupeKey: `payment-proof-rejected:${proof.$id}:${proof.version}`, actionUrl: "/avisos" }).catch(() => undefined);
+      await notifyStudentFinancial({ studentId: charge.student_id, title: "Comprovante precisa ser reenviado", body: `O comprovante de ${charge.description} não pôde ser aceito. Motivo: ${input.reason}. Envie um novo comprovante no financeiro.`, dedupeKey: `payment-proof-rejected:${proof.$id}:${proof.version}` }).catch(() => undefined);
       return row;
     });
     invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(charge.student_id));
@@ -66,6 +66,14 @@ export async function decidePaymentProof(actor: Profile, raw: unknown) {
     return row;
   });
   invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(charge.student_id));
+  await notifyStudentFinancial({
+    studentId: charge.student_id,
+    title: `Pagamento confirmado · ${charge.description}`,
+    body: charge.charge_type === "monthly_fee"
+      ? `O professor confirmou seu comprovante de ${charge.description}. Seu acesso ao aplicativo está liberado por 30 dias.`
+      : `O professor confirmou o pagamento de ${charge.description}.`,
+    dedupeKey: `payment-confirmed:${payment.$id}`
+  }).catch(() => undefined);
   return { proof, payment };
 }
 
@@ -93,6 +101,14 @@ export async function recordManualPayment(actor: Profile, raw: unknown) {
     return row;
   });
   invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(charge.student_id));
+  await notifyStudentFinancial({
+    studentId: charge.student_id,
+    title: `Pagamento confirmado · ${charge.description}`,
+    body: charge.charge_type === "monthly_fee"
+      ? `O professor registrou seu pagamento de ${charge.description}. Seu acesso ao aplicativo está liberado por 30 dias.`
+      : `O professor registrou o pagamento de ${charge.description}.`,
+    dedupeKey: `payment-confirmed:${payment.$id}`
+  }).catch(() => undefined);
   return payment;
 }
 
@@ -112,6 +128,12 @@ export async function reversePayment(actor: Profile, raw: unknown) {
     return row;
   });
   invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(charge.student_id));
+  await notifyStudentFinancial({
+    studentId: charge.student_id,
+    title: `Pagamento estornado · ${charge.description}`,
+    body: `O pagamento de ${charge.description} foi estornado pelo professor. Motivo: ${input.reason}.`,
+    dedupeKey: `payment-reversed:${payment.$id}`
+  }).catch(() => undefined);
   return updated;
 }
 

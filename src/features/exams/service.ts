@@ -9,6 +9,7 @@ import type { Charge } from "@/features/billing/types";
 import { assertNextGraduation, examChargeCancellation, type PaidChargeDecision } from "@/features/exams/rules";
 import { examEventSchema, examParticipantSchema, examResultSchema } from "@/features/exams/schemas";
 import type { BeltHistory, ExamEvent, ExamParticipant } from "@/features/exams/types";
+import { notifyStudentEvent } from "@/features/notifications/notification-service";
 import type { BeltOption, GubOption } from "@/features/students/options";
 import type { Enrollment, Student, StudentDocument } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
@@ -16,6 +17,8 @@ import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { cachedRead } from "@/lib/cache/cached-read";
 import { invalidateTags } from "@/lib/cache/invalidate";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { formatBusinessDateBr } from "@/lib/dates";
+import { guardianExamsPath, ROUTES } from "@/lib/navigation/routes";
 
 const dateTime = (date: string) => `${date}T12:00:00.000Z`;
 const stableId = (...parts: string[]) => createHash("sha256").update(parts.join(":" )).digest("hex").slice(0, 36);
@@ -211,6 +214,16 @@ export async function addExamParticipant(actor: Profile, raw: unknown) {
   if (event.status === "planned") await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examEvents, rowId: event.$id, data: { status: "confirmed", updated_at: now } });
   invalidateTags(CACHE_TAGS.examEvents, CACHE_TAGS.examEvent(event.$id), CACHE_TAGS.exams(student.$id), CACHE_TAGS.billingCharges, CACHE_TAGS.charges(student.$id));
   await writeAuditEvent("exam.participant.added", actor.account_id, "exam_participant", participant.$id, { charge_id: charge.$id });
+  await notifyStudentEvent({
+    studentId: student.$id,
+    audience: "family",
+    title: `Inscrição confirmada: ${event.name}`,
+    body: `O professor inscreveu ${student.full_name} no exame para Faixa ${targetBelt} em ${formatBusinessDateBr(event.event_date)}.`,
+    dedupeKey: `exam-registered:${participant.$id}`,
+    studentActionUrl: ROUTES.studentExams,
+    guardianActionUrl: guardianExamsPath,
+    actorAccountId: actor.account_id
+  }).catch(() => undefined);
   return participant;
 }
 
@@ -273,5 +286,25 @@ export async function recordExamResult(actor: Profile, raw: unknown) {
     CACHE_TAGS.enrollments
   );
   await writeAuditEvent("exam.result.recorded", actor.account_id, "exam_participant", participant.$id, { result: input.result, target_gub: participant.target_gub });
+  const resultTitle =
+    input.result === "approved"
+      ? `Parabéns! Aprovado para Faixa ${participant.target_belt}`
+      : `Resultado disponível: ${event.name}`;
+  const resultBody =
+    input.result === "approved"
+      ? `O professor registrou sua aprovação no exame ${event.name} para a Faixa ${participant.target_belt}.${input.notes ? ` Observação: ${input.notes}` : ""}`
+      : input.result === "absent"
+        ? `Sua presença não foi registrada no exame ${event.name}.${input.notes ? ` Observação: ${input.notes}` : ""}`
+        : `O professor publicou o resultado do exame ${event.name}. Confira os detalhes no aplicativo.${input.notes ? ` Observação: ${input.notes}` : ""}`;
+  await notifyStudentEvent({
+    studentId: student.$id,
+    audience: "family",
+    title: resultTitle,
+    body: resultBody,
+    dedupeKey: `exam-result:${participant.$id}:${input.result}`,
+    studentActionUrl: ROUTES.studentExams,
+    guardianActionUrl: guardianExamsPath,
+    actorAccountId: actor.account_id
+  }).catch(() => undefined);
   return tables.getRow<ExamParticipant>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examParticipants, rowId: participant.$id });
 }

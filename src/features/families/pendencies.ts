@@ -69,16 +69,16 @@ export function buildPendencies({ studentStatus, charges, contracts, parqStatus,
     const expiring = parqStatus === "expiring_soon";
     items.push({
       id: "parq",
-      title: "PAR-Q anual (CREF1)",
-      status: expired ? "Vencido" : expiring ? "Vence em breve" : "Pendente",
+      title: "Questionário de saúde",
+      status: expired ? "Precisa renovar" : expiring ? "Vence em breve" : "Falta preencher",
       tone: expired ? "danger" : "warning",
       detail: canSign
         ? expiring && parqExpiresAt
-          ? `Vence em ${dateFormatter.format(new Date(`${parqExpiresAt.slice(0, 10)}T12:00:00Z`))}. Renove o questionário anual.`
-          : "Preencha e assine o questionário anual de prontidão física."
-        : "Seu responsável precisa preencher e assinar o PAR-Q anual.",
+          ? `Vence em ${dateFormatter.format(new Date(`${parqExpiresAt.slice(0, 10)}T12:00:00Z`))}. Responda novamente em menos de 2 minutos.`
+          : "Responda 10 perguntas rápidas sobre sua saúde para treinar com segurança."
+        : "Seu responsável precisa responder o questionário anual de saúde.",
       href: canSign ? links.parq : undefined,
-      actionLabel: canSign && links.parq ? (expired || expiring ? "Renovar PAR-Q" : "Preencher PAR-Q") : undefined,
+      actionLabel: canSign && links.parq ? (expired || expiring ? "Renovar agora" : "Responder agora") : undefined,
       priority: expired ? 1.5 : 3.5
     });
   }

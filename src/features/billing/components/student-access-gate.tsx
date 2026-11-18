@@ -164,18 +164,18 @@ export function StudentAccessGate({
       {showExpiredParqBanner ? (
         <div className="mx-auto w-full max-w-6xl px-4 pt-4 sm:px-6 lg:px-8">
           <Alert>
-            <AlertTitle>Questionário PAR-Q anual vencido</AlertTitle>
+            <AlertTitle>Hora de renovar seu questionário de saúde</AlertTitle>
             <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
               <span>
                 {isMinor
-                  ? "O questionário anual de prontidão física (PAR-Q) venceu. Peça ao seu responsável para renová-lo no portal da família."
-                  : "Seu questionário anual de prontidão para atividade física (PAR-Q) venceu. Renove agora para manter sua ficha em dia."}
+                  ? "Seu questionário de saúde anual precisa ser renovado. Peça ao seu responsável para atualizar no portal da família."
+                  : "Seu questionário de saúde anual venceu. Responda 10 perguntas rápidas para manter sua ficha em dia."}
               </span>
               {!isMinor ? (
                 <Button asChild size="sm" variant="outline" className="min-h-9">
                   <Link href={ROUTES.studentParq}>
                     <ClipboardCheck className="size-3.5" aria-hidden="true" />
-                    Renovar PAR-Q
+                    Responder agora
                   </Link>
                 </Button>
               ) : null}

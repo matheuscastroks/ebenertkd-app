@@ -26,8 +26,8 @@ async function GuardianParqContent({
   if (!student) {
     return (
       <EmptyState
-        title="Ficha de matrícula ainda não iniciada"
-        description="Preencha primeiro a ficha de matrícula do dependente para liberar o questionário PAR-Q anual."
+        title="Preencha a matrícula primeiro"
+        description="Assim que a matrícula do dependente for iniciada, o questionário de saúde anual ficará disponível aqui."
         action={
           <Button asChild className="min-h-11">
             <Link href={guardianEnrollmentPath(profileId)}>Ir para matrícula</Link>
@@ -70,26 +70,26 @@ export default async function GuardianParqPage({
     <PortalShell
       profile={guardian}
       activePath={ROUTES.guardianDependents}
-      breadcrumbs={[{ label: "Minha família", href: ROUTES.guardian }, { label: "PAR-Q anual" }]}
-      title="PAR-Q anual"
-      subtitle="Questionário de Prontidão para Atividade Física e Termo de Responsabilidade do dependente."
+      breadcrumbs={[{ label: "Minha família", href: ROUTES.guardian }, { label: "Questionário de saúde" }]}
+      title="Questionário de saúde"
+      subtitle="10 perguntas rápidas preenchidas uma vez por ano pelo responsável."
     >
-      <div className="mx-auto w-full max-w-4xl min-w-0 space-y-6">
+      <div className="mx-auto w-full max-w-3xl min-w-0 space-y-6">
         <DependentContext guardian={guardian} profileId={profileId} section="parq" />
 
         {query.submitted ? (
           <OperationToast
             tone="success"
-            title="PAR-Q anual registrado com sucesso"
-            description="A declaração e a assinatura do responsável foram salvas com validade de 12 meses."
+            title="Questionário de saúde salvo"
+            description="As respostas e a assinatura do responsável foram registradas com validade de 1 ano."
             clearParams={["submitted"]}
           />
         ) : null}
         {query.error ? (
           <OperationToast
             tone="error"
-            title="Não foi possível salvar o PAR-Q"
-            description="Responda todas as 10 perguntas, aceite o termo de responsabilidade e adicione sua assinatura."
+            title="Não foi possível enviar as respostas"
+            description="Confira se todas as 10 perguntas foram respondidas, aceite o termo e adicione sua assinatura."
             clearParams={["error"]}
           />
         ) : null}

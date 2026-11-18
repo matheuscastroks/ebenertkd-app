@@ -10,7 +10,7 @@ export function dependentSections(profileId: string) {
   return [
     { key: "frequencia", label: "Frequência", description: "Presenças mês a mês", href: guardianAttendancePath(profileId) },
     { key: "exames", label: "Exames", description: "Exames de faixa e resultados", href: guardianExamsPath(profileId) },
-    { key: "parq", label: "PAR-Q anual", description: "Questionário de prontidão física (CREF1)", href: guardianParqPath(profileId) },
+    { key: "parq", label: "Questionário de saúde", description: "10 perguntas anuais de saúde", href: guardianParqPath(profileId) },
     { key: "matricula", label: "Ficha", description: "Dados de matrícula e saúde", href: guardianEnrollmentPath(profileId) },
     { key: "contratos", label: "Contratos", description: "Assinatura e documentos", href: guardianContractsPath(profileId) },
     { key: "financeiro", label: "Financeiro", description: "Mensalidades e comprovantes", href: guardianBillingPath(profileId) }

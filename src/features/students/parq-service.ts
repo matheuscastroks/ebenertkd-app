@@ -4,7 +4,8 @@ import { AppwriteException, ID, Query } from "node-appwrite";
 import { writeAuditEvent } from "@/features/auth/service";
 import type { Profile } from "@/features/auth/types";
 import { hashContent, privacyIpFingerprint } from "@/features/contracts/rules";
-import { createNotification } from "@/features/notifications/notification-service";
+import { notifyAdmins, notifyStudentEvent } from "@/features/notifications/notification-service";
+import { guardianEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
 import { resolveStudentProfile } from "@/features/students/access";
 import {
   canSignParq,
@@ -217,26 +218,31 @@ export async function submitParq(
   );
 
   if (validated.hasYesAnswer) {
-    const admins = await tables
-      .listRows<Profile>({
-        databaseId: config.databaseId,
-        tableId: APPWRITE_IDS.tables.profiles,
-        queries: [Query.equal("role", ["admin"]), Query.equal("status", ["active"]), Query.limit(50)],
-      })
-      .catch(() => ({ rows: [] as Profile[] }));
-
-    if (admins.rows.length > 0) {
-      await createNotification({
-        kind: "system",
-        title: `PAR-Q com atenção médica · ${student.full_name}`,
-        body: `O PAR-Q anual de ${student.full_name} teve resposta "Sim" nas perguntas ${validated.yesQuestionNumbers.join(", ")}. Recomenda-se conferir o atestado médico atualizado.`,
-        audience: "system",
+    await Promise.all([
+      notifyAdmins({
+        title: `Questionário de saúde com atenção · ${student.full_name}`,
+        body: `${student.full_name} respondeu "Sim" nas perguntas ${validated.yesQuestionNumbers.join(", ")} do questionário anual de saúde (PAR-Q). Confira se o atestado médico está atualizado.`,
         actionUrl: adminEnrollmentPath(student.$id),
         dedupeKey: `parq-yes:${created.$id}`,
+      }).catch(() => undefined),
+      notifyStudentEvent({
+        studentId: student.$id,
+        audience: "signer",
+        title: "Questionário de saúde salvo · lembrete de atestado",
+        body: "Como houve resposta \"Sim\" no questionário de saúde, recomendamos enviar um atestado médico atualizado na sua ficha de matrícula.",
+        dedupeKey: `parq-medical-hint:${created.$id}`,
+        studentActionUrl: ROUTES.studentEnrollment,
+        guardianActionUrl: guardianEnrollmentPath,
         actorAccountId: actor.account_id,
-        recipientProfiles: admins.rows,
-      }).catch(() => undefined);
-    }
+      }).catch(() => undefined),
+    ]);
+  } else {
+    await notifyAdmins({
+      title: `Questionário de saúde respondido · ${student.full_name}`,
+      body: `${student.full_name} preencheu e assinou o questionário anual de saúde sem restrições declaradas.`,
+      actionUrl: adminEnrollmentPath(student.$id),
+      dedupeKey: `parq-submitted:${created.$id}`,
+    }).catch(() => undefined);
   }
 
   return created;

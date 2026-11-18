@@ -13,7 +13,13 @@ import { CACHE_TAGS } from "@/lib/cache/tags";
 import { getTrainingClass } from "@/features/classes/service";
 import { issueContractForEnrollment } from "@/features/contracts/contract-service";
 import { beltForGub, type GubOption } from "@/features/students/options";
-import { notifyAdmins } from "@/features/notifications/notification-service";
+import { notifyAdmins, notifyStudentEvent } from "@/features/notifications/notification-service";
+import {
+  guardianContractPath,
+  guardianEnrollmentPath,
+  ROUTES,
+  studentContractPath
+} from "@/lib/navigation/routes";
 
 const isoDate = (value?: string) => value ? new Date(`${value}T12:00:00.000Z`).toISOString() : undefined;
 
@@ -83,12 +89,24 @@ export async function saveEnrollmentDraft(target: Profile, actor: Profile, input
   invalidateTags(CACHE_TAGS.enrollments, CACHE_TAGS.studentsAll, CACHE_TAGS.student(student.$id), CACHE_TAGS.studentProfile(target.$id));
   await writeAuditEvent(auditAction, actor.account_id, "enrollment", enrollment.$id, { student_id: student.$id });
   if (isDraft && submit) {
-    await notifyAdmins({
-      title: "Nova matrícula para análise",
-      body: `${student.full_name} concluiu o cadastro.`,
-      dedupeKey: `enrollment-submitted:${enrollment.$id}:${enrollment.revision}`,
-      actionUrl: `/admin/matriculas/${student.$id}`
-    }).catch(() => undefined);
+    await Promise.all([
+      notifyAdmins({
+        title: "Nova matrícula para análise",
+        body: `${student.full_name} concluiu o cadastro.`,
+        dedupeKey: `enrollment-submitted:${enrollment.$id}:${enrollment.revision}`,
+        actionUrl: `/admin/matriculas/${student.$id}`
+      }).catch(() => undefined),
+      notifyStudentEvent({
+        studentId: student.$id,
+        audience: "family",
+        title: "Ficha de matrícula enviada",
+        body: "Recebemos seus dados! O professor vai analisar sua matrícula e você será avisado assim que avançar.",
+        dedupeKey: `enrollment-received:${enrollment.$id}:${enrollment.revision}`,
+        studentActionUrl: ROUTES.studentEnrollment,
+        guardianActionUrl: guardianEnrollmentPath,
+        actorAccountId: actor.account_id
+      }).catch(() => undefined)
+    ]);
   }
   return getEnrollmentBundleByStudentId(student.$id);
 }
@@ -145,6 +163,23 @@ export async function adminUpdateStudent(actor: Profile, studentId: string, inpu
   await recordReview(actor, studentId, bundle.enrollment.$id, "student_updated", "Dados cadastrais atualizados pelo professor", input);
   invalidateTags(CACHE_TAGS.enrollments, CACHE_TAGS.studentsAll, CACHE_TAGS.student(studentId), CACHE_TAGS.studentProfile(bundle.student.profile_id));
   await writeAuditEvent("student.updated_by_admin", actor.account_id, "student", studentId, { changes: input });
+  const classChanged = trainingClass && trainingClass.$id !== bundle.student.training_class_id;
+  const beltChanged = parsed.gub != null && parsed.gub !== bundle.student.gub;
+  const updateSummary = classChanged
+    ? `O professor atualizou sua ficha e definiu sua turma como ${trainingClass.name}.`
+    : beltChanged
+      ? `O professor atualizou sua graduação na ficha para Faixa ${updatedStudent.current_belt || "atualizada"}.`
+      : "O professor atualizou informações da sua ficha de matrícula.";
+  await notifyStudentEvent({
+    studentId,
+    audience: "family",
+    title: "Sua ficha de matrícula foi atualizada",
+    body: updateSummary,
+    dedupeKey: `student-updated-by-admin:${studentId}:${now}`,
+    studentActionUrl: ROUTES.studentEnrollment,
+    guardianActionUrl: guardianEnrollmentPath,
+    actorAccountId: actor.account_id
+  }).catch(() => undefined);
   return updatedStudent;
 }
 
@@ -207,5 +242,17 @@ export async function advanceToSignature(actor: Profile, studentId: string) {
   await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, rowId: bundle.enrollment.$id, data: { status: "awaiting_signature", revision: bundle.enrollment.revision + 1, updated_at: new Date().toISOString() } });
   await recordReview(actor, studentId, bundle.enrollment.$id, "awaiting_signature");
   invalidateTags(CACHE_TAGS.enrollments, CACHE_TAGS.student(studentId), CACHE_TAGS.contracts);
+  await notifyStudentEvent({
+    studentId,
+    audience: "family",
+    title: "Matrícula aprovada! Contrato pronto para assinar",
+    body: "O professor aprovou sua ficha e liberou o contrato. Leia e assine pelo aplicativo para ativar sua matrícula.",
+    minorTitle: "Sua matrícula avançou!",
+    minorBody: "O professor aprovou sua ficha e enviou o contrato para o seu responsável assinar.",
+    dedupeKey: `enrollment-awaiting-signature:${contract.$id}`,
+    studentActionUrl: studentContractPath(contract.$id),
+    guardianActionUrl: (profileId) => guardianContractPath(profileId, contract.$id),
+    actorAccountId: actor.account_id
+  }).catch(() => undefined);
   return contract;
 }

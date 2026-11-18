@@ -41,7 +41,7 @@ export default async function StudentPage() {
       <Link className={rowClass} href={ROUTES.studentEvolution}>Caminho da faixa<ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" /></Link>
       <Link className={rowClass} href={ROUTES.studentStudies}>Guia de estudos<ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" /></Link>
       <Link className={rowClass} href={ROUTES.studentCard}>Carteirinha e saúde<ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" /></Link>
-      <Link className={rowClass} href={ROUTES.studentParq}>PAR-Q anual<ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" /></Link>
+      <Link className={rowClass} href={ROUTES.studentParq}>Questionário de saúde<ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" /></Link>
       <Link className={rowClass} href={ROUTES.studentEnrollment}>Meus dados<ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" /></Link>
       <Link className={rowClass} href={ROUTES.studentContracts}>Documentos e contratos<ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" /></Link>
       {minor ? null : profile.capabilities.includes("guardian")

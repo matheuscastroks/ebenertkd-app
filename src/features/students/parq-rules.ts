@@ -25,6 +25,7 @@ export type ParqQuestionId =
 export type ParqQuestion = {
   id: ParqQuestionId;
   number: number;
+  topic: string;
   text: string;
 };
 
@@ -32,51 +33,61 @@ export const PARQ_QUESTIONS: readonly ParqQuestion[] = [
   {
     id: "q1",
     number: 1,
+    topic: "Coração ou pressão",
     text: "Algum médico já disse que você possui algum problema de coração ou pressão arterial, e que somente deveria realizar atividade física supervisionado por profissionais de saúde?",
   },
   {
     id: "q2",
     number: 2,
+    topic: "Dor no peito ao treinar",
     text: "Você sente dores no peito quando pratica atividade física?",
   },
   {
     id: "q3",
     number: 3,
+    topic: "Dor no peito recente",
     text: "No último mês, você sentiu dores no peito ao praticar atividade física?",
   },
   {
     id: "q4",
     number: 4,
+    topic: "Tontura ou equilíbrio",
     text: "Você apresenta algum desequilíbrio devido à tontura e/ou perda momentânea da consciência?",
   },
   {
     id: "q5",
     number: 5,
+    topic: "Ossos ou articulações",
     text: "Você possui algum problema ósseo ou articular, que pode ser afetado ou agravado pela atividade física?",
   },
   {
     id: "q6",
     number: 6,
+    topic: "Medicação contínua",
     text: "Você toma atualmente algum tipo de medicação de uso contínuo?",
   },
   {
     id: "q7",
     number: 7,
+    topic: "Tratamento cardíaco",
     text: "Você realiza algum tipo de tratamento médico para pressão arterial ou problemas cardíacos?",
   },
   {
     id: "q8",
     number: 8,
+    topic: "Tratamento contínuo",
     text: "Você realiza algum tratamento médico contínuo, que possa ser afetado ou prejudicado com a atividade física?",
   },
   {
     id: "q9",
     number: 9,
+    topic: "Cirurgia anterior",
     text: "Você já se submeteu a algum tipo de cirurgia, que comprometa de alguma forma a atividade física?",
   },
   {
     id: "q10",
     number: 10,
+    topic: "Outro motivo de saúde",
     text: "Sabe de alguma outra razão pela qual a atividade física possa eventualmente comprometer sua saúde?",
   },
 ] as const;
@@ -224,8 +235,8 @@ export function canSignParq(input: {
 }
 
 export const PARQ_STATUS_LABELS: Record<ParqStatus, string> = {
-  valid: "PAR-Q em dia",
-  expiring_soon: "PAR-Q vence em ≤ 30 dias",
-  expired: "PAR-Q vencido",
-  missing: "PAR-Q pendente",
+  valid: "Em dia",
+  expiring_soon: "Vence em breve",
+  expired: "Precisa renovar",
+  missing: "Falta preencher",
 };

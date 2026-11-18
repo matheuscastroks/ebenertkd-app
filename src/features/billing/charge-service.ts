@@ -7,6 +7,7 @@ import { chargeAdjustmentSchema } from "@/features/billing/schemas";
 import { chargeRowId, competenceFromDate, effectiveChargeStatus, resolveDueDate } from "@/features/billing/rules";
 import type { Charge, ChargeType } from "@/features/billing/types";
 import type { CancellationRequest, Contract } from "@/features/contracts/types";
+import { notifyStudentFinancial } from "@/features/notifications/notification-service";
 import { resolveStudentProfile } from "@/features/students/access";
 import { getEnrollmentBundleByStudentId } from "@/features/students/service";
 import type { Enrollment } from "@/features/students/types";
@@ -15,6 +16,8 @@ import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { cachedRead } from "@/lib/cache/cached-read";
 import { invalidateTags } from "@/lib/cache/invalidate";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { formatBusinessDateBr } from "@/lib/dates";
+import { formatBrl } from "@/lib/money";
 
 function asDateTime(date: string) {
   return date.includes("T") ? date : `${date}T12:00:00.000Z`;
@@ -38,6 +41,12 @@ async function createCharge(input: {
       }, permissions: []
     });
     invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(input.studentId));
+    await notifyStudentFinancial({
+      studentId: input.studentId,
+      title: `Nova cobrança: ${input.description}`,
+      body: `Valor de ${formatBrl(input.amountCents)} com vencimento em ${formatBusinessDateBr(input.dueDate)}. Você pode pagar por PIX e enviar o comprovante no financeiro.`,
+      dedupeKey: `charge-created:${created.$id}`
+    }).catch(() => undefined);
     return created;
   } catch (error) {
     if (!(error instanceof AppwriteException) || error.code !== 409) throw error;
@@ -145,6 +154,12 @@ export async function adjustCharge(actor: Profile, raw: unknown) {
   const updated = await tables.updateRow<Charge>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: charge.$id, data: { amount_cents: input.amountCents, due_date: asDateTime(input.dueDate), adjustment_reason: input.reason, updated_at: new Date().toISOString() } });
   invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(charge.student_id));
   await writeAuditEvent("billing.charge.adjusted", actor.account_id, "charge", charge.$id, { previous_amount_cents: charge.amount_cents, amount_cents: input.amountCents, reason: input.reason });
+  await notifyStudentFinancial({
+    studentId: charge.student_id,
+    title: `Cobrança atualizada: ${charge.description}`,
+    body: `O professor atualizou o valor para ${formatBrl(input.amountCents)} com vencimento em ${formatBusinessDateBr(input.dueDate)}.`,
+    dedupeKey: `charge-adjusted:${charge.$id}:${updated.updated_at}`
+  }).catch(() => undefined);
   return updated;
 }
 

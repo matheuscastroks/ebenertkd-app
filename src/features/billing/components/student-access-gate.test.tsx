@@ -91,8 +91,8 @@ describe("StudentAccessGate", () => {
     );
 
     expect(screen.getByText("Conteúdo liberado")).toBeInTheDocument();
-    expect(screen.getByText("Questionário PAR-Q anual vencido")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Renovar PAR-Q/ })).toHaveAttribute(
+    expect(screen.getByText("Hora de renovar seu questionário de saúde")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Responder agora/ })).toHaveAttribute(
       "href",
       "/aluno/parq"
     );

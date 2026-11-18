@@ -7,12 +7,14 @@ import { applyApprovedCancellation } from "@/features/billing/charge-service";
 import { getContractForActor } from "@/features/contracts/contract-service";
 import { cancellationDecisionSchema, cancellationRequestSchema } from "@/features/contracts/schemas";
 import type { CancellationRequest } from "@/features/contracts/types";
+import { notifyAdmins, notifyStudentEvent } from "@/features/notifications/notification-service";
 import { calculateExitFee } from "@/lib/domain/billing-rules";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { cachedRead } from "@/lib/cache/cached-read";
 import { invalidateTags } from "@/lib/cache/invalidate";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { guardianContractsPath, ROUTES } from "@/lib/navigation/routes";
 
 function saoPauloDate() {
   const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
@@ -33,6 +35,12 @@ export async function requestCancellation(actor: Profile, raw: unknown) {
   const request = await tables.createRow<CancellationRequest>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.cancellationRequests, rowId: ID.unique(), data: { contract_id: contract.$id, enrollment_id: contract.enrollment_id, student_id: contract.student_id, requested_by_profile_id: actor.$id, target_exit_month: new Date(`${input.targetExitMonth}-01T12:00:00Z`).toISOString(), notice_date: new Date(`${noticeDate}T12:00:00Z`).toISOString(), suggested_fee_cents: fee, status: "pending", reason: input.reason, created_at: now, updated_at: now }, permissions: [] });
   invalidateTags(CACHE_TAGS.cancellations);
   await writeAuditEvent("contract.cancellation_requested", actor.account_id, "cancellation_request", request.$id, { suggested_fee_cents: fee });
+  await notifyAdmins({
+    title: `Pedido de cancelamento · ${contract.student_name}`,
+    body: `${actor.full_name} solicitou o cancelamento da matrícula para ${input.targetExitMonth}.`,
+    dedupeKey: `cancellation-requested:${request.$id}`,
+    actionUrl: ROUTES.adminCancellations
+  }).catch(() => undefined);
   return request;
 }
 
@@ -74,5 +82,17 @@ export async function decideCancellation(actor: Profile, raw: unknown) {
     CACHE_TAGS.charges(request.student_id)
   );
   await writeAuditEvent(`contract.cancellation_${input.decision}`, actor.account_id, "cancellation_request", request.$id, { fee_cents: input.feeCents, notes: input.notes });
+  await notifyStudentEvent({
+    studentId: request.student_id,
+    audience: "signer",
+    title: input.decision === "approved" ? "Pedido de cancelamento aprovado" : "Pedido de cancelamento não aprovado",
+    body: input.decision === "approved"
+      ? `Seu pedido de cancelamento foi aprovado pelo professor.${input.notes ? ` Observação: ${input.notes}` : ""}`
+      : `O professor analisou seu pedido de cancelamento e não aprovou.${input.notes ? ` Motivo: ${input.notes}` : ""}`,
+    dedupeKey: `cancellation-decided:${request.$id}:${input.decision}`,
+    studentActionUrl: ROUTES.studentContracts,
+    guardianActionUrl: guardianContractsPath,
+    actorAccountId: actor.account_id
+  }).catch(() => undefined);
   return updated;
 }

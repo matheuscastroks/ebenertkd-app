@@ -8,7 +8,9 @@ import { classifyContractRenewalBucket, renewalEvent, type RenewalBucket } from 
 import { renewalSchema } from "@/features/contracts/schemas";
 import type { Contract } from "@/features/contracts/types";
 import { getEnrollmentBundleByStudentId } from "@/features/students/service";
+import { notifyStudentEvent } from "@/features/notifications/notification-service";
 import type { Enrollment, Student } from "@/features/students/types";
+import { guardianContractPath, studentContractPath } from "@/lib/navigation/routes";
 import { listAllRows } from "@/lib/appwrite/all-rows";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
@@ -71,6 +73,16 @@ export async function renewContract(actor: Profile, raw: unknown) {
   });
   invalidateTags(CACHE_TAGS.contracts, CACHE_TAGS.contract(contract.$id), CACHE_TAGS.enrollments, CACHE_TAGS.student(input.studentId));
   await writeAuditEvent("contract.renewed", actor.account_id, "contract", contract.$id, { previous_contract_id: previous.$id });
+  await notifyStudentEvent({
+    studentId: input.studentId,
+    audience: "signer",
+    title: "Renovação de contrato disponível para assinatura",
+    body: "O professor emitiu a renovação do contrato anual. Leia e assine pelo aplicativo para manter a matrícula em dia.",
+    dedupeKey: `contract-renewed:${contract.$id}`,
+    studentActionUrl: studentContractPath(contract.$id),
+    guardianActionUrl: (profileId) => guardianContractPath(profileId, contract.$id),
+    actorAccountId: actor.account_id
+  }).catch(() => undefined);
   return contract;
 }
 

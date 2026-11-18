@@ -13,7 +13,8 @@ import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { invalidateTags } from "@/lib/cache/invalidate";
 import { CACHE_TAGS } from "@/lib/cache/tags";
-import { notifyAdmins } from "@/features/notifications/notification-service";
+import { notifyAdmins, notifyStudentEvent } from "@/features/notifications/notification-service";
+import { guardianEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
 
 function filePermissions(target: Profile, actor: Profile) {
   const accountIds = new Set([target.account_id, actor.account_id]);
@@ -141,6 +142,21 @@ export async function reviewStudentDocument(
     document_type: document.document_type
   });
   invalidateTags(CACHE_TAGS.enrollments, CACHE_TAGS.student(document.student_id), CACHE_TAGS.studentProfile(bundle.student.profile_id));
+
+  const docLabel = document.document_type === "profile_photo" ? "foto de perfil" : "atestado médico";
+  await notifyStudentEvent({
+    studentId: document.student_id,
+    audience: "family",
+    title: decision === "approved" ? `Seu ${docLabel} foi aprovado` : `Precisamos de um novo ${docLabel}`,
+    body:
+      decision === "approved"
+        ? `O professor conferiu e aprovou o envio do seu ${docLabel}.`
+        : `O professor pediu um novo envio do ${docLabel}. Motivo: ${reason?.trim()}.`,
+    dedupeKey: `document-reviewed:${documentId}:${decision}:${Date.now()}`,
+    studentActionUrl: ROUTES.studentEnrollment,
+    guardianActionUrl: guardianEnrollmentPath,
+    actorAccountId: actor.account_id
+  }).catch(() => undefined);
 }
 
 export async function listEnrollmentReviews(studentId: string) {

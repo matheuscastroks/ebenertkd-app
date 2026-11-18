@@ -102,19 +102,19 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
 
       {needsParqAction ? (
         <Alert>
-          <AlertTitle>{PARQ_STATUS_LABELS[compliance.parqStatus]}</AlertTitle>
+          <AlertTitle>Questionário de saúde · {PARQ_STATUS_LABELS[compliance.parqStatus]}</AlertTitle>
           <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
             <span>
               {isMinor
-                ? "O questionário anual de prontidão física (PAR-Q) precisa ser preenchido e assinado pelo responsável legal."
+                ? "Seu questionário de saúde anual precisa ser respondido pelo seu responsável no portal da família."
                 : compliance.parqStatus === "expiring_soon"
-                  ? `Seu PAR-Q anual vence em ${formatBusinessDateBr(compliance.parqExpiresAt)}. Renove agora pelo aplicativo.`
-                  : "Preencha e assine o questionário oficial de prontidão para atividade física (PAR-Q) com validade anual."}
+                  ? `Seu questionário de saúde vence em ${formatBusinessDateBr(compliance.parqExpiresAt)}. Responda novamente em menos de 2 minutos.`
+                  : "Responda 10 perguntas rápidas sobre sua saúde uma vez por ano para treinar com segurança."}
             </span>
             {!isMinor ? (
               <Button asChild size="sm" variant="outline" className="min-h-9">
                 <Link href={ROUTES.studentParq}>
-                  Preencher PAR-Q
+                  Responder agora
                   <ArrowRight className="size-3.5" aria-hidden="true" />
                 </Link>
               </Button>
@@ -207,7 +207,7 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
                 </dd>
               </div>
               <div className="flex items-center justify-between gap-3 py-2.5">
-                <dt className="text-muted-foreground">PAR-Q anual (CREF1)</dt>
+                <dt className="text-muted-foreground">Questionário de saúde anual</dt>
                 <dd className="flex items-center gap-2">
                   <StatusBadge tone={PARQ_TONES[compliance.parqStatus]}>
                     {compliance.parqExpiresAt
@@ -218,7 +218,7 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
               </div>
               {!isMinor && accessState && accessState.status !== "not_applicable" ? (
                 <div className="flex items-center justify-between gap-3 py-2.5">
-                  <dt className="text-muted-foreground">Ciclo mensal de acesso (30d)</dt>
+                  <dt className="text-muted-foreground">Acesso mensal ao app</dt>
                   <dd className="font-medium tabular-nums text-foreground">
                     {accessState.accessValidUntil
                       ? `Válido até ${formatBusinessDateBr(accessState.accessValidUntil)}`
@@ -254,7 +254,7 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
           <div className="grid gap-2 sm:grid-cols-2">
             <Button asChild variant="outline" className="min-h-11 w-full">
               <Link href={ROUTES.studentParq}>
-                PAR-Q anual
+                Questionário de saúde
                 <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
             </Button>

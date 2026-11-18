@@ -19,8 +19,8 @@ async function StudentParqContent({ profile }: { profile: Profile }) {
   if (!student) {
     return (
       <EmptyState
-        title="Complete sua ficha de matrícula primeiro"
-        description="Após iniciar sua matrícula, você poderá preencher e assinar o Questionário de Prontidão para Atividade Física (PAR-Q)."
+        title="Complete sua matrícula primeiro"
+        description="Depois de preencher seus dados de matrícula, você poderá responder o questionário de saúde anual."
         action={
           <Button asChild className="min-h-11">
             <Link href={ROUTES.studentEnrollment}>Ir para matrícula</Link>
@@ -56,24 +56,24 @@ export default async function StudentParqPage({
     <PortalShell
       profile={profile}
       activePath={ROUTES.studentParq}
-      title="PAR-Q anual"
-      subtitle="Questionário de Prontidão para Atividade Física e Termo de Responsabilidade (validade de 12 meses)."
-      breadcrumbs={[{ label: "PAR-Q anual" }]}
+      title="Questionário de saúde"
+      subtitle="Responda 10 perguntas rápidas uma vez por ano para treinar com segurança."
+      breadcrumbs={[{ label: "Questionário de saúde" }]}
     >
-      <div className="mx-auto w-full max-w-4xl min-w-0 space-y-5">
+      <div className="mx-auto w-full max-w-3xl min-w-0 space-y-5">
         {query.submitted ? (
           <OperationToast
             tone="success"
-            title="PAR-Q anual registrado com sucesso"
-            description="Sua declaração e assinatura digital foram salvas com validade de 12 meses."
+            title="Questionário de saúde salvo"
+            description="Suas respostas foram registradas e valem por 1 ano."
             clearParams={["submitted"]}
           />
         ) : null}
         {query.error ? (
           <OperationToast
             tone="error"
-            title="Não foi possível salvar o PAR-Q"
-            description="Responda todas as 10 perguntas, aceite o termo de responsabilidade e adicione sua assinatura."
+            title="Não foi possível enviar suas respostas"
+            description="Confira se todas as 10 perguntas foram respondidas, aceite o termo e adicione sua assinatura."
             clearParams={["error"]}
           />
         ) : null}

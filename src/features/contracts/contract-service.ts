@@ -41,7 +41,7 @@ export async function issueContractForEnrollment(actor: Profile, studentId: stri
     "student.full_name": student.full_name,
     "student.cpf": student.cpf ?? "não informado",
     "guardian.full_name": guardian?.full_name ?? "não se aplica",
-    "academy.name": "Ebenert KD",
+    "academy.name": "Ebener Taekwondo",
     "financial.monthly_fee": moneyLabel(enrollment.monthly_fee_cents - (enrollment.discount_cents ?? 0)),
     "financial.due_day": String(enrollment.approved_due_day),
     "contract.starts_at": dateLabel(enrollment.contract_start),

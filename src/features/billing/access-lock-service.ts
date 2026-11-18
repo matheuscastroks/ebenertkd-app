@@ -8,12 +8,14 @@ import {
   type StudentAppAccessState,
 } from "@/features/billing/access-lock-rules";
 import type { Charge, Payment } from "@/features/billing/types";
+import { notifyStudentEvent } from "@/features/notifications/notification-service";
 import type { Enrollment, Student } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { invalidateTags } from "@/lib/cache/invalidate";
 import { CACHE_TAGS } from "@/lib/cache/tags";
-import { saoPauloToday } from "@/lib/dates";
+import { formatBusinessDateBr, saoPauloToday } from "@/lib/dates";
+import { guardianBillingPath, ROUTES } from "@/lib/navigation/routes";
 
 /**
  * Calcula internamente o estado do ciclo mensal de 30 dias para um `student_id`.
@@ -126,6 +128,20 @@ export async function setStudentAccessOverride(
     enrollment.$id,
     { student_id: studentId, access_override_until: normalized }
   );
+
+  if (normalized) {
+    await notifyStudentEvent({
+      studentId,
+      audience: "family",
+      title: "Acesso ao aplicativo liberado pelo professor",
+      body: `O professor liberou seu acesso temporário ao aplicativo até ${formatBusinessDateBr(normalized)}.`,
+      minorBody: "Seu acesso ao aplicativo foi liberado pelo professor.",
+      dedupeKey: `access-override:${enrollment.$id}:${normalized}`,
+      studentActionUrl: ROUTES.student,
+      guardianActionUrl: guardianBillingPath,
+      actorAccountId: actor.account_id,
+    }).catch(() => undefined);
+  }
 
   return updated;
 }
