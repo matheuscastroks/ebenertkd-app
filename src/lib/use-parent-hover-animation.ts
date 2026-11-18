@@ -13,16 +13,26 @@ const INTERACTIVE_PARENT_SELECTOR = [
   "[data-slot='sidebar-menu-action']",
   "[data-slot='dropdown-menu-item']",
   "[data-slot='select-trigger']",
+  "[data-slot='input-group']",
+  "[data-slot='input-group-addon']",
+  "[data-slot='field']",
+  "[data-slot='control']",
+  "[data-slot='checkbox']",
+  "[data-slot='accordion-trigger']",
+  "[data-slot='dialog-close']",
+  "[data-slot='sheet-close']",
   "[role='menuitem']",
   "[role='tab']",
   "button",
   "a",
+  "label",
+  "summary",
 ].join(", ");
 
 /**
  * Conecta a animação de um ícone `@lucide-animated` ao container interativo
- * pai mais próximo (item da sidebar, link, botão, item de menu ou aba), para que
- * passar o mouse em qualquer ponto do item dispare a animação do ícone uma única vez.
+ * pai mais próximo (item da sidebar, link, botão, item de menu, aba ou campo de formulário),
+ * para que passar o mouse ou focar no elemento dispare a animação do ícone.
  */
 export function useParentHoverAnimation(
   isControlledRef: React.RefObject<boolean>,
@@ -67,10 +77,14 @@ export function useParentHoverAnimation(
 
     parent.addEventListener("mouseenter", handleEnter);
     parent.addEventListener("mouseleave", handleLeave);
+    parent.addEventListener("focusin", handleEnter);
+    parent.addEventListener("focusout", handleLeave);
     return () => {
       hasInteractiveParentRef.current = false;
       parent.removeEventListener("mouseenter", handleEnter);
       parent.removeEventListener("mouseleave", handleLeave);
+      parent.removeEventListener("focusin", handleEnter);
+      parent.removeEventListener("focusout", handleLeave);
     };
   }, [isControlledRef]);
 
