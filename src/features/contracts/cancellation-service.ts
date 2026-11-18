@@ -47,17 +47,19 @@ export const listCancellationRequests = unstable_cache(
 );
 
 export async function decideCancellation(actor: Profile, raw: unknown) {
+  if (actor.role !== "admin") throw new Error("admin_required");
   const input = cancellationDecisionSchema.parse(raw);
   const { tables, config } = createAppwriteAdminClient();
   const request = await tables.getRow<CancellationRequest>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.cancellationRequests, rowId: input.requestId });
   if (request.status !== "pending") return request;
   const now = new Date().toISOString();
-  const updated = await tables.updateRow<CancellationRequest>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.cancellationRequests, rowId: request.$id, data: { status: input.decision, decided_fee_cents: input.decision === "approved" ? input.feeCents : 0, decision_notes: input.notes, decided_by_account_id: actor.account_id, decided_at: now, updated_at: now } });
+  // Efeitos primeiro (idempotentes): se algum falhar, o pedido segue pendente e pode ser repetido.
   if (input.decision === "approved") {
     await applyApprovedCancellation(actor, request, input.feeCents);
     await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contracts, rowId: request.contract_id, data: { status: "cancelled", updated_at: now } });
     await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, rowId: request.enrollment_id, data: { status: "cancelled", updated_at: now } });
   }
+  const updated = await tables.updateRow<CancellationRequest>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.cancellationRequests, rowId: request.$id, data: { status: input.decision, decided_fee_cents: input.decision === "approved" ? input.feeCents : 0, decision_notes: input.notes, decided_by_account_id: actor.account_id, decided_at: now, updated_at: now } });
   await writeAuditEvent(`contract.cancellation_${input.decision}`, actor.account_id, "cancellation_request", request.$id, { fee_cents: input.feeCents, notes: input.notes });
   return updated;
 }
