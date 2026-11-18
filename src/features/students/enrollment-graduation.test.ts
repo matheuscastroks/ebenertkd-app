@@ -31,7 +31,7 @@ describe("graduação após a matrícula", () => {
   it("aluno não consegue alterar a própria faixa depois que a matrícula saiu do rascunho", async () => {
     const student = { $id: "p1", role: "adult_student", capabilities: ["student"], account_id: "a1" } as Profile;
     await saveEnrollmentDraft(student, student, input, false);
-    const studentWrite = updateRow.mock.calls[0][0].data;
+    const studentWrite = updateRow.mock.calls[0][0]!.data;
     expect(studentWrite.gub).toBe(8);
     expect(studentWrite.current_belt).toBe("Amarela");
   });
