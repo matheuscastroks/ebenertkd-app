@@ -49,14 +49,11 @@ export default async function DependentAttendancePage({
     <PortalShell
       profile={guardian}
       activePath={ROUTES.guardianDependents}
-      breadcrumbs={[
-        { label: "Dependentes", href: ROUTES.guardianDependents },
-        { label: "Frequência e Aulas" }
-      ]}
-      title="Frequência do aluno"
-      subtitle="Acompanhe a assiduidade, presenças e histórico de aulas mês a mês."
+      breadcrumbs={[{ label: "Minha família", href: ROUTES.guardian }, { label: "Frequência" }]}
+      title="Frequência"
+      subtitle="Presenças e aulas do dependente, mês a mês."
     >
-      <div className="w-full min-w-0 space-y-4">
+      <div className="w-full min-w-0 space-y-6">
         <DependentContext guardian={guardian} profileId={profileId} section="frequencia" />
         <Suspense key={month} fallback={<AttendanceCalendarSkeleton />}>
           <DependentAttendanceContent

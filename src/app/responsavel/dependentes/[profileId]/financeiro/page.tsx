@@ -21,14 +21,11 @@ export default async function GuardianBillingPage({
     <PortalShell
       profile={actor}
       activePath={ROUTES.guardianDependents}
-      breadcrumbs={[
-        { label: "Dependentes", href: ROUTES.guardianDependents },
-        { label: "Financeiro" }
-      ]}
-      title="Financeiro do dependente"
-      subtitle="Acompanhe as mensalidades e envie comprovantes de pagamento em nome do aluno."
+      breadcrumbs={[{ label: "Minha família", href: ROUTES.guardian }, { label: "Financeiro" }]}
+      title="Financeiro"
+      subtitle="Mensalidades e envio de comprovantes do dependente."
     >
-      <div className="w-full min-w-0 space-y-4">
+      <div className="w-full min-w-0 space-y-6">
         <DependentContext guardian={actor} profileId={profileId} section="financeiro" />
         {query.updated ? (
           <OperationToast

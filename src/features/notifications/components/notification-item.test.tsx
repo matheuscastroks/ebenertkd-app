@@ -14,7 +14,7 @@ it("indica somente avisos nao lidos e oferece alvo de toque", () => {
 });
 it("abas Avisos e Historico respondem ao teclado", async () => {
  const user = userEvent.setup(); render(<NotificationInbox items={[item]} />);
- const tab = screen.getByRole("tab", { name: /Avisos/ }); tab.focus(); await user.keyboard("{ArrowRight}");
+ const tab = screen.getByRole("tab", { name: /Novos/ }); tab.focus(); await user.keyboard("{ArrowRight}");
  expect(screen.getByRole("tab", { name: /Histórico/ })).toHaveAttribute("aria-selected", "true");
 });
 

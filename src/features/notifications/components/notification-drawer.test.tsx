@@ -19,7 +19,7 @@ describe("Painel de avisos", () => {
   render(<NotificationDrawer open onOpenChange={vi.fn()} />);
   expect(await screen.findByText("Treino especial")).toBeVisible();
   expect(screen.getByText("Treino confirmado")).toBeVisible();
-  expect(screen.getByRole("tab", { name: /Avisos/ })).toHaveClass("min-h-11");
+  expect(screen.getByRole("tab", { name: /Novos/ })).toHaveClass("min-h-11");
  });
  it("move aviso ao historico ao confirmar leitura", async () => {
   const user = userEvent.setup(); render(<NotificationDrawer open onOpenChange={vi.fn()} />);
@@ -34,6 +34,6 @@ describe("Painel de avisos", () => {
   render(<NotificationDrawer open onOpenChange={vi.fn()} />);
   expect(await screen.findByRole("alert")).toHaveTextContent(/Não foi possível atualizar/);
   expect(screen.queryByText("Nenhum aviso novo")).toBeNull();
-  expect(screen.queryByRole("tab", { name: /Avisos/ })).toBeNull();
+  expect(screen.queryByRole("tab", { name: /Novos/ })).toBeNull();
  });
 });

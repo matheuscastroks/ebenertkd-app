@@ -50,6 +50,7 @@ Quem precisar de mudança fora da sua área registra em "Bloqueios" e pede ao do
 ## Registro de progresso
 
 - 2026-11-17: plano criado; quatro agentes lançados.
+- 2026-11-17: Task 4 (portais) concluída: visão geral do aluno com próximo treino em destaque, pendências em lista com uma só ação laranja e faixa com critérios recolhidos; painel da família com pendências nomeando cada filho; nova página de resumo por dependente (`/responsavel/dependentes/[id]`) com as cinco áreas como navegação; gerenciar dependentes com acesso e senha recolhidos; contratos em lista única; avisos, configurações e apresentação inicial simplificados. Menor continua sem consulta nem exibição de financeiro (testes). A rota de resumo não entra no menu (acessada pelo painel e pela trilha), por isso nenhuma mudança em `src/lib/navigation`.
 - 2026-11-17: Task 2 (estrutura) concluída: navegação agrupada por perfil sem remover destinos, barra inferior com rótulos curtos, cabeçalho de página com título único e ação à direita, menu da conta só com itens da conta e skeletons com a geometria do cabeçalho.
 - 2026-11-17: Task 3 (professor) concluída: uma única ação laranja por tela (chamada do próximo treino no painel, criar turma, aula de hoje, novo exame, concluir análise), ações raras recolhidas (PIX e exportação em "Mais ações", filtros raros do financeiro, aulas e exames antigos, pedidos decididos, cancelar exame), títulos duplicados removidos, resumo "Tudo funcionando" no sistema e financeiro do pagador com rótulo "Pagar", competência legível e filtro de mês legível.
 
@@ -78,9 +79,9 @@ Quem precisar de mudança fora da sua área registra em "Bloqueios" e pede ao do
 
 ### Task 4 (Agente D): Portais do aluno e do responsável
 
-- [ ] **Step 1:** Mesma auditoria para `/aluno`, `/responsavel`, avisos, configurações e onboarding.
-- [ ] **Step 2:** Reorganizar; criar telas novas só se a tarefa principal pedir (ex.: página resumo do dependente), justificando no PR.
-- [ ] **Step 3:** Testes (menor sem dados financeiros); verificação no navegador; PR.
+- [x] **Step 1:** Mesma auditoria para `/aluno`, `/responsavel`, avisos, configurações e onboarding.
+- [x] **Step 2:** Reorganizar; criar telas novas só se a tarefa principal pedir (ex.: página resumo do dependente), justificando no PR.
+- [x] **Step 3:** Testes (menor sem dados financeiros); verificação no navegador; PR.
 
 ### Task 5 (Product owner): Revisão e integração
 

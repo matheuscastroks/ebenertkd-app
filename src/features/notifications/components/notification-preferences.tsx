@@ -40,7 +40,7 @@ export function NotificationPreferences({
     startTransition(async () => {
       try {
         await setNotificationPreferenceAction(key, enabled);
-        toast.success("Preferência salva com sucesso");
+        toast.success("Preferência salva");
       } catch {
         setPreferences(previous);
         toast.error("Não foi possível salvar a preferência");
@@ -49,19 +49,17 @@ export function NotificationPreferences({
   }
 
   return (
-    <div className="divide-y divide-border/60 rounded-xl border border-border/80 bg-card shadow-xs overflow-hidden">
+    <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
       {options
         .filter((option) => showFinancial || option.key !== "financial_enabled")
         .map(({ key, label, description }) => (
           <div
             key={key}
-            className="flex items-center justify-between gap-4 p-4 transition-colors hover:bg-muted/10 min-h-[56px]"
+            className="flex min-h-14 items-center justify-between gap-4 p-4"
           >
-            <div className="flex items-start gap-3 min-w-0 flex-1">
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold text-foreground text-sm">{label}</p>
-                <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{description}</p>
-              </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium">{label}</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
             </div>
             <Switch
               aria-label={`Receber ${label.toLowerCase()} por notificação`}

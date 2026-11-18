@@ -83,7 +83,7 @@ export default async function NotificationsPage({
       title="Avisos"
       subtitle="Comunicados e lembretes da academia."
       headerActions={
-        <Suspense fallback={<div className="h-9 w-28 rounded-lg bg-muted/60 animate-pulse" />}>
+        <Suspense fallback={<div className="h-9 w-28 rounded-lg bg-muted animate-pulse" />}>
           <HeaderActionButtons profile={profile} />
         </Suspense>
       }

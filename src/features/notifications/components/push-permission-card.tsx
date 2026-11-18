@@ -51,7 +51,7 @@ export function PushPermissionCard({
         if (!payload) throw new Error("invalid_subscription");
         await savePushSubscriptionAction(payload);
         setActive(true);
-        toast.success("Notificações ativadas neste dispositivo com sucesso");
+        toast.success("Alertas ativados neste aparelho");
       } catch {
         toast.error("Não foi possível ativar as notificações", {
           description: "Confira as permissões do navegador e tente novamente.",
@@ -61,67 +61,50 @@ export function PushPermissionCard({
 
   const disable = () =>
     startTransition(async () => {
-      const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.getSubscription();
-      if (subscription) {
-        await revokePushSubscriptionAction(subscription.endpoint);
-        await subscription.unsubscribe();
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+        if (subscription) {
+          await revokePushSubscriptionAction(subscription.endpoint);
+          await subscription.unsubscribe();
+        }
+        setActive(false);
+        toast.success("Alertas desativados neste aparelho");
+      } catch {
+        toast.error("Não foi possível desativar os alertas. Tente de novo.");
       }
-      setActive(false);
-      toast.success("Notificações desativadas neste dispositivo");
     });
 
+  const notice = !configured
+    ? "O envio de alertas ainda não foi configurado pela academia."
+    : permission === "unsupported"
+      ? "Este navegador não oferece alertas. Os avisos continuam na central."
+      : permission === "denied"
+        ? "Os alertas estão bloqueados no navegador. Libere a permissão nas configurações do navegador."
+        : null;
+
   return (
-    <div className="space-y-4 rounded-xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs">
-      <div className="flex items-start gap-3">
-        <div>
-          <p className="font-semibold text-sm text-foreground">Avisos no navegador e celular</p>
-          <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">
-            Receba alertas instantâneos de novos comunicados mesmo com o aplicativo fechado.
+    <div className="space-y-3 rounded-xl border border-border bg-card p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-sm font-medium">Alertas neste aparelho</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            {active ? "Ativados. Você recebe avisos mesmo com o aplicativo fechado." : "Receba avisos mesmo com o aplicativo fechado."}
           </p>
         </div>
-      </div>
-
-      <div className="space-y-3 pt-1">
-        {!configured ? (
-          <p className="text-sm text-warning-foreground bg-warning-soft p-3 rounded-lg border border-border">
-            O envio push ainda não foi configurado pelo administrador da academia.
-          </p>
-        ) : null}
-        {permission === "unsupported" ? (
-          <p className="text-sm text-muted-foreground bg-muted/40 p-3 rounded-lg border border-border/40">
-            Este navegador não oferece suporte a notificações web.
-          </p>
-        ) : null}
-        {permission === "denied" ? (
-          <p className="text-sm text-warning-foreground bg-warning-soft p-3 rounded-lg border border-border">
-            As notificações estão bloqueadas nas preferências do seu navegador. Libere a permissão para receber alertas.
-          </p>
-        ) : null}
-
         {active ? (
-          <Button
-            variant="outline"
-            onClick={disable}
-            disabled={pending}
-            className="h-11 font-medium w-full sm:w-auto "
-          >
-            <BellOff className="mr-2 size-4" aria-hidden="true" />
-            Desativar neste dispositivo
+          <Button variant="outline" onClick={disable} disabled={pending} className="min-h-11 w-full shrink-0 sm:w-auto">
+            <BellOff aria-hidden="true" />
+            Desativar
           </Button>
         ) : (
-          <Button
-            onClick={enable}
-            disabled={
-              pending || !configured || permission === "unsupported" || permission === "denied"
-            }
-            className="h-11 font-medium w-full sm:w-auto"
-          >
-            <Bell className="mr-2 size-4" aria-hidden="true" />
-            {pending ? "Ativando…" : "Ativar notificações neste aparelho"}
+          <Button onClick={enable} disabled={pending || Boolean(notice)} className="min-h-11 w-full shrink-0 sm:w-auto">
+            <Bell aria-hidden="true" />
+            {pending ? "Ativando…" : "Ativar alertas"}
           </Button>
         )}
       </div>
+      {notice ? <p role="status" className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">{notice}</p> : null}
     </div>
   );
 }
