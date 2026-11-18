@@ -106,7 +106,7 @@ async function GuardianMinorsList({ minors }: { minors: Profile[] }) {
   </CardContent></Card>;
 }
 
-export default async function DependentsPage({ searchParams }: { searchParams: Promise<{ error?: string; created?: string }> }) {
+export default async function DependentsPage({ searchParams }: { searchParams: Promise<{ error?: string; created?: string; reset?: string; revoked?: string }> }) {
   const [guardian, params] = await Promise.all([requireCapability("guardian"), searchParams]);
   const minors = await listGuardianMinors(guardian);
 
@@ -120,6 +120,8 @@ export default async function DependentsPage({ searchParams }: { searchParams: P
       headerActions={minors.length === 0 ? undefined : <CreateMinorDialog idPrefix="minor-modal" trigger={<Button className="min-h-11"><UserPlus aria-hidden="true" />Adicionar dependente</Button>} />}
     >
       {params.created ? <OperationToast tone="success" title="Dependente cadastrado" description="O acesso já está ativo. Envie o usuário e a senha para o seu filho." clearParams={["created"]} /> : null}
+      {params.reset ? <OperationToast tone="success" title="Senha atualizada" description="Os acessos abertos do seu filho foram encerrados. Envie a nova senha a ele." clearParams={["reset"]} /> : null}
+      {params.revoked ? <OperationToast tone="success" title="Acessos encerrados" description="Seu filho precisará entrar de novo em todos os aparelhos." clearParams={["revoked"]} /> : null}
       {params.error ? <OperationToast tone="error" title="Não foi possível concluir" description="Revise os dados ou tente outro nome de usuário." clearParams={["error"]} /> : null}
       <Suspense fallback={<ListItemsSkeleton count={2} />}>
         <GuardianMinorsList minors={minors} />
