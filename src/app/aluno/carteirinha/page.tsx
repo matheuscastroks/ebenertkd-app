@@ -91,7 +91,7 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
             <div className="flex items-center gap-2">
               <ShieldCheck className="size-4 text-primary-text" aria-hidden="true" />
               <h2 id="digital-passport-heading" className="text-sm font-semibold text-foreground">
-                Ebenézer Taekwondo · Passaporte do Aluno
+                Ebener Taekwondo · Passaporte do Aluno
               </h2>
             </div>
             <StatusBadge tone={isActive ? "success" : "warning"}>

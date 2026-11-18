@@ -26,10 +26,10 @@
 
 ## 3. Checklist de Implementação
 
-- [ ] Rotas em `src/lib/navigation/routes.ts` e atualização de `src/lib/navigation/routes.test.ts`
-- [ ] Tela 1: Caminho da Faixa (`/aluno/evolucao`) + regras + gráfico + testes
-- [ ] Tela 2: Guia Técnico e Quiz (`/aluno/estudos`) + catálogo por faixa + testes
-- [ ] Tela 3: Conquistas e Constância (`/aluno/conquistas`) + regras + heatmap + gráfico + testes
-- [ ] Tela 4: Calendário e Exportação `.ics` (`/aluno/calendario`) + regras + testes
-- [ ] Tela 5: Carteirinha Digital e Regularidade (`/aluno/carteirinha`) + atalho no dashboard
-- [ ] Validação final: testes unitários + guardas arquiteturais, `npm run typecheck`, `npm run lint` e `npm run build`
+- [x] Rotas em `src/lib/navigation/routes.ts` e atualização de `src/lib/navigation/routes.test.ts`
+- [x] Tela 1: Caminho da Faixa (`/aluno/evolucao`) + regras + gráfico + testes
+- [x] Tela 2: Guia Técnico e Quiz (`/aluno/estudos`) + catálogo por faixa + testes
+- [x] Tela 3: Conquistas e Constância (`/aluno/conquistas`) + regras + heatmap + gráfico + testes
+- [x] Tela 4: Calendário e Exportação `.ics` (`/aluno/calendario`) + regras + testes
+- [x] Tela 5: Carteirinha Digital e Regularidade (`/aluno/carteirinha`) + atalho no dashboard
+- [x] Validação final: testes unitários + guardas arquiteturais, `npm run typecheck`, `npm run lint` e `npm run build`
