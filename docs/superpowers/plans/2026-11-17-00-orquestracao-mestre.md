@@ -76,7 +76,20 @@ Legenda: `[x]` feito e mesclado, `[~]` em andamento/PR aberto, `[ ]` pendente.
 - [x] Revisão cruzada de subagentes/tech lead das áreas 01–05, com correções e commits separados na main.
 - [ ] Piloto com o professor e duas famílias (docs/pilot-script.md).
 
+### Onda 4 — Refinamento premium (2026-11-17, plano [06](./2026-11-17-06-refinamento-premium.md))
+
+- [x] Entrada nova (#14), estrutura e navegação (#16), telas do professor (#18) e portais do aluno, menor e responsável (#17), mesclados com CI verde.
+- [x] Correções do QA: exclusão de conta caía em erro (#15), auditoria de dependências (#19), filtros do financeiro (#20).
+- [x] Varredura visual final com os 4 perfis (375px claro e 1280px escuro): todas as telas internas carregam, sem rolagem horizontal; menor sem dado financeiro.
+- [~] Revisão de tech lead e QA dos PRs da onda 4 (agente de revisão somente leitura em andamento).
+- [ ] Cache das leituras do Appwrite (plano a criar): agente interrompido pelo dono; o app ainda faz chamadas em sequência por página. Avaliar junto com a hospedagem do app.
+- [x] Backend do Appwrite movido para Nova York (#21): projeto novo, schema aplicado (30 tabelas e bucket). Uma chamada à API caiu de 0,6 a 1,3 s para ~0,3 s.
+- [ ] Functions `daily-operations` e `backup` no projeto novo: o plano gratuito não aceita agendamento cron; criar sem cron e disparar por agendador externo (GitHub Actions) ou subir de plano.
+- [ ] Contas no projeto novo: nenhuma criada; o dono cria o administrador (`npm run appwrite:create-admin`).
+
 ## Registro de progresso (mais recente primeiro)
+
+- 2026-11-17: onda 4 mesclada; backend migrado para Nova York; pendências: cron das Functions, contas do projeto novo, cache de leituras, revisão formal, e as ações do dono (Drive, VAPID, deploy, privacidade, piloto).
 
 - 2026-11-17: fechamento técnico local: 118 arquivos/428 testes e 18 E2E públicos desktop/mobile aprovados; build, lint e typecheck passaram. PWA não recarrega na primeira instalação; cliente e diagnóstico Appwrite respeitam o ambiente configurado. Guarda de design sem exceções. Relatório: docs/implementation/validacao-retomada-2026-11-17.md. Criação do projeto isolado de homologação bloqueada pela revisão automática; aprovação específica solicitada, recurso não criado.
 
