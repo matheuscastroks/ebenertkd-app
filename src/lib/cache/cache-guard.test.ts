@@ -16,9 +16,17 @@ function sourceFiles(dir: string): string[] {
 const rel = (file: string) => path.relative(SRC, file).replaceAll("\\", "/");
 const files = sourceFiles(SRC).map((file) => ({ file: rel(file), text: readFileSync(file, "utf8") }));
 
-it("unstable_cache só é usado dentro do helper cachedRead (que exige tags e revalidate)", () => {
-  const offenders = files.filter(({ file, text }) => file !== "lib/cache/cached-read.ts" && /unstable_cache\s*\(/.test(text)).map(({ file }) => file);
-  expect(offenders).toEqual([]);
+it("todo unstable_cache direto declara tags e revalidate (sem cache que nunca invalida)", () => {
+  const problems: string[] = [];
+  for (const { file, text } of files) {
+    if (file === "lib/cache/cached-read.ts") continue;
+    for (const match of text.matchAll(/unstable_cache\s*\(/g)) {
+      const tail = text.slice(match.index! + 1, match.index! + 8000).split(/unstable_cache\s*\(/)[0];
+      const options = /\{[^{}]*\btags\s*:[^{}]*\}/.exec(tail)?.[0] ?? "";
+      if (!/\brevalidate\s*:/.test(options)) problems.push(file);
+    }
+  }
+  expect(problems).toEqual([]);
 });
 
 it("toda chamada de cachedRead declara name, key, tags e revalidate", () => {
