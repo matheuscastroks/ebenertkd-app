@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition, type FormEvent } from "react";
+import { useTransition, type FormEvent, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Settings2 } from "lucide-react";
 import { toast } from "sonner";
@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import type { BillingSettings } from "@/features/billing/types";
 
-export function PixSettingsDialog({ settings }: { settings: BillingSettings | null }) {
+export function PixSettingsDialog({ settings, trigger }: { settings: BillingSettings | null; trigger?: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -39,13 +39,13 @@ export function PixSettingsDialog({ settings }: { settings: BillingSettings | nu
       }
     });
   };
-  return <ResponsiveDialog open={open} onOpenChange={onOpenChange} trigger={<Button variant="outline"><Settings2 aria-hidden="true" />Configurar PIX</Button>} title="Dados PIX" description="Esses dados aparecem para alunos e responsáveis na hora de pagar.">
+  return <ResponsiveDialog open={open} onOpenChange={onOpenChange} trigger={trigger ?? <Button variant="outline" className="min-h-11"><Settings2 aria-hidden="true" />Configurar PIX</Button>} title="Dados PIX" description="Esses dados aparecem para alunos e responsáveis na hora de pagar.">
     <form onSubmit={onSubmit} className="grid gap-4">
       <Field><FieldLabel htmlFor="modal-beneficiary-name">Beneficiário</FieldLabel><Input id="modal-beneficiary-name" name="beneficiary_name" defaultValue={settings?.beneficiary_name} required /></Field>
       <Field><FieldLabel htmlFor="modal-pix-key-type">Tipo da chave</FieldLabel><Select name="pix_key_type" defaultValue={settings?.pix_key_type ?? "random"}><SelectTrigger id="modal-pix-key-type" className="w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="cpf">CPF</SelectItem><SelectItem value="cnpj">CNPJ</SelectItem><SelectItem value="email">E-mail</SelectItem><SelectItem value="phone">Telefone</SelectItem><SelectItem value="random">Aleatória</SelectItem></SelectContent></Select></Field>
       <Field><FieldLabel htmlFor="modal-pix-key">Chave PIX</FieldLabel><Input id="modal-pix-key" name="pix_key" defaultValue={settings?.pix_key} required /></Field>
       <Field><FieldLabel htmlFor="modal-pix-instructions">Instruções</FieldLabel><Textarea id="modal-pix-instructions" name="instructions" defaultValue={settings?.instructions ?? ""} className="min-h-28" /><FieldDescription>Exibido antes do envio do comprovante.</FieldDescription></Field>
-      <Button type="submit" disabled={pending}>{pending ? "Salvando…" : "Salvar dados PIX"}</Button>
+      <Button type="submit" className="min-h-11" disabled={pending}>{pending ? "Salvando…" : "Salvar dados PIX"}</Button>
     </form>
   </ResponsiveDialog>;
 }

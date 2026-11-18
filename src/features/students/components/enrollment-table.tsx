@@ -135,7 +135,7 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
                     <EnrollmentStatus value={enrollment?.status} />
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button asChild size="sm" className="min-h-11 font-medium">
+                    <Button asChild size="sm" variant={["submitted", "under_review"].includes(enrollment?.status ?? "") ? "outline" : "ghost"} className="min-h-11 font-medium">
                       <Link href={adminEnrollmentPath(student.$id)}>
                         <Eye className="mr-1.5 size-4" aria-hidden="true" />
                         {["submitted", "under_review"].includes(enrollment?.status ?? "") ? "Analisar" : "Ver"}
@@ -175,7 +175,7 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
                       {enrollment?.requested_due_day ? `dia ${enrollment.requested_due_day}` : "não informado"}
                     </strong>
                   </span>
-                  <Button asChild className="min-h-11 font-medium px-4">
+                  <Button asChild variant={["submitted", "under_review"].includes(enrollment?.status ?? "") ? "outline" : "ghost"} className="min-h-11 font-medium px-4">
                     <Link href={adminEnrollmentPath(student.$id)}>
                       <Eye className="mr-1.5 size-4" aria-hidden="true" />
                       {["submitted", "under_review"].includes(enrollment?.status ?? "") ? "Analisar" : "Ver"}

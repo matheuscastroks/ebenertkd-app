@@ -37,7 +37,7 @@ export function BeltProgressionPill({
     return (
       <div
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2 py-1 shadow-xs transition-colors ",
+          "inline-flex max-w-full flex-wrap items-center gap-1.5 rounded-lg border border-border bg-background px-2 py-1 shadow-xs transition-colors",
           size === "sm" && "text-xs py-0.5 px-1.5",
           size === "lg" && "text-sm py-1.5 px-3",
           className

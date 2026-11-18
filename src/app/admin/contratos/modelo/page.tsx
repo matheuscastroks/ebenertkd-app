@@ -14,7 +14,7 @@ import { CONTRACT_VARIABLES } from "@/features/contracts/rules";
 import { DEFAULT_CONTRACT_CONTENT, getContractTemplate, listContractVersions } from "@/features/contracts/template-service";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
-import { FileCode, History, Save } from "lucide-react";
+import { Save } from "lucide-react";
 
 export default async function ContractTemplatePage({
   searchParams,
@@ -30,7 +30,7 @@ export default async function ContractTemplatePage({
       profile={admin}
       activePath={ROUTES.adminContracts}
       title="Modelo de contrato"
-      subtitle="Rascunhos podem ser alterados livremente; versões publicadas permanecem imutáveis para contratos já gerados."
+      subtitle="Rascunhos podem mudar à vontade. Versões publicadas não alteram contratos já gerados."
       breadcrumbs={[
         { label: "Contratos", href: ROUTES.adminContracts },
         { label: "Modelo padrão" },
@@ -48,11 +48,11 @@ export default async function ContractTemplatePage({
 
       <div className="w-full min-w-0 grid gap-6 lg:grid-cols-[1fr_340px]">
         {/* Editor Principal */}
-        <Card className="border-border/80 shadow-sm">
+        <Card>
           <CardHeader className="space-y-1">
-            <CardTitle className="text-lg">Texto do contrato</CardTitle>
+            <CardTitle className="text-base font-semibold">Texto do contrato</CardTitle>
             <CardDescription className="text-sm leading-relaxed">
-              Edite o texto base. Você pode salvar como rascunho ou publicar uma nova versão oficial para contratos futuros.
+              Salve como rascunho enquanto edita. Publique quando o texto estiver pronto para novos contratos.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -71,7 +71,7 @@ export default async function ContractTemplatePage({
               <Field>
                 <div className="flex items-center justify-between">
                   <FieldLabel htmlFor="template-content">Conteúdo e cláusulas</FieldLabel>
-                  <span className="text-xs text-muted-foreground">Markdown / Texto simples</span>
+                  
                 </div>
                 <ContractContentEditor content={template?.draft_content ?? DEFAULT_CONTRACT_CONTENT} />
               </Field>
@@ -84,7 +84,7 @@ export default async function ContractTemplatePage({
                   variant="outline"
                   className="h-11 font-medium sm:flex-1"
                 >
-                  <Save className="mr-2 size-4" />
+                  <Save className="size-4" aria-hidden="true" />
                   Salvar rascunho
                 </Button>
                 <ConsequenceDialog trigger={<Button type="button" className="min-h-11">Publicar nova versão</Button>} title={`Publicar versão ${Math.max(0, ...versions.map((version) => version.version)) + 1}?`} summary={[{ label: "Modelo", value: template?.name ?? "Contrato padrão", field: "name" }]} effect="Novos contratos usarão esta versão. Contratos atuais não mudam." confirmLabel="Publicar versão" action={saveContractTemplateAction} formId="contract-template" values={{ intent: "publish" }} />
@@ -95,12 +95,9 @@ export default async function ContractTemplatePage({
 
         {/* Sidebar com Variáveis e Histórico */}
         <div className="space-y-6">
-          <Card className="border-border/80 shadow-sm">
+          <Card>
             <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <FileCode className="size-4 text-primary-text" />
-                <CardTitle className="text-base font-semibold">Variáveis disponíveis</CardTitle>
-              </div>
+              <CardTitle className="text-base font-semibold">Variáveis disponíveis</CardTitle>
               <CardDescription className="text-xs">
                 Substituídas automaticamente pelos dados do aluno e da mensalidade.
               </CardDescription>
@@ -110,7 +107,7 @@ export default async function ContractTemplatePage({
                 {CONTRACT_VARIABLES.map((variable) => (
                   <code
                     key={variable}
-                    className="inline-block rounded-md border border-border/60 bg-muted/60 px-2 py-1 font-mono text-xs text-foreground select-all"
+                    className="inline-block select-all rounded-lg border border-border bg-muted px-2 py-1 font-mono text-sm text-foreground"
                   >
                     {`{{ ${variable} }}`}
                   </code>
@@ -119,22 +116,19 @@ export default async function ContractTemplatePage({
             </CardContent>
           </Card>
 
-          <Card className="border-border/80 shadow-sm">
+          <Card>
             <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <History className="size-4 text-primary-text" />
-                <CardTitle className="text-base font-semibold">Histórico de versões</CardTitle>
-              </div>
+              <CardTitle className="text-base font-semibold">Histórico de versões</CardTitle>
               <CardDescription className="text-xs">
                 Versões publicadas e data de disponibilização.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="divide-y divide-border">
               {versions.length ? (
                 versions.map((version) => (
                   <div
                     key={version.$id}
-                    className="flex items-center justify-between rounded-xl border border-border/60 bg-card p-3 shadow-xs"
+                    className="flex items-center justify-between py-2"
                   >
                     <div>
                       <div className="flex items-center gap-2">
@@ -158,7 +152,7 @@ export default async function ContractTemplatePage({
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">Nenhuma versão publicada.</p>
+                <p className="py-2 text-sm text-muted-foreground">Nenhuma versão publicada. Novos contratos só podem ser gerados depois da primeira publicação.</p>
               )}
             </CardContent>
           </Card>

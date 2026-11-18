@@ -60,16 +60,16 @@ export default async function AdminBillingPage({
       profile={actor}
       activePath={ROUTES.adminBilling}
       title="Painel financeiro"
-      subtitle="Acompanhe mensalidades, conciliação de PIX e conferência de comprovantes."
+      subtitle="Confira comprovantes, registre pagamentos e acompanhe o mês."
       breadcrumbs={[{ label: "Financeiro" }]}
-      headerActions={<Suspense fallback={null}><BillingToolbarContent /></Suspense>}
+      headerActions={<Suspense fallback={<Skeleton className="h-11 w-32 rounded-lg" />}><BillingToolbarContent /></Suspense>}
     >
       <div className="w-full min-w-0 space-y-6">
         <Suspense fallback={<MetricCardsSkeleton count={4} />}>
           <BillingMetrics />
         </Suspense>
 
-        <Suspense fallback={<Skeleton className="h-32 w-full rounded-xl" />}>
+        <Suspense fallback={<Skeleton className="h-16 w-full rounded-xl" />}>
           <BillingFiltersContent />
         </Suspense>
 
@@ -108,7 +108,7 @@ async function BillingMetrics() {
   const summary = await getBillingSummary();
   return (
     <div className="space-y-2">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <Link href={`${ROUTES.adminBilling}?status=paid`} className="rounded-xl focus-visible:outline-2 focus-visible:outline-ring" aria-label="Filtrar: Recebido no mês"><MetricCard label="Recebido no mês" value={money(summary.receivedCents)} tone="success" /></Link>
         <Link href={`${ROUTES.adminBilling}?status=pending`} className="rounded-xl focus-visible:outline-2 focus-visible:outline-ring" aria-label="Filtrar: A receber"><MetricCard label="A receber" value={money(summary.pendingCents)} tone="warning" /></Link>
         <Link href={`${ROUTES.adminBilling}?status=overdue`} className="rounded-xl focus-visible:outline-2 focus-visible:outline-ring" aria-label="Filtrar: Em atraso"><MetricCard label="Em atraso" value={money(summary.overdueCents)} tone="danger" /></Link>
@@ -148,9 +148,9 @@ async function BillingResults({ params }: { params: BillingQuery }) {
       {data.charges.length === 0 ? (
         <EmptyState
           title="Nenhuma cobrança encontrada"
-          description="Ajuste os filtros para consultar outro período ou grupo de alunos."
+          description="Remova algum filtro ou consulte outro período."
           action={
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="min-h-11">
               <Link href={ROUTES.adminBilling}>Limpar filtros</Link>
             </Button>
           }

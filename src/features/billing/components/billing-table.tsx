@@ -11,6 +11,7 @@ import { ChargeActions } from "@/features/billing/components/charge-actions";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
 import type { Charge, Payment, PaymentProof } from "@/features/billing/types";
 import { formatCompetence } from "@/features/billing/format-competence";
+import { chargeTitle } from "@/features/billing/components/charge-title";
 import { useTableSort } from "@/hooks/use-table-sort";
 
 const money = (value: number) =>
@@ -148,7 +149,7 @@ export function BillingTable({
                         <p className="font-medium text-foreground text-sm">
                           {names.get(charge.student_id) ?? "Aluno"}
                         </p>
-                        <p className="text-xs text-muted-foreground">{charge.description}</p>
+                        <p className="text-xs text-muted-foreground">{chargeTitle(charge)}</p>
                       </div>
                     </div>
                   </TableCell>
@@ -185,7 +186,7 @@ export function BillingTable({
                       <p className="font-medium text-foreground text-sm">
                         {names.get(charge.student_id) ?? "Aluno"}
                       </p>
-                      <p className="text-xs text-muted-foreground">{charge.description}</p>
+                      <p className="text-xs text-muted-foreground">{chargeTitle(charge)}</p>
                     </div>
                   </div>
                   <BillingStatus value={charge.status} />

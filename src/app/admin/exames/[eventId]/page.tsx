@@ -6,6 +6,7 @@ import {
   cancelExamParticipantAction,
 } from "@/app/actions/exams";
 import { PortalShell } from "@/components/dashboard/portal-shell";
+import { EmptyState } from "@/components/shared/empty-state";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
@@ -31,27 +32,12 @@ import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import { BeltProgressionPill } from "@/features/students/components/belt-progression-pill";
 import { getExamEvent, getExamEventBundle } from "@/features/exams/service";
-import { examEventLabels, examEventTones, examParticipantLabels, examParticipantTones } from "@/features/exams/labels";
+import { examEventLabels, examEventTones, examParticipantLabels, examParticipantTones, formatExamDate } from "@/features/exams/labels";
 import { beltForGub, type GubOption } from "@/features/students/options";
 import { centsToReaisInput, formatBrl } from "@/lib/money";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
-import {
-  AlertCircle,
-  Award,
-  Calendar,
-  CheckCircle2,
-  DollarSign,
-  Info,
-  MapPin,
-  MinusCircle,
-  ShieldAlert,
-  UserCheck,
-  UserPlus,
-  Users,
-  XCircle,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ChevronDown } from "lucide-react";
 
 const eventLabels = examEventLabels;
 const eventTones = examEventTones;
@@ -94,6 +80,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
   const approvedCount = bundle.participants.filter(
     (p) => p.participant.status === "approved"
   ).length;
+  const eventClosed = bundle.event.status === "completed" || bundle.event.status === "cancelled";
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -101,59 +88,30 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
       {/* COLUNA PRINCIPAL (65% / 8 de 12 colunas): MESA DA BANCA  */}
       {/* ======================================================== */}
       <div className="lg:col-span-8 space-y-6">
-        <div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Award className="size-5 text-primary-text" />
-              <h2 className="text-base sm:text-lg font-semibold text-foreground">
-                Mesa de Avaliação da Banca
-              </h2>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary-text border border-primary/20">
-                {bundle.participants.length} {bundle.participants.length === 1 ? "candidato" : "candidatos"}
-              </span>
-              {registeredCount > 0 && (
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-warning-soft text-warning-foreground dark:text-warning-foreground border border-border">
-                  {registeredCount} pendente{registeredCount > 1 ? "s" : ""}
-                </span>
-              )}
-            </div>
-          </div>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            Candidatos agrupados por graduação pretendida. Avalie cada praticante em 1 toque na mesa de exame.
+        <div className="space-y-1">
+          <h2 className="text-base font-semibold">Mesa da banca</h2>
+          <p className="text-sm text-muted-foreground">
+            <span className="tabular-nums">{bundle.participants.length}</span> {bundle.participants.length === 1 ? "candidato" : "candidatos"}
+            {registeredCount > 0 ? <> · <span className="tabular-nums">{registeredCount}</span> sem resultado</> : null}
+            {" · "}agrupados pela faixa pretendida.
           </p>
         </div>
 
         {bundle.participants.length === 0 ? (
-          <Card className="shadow-xs rounded-2xl border-border/80">
-            <CardContent className="flex flex-col items-center justify-center p-12 text-center">
-              <Users className="size-12 text-muted-foreground/40 mb-3" />
-              <p className="font-semibold text-foreground text-base">
-                Nenhum participante inscrito na banca ainda
-              </p>
-              <p className="text-xs text-muted-foreground mt-1 max-w-md">
-                Utilize o painel lateral à direita para inscrever os alunos elegíveis neste exame de graduação.
-              </p>
-            </CardContent>
-          </Card>
+          <EmptyState
+            title="Nenhum candidato inscrito"
+            description="Inscreva os alunos elegíveis na lista ao lado (abaixo, no celular)."
+          />
         ) : (
           <div className="space-y-6">
             {sortedGroups.map((group) => (
               <div key={group.targetGub} className="space-y-3">
                 {/* Cabeçalho do Grupo de Faixa-Alvo */}
-                <div className="flex items-center justify-between px-1">
-                  <div className="flex items-center gap-2.5">
-                    <BeltProgressionPill
-                      belt={group.targetBelt}
-                      gub={group.targetGub}
-                      size="sm"
-                    />
-                    <h3 className="text-sm font-semibold text-foreground">
-                      Candidatos a Faixa {group.targetBelt} ({group.targetGub === 0 ? "1º Dan" : `${group.targetGub}º GUB`})
-                    </h3>
-                  </div>
-                  <span className="text-xs text-muted-foreground font-medium">
+                <div className="flex items-baseline justify-between gap-3">
+                  <h3 className="text-sm font-semibold">
+                    Para faixa {group.targetBelt} ({group.targetGub === 0 ? "1º dan" : `${group.targetGub}º gub`})
+                  </h3>
+                  <span className="shrink-0 text-sm text-muted-foreground tabular-nums">
                     {group.participants.length} {group.participants.length === 1 ? "aluno" : "alunos"}
                   </span>
                 </div>
@@ -171,15 +129,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                         ["paid", "proof_under_review"].includes(charge.status);
 
                       return (
-                        <Card
-                          key={participant.$id}
-                          className={cn(
-                            "shadow-xs rounded-2xl border-border/80 transition-colors",
-                            isApproved && "bg-success-soft border-border dark:bg-success-soft",
-                            isFailed && "bg-danger-soft border-border dark:bg-danger-soft",
-                            isAbsent && "bg-warning-soft border-border dark:bg-warning-soft"
-                          )}
-                        >
+                        <Card key={participant.$id}>
                           <CardContent className="p-4 sm:p-5 space-y-3">
                             {/* Linha Superior: Aluno, Faixas e Badges */}
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -190,7 +140,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                                   className="size-11"
                                 />
                                 <div className="min-w-0">
-                                  <h4 className="font-semibold text-sm sm:text-base text-foreground truncate">
+                                  <h4 className="truncate text-base font-medium">
                                     {student!.full_name}
                                   </h4>
                                   <div className="mt-1">
@@ -223,8 +173,8 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                             </div>
 
                             {/* Área de Avaliação Táctil de 1 Toque (quando registrado) */}
-                            {isRegistered && bundle.event.status !== "completed" && bundle.event.status !== "cancelled" ? (
-                              <div className="pt-2 border-t border-border/50">
+                            {isRegistered && !eventClosed ? (
+                              <div className="border-t border-border pt-3">
                                 <div className="space-y-3">
                                   <ExamResultActions participantId={participant.$id} eventId={eventId} name={student!.full_name} currentBelt={student!.current_belt ?? "Sem faixa"} targetBelt={participant.target_belt} feeCents={charge?.amount_cents ?? bundle.event.default_fee_cents} />
                                   <div className="flex justify-end">
@@ -234,7 +184,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                                         <Button
                                           variant="ghost"
                                           size="sm"
-                                          className="text-destructive hover:bg-destructive/10 text-xs h-8 px-2"
+                                          className="min-h-11 text-destructive"
                                         >
                                           Cancelar inscrição
                                         </Button>
@@ -256,13 +206,13 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
 
                                           {charge?.status === "paid" ? (
                                             <Field>
-                                              <FieldLabel className="text-xs font-semibold">
+                                              <FieldLabel>
                                                 Tratamento do valor quitado
                                               </FieldLabel>
                                               <select
                                                 name="financial_decision"
                                                 defaultValue="keep_charge"
-                                                className="h-10 w-full rounded-xl border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                                className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                               >
                                                 <option value="keep_charge">
                                                   Manter valor arrecadado (taxa administrativa)
@@ -288,31 +238,14 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                               </div>
                             ) : (
                               /* Resultado Já Homologado */
-                              <div
-                                className={cn(
-                                  "rounded-xl border p-3 space-y-1 text-xs",
-                                  isApproved && "border-border bg-success-soft text-success-foreground dark:border-border dark:bg-success-soft dark:text-success-foreground",
-                                  isFailed && "border-border bg-danger-soft text-destructive dark:border-border dark:bg-danger-soft dark:text-destructive",
-                                  isAbsent && "border-border bg-warning-soft text-warning-foreground dark:border-border dark:bg-warning-soft dark:text-warning-foreground"
-                                )}
-                              >
-                                <div className="flex items-center justify-between font-semibold">
-                                  <span className="flex items-center gap-1.5">
-                                    {isApproved && <CheckCircle2 className="size-4 text-success-foreground dark:text-success-foreground" />}
-                                    {isFailed && <XCircle className="size-4 text-destructive dark:text-destructive" />}
-                                    {isAbsent && <MinusCircle className="size-4 text-warning-foreground dark:text-warning-foreground" />}
-                                    Parecer da banca: {participantLabels[participant.status]}
-                                  </span>
-                                  {isApproved && (
-                                    <span className="text-sm font-semibold text-success-foreground dark:text-success-foreground  ">
-                                      Graduação Homologada
-                                    </span>
-                                  )}
-                                </div>
+                              <div className="space-y-1 border-t border-border pt-3 text-sm">
+                                <p className="font-medium">
+                                  Parecer da banca: {participantLabels[participant.status]}
+                                  {isApproved ? <span className="text-muted-foreground"> · graduação registrada</span> : null}
+                                  {isFailed || isAbsent ? <span className="text-muted-foreground"> · faixa mantida</span> : null}
+                                </p>
                                 {participant.result_notes ? (
-                                  <p className="italic text-foreground/80 pt-0.5">
-                                    &ldquo;{participant.result_notes}&rdquo;
-                                  </p>
+                                  <p className="text-muted-foreground">{participant.result_notes}</p>
                                 ) : null}
                               </div>
                             )}
@@ -331,53 +264,33 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
       {/* ======================================================== */}
       {/* COLUNA LATERAL DE APOIO (35% / 4 de 12 colunas): ELEGÍVEIS */}
       {/* ======================================================== */}
-      <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-6">
-        {/* Card 1: Alunos Elegíveis para Inscrição */}
-        <Card className="shadow-xs rounded-2xl border-border/80">
-          <CardHeader className="p-4 pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <UserPlus className="size-4 text-primary-text" />
-                <CardTitle className="text-base font-semibold">Alunos elegíveis</CardTitle>
-              </div>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
-                {bundle.eligibleStudents.length} aptos
-              </span>
-            </div>
-            <CardDescription className="text-xs">
-              Praticantes com matrícula ativa e próxima graduação disponível para exame.
+      <aside className="space-y-6 lg:col-span-4 lg:sticky lg:top-6">
+        <Card>
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-base font-semibold">Alunos elegíveis</CardTitle>
+            <CardDescription>
+              {bundle.eligibleStudents.length} com matrícula ativa e próxima faixa disponível.
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="p-4 pt-1 space-y-2.5">
+          <CardContent className="p-4 pt-0">
             {bundle.eligibleStudents.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border/80 p-5 text-center text-xs text-muted-foreground">
-                Todos os alunos elegíveis já foram inscritos neste exame.
-              </div>
+              <p className="py-2 text-sm text-muted-foreground">
+                Nenhum aluno elegível fora da banca. Todos os aptos já estão inscritos.
+              </p>
             ) : (
-              <div className="max-h-[460px] overflow-y-auto space-y-2.5 pr-1">
+              <ul className="max-h-[460px] divide-y divide-border overflow-y-auto">
                 {bundle.eligibleStudents.map(({ student, photoDocumentId }) => {
                   const targetGub = (student!.gub! - 1) as GubOption;
                   const targetBelt = beltForGub(targetGub)!;
 
                   return (
-                    <div
-                      key={student!.$id}
-                      className="flex items-center justify-between gap-2.5 rounded-xl border border-border/60 bg-muted/20 p-2.5 hover:border-border transition-colors"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <StudentAvatar
-                          name={student!.full_name}
-                          photoDocumentId={photoDocumentId}
-                          className="size-8"
-                        />
+                    <li key={student!.$id} className="flex items-center justify-between gap-3 py-2.5">
+                      <div className="flex min-w-0 items-center gap-2.5">
+                        <StudentAvatar name={student!.full_name} photoDocumentId={photoDocumentId} className="size-8" />
                         <div className="min-w-0">
-                          <p className="truncate font-semibold text-xs text-foreground">
-                            {student!.full_name}
-                          </p>
-                          <p className="text-sm text-muted-foreground truncate">
-                            ➔ Faixa {targetBelt}
-                          </p>
+                          <p className="truncate text-sm font-medium">{student!.full_name}</p>
+                          <p className="truncate text-sm text-muted-foreground">Para faixa {targetBelt}</p>
                         </div>
                       </div>
 
@@ -385,17 +298,16 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                         trigger={
                           <Button
                             size="sm"
-                            className="h-8 px-2.5 text-xs font-semibold shrink-0"
-                            disabled={
-                              bundle.event.status === "cancelled" ||
-                              bundle.event.status === "completed"
-                            }
+                            variant="outline"
+                            className="min-h-11 shrink-0"
+                            disabled={eventClosed}
+                            aria-label={`Inscrever ${student!.full_name}`}
                           >
                             Inscrever
                           </Button>
                         }
                         title={`Inscrever ${student!.full_name}`}
-                        description="A confirmação registra a inscrição na banca e cria automaticamente uma cobrança individual no financeiro do aluno."
+                        description="A inscrição cria uma cobrança individual no financeiro do aluno."
                       >
                         <form action={addExamParticipantAction} className="space-y-4 pt-2">
                           <input type="hidden" name="event_id" value={eventId} />
@@ -403,19 +315,13 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                           <input type="hidden" name="target_gub" value={targetGub} />
                           <input type="hidden" name="target_belt" value={targetBelt} />
 
-                          <div className="rounded-xl border border-border/60 bg-muted/20 p-3.5 space-y-2 text-xs sm:text-sm">
-                            <div className="flex items-center justify-between">
-                              <span className="text-muted-foreground">Graduação pretendida:</span>
-                              <span className="font-semibold text-foreground">
-                                {targetBelt} ({targetGub}º GUB)
-                              </span>
-                            </div>
-                          </div>
+                          <p className="flex items-center justify-between rounded-lg border border-border p-3 text-sm">
+                            <span className="text-muted-foreground">Graduação pretendida</span>
+                            <span className="font-medium">{targetBelt} ({targetGub}º gub)</span>
+                          </p>
 
                           <Field>
-                            <FieldLabel htmlFor={`fee-${student!.$id}`} className="text-xs sm:text-sm font-semibold">
-                              Taxa individual do exame (R$)
-                            </FieldLabel>
+                            <FieldLabel htmlFor={`fee-${student!.$id}`}>Taxa individual do exame (R$)</FieldLabel>
                             <Input
                               id={`fee-${student!.$id}`}
                               name="fee_reais"
@@ -425,109 +331,83 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                               step="0.01"
                               defaultValue={centsToReaisInput(bundle.event.default_fee_cents)}
                               required
-                              className="h-11 font-mono font-medium"
+                              className="h-11 tabular-nums"
                             />
-                            <FieldDescription className="text-xs">
-                              Será registrada como uma cobrança individual com vencimento na data do exame.
-                            </FieldDescription>
+                            <FieldDescription>Vence na data do exame.</FieldDescription>
                           </Field>
 
-                          <FormSubmitButton
-                            className="h-11 w-full font-medium"
-                            pendingLabel="Inscrevendo aluno…"
-                          >
-                            Confirmar inscrição no exame
+                          <FormSubmitButton className="min-h-11 w-full" pendingLabel="Inscrevendo aluno…">
+                            Confirmar inscrição
                           </FormSubmitButton>
                         </form>
                       </ResponsiveDialog>
-                    </div>
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
             )}
           </CardContent>
         </Card>
 
-        {/* Card 2: Resumo e Informações do Evento */}
-        <Card className="shadow-xs rounded-2xl border-border/80">
+        <Card>
           <CardHeader className="p-4 pb-2">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <Info className="size-4 text-primary-text" />
-              Dados do Evento
-            </CardTitle>
+            <CardTitle className="text-base font-semibold">Resumo do exame</CardTitle>
           </CardHeader>
-          <CardContent className="p-4 pt-1 space-y-2 text-xs">
-            <div className="flex items-center justify-between py-1 border-b border-border/40">
-              <span className="text-muted-foreground">Status do evento:</span>
-              <StatusBadge tone={eventTones[bundle.event.status]}>
-                {eventLabels[bundle.event.status]}
-              </StatusBadge>
-            </div>
-            <div className="flex items-center justify-between py-1 border-b border-border/40">
-              <span className="text-muted-foreground">Taxa padrão:</span>
-              <span className="font-semibold font-mono text-foreground">
-                {formatBrl(bundle.event.default_fee_cents)}
-              </span>
-            </div>
-            <div className="flex items-center justify-between py-1 border-b border-border/40">
-              <span className="text-muted-foreground">Arrecadação prevista:</span>
-              <span className="font-semibold font-mono text-foreground">
-                {formatBrl(
-                  bundle.participants.reduce((sum, p) => sum + p.participant.fee_cents, 0)
-                )}
-              </span>
-            </div>
-            <div className="flex items-center justify-between py-1">
-              <span className="text-muted-foreground">Alunos homologados:</span>
-              <span className="font-semibold text-foreground">
-                {approvedCount} de {bundle.participants.length}
-              </span>
-            </div>
+          <CardContent className="p-4 pt-0">
+            <dl className="divide-y divide-border text-sm">
+              <div className="flex items-center justify-between gap-3 py-2">
+                <dt className="text-muted-foreground">Taxa padrão</dt>
+                <dd className="font-medium tabular-nums">{formatBrl(bundle.event.default_fee_cents)}</dd>
+              </div>
+              <div className="flex items-center justify-between gap-3 py-2">
+                <dt className="text-muted-foreground">Arrecadação prevista</dt>
+                <dd className="font-medium tabular-nums">{formatBrl(bundle.participants.reduce((sum, p) => sum + p.participant.fee_cents, 0))}</dd>
+              </div>
+              <div className="flex items-center justify-between gap-3 py-2">
+                <dt className="text-muted-foreground">Aprovados</dt>
+                <dd className="font-medium tabular-nums">{approvedCount} de {bundle.participants.length}</dd>
+              </div>
+            </dl>
+
+            {!eventClosed ? (
+              <details className="group mt-3 border-t border-border pt-3">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden">
+                  Mais ações
+                  <ChevronDown className="size-4 transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none" aria-hidden="true" />
+                </summary>
+                <div className="space-y-2 pt-2">
+                  <p className="text-sm text-muted-foreground">
+                    Cancelar o exame encerra as inscrições. Trate antes cada inscrição ativa.
+                  </p>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" className="min-h-11 w-full text-destructive">
+                        Cancelar este exame
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Cancelar {bundle.event.name}?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          O evento será marcado como cancelado e não receberá novas inscrições. {bundle.participants.length} {bundle.participants.length === 1 ? "candidato inscrito precisa" : "candidatos inscritos precisam"} ser tratados individualmente.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <form action={cancelExamEventAction}>
+                        <input type="hidden" name="event_id" value={eventId} />
+                        <AlertDialogFooter>
+                          <AlertDialogCancel type="button">Voltar</AlertDialogCancel>
+                          <AlertDialogAction type="submit" variant="destructive">
+                            Confirmar cancelamento
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </form>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </details>
+            ) : null}
           </CardContent>
         </Card>
-
-        {/* Card 3: Ações Administrativas Gerais */}
-        {!["completed", "cancelled"].includes(bundle.event.status) && (
-          <Card className="border-destructive/20 bg-destructive/5 rounded-2xl">
-            <CardContent className="p-4 space-y-2">
-              <div className="flex items-center gap-2 text-destructive font-semibold text-xs">
-                <ShieldAlert className="size-4" />
-                <span>Zona Administrativa</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Deseja cancelar este exame de graduação? Inscrições ativas devem ser tratadas individualmente.
-              </p>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="w-full h-9 text-xs font-semibold mt-1"
-                  >
-                    Cancelar este exame
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Cancelar {bundle.event.name}?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      O evento será marcado como cancelado e não receberá mais novas inscrições. Certifique-se de tratar todas as inscrições ativas antes.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <form action={cancelExamEventAction}>
-                    <input type="hidden" name="event_id" value={eventId} />
-                    <AlertDialogFooter>
-                      <AlertDialogCancel type="button">Voltar</AlertDialogCancel>
-                      <AlertDialogAction type="submit" variant="destructive">
-                        Confirmar cancelamento
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </form>
-                </AlertDialogContent>
-              </AlertDialog>
-            </CardContent>
-          </Card>
-        )}
       </aside>
     </div>
   );
@@ -571,7 +451,7 @@ export default async function ExamDetailPage({
   const notice = query.added
     ? "Aluno inscrito na banca e cobrança gerada com sucesso."
     : query.graded
-      ? "Resultado registrado com sucesso e graduação atualizada!"
+      ? "Resultado registrado e graduação atualizada."
       : query.cancelled
         ? "Inscrição cancelada com sucesso."
         : undefined;
@@ -581,7 +461,8 @@ export default async function ExamDetailPage({
       profile={admin}
       activePath={ROUTES.adminExams}
       title={event.name}
-      subtitle="Gerencie a mesa da banca examinadora, avaliações tácteis de graduação e taxas individuais."
+      subtitle={`${formatExamDate(event.event_date, { weekday: "long", day: "2-digit", month: "long", year: "numeric" })} · ${event.location || "Local não informado"}`}
+      headerActions={<StatusBadge tone={eventTones[event.status]}>{eventLabels[event.status]}</StatusBadge>}
       breadcrumbs={[
         { label: "Exames de faixa", href: ROUTES.adminExams },
         { label: event.name },
@@ -609,51 +490,6 @@ export default async function ExamDetailPage({
             clearParams={["error"]}
           />
         ) : null}
-
-        {/* Resumo Proeminente do Evento (Topo) */}
-        <Card className="shadow-xs rounded-2xl border-border/80 overflow-hidden    ">
-          <CardContent className="p-5 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="space-y-1.5 min-w-0">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary-text border border-primary/20 shrink-0">
-                    <Award className="size-5" />
-                  </div>
-                  <h1 className="text-xl sm:text-2xl font-semibold text-foreground truncate">
-                    {event.name}
-                  </h1>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground pt-1">
-                  <span className="flex items-center gap-1.5 capitalize">
-                    <Calendar className="size-3.5 shrink-0 text-muted-foreground/70" />
-                    {new Date(event.event_date).toLocaleDateString("pt-BR", {
-                      weekday: "long",
-                      day: "2-digit",
-                      month: "long",
-                      year: "numeric",
-                      timeZone: "UTC",
-                    })}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <MapPin className="size-3.5 shrink-0 text-muted-foreground/70" />
-                    <span>{event.location ?? "Dojang Central Ebener TKD"}</span>
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <DollarSign className="size-3.5 shrink-0 text-muted-foreground/70" />
-                    Taxa base: <strong className="font-mono text-foreground">{formatBrl(event.default_fee_cents)}</strong>
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
-                <StatusBadge tone={eventTones[event.status]}>
-                  {eventLabels[event.status]}
-                </StatusBadge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Seções em Layout Assimétrico de 2 Colunas */}
         <Suspense fallback={<ExamSectionsSkeleton />}>

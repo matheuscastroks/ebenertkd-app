@@ -35,8 +35,8 @@ export default async function EnrollmentReviewPage({ params, searchParams }: { p
     <PortalShell
       profile={admin}
       activePath={ROUTES.adminEnrollments}
-      title="Análise da matrícula"
-      subtitle="Revise a ficha, os documentos e as condições do aluno."
+      title={bundle.student.full_name}
+      subtitle="Análise da matrícula: ficha, documentos e condições."
       breadcrumbs={[{ label: "Matrículas", href: ROUTES.adminEnrollments }, { label: bundle.student.full_name }]}
     >
       <div className="mx-auto w-full max-w-6xl">
