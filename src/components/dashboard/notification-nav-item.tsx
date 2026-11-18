@@ -11,6 +11,7 @@ const BellIcon = NAV_ICONS.notifications;
 
 export function NotificationNavItem({ initialCount, active }: { initialCount: number; active?: boolean }) {
   const [count, setCount] = useState(initialCount);
+  const [displayCount, setDisplayCount] = useState(Math.max(1, initialCount));
   const [drawerOpen, setDrawerOpen] = useState(false);
   const countRef = useRef(count);
   const bellIconRef = useRef<AnimatedIconHandle>(null);
@@ -18,6 +19,13 @@ export function NotificationNavItem({ initialCount, active }: { initialCount: nu
   useEffect(() => {
     countRef.current = count;
   }, [count]);
+
+  const pulseBell = useCallback(() => {
+    bellIconRef.current?.startAnimation();
+    window.setTimeout(() => {
+      bellIconRef.current?.stopAnimation();
+    }, 650);
+  }, []);
 
   const notifyUnreadToast = useCallback((unreadCount: number) => {
     if (unreadCount <= 0) return;
@@ -43,13 +51,15 @@ export function NotificationNavItem({ initialCount, active }: { initialCount: nu
   useEffect(() => {
     const timer = window.setTimeout(() => {
       setCount(initialCount);
-      countRef.current = initialCount;
       if (initialCount > 0) {
+        setDisplayCount(initialCount);
+        pulseBell();
         notifyUnreadToast(initialCount);
       }
+      countRef.current = initialCount;
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [initialCount, notifyUnreadToast]);
+  }, [initialCount, notifyUnreadToast, pulseBell]);
 
   useEffect(() => {
     const handleOpen = () => setDrawerOpen(true);
@@ -66,6 +76,7 @@ export function NotificationNavItem({ initialCount, active }: { initialCount: nu
         const payload = (await response.json()) as { count?: number };
         if (!mounted || typeof payload.count !== "number") return;
         if (payload.count > countRef.current) {
+          pulseBell();
           notifyUnreadToast(payload.count);
         } else if (payload.count < countRef.current) {
           try {
@@ -81,6 +92,9 @@ export function NotificationNavItem({ initialCount, active }: { initialCount: nu
         }
         countRef.current = payload.count;
         setCount(payload.count);
+        if (payload.count > 0) {
+          setDisplayCount(payload.count);
+        }
       } catch {
         // Keep the last known count if the device is offline.
       }
@@ -101,7 +115,10 @@ export function NotificationNavItem({ initialCount, active }: { initialCount: nu
       window.removeEventListener("notifications:changed", refresh);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [notifyUnreadToast]);
+  }, [notifyUnreadToast, pulseBell]);
+
+  const hasUnread = count > 0;
+  const formattedCount = displayCount > 99 ? "99+" : String(displayCount);
 
   return (
     <>
@@ -113,21 +130,26 @@ export function NotificationNavItem({ initialCount, active }: { initialCount: nu
           type="button"
           onClick={() => setDrawerOpen(true)}
           isActive={drawerOpen || active}
-          tooltip={count ? `Avisos · ${count} não lidos` : "Avisos"}
-          aria-label={count ? `Avisos, ${count} não lidos` : "Avisos"}
+          tooltip={hasUnread ? `Avisos · ${count} não lidos` : "Avisos"}
+          aria-label={hasUnread ? `Avisos, ${count} não lidos` : "Avisos"}
         >
-          <span className="relative shrink-0">
+          <span className="relative inline-flex shrink-0 items-center justify-center">
             <BellIcon ref={bellIconRef} size={16} strokeWidth={2} aria-hidden="true" className="flex size-4" />
-            {count > 0 ? (
-              <span
-                className="t-badge-pop absolute -right-0.5 -top-0.5 size-1.5 rounded-full bg-primary"
-                aria-hidden="true"
-              />
-            ) : null}
+            <span
+              className="t-badge"
+              data-open={hasUnread ? "true" : "false"}
+              aria-hidden="true"
+            >
+              <span className="t-badge-dot size-2 rounded-full bg-primary ring-2 ring-sidebar" />
+            </span>
           </span>
           <span>Avisos</span>
         </SidebarMenuButton>
-        {count > 0 ? <SidebarMenuBadge className="t-badge-pop">{count > 99 ? "99+" : count}</SidebarMenuBadge> : null}
+        {hasUnread ? (
+          <SidebarMenuBadge className="t-badge-pop bg-primary/15 font-semibold text-primary-text tabular-nums">
+            {formattedCount}
+          </SidebarMenuBadge>
+        ) : null}
       </SidebarMenuItem>
       <NotificationDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />
     </>
