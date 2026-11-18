@@ -14,7 +14,7 @@ import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import type { AttendanceStatus } from "@/features/classes/attendance-rules";
-import { cn } from "cn";
+import { cn } from "@/lib/utils";
 
 type AttendanceRow = {
   classEnrollmentId: string;

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { cn } from "cn";
+import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import type { StatusTone } from "@/components/shared/status-badge";
 

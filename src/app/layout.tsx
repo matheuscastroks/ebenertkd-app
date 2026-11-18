@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import localFont from "next/font/local";
 import { RegisterServiceWorker } from "@/components/pwa/register-sw";
-import { AppwriteConnectionCheck } from "@/components/appwrite/appwrite-connection-check";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
@@ -33,7 +32,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <body className={poppins.variable}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <TooltipProvider>
-            <AppwriteConnectionCheck />
             <RegisterServiceWorker />
             {children}
             <Toaster richColors closeButton position="top-right" />

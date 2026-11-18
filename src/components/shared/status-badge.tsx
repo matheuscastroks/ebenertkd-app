@@ -1,5 +1,5 @@
 import type { ComponentProps } from "react";
-import { cn } from "cn";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 export type StatusTone = "neutral" | "info" | "success" | "warning" | "danger";
