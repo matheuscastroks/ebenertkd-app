@@ -57,6 +57,8 @@ export async function getContract(contractId: string) {
 }
 
 export async function getContractForActor(actor: Profile, contractId: string) {
+  // Contrato, PDF e pedido de rescisão trazem valores: o menor nunca os acessa (regra: menor sem dado financeiro).
+  if (actor.role === "minor_student") throw new Error("minor_cannot_access_contract");
   const contract = await getContract(contractId);
   const bundle = await getEnrollmentBundleByStudentId(contract.student_id);
   await resolveStudentProfile(actor, bundle.student.profile_id);
