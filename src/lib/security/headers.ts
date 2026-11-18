@@ -1,6 +1,6 @@
 export type SecurityHeader = { key: string; value: string };
 
-export function securityHeaders(production: boolean, appwriteEndpoint = "https://fra.cloud.appwrite.io/v1"): SecurityHeader[] {
+export function securityHeaders(production: boolean, appwriteEndpoint = "https://nyc.cloud.appwrite.io/v1"): SecurityHeader[] {
   const endpoint = new URL(appwriteEndpoint);
   const websocketOrigin = `${endpoint.protocol === "https:" ? "wss:" : "ws:"}//${endpoint.host}`;
   const policy = [
