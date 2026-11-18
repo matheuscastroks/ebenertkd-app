@@ -14,6 +14,8 @@ import type { Contract, ContractSignature } from "@/features/contracts/types";
 import type { Enrollment, Student } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { invalidateTags } from "@/lib/cache/invalidate";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 type SignatureContext = { ip?: string | null; userAgent?: string | null };
 
@@ -52,6 +54,17 @@ export async function signContract(actor: Profile, raw: unknown, context: Signat
   const signature = existing.rows[0] ?? await tables.createRow<ContractSignature>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contractSignatures, rowId: ID.unique(), data: { contract_id: contract.$id, signer_profile_id: actor.$id, signer_account_id: actor.account_id, signer_name: actor.full_name, signature_data_url: input.signatureDataUrl, content_hash: contract.content_hash, ip_fingerprint: privacyIpFingerprint(context.ip), user_agent: context.userAgent?.slice(0, 512), accepted_at: now, created_at: now }, permissions: [] });
   const pdf = await buildSignedContractPdf(contract, signature.signer_name, signature.signature_data_url, signature.accepted_at);
   const result = await reconcileSignedContract(contract, signature, pdf);
+  invalidateTags(
+    CACHE_TAGS.contracts,
+    CACHE_TAGS.contract(contract.$id),
+    CACHE_TAGS.enrollments,
+    CACHE_TAGS.studentsAll,
+    CACHE_TAGS.student(bundle.student.$id),
+    CACHE_TAGS.studentProfile(bundle.student.profile_id),
+    CACHE_TAGS.billingCharges,
+    CACHE_TAGS.charges(bundle.student.$id),
+    CACHE_TAGS.classEnrollments
+  );
   await writeAuditEvent("contract.signed", actor.account_id, "contract", contract.$id, { signer_profile_id: actor.$id, pdf_hash: result.pdfHash });
   return { contractId: contract.$id, ...result };
 }

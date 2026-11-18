@@ -1,6 +1,5 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
 import { ID, Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import { contractTemplateSchema } from "@/features/contracts/schemas";
@@ -9,6 +8,8 @@ import type { ContractTemplate, ContractVersion } from "@/features/contracts/typ
 import { writeAuditEvent } from "@/features/auth/service";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { cachedRead } from "@/lib/cache/cached-read";
+import { invalidateTags } from "@/lib/cache/invalidate";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 
 export const DEFAULT_CONTRACT_CONTENT = `CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE TAEKWONDO
@@ -23,25 +24,29 @@ O aluno ou responsável declara que as informações de saúde fornecidas são v
 
 const sampleVariables = Object.fromEntries(CONTRACT_VARIABLES.map((key) => [key, "Exemplo"])) as Record<(typeof CONTRACT_VARIABLES)[number], string>;
 
-export const getContractTemplate = unstable_cache(
-  async () => {
-    const { tables, config } = createAppwriteAdminClient();
-    const rows = await tables.listRows<ContractTemplate>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contractTemplates, queries: [Query.limit(1)] });
-    return rows.rows[0] ?? null;
-  },
-  ["get-contract-template"],
-  { tags: [CACHE_TAGS.contractTemplate], revalidate: 300 }
-);
+async function readContractTemplate() {
+  const { tables, config } = createAppwriteAdminClient();
+  const rows = await tables.listRows<ContractTemplate>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contractTemplates, queries: [Query.limit(1)] });
+  return rows.rows[0] ?? null;
+}
+
+export function getContractTemplate() {
+  return cachedRead(
+    { name: "get-contract-template", key: [], tags: [CACHE_TAGS.contractTemplate], revalidate: 300 },
+    readContractTemplate
+  );
+}
 
 export async function saveContractTemplateDraft(actor: Profile, raw: unknown) {
   const input = contractTemplateSchema.parse(raw);
   renderContractTemplate(input.content, sampleVariables);
-  const existing = await getContractTemplate();
+  const existing = await readContractTemplate();
   const { tables, config } = createAppwriteAdminClient();
   const now = new Date().toISOString();
   const template = existing
     ? await tables.updateRow<ContractTemplate>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contractTemplates, rowId: existing.$id, data: { name: input.name, draft_content: input.content, updated_by_account_id: actor.account_id, updated_at: now } })
     : await tables.createRow<ContractTemplate>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contractTemplates, rowId: ID.unique(), data: { name: input.name, draft_content: input.content, created_by_account_id: actor.account_id, updated_by_account_id: actor.account_id, created_at: now, updated_at: now }, permissions: [] });
+  invalidateTags(CACHE_TAGS.contractTemplate);
   await writeAuditEvent("contract.template_saved", actor.account_id, "contract_template", template.$id);
   return template;
 }
@@ -59,12 +64,13 @@ export async function publishContractTemplate(actor: Profile, raw: unknown) {
     permissions: []
   });
   await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contractTemplates, rowId: template.$id, data: { published_version_id: version.$id, updated_at: now } });
+  invalidateTags(CACHE_TAGS.contractTemplate);
   await writeAuditEvent("contract.template_published", actor.account_id, "contract_version", version.$id, { version: version.version });
   return version;
 }
 
 export async function getPublishedContractVersion() {
-  const template = await getContractTemplate();
+  const template = await readContractTemplate();
   if (!template?.published_version_id) throw new Error("published_contract_template_required");
   const { tables, config } = createAppwriteAdminClient();
   return tables.getRow<ContractVersion>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contractVersions, rowId: template.published_version_id });

@@ -11,6 +11,8 @@ import { getEnrollmentBundleByStudentId } from "@/features/students/service";
 import type { DocumentType, Student, StudentDocument } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { invalidateTags } from "@/lib/cache/invalidate";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { notifyAdmins } from "@/features/notifications/notification-service";
 
 function filePermissions(target: Profile, actor: Profile) {
@@ -84,6 +86,7 @@ export async function uploadStudentDocument(
       student_id: studentId,
       document_type: documentType
     });
+    invalidateTags(CACHE_TAGS.enrollments, CACHE_TAGS.student(studentId), CACHE_TAGS.studentProfile(target.$id));
     await notifyAdmins({ title: "Documento aguardando análise", body: `${bundle.student.full_name} enviou ${documentType === "profile_photo" ? "uma foto de perfil" : "um atestado médico"}.`, dedupeKey: `document-pending:${document.$id}:${document.updated_at}`, actionUrl: `/admin/matriculas/${studentId}` }).catch(() => undefined);
     return document;
   } catch (error) {
@@ -137,6 +140,7 @@ export async function reviewStudentDocument(
     document_id: documentId,
     document_type: document.document_type
   });
+  invalidateTags(CACHE_TAGS.enrollments, CACHE_TAGS.student(document.student_id), CACHE_TAGS.studentProfile(bundle.student.profile_id));
 }
 
 export async function listEnrollmentReviews(studentId: string) {

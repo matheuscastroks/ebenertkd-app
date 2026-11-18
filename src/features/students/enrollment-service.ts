@@ -8,6 +8,8 @@ import { canTransitionEnrollment, hasApprovedRequiredDocuments, hasRequiredSubmi
 import { getEnrollmentBundleByStudentId, getOrCreateEnrollmentBundle } from "@/features/students/service";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { invalidateTags } from "@/lib/cache/invalidate";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { getTrainingClass } from "@/features/classes/service";
 import { issueContractForEnrollment } from "@/features/contracts/contract-service";
 import { beltForGub, type GubOption } from "@/features/students/options";
@@ -78,6 +80,7 @@ export async function saveEnrollmentDraft(target: Profile, actor: Profile, input
   });
 
   const auditAction = isDraft ? (submit ? "enrollment.submitted" : "enrollment.draft_saved") : "student.updated";
+  invalidateTags(CACHE_TAGS.enrollments, CACHE_TAGS.studentsAll, CACHE_TAGS.student(student.$id), CACHE_TAGS.studentProfile(target.$id));
   await writeAuditEvent(auditAction, actor.account_id, "enrollment", enrollment.$id, { student_id: student.$id });
   if (isDraft && submit) {
     await notifyAdmins({
@@ -140,6 +143,7 @@ export async function adminUpdateStudent(actor: Profile, studentId: string, inpu
   });
 
   await recordReview(actor, studentId, bundle.enrollment.$id, "student_updated", "Dados cadastrais atualizados pelo professor", input);
+  invalidateTags(CACHE_TAGS.enrollments, CACHE_TAGS.studentsAll, CACHE_TAGS.student(studentId), CACHE_TAGS.studentProfile(bundle.student.profile_id));
   await writeAuditEvent("student.updated_by_admin", actor.account_id, "student", studentId, { changes: input });
   return updatedStudent;
 }
@@ -179,6 +183,7 @@ export async function saveFinancialReview(actor: Profile, studentId: string, raw
     }
   });
   await recordReview(actor, studentId, enrollment.$id, "financial_updated", undefined, input);
+  invalidateTags(CACHE_TAGS.enrollments, CACHE_TAGS.student(studentId));
 }
 
 export async function advanceToSignature(actor: Profile, studentId: string) {
@@ -201,5 +206,6 @@ export async function advanceToSignature(actor: Profile, studentId: string) {
   const { tables, config } = createAppwriteAdminClient();
   await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, rowId: bundle.enrollment.$id, data: { status: "awaiting_signature", revision: bundle.enrollment.revision + 1, updated_at: new Date().toISOString() } });
   await recordReview(actor, studentId, bundle.enrollment.$id, "awaiting_signature");
+  invalidateTags(CACHE_TAGS.enrollments, CACHE_TAGS.student(studentId), CACHE_TAGS.contracts);
   return contract;
 }

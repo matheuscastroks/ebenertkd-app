@@ -10,6 +10,8 @@ import type { AttendanceRecord, ClassEnrollment, Lesson } from "@/features/class
 import type { Student, StudentDocument } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { invalidateTags } from "@/lib/cache/invalidate";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 const attendanceId = (lessonId: string, classEnrollmentId: string) => createHash("sha256").update(`${lessonId}:${classEnrollmentId}`).digest("hex").slice(0, 36);
 
@@ -86,6 +88,12 @@ export async function saveAttendanceBatch(actor: Profile, raw: unknown) {
     await tables.updateTransaction({ transactionId: transaction.$id, rollback: true }).catch(() => undefined);
     throw error;
   }
+  invalidateTags(
+    CACHE_TAGS.lesson(sheet.lesson.$id),
+    CACHE_TAGS.classLessons(sheet.lesson.training_class_id),
+    CACHE_TAGS.attendanceAll,
+    ...sheet.rows.map((row) => CACHE_TAGS.attendance(row.classEnrollment.student_id))
+  );
   await writeAuditEvent(correcting ? "attendance.corrected" : "attendance.recorded", actor.account_id, "lesson", sheet.lesson.$id, { records: input.records.length, correction_reason: input.correctionReason });
   return getAttendanceSheet(sheet.lesson.$id);
 }

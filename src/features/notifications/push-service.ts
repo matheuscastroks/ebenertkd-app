@@ -10,6 +10,8 @@ import type { AppNotification, BrowserPushSubscription, NotificationDelivery, No
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { safeErrorMessage } from "@/lib/security/safe-error";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { invalidateTags } from "@/lib/cache/invalidate";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { buildPushPayload } from "@/features/notifications/push-payload";
 import { getNotificationPreferences, pushAllowed } from "@/features/notifications/preferences-service";
 
@@ -34,8 +36,11 @@ export async function savePushSubscription(actor: Profile, raw: unknown, userAge
   const hash = endpointHash(input.endpoint);
   const existing = await tables.listRows<PushSubscriptionRecord>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.pushSubscriptions, queries: [Query.equal("endpoint_hash", [hash]), Query.limit(1)] });
   const data = { profile_id: actor.$id, account_id: actor.account_id, subscription_ciphertext: encryptSubscription(input), user_agent: userAgent?.slice(0, 512), status: "active" as const, last_seen_at: now, updated_at: now };
-  if (existing.rows[0]) return tables.updateRow<PushSubscriptionRecord>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.pushSubscriptions, rowId: existing.rows[0].$id, data });
-  return tables.createRow<PushSubscriptionRecord>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.pushSubscriptions, rowId: ID.unique(), permissions: [], data: { ...data, endpoint_hash: hash, created_at: now } });
+  const saved = existing.rows[0]
+    ? await tables.updateRow<PushSubscriptionRecord>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.pushSubscriptions, rowId: existing.rows[0].$id, data })
+    : await tables.createRow<PushSubscriptionRecord>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.pushSubscriptions, rowId: ID.unique(), permissions: [], data: { ...data, endpoint_hash: hash, created_at: now } });
+  invalidateTags(CACHE_TAGS.push(actor.$id));
+  return saved;
 }
 
 export async function revokePushSubscription(actor: Profile, endpoint: string) {
@@ -43,6 +48,7 @@ export async function revokePushSubscription(actor: Profile, endpoint: string) {
   const found = await tables.listRows<PushSubscriptionRecord>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.pushSubscriptions, queries: [Query.equal("endpoint_hash", [endpointHash(endpoint)]), Query.equal("account_id", [actor.account_id]), Query.limit(1)] });
   if (!found.rows[0]) return;
   await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.pushSubscriptions, rowId: found.rows[0].$id, data: { status: "revoked", updated_at: new Date().toISOString() } });
+  invalidateTags(CACHE_TAGS.push(actor.$id));
 }
 
 export async function hasActivePushSubscription(actor: Profile) {

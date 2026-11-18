@@ -9,6 +9,8 @@ import type { Lesson, TrainingClass } from "@/features/classes/types";
 import { writeAuditEvent } from "@/features/auth/service";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { invalidateTags } from "@/lib/cache/invalidate";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 const lessonDateTime = (date: string) => `${canonicalLessonDate(date)}T12:00:00.000Z`;
 const lessonId = (classId: string, date: string, startTime: string) => createHash("sha256").update(`${classId}:${date}:${startTime}`).digest("hex").slice(0, 36);
@@ -30,6 +32,7 @@ export async function createLesson(actor: Profile, raw: unknown) {
       permissions: [],
       data: { training_class_id: trainingClass.$id, lesson_date: lessonDateTime(date), start_time: input.startTime, end_time: input.endTime, lesson_type: input.lessonType, status: "open", created_by_account_id: actor.account_id, created_at: now, updated_at: now }
     });
+    invalidateTags(CACHE_TAGS.classLessons(trainingClass.$id));
     await writeAuditEvent("lesson.created", actor.account_id, "lesson", lesson.$id, { lesson_type: input.lessonType, lesson_date: date });
     return lesson;
   } catch (error) {

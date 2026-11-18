@@ -9,6 +9,8 @@ import type { PaymentProof } from "@/features/billing/types";
 import { detectFileKind, MAX_DOCUMENT_BYTES } from "@/features/students/rules";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { invalidateTags } from "@/lib/cache/invalidate";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { notifyAdmins } from "@/features/notifications/notification-service";
 
 function validateProof(file: File, bytes: Uint8Array) {
@@ -38,6 +40,7 @@ export async function uploadPaymentProof(actor: Profile, chargeId: string, file:
     const proof = await tables.createRow<PaymentProof>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.paymentProofs, rowId: ID.unique(), data: { charge_id: charge.$id, file_id: fileRow.$id, original_name: file.name, mime_type: mimeType, size_bytes: file.size, version, status: "pending", uploaded_by_account_id: actor.account_id, created_at: now, updated_at: now }, permissions: [] });
     if (previous.rows[0]?.status === "pending") await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.paymentProofs, rowId: previous.rows[0].$id, data: { status: "superseded", updated_at: now } });
     await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: charge.$id, data: { status: "proof_under_review", updated_at: now } });
+    invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(charge.student_id));
     await writeAuditEvent("billing.proof.uploaded", actor.account_id, "payment_proof", proof.$id, { charge_id: charge.$id, version });
     await notifyAdmins({ title: "Comprovante aguardando análise", body: `${bundle.student.full_name} enviou um comprovante de pagamento.`, dedupeKey: `payment-proof-pending:${proof.$id}`, actionUrl: "/admin/financeiro" }).catch(() => undefined);
     return proof;

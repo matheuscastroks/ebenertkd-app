@@ -1,6 +1,5 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
 import { ID, Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import { writeAuditEvent } from "@/features/auth/service";
@@ -8,28 +7,32 @@ import { trainingClassSchema } from "@/features/classes/schemas";
 import type { TrainingClass } from "@/features/classes/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { cachedRead } from "@/lib/cache/cached-read";
+import { invalidateTags } from "@/lib/cache/invalidate";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 
-export const listTrainingClasses = unstable_cache(
-  async (includeInactive = false) => {
-    const { tables, config } = createAppwriteAdminClient();
-    const queries = [Query.orderAsc("name"), Query.limit(100)];
-    if (!includeInactive) queries.push(Query.equal("status", ["active"]));
-    const result = await tables.listRows<TrainingClass>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.trainingClasses, queries });
-    return result.rows;
-  },
-  ["list-training-classes"],
-  { tags: [CACHE_TAGS.trainingClasses], revalidate: 300 }
-);
+export function listTrainingClasses(includeInactive = false) {
+  return cachedRead(
+    { name: "list-training-classes", key: [includeInactive], tags: [CACHE_TAGS.trainingClasses], revalidate: 300 },
+    async () => {
+      const { tables, config } = createAppwriteAdminClient();
+      const queries = [Query.orderAsc("name"), Query.limit(100)];
+      if (!includeInactive) queries.push(Query.equal("status", ["active"]));
+      const result = await tables.listRows<TrainingClass>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.trainingClasses, queries });
+      return result.rows;
+    }
+  );
+}
 
-export const getTrainingClass = unstable_cache(
-  async (classId: string) => {
-    const { tables, config } = createAppwriteAdminClient();
-    return tables.getRow<TrainingClass>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.trainingClasses, rowId: classId });
-  },
-  ["get-training-class"],
-  { tags: [CACHE_TAGS.trainingClasses], revalidate: 300 }
-);
+export function getTrainingClass(classId: string) {
+  return cachedRead(
+    { name: "get-training-class", key: [classId], tags: [CACHE_TAGS.trainingClasses, CACHE_TAGS.trainingClass(classId)], revalidate: 300 },
+    async () => {
+      const { tables, config } = createAppwriteAdminClient();
+      return tables.getRow<TrainingClass>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.trainingClasses, rowId: classId });
+    }
+  );
+}
 
 export async function createTrainingClass(actor: Profile, raw: unknown) {
   if (actor.role !== "admin") throw new Error("admin_required");
@@ -37,6 +40,7 @@ export async function createTrainingClass(actor: Profile, raw: unknown) {
   const { tables, config } = createAppwriteAdminClient();
   const now = new Date().toISOString();
   const row = await tables.createRow<TrainingClass>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.trainingClasses, rowId: ID.unique(), permissions: [], data: { name: input.name, weekdays: input.weekdays, start_time: input.startTime, end_time: input.endTime, location: input.location, capacity: input.capacity, status: "active", created_by_account_id: actor.account_id, created_at: now, updated_at: now } });
+  invalidateTags(CACHE_TAGS.trainingClasses, CACHE_TAGS.trainingClass(row.$id));
   await writeAuditEvent("training_class.created", actor.account_id, "training_class", row.$id);
   return row;
 }
@@ -46,6 +50,7 @@ export async function updateTrainingClass(actor: Profile, classId: string, raw: 
   const input = trainingClassSchema.parse(raw);
   const { tables, config } = createAppwriteAdminClient();
   await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.trainingClasses, rowId: classId, data: { name: input.name, weekdays: input.weekdays, start_time: input.startTime, end_time: input.endTime, location: input.location, capacity: input.capacity, updated_at: new Date().toISOString() } });
+  invalidateTags(CACHE_TAGS.trainingClasses, CACHE_TAGS.trainingClass(classId));
   await writeAuditEvent("training_class.updated", actor.account_id, "training_class", classId);
 }
 
@@ -53,5 +58,6 @@ export async function setTrainingClassStatus(actor: Profile, classId: string, st
   if (actor.role !== "admin") throw new Error("admin_required");
   const { tables, config } = createAppwriteAdminClient();
   await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.trainingClasses, rowId: classId, data: { status, updated_at: new Date().toISOString() } });
+  invalidateTags(CACHE_TAGS.trainingClasses, CACHE_TAGS.trainingClass(classId));
   await writeAuditEvent(`training_class.${status}`, actor.account_id, "training_class", classId);
 }

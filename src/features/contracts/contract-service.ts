@@ -10,6 +10,8 @@ import { resolveStudentProfile } from "@/features/students/access";
 import { getEnrollmentBundleByStudentId } from "@/features/students/service";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { invalidateTags } from "@/lib/cache/invalidate";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 const dateLabel = (value: string) => new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(new Date(value));
 const moneyLabel = (cents: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
@@ -47,6 +49,7 @@ export async function issueContractForEnrollment(actor: Profile, studentId: stri
   });
   const now = new Date().toISOString();
   const contract = await tables.createRow<Contract>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contracts, rowId: ID.unique(), data: { enrollment_id: enrollment.$id, student_id: student.$id, version_id: version.$id, version_number: version.version, status: "pending_signature", content_snapshot: snapshot, content_hash: hashContent(snapshot), student_name: student.full_name, guardian_name: guardian?.full_name, monthly_fee_cents: enrollment.monthly_fee_cents - (enrollment.discount_cents ?? 0), starts_at: enrollment.contract_start, ends_at: enrollment.contract_end, created_by_account_id: actor.account_id, created_at: now, updated_at: now }, permissions: [] });
+  invalidateTags(CACHE_TAGS.contracts, CACHE_TAGS.contract(contract.$id), CACHE_TAGS.student(student.$id));
   await writeAuditEvent("contract.issued", actor.account_id, "contract", contract.$id, { enrollment_id: enrollment.$id, version: version.version });
   return contract;
 }

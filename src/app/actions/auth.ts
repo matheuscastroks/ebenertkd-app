@@ -27,6 +27,8 @@ import { ROUTES } from "@/lib/navigation/routes";
 import { appwriteSessionCookie, createAppwriteSessionClient } from "@/lib/appwrite/session";
 import { getCurrentProfile } from "@/lib/auth/session";
 import { revokePushSubscription } from "@/features/notifications/push-service";
+import { invalidateTags } from "@/lib/cache/invalidate";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 const genericLoginError = encodeURIComponent("Credenciais inválidas.");
 
@@ -140,9 +142,10 @@ export async function confirmRecoveryAction(formData: FormData) {
 
 export async function logoutAction(formData?: FormData) {
   const endpoint = formData?.get("push_endpoint");
+  const current = await getCurrentProfile().catch(() => null);
   if (typeof endpoint === "string" && endpoint.length > 0 && endpoint.length <= 2048) {
     try {
-      const actor = await getCurrentProfile();
+      const actor = current;
       if (actor) await revokePushSubscription(actor, endpoint);
     } catch {
       // Push cleanup must not block signing out; revoke is scoped to actor + endpoint.
@@ -155,5 +158,6 @@ export async function logoutAction(formData?: FormData) {
     // Remove the local cookie even if the remote session is already expired.
   }
   (await cookies()).delete(APPWRITE_SESSION_COOKIE);
+  if (current) invalidateTags(CACHE_TAGS.profileAccount(current.account_id));
   redirect("/");
 }

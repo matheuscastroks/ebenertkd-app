@@ -12,6 +12,9 @@ import { inboxItemView, notificationView } from "@/features/notifications/notifi
 import type { Student } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { cachedRead } from "@/lib/cache/cached-read";
+import { invalidateTags } from "@/lib/cache/invalidate";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 const publishSchema = z.object({
   title: z.string().trim().min(3).max(128),
@@ -79,6 +82,10 @@ export async function createNotification(input: { kind: NotificationKind; title:
     }
     await deliverNotificationPush(notification, recipient).catch(() => undefined);
   }
+  invalidateTags(
+    input.kind === "announcement" && CACHE_TAGS.announcements,
+    ...input.recipientProfiles.map((profile) => CACHE_TAGS.notifications(profile.$id))
+  );
   return notification;
 }
 
@@ -111,10 +118,20 @@ export async function listInbox(profile: Profile): Promise<InboxItem[]> {
   });
 }
 
-export async function countUnreadNotifications(profile: Profile) {
-  const { tables, config } = createAppwriteAdminClient();
-  const result = await tables.listRows<NotificationRecipient>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationRecipients, queries: [Query.equal("profile_id", [profile.$id]), Query.isNull("read_at"), Query.limit(1)] });
-  return result.total;
+export function countUnreadNotifications(profile: Profile) {
+  const profileId = profile.$id;
+  return cachedRead(
+    { name: "count-unread-notifications", key: [profileId], tags: [CACHE_TAGS.notifications(profileId)], revalidate: 20 },
+    async () => {
+      const { tables, config } = createAppwriteAdminClient();
+      const result = await tables.listRows<NotificationRecipient>({
+        databaseId: config.databaseId,
+        tableId: APPWRITE_IDS.tables.notificationRecipients,
+        queries: [Query.equal("profile_id", [profileId]), Query.isNull("read_at"), Query.limit(1)]
+      });
+      return result.total;
+    }
+  );
 }
 
 export async function listSentAnnouncements(profile: Profile) {
@@ -135,6 +152,7 @@ export async function markNotificationRead(profile: Profile, recipientId: string
   const recipient = await tables.getRow<NotificationRecipient>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationRecipients, rowId: recipientId });
   if (recipient.profile_id !== profile.$id) throw new Error("notification_access_denied");
   if (!recipient.read_at) await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationRecipients, rowId: recipient.$id, data: { read_at: new Date().toISOString(), updated_at: new Date().toISOString() } });
+  invalidateTags(CACHE_TAGS.notifications(profile.$id));
 }
 
 export async function markAllNotificationsRead(profile: Profile) {
@@ -155,6 +173,7 @@ export async function markAllNotificationsRead(profile: Profile) {
       })
     )
   );
+  invalidateTags(CACHE_TAGS.notifications(profile.$id));
 }
 
 export async function listNotificationAudienceOptions() {

@@ -1,30 +1,30 @@
 import "server-only";
 
 import { cache } from "react";
-import { Query } from "node-appwrite";
 import { redirect } from "next/navigation";
 import type { AppCapability, AppRole } from "@/lib/auth/auth-utils";
 import { resolveDashboardPath } from "@/lib/auth/auth-utils";
-import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteSessionClient } from "@/lib/appwrite/session";
 import type { Profile } from "@/features/auth/types";
 import { hasCapability } from "@/features/auth/permissions";
+import { getProfileByAccountId } from "@/features/profiles/profile-read";
 
 export type ProfileRecord = Profile;
 
+/**
+ * `account.get()` roda a cada requisição, SEM cache: logout e revogação de sessão valem na hora.
+ * Só a busca do perfil por `account_id` é cacheada (60 s, tag `profile-account:<id>`); o status
+ * `active` e a conta dona da linha são conferidos aqui, fora do cache.
+ */
 export const getCurrentProfile = cache(async function getCurrentProfile() {
   const appwrite = await createAppwriteSessionClient();
   if (!appwrite) return null;
 
   try {
     const account = await appwrite.account.get();
-    const result = await appwrite.tables.listRows<Profile>({
-      databaseId: APPWRITE_IDS.database,
-      tableId: APPWRITE_IDS.tables.profiles,
-      queries: [Query.equal("account_id", [account.$id]), Query.limit(1)]
-    });
-    const profile = result.rows[0] ?? null;
-    return profile?.status === "active" ? profile : null;
+    const profile = await getProfileByAccountId(account.$id);
+    if (!profile || profile.account_id !== account.$id) return null;
+    return profile.status === "active" ? profile : null;
   } catch {
     return null;
   }
