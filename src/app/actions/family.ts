@@ -35,14 +35,24 @@ export async function resetMinorPasswordAction(formData: FormData) {
   const minorProfileId = String(formData.get("minor_profile_id") ?? "");
   const password = String(formData.get("password") ?? "");
   if (!minorProfileId || password.length < 8) redirect(`${ROUTES.guardianDependents}?error=password`);
-  await resetMinorPassword(guardian, minorProfileId, password);
+  try {
+    await resetMinorPassword(guardian, minorProfileId, password);
+  } catch {
+    redirect(`${ROUTES.guardianDependents}?error=minor`);
+  }
   revalidatePath(ROUTES.guardianDependents);
+  redirect(`${ROUTES.guardianDependents}?reset=1`);
 }
 
 export async function revokeMinorSessionsAction(formData: FormData) {
   const guardian = await requireCapability("guardian");
   const minorProfileId = String(formData.get("minor_profile_id") ?? "");
   if (!minorProfileId) redirect(`${ROUTES.guardianDependents}?error=minor`);
-  await revokeMinorSessions(guardian, minorProfileId);
+  try {
+    await revokeMinorSessions(guardian, minorProfileId);
+  } catch {
+    redirect(`${ROUTES.guardianDependents}?error=minor`);
+  }
   revalidatePath(ROUTES.guardianDependents);
+  redirect(`${ROUTES.guardianDependents}?revoked=1`);
 }
