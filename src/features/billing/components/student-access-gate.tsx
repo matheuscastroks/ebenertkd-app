@@ -123,9 +123,9 @@ export function StudentAccessGate({
     parqStatus === "expired" && !pathname.startsWith(ROUTES.studentParq);
 
   return (
-    <div className="w-full min-w-0">
+    <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col">
       {showLockedFinanceBanner ? (
-        <div className="mx-auto w-full max-w-6xl px-4 pt-4 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-6xl shrink-0 px-4 pt-4 sm:px-6 lg:px-8">
           <Alert>
             <AlertTitle>Acesso às demais áreas pausado até a regularização mensal</AlertTitle>
             <AlertDescription>

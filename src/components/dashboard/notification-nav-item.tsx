@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { toast } from "sonner";
 import { NAV_ICONS } from "@/lib/navigation/nav-icons";
 import type { AnimatedIconHandle } from "@/lib/use-parent-hover-animation";
@@ -9,15 +17,34 @@ import { cn } from "@/lib/utils";
 
 const BellIcon = NAV_ICONS.notifications;
 
-export function NotificationTopButton({
+const NotificationCountContext = createContext<number | undefined>(undefined);
+
+export function NotificationCountProvider({
+  initialCount,
+  children,
+}: {
+  initialCount: number;
+  children: ReactNode;
+}) {
+  return (
+    <NotificationCountContext.Provider value={initialCount}>
+      {children}
+    </NotificationCountContext.Provider>
+  );
+}
+
+export function NotificationHeaderButton({
   initialCount,
   className,
 }: {
-  initialCount: number;
+  initialCount?: number;
   className?: string;
 }) {
-  const [count, setCount] = useState(initialCount);
-  const [displayCount, setDisplayCount] = useState(Math.max(1, initialCount));
+  const contextCount = useContext(NotificationCountContext);
+  const resolvedInitialCount = initialCount ?? contextCount ?? 0;
+
+  const [count, setCount] = useState(resolvedInitialCount);
+  const [displayCount, setDisplayCount] = useState(Math.max(1, resolvedInitialCount));
   const [drawerOpen, setDrawerOpen] = useState(false);
   const countRef = useRef(count);
   const bellIconRef = useRef<AnimatedIconHandle>(null);
@@ -56,16 +83,16 @@ export function NotificationTopButton({
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      setCount(initialCount);
-      if (initialCount > 0) {
-        setDisplayCount(initialCount);
+      setCount(resolvedInitialCount);
+      if (resolvedInitialCount > 0) {
+        setDisplayCount(resolvedInitialCount);
         pulseBell();
-        notifyUnreadToast(initialCount);
+        notifyUnreadToast(resolvedInitialCount);
       }
-      countRef.current = initialCount;
+      countRef.current = resolvedInitialCount;
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [initialCount, notifyUnreadToast, pulseBell]);
+  }, [resolvedInitialCount, notifyUnreadToast, pulseBell]);
 
   useEffect(() => {
     const handleOpen = () => setDrawerOpen(true);
@@ -137,8 +164,8 @@ export function NotificationTopButton({
         aria-expanded={drawerOpen}
         title={hasUnread ? `Avisos · ${count} não lidos` : "Avisos"}
         className={cn(
-          "fixed right-4 top-4 z-30 inline-flex size-10 items-center justify-center rounded-full border border-border/80 bg-card/85 text-foreground shadow-xs backdrop-blur-md transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none md:right-6 md:top-5",
-          drawerOpen && "border-primary/40 bg-card text-primary-text",
+          "relative inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-sidebar-border/80 bg-background/80 text-sidebar-foreground shadow-xs transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none",
+          drawerOpen && "border-primary/40 bg-background text-primary-text",
           className
         )}
       >
@@ -150,11 +177,11 @@ export function NotificationTopButton({
           className="flex size-4.5"
         />
         <span
-          className="t-badge pointer-events-none absolute -right-1 -top-1"
+          className="t-badge pointer-events-none absolute -right-0.5 -top-0.5"
           data-open={hasUnread ? "true" : "false"}
           aria-hidden="true"
         >
-          <span className="t-badge-dot flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold leading-none text-primary-foreground tabular-nums shadow-xs ring-2 ring-background">
+          <span className="t-badge-dot flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold leading-none text-primary-foreground tabular-nums shadow-xs ring-2 ring-sidebar">
             {formattedCount}
           </span>
         </span>
@@ -163,3 +190,5 @@ export function NotificationTopButton({
     </>
   );
 }
+
+export { NotificationHeaderButton as NotificationTopButton };
