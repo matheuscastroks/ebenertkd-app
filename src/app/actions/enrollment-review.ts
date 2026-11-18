@@ -2,6 +2,7 @@
 
 import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
+import { setStudentAccessOverride } from "@/features/billing/access-lock-service";
 import { reviewStudentDocument } from "@/features/students/document-service";
 import { advanceToSignature, adminUpdateStudent, saveFinancialReview } from "@/features/students/enrollment-service";
 import type { BeltOption } from "@/features/students/options";
@@ -110,4 +111,19 @@ export async function adminUpdateStudentAction(formData: FormData) {
   updateTag(CACHE_TAGS.enrollments);
   revalidatePath(reviewPath(studentId));
   redirect(reviewPath(studentId, "?updated=student"));
+}
+
+export async function setAccessOverrideAction(formData: FormData) {
+  const admin = await requireProfile("admin");
+  const studentId = String(formData.get("student_id") ?? "");
+  const clear = formData.get("clear_override") === "1";
+  const overrideUntil = clear ? null : String(formData.get("access_override_until") ?? "").trim() || null;
+  try {
+    await setStudentAccessOverride(admin, studentId, overrideUntil);
+  } catch {
+    redirect(reviewPath(studentId, "?error=access_override"));
+  }
+  updateTag(CACHE_TAGS.enrollments);
+  revalidatePath(reviewPath(studentId));
+  redirect(reviewPath(studentId, "?updated=access_override"));
 }

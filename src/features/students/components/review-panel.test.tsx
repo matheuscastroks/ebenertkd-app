@@ -5,7 +5,8 @@ vi.mock("@/app/actions/enrollment-review", () => ({
   advanceToSignatureAction: vi.fn(),
   adminUpdateStudentAction: vi.fn(),
   reviewDocumentAction: vi.fn(),
-  saveFinancialReviewAction: vi.fn()
+  saveFinancialReviewAction: vi.fn(),
+  setAccessOverrideAction: vi.fn()
 }));
 
 vi.mock("@/app/actions/renewals", () => ({

@@ -28,6 +28,8 @@ export const CACHE_TAGS = {
   student: (studentId: string) => `student:${studentId}`,
   studentProfile: (profileId: string) => `student-profile:${profileId}`,
   studentsAll: "students-all",
+  parq: (studentId: string) => `parq:${studentId}`,
+  parqAll: "parq-all",
   charges: (studentId: string) => `charges:${studentId}`,
   attendance: (studentId: string) => `attendance:${studentId}`,
   attendanceAll: "attendance-all",

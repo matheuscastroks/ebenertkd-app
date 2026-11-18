@@ -2,7 +2,8 @@ import Link from "next/link";
 import {
   advanceToSignatureAction,
   reviewDocumentAction,
-  saveFinancialReviewAction
+  saveFinancialReviewAction,
+  setAccessOverrideAction
 } from "@/app/actions/enrollment-review";
 import { renewContractAction } from "@/app/actions/renewals";
 import { DateField } from "@/components/shared/date-field";
@@ -45,6 +46,17 @@ import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { EditStudentDialog } from "@/features/students/components/edit-student-dialog";
 import type { TrainingClass } from "@/features/classes/types";
 import {
+  ACCESS_STATUS_LABELS,
+  type StudentAppAccessState,
+  type StudentAppAccessStatus
+} from "@/features/billing/access-lock-rules";
+import {
+  PARQ_STATUS_LABELS,
+  type ParqAssessment,
+  type ParqStatus
+} from "@/features/students/parq-rules";
+import { formatBusinessDateBr } from "@/lib/dates";
+import {
   beltForGub,
   calculateDefaultContractDates,
   calculateNextDueDate,
@@ -79,15 +91,35 @@ const enrollmentStatusLabels: Record<string, string> = {
   awaiting_renewal: "Aguardando renovação"
 };
 
+const parqToneMap: Record<ParqStatus, "success" | "warning" | "danger"> = {
+  valid: "success",
+  expiring_soon: "warning",
+  expired: "danger",
+  missing: "warning"
+};
+
+const accessToneMap: Record<StudentAppAccessStatus, "success" | "warning" | "danger" | "info" | "neutral"> = {
+  not_applicable: "neutral",
+  active: "success",
+  expiring_soon: "warning",
+  proof_under_review: "info",
+  override: "info",
+  locked: "danger"
+};
+
 export function ReviewPanel({
   bundle,
   reviews,
   classes = [],
+  parqAssessment,
+  accessState,
   notice
 }: {
   bundle: EnrollmentBundle;
   reviews: Array<Record<string, unknown>>;
   classes?: TrainingClass[];
+  parqAssessment?: ParqAssessment;
+  accessState?: StudentAppAccessState;
   notice?: string;
 }) {
   const { student, enrollment, documents } = bundle;
@@ -474,6 +506,48 @@ export function ReviewPanel({
                   </p>
                 ) : null}
               </div>
+
+              {/* Questionário PAR-Q anual (CREF1) */}
+              {parqAssessment ? (
+                <div className="space-y-2.5 py-3.5 last:pb-0">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-medium text-foreground">Questionário PAR-Q anual (CREF1)</p>
+                    <StatusBadge tone={parqToneMap[parqAssessment.status]}>
+                      {PARQ_STATUS_LABELS[parqAssessment.status]}
+                    </StatusBadge>
+                  </div>
+                  {parqAssessment.signedAt ? (
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      <p className="tabular-nums">
+                        Assinado em {formatBusinessDateBr(parqAssessment.signedAt)} · Válido até{" "}
+                        {formatBusinessDateBr(parqAssessment.expiresAt)}
+                        {parqAssessment.signerName ? ` · Por ${parqAssessment.signerName}` : ""}
+                      </p>
+                      {parqAssessment.hasYesAnswer ? (
+                        <p className="flex items-center gap-1.5 text-warning-foreground">
+                          <AlertTriangle className="size-3.5 shrink-0" aria-hidden="true" />
+                          <span>
+                            Respondeu &quot;Sim&quot; nas perguntas{" "}
+                            <span className="font-medium tabular-nums">
+                              {parqAssessment.yesQuestionNumbers.join(", ")}
+                            </span>
+                            {" "}— conferir atestado médico atualizado.
+                          </span>
+                        </p>
+                      ) : (
+                        <p className="flex items-center gap-1.5 text-muted-foreground">
+                          <CheckCircle2 className="size-3.5 shrink-0" aria-hidden="true" />
+                          Todas as 10 perguntas respondidas com &quot;Não&quot;.
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Questionário anual de prontidão física ainda não preenchido pelo aluno ou responsável.
+                    </p>
+                  )}
+                </div>
+              ) : null}
             </div>
           </section>
 
@@ -686,6 +760,73 @@ export function ReviewPanel({
               </form>
             </section>
           )}
+
+          {/* Seção 3: Ciclo mensal de acesso ao app (30 dias) e liberação temporária */}
+          {accessState ? (
+            <section className="p-5 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h2 className="text-base font-semibold text-foreground">Ciclo mensal de acesso (30 dias)</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    O aplicativo fecha automaticamente 30 dias após o último pagamento confirmado, salvo comprovante em análise ou liberação manual.
+                  </p>
+                </div>
+                <StatusBadge tone={accessToneMap[accessState.status]}>
+                  {ACCESS_STATUS_LABELS[accessState.status]}
+                </StatusBadge>
+              </div>
+
+              <dl className="divide-y divide-border border-y border-border text-sm">
+                <div className="flex items-center justify-between py-2">
+                  <dt className="text-muted-foreground">Último pagamento mensal</dt>
+                  <dd className="font-medium tabular-nums text-foreground">
+                    {accessState.lastPaidAt ? formatBusinessDateBr(accessState.lastPaidAt) : "Sem registro"}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <dt className="text-muted-foreground">Acesso válido até</dt>
+                  <dd className="font-medium tabular-nums text-foreground">
+                    {accessState.accessValidUntil ? formatBusinessDateBr(accessState.accessValidUntil) : "—"}
+                  </dd>
+                </div>
+                {accessState.overrideUntil ? (
+                  <div className="flex items-center justify-between py-2">
+                    <dt className="text-muted-foreground">Liberação manual ativa até</dt>
+                    <dd className="font-medium tabular-nums text-foreground">
+                      {formatBusinessDateBr(accessState.overrideUntil)}
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+
+              <form action={setAccessOverrideAction} className="space-y-3">
+                <input type="hidden" name="student_id" value={student.$id} />
+                <DateField
+                  id="access-override-until"
+                  name="access_override_until"
+                  label="Liberar acesso manualmente até (opcional)"
+                  defaultValue={dateValue(enrollment.access_override_until)}
+                />
+                <div className="flex flex-wrap gap-2">
+                  <FormSubmitButton variant="outline" size="sm" className="min-h-10" pendingLabel="Salvando…">
+                    Salvar liberação temporária
+                  </FormSubmitButton>
+                  {enrollment.access_override_until ? (
+                    <FormSubmitButton
+                      name="clear_override"
+                      value="1"
+                      variant="ghost"
+                      size="sm"
+                      className="min-h-10 text-destructive"
+                      pendingLabel="Removendo…"
+                    >
+                      Remover liberação manual
+                    </FormSubmitButton>
+                  ) : null}
+                </div>
+              </form>
+            </section>
+          ) : null}
         </div>
       </div>
     </div>

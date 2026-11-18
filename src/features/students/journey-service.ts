@@ -8,6 +8,7 @@ import { sortBeltHistoryNewestFirst } from "@/features/exams/rules";
 import type { BeltHistory } from "@/features/exams/types";
 import { resolveStudentProfile } from "@/features/students/access";
 import { evaluateStudentCompliance } from "@/features/students/compliance-rules";
+import { getLatestParqForStudent } from "@/features/students/parq-service";
 import {
   buildBeltRoadmap,
   buildMonthlyAttendanceSeries,
@@ -48,7 +49,7 @@ export async function getStudentJourneySnapshot(actor: Profile, requestedProfile
   }
 
   const { tables, config } = createAppwriteAdminClient();
-  const [enrollmentsRes, beltHistoryRes, documentsRes, trainingClass] = await Promise.all([
+  const [enrollmentsRes, beltHistoryRes, documentsRes, trainingClass, latestParq] = await Promise.all([
     tables.listRows<Enrollment>({
       databaseId: config.databaseId,
       tableId: APPWRITE_IDS.tables.enrollments,
@@ -67,6 +68,7 @@ export async function getStudentJourneySnapshot(actor: Profile, requestedProfile
     student.training_class_id
       ? getTrainingClass(student.training_class_id).catch(() => null)
       : Promise.resolve(null),
+    getLatestParqForStudent(student.$id).catch(() => null),
   ]);
 
   const enrollment = enrollmentsRes.rows[0] ?? null;
@@ -112,6 +114,7 @@ export async function getStudentJourneySnapshot(actor: Profile, requestedProfile
     student,
     enrollment,
     documents,
+    latestParq,
     trainingClassName: trainingClass?.name ?? student.training_class,
     referenceDate,
   });

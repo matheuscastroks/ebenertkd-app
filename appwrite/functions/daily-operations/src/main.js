@@ -211,10 +211,49 @@ async function main({ req, res, log, error }) {
       paymentReminders += recipients.length;
     }
 
+    step = "parq-reminders";
+    let parqReminders = 0;
+    try {
+      const parqRows = await listAll(tables, "parq_submissions");
+      const latestParqByStudent = new Map();
+      for (const row of parqRows) {
+        const existing = latestParqByStudent.get(row.student_id);
+        if (!existing || row.signed_at > existing.signed_at) {
+          latestParqByStudent.set(row.student_id, row);
+        }
+      }
+      for (const enrollment of enrollments) {
+        const latestParq = latestParqByStudent.get(enrollment.student_id);
+        if (!latestParq || !latestParq.expires_at) continue;
+        const left = daysUntil(latestParq.expires_at, day);
+        const stage = left === 30 ? "30d" : left === 7 ? "7d" : left === 0 ? "expired" : null;
+        if (!stage) continue;
+        const recipients = await financialRecipients(tables, enrollment.student_id);
+        if (!recipients.length) continue;
+        const title = stage === "expired"
+          ? "PAR-Q anual vencido"
+          : `PAR-Q anual vence em ${left} dias`;
+        const body = stage === "expired"
+          ? "Seu questionário anual de prontidão para atividade física (PAR-Q) venceu hoje. Preencha e assine a renovação no portal."
+          : `Seu questionário anual de prontidão para atividade física (PAR-Q) vence em ${left} dias. Renove pelo portal para manter sua ficha em dia.`;
+        await createNotification(tables, {
+          kind: "system",
+          title,
+          body,
+          actionUrl: "/aluno/parq",
+          dedupeKey: `parq:${latestParq.$id}:${stage}`,
+          recipients
+        });
+        parqReminders += recipients.length;
+      }
+    } catch (cause) {
+      if (!(cause instanceof AppwriteException) || cause.code !== 404) throw cause;
+    }
+
     step = "automation-run";
-    await tables.createRow({ databaseId, tableId: "automation_runs", rowId: idempotencyKey, permissions: [], data: { job: "daily-operations", idempotency_key: idempotencyKey, status: "completed", started_at: now.toISOString(), finished_at: new Date().toISOString(), details: JSON.stringify({ phase: 6, reminders, expired, charges_created: chargesCreated, marked_overdue: markedOverdue, payment_reminders: paymentReminders, covered_days: coveredDays.length }), created_at: now.toISOString() } });
-    log(`Recorded ${idempotencyKey}: ${chargesCreated} charges, ${markedOverdue} overdue`);
-    return res.json({ ok: true, idempotencyKey, reminders, expired, chargesCreated, markedOverdue, paymentReminders });
+    await tables.createRow({ databaseId, tableId: "automation_runs", rowId: idempotencyKey, permissions: [], data: { job: "daily-operations", idempotency_key: idempotencyKey, status: "completed", started_at: now.toISOString(), finished_at: new Date().toISOString(), details: JSON.stringify({ phase: 6, reminders, expired, charges_created: chargesCreated, marked_overdue: markedOverdue, payment_reminders: paymentReminders, parq_reminders: parqReminders, covered_days: coveredDays.length }), created_at: now.toISOString() } });
+    log(`Recorded ${idempotencyKey}: ${chargesCreated} charges, ${markedOverdue} overdue, ${parqReminders} parq reminders`);
+    return res.json({ ok: true, idempotencyKey, reminders, expired, chargesCreated, markedOverdue, paymentReminders, parqReminders });
   } catch (cause) {
     if (cause instanceof AppwriteException && cause.code === 409) return res.json({ ok: true, duplicate: true, idempotencyKey });
     await notifyAdmins(tables, { title: "Falha na automação diária", body: "A rotina diária não foi concluída. Consulte os registros da função.", dedupeKey: `daily-operations-failed:${day}` }).catch(() => undefined);

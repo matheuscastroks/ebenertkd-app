@@ -8,6 +8,7 @@ import {
   type MedicalComplianceStatus,
 } from "@/features/students/compliance-rules";
 import type { Enrollment, Student, StudentDocument } from "@/features/students/types";
+import { listLatestParqByStudent } from "@/features/students/parq-service";
 import { listAllRows } from "@/lib/appwrite/all-rows";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { cachedRead } from "@/lib/cache/cached-read";
@@ -41,7 +42,10 @@ function loadComplianceDataset() {
 }
 
 export async function getAnnualComplianceOverview(filters: ComplianceFilters = {}) {
-  const { students, enrollments, documents, classes } = await loadComplianceDataset();
+  const [{ students, enrollments, documents, classes }, parqByStudent] = await Promise.all([
+    loadComplianceDataset(),
+    listLatestParqByStudent(),
+  ]);
   const referenceDate = saoPauloToday();
 
   const classById = new Map(classes.map((item) => [item.$id, item]));
@@ -72,6 +76,7 @@ export async function getAnnualComplianceOverview(filters: ComplianceFilters = {
         student,
         enrollment,
         documents: docsByStudent.get(student.$id) ?? [],
+        latestParq: parqByStudent.get(student.$id) ?? null,
         trainingClassName: classObj?.name ?? student.training_class,
         referenceDate,
       });

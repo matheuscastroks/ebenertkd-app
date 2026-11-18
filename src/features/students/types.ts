@@ -40,6 +40,7 @@ export type Enrollment = Models.Row & {
   first_due_date?: string | null;
   contract_start?: string | null;
   contract_end?: string | null;
+  access_override_until?: string | null;
   revision: number;
   submitted_at?: string | null;
   created_at: string;
@@ -58,6 +59,24 @@ export type StudentDocument = Models.Row & {
   uploaded_by_account_id: string;
   created_at: string;
   updated_at: string;
+};
+
+export type ParqSubmission = Models.Row & {
+  student_id: string;
+  signer_profile_id: string;
+  signer_account_id: string;
+  signer_name: string;
+  signer_role: "adult_student" | "guardian" | "admin";
+  answers_json: string;
+  has_yes_answer: boolean;
+  requires_medical_certificate: boolean;
+  term_accepted: boolean;
+  signature_data_url: string;
+  content_hash: string;
+  ip_fingerprint?: string | null;
+  signed_at: string;
+  expires_at: string;
+  created_at: string;
 };
 
 export type EnrollmentBundle = {

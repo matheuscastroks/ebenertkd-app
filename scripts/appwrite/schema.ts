@@ -262,6 +262,7 @@ export const tables: TableDefinition[] = [
       { key: "first_due_date", kind: "datetime", required: false },
       { key: "contract_start", kind: "datetime", required: false },
       { key: "contract_end", kind: "datetime", required: false },
+      { key: "access_override_until", kind: "datetime", required: false },
       { key: "revision", kind: "integer", required: true, min: 1 },
       { key: "submitted_at", kind: "datetime", required: false },
       { key: "created_at", kind: "datetime", required: true },
@@ -293,6 +294,31 @@ export const tables: TableDefinition[] = [
       { key: "student_type_unique", type: "unique", columns: ["student_id", "document_type"] },
       { key: "student_idx", type: "key", columns: ["student_id"] },
       { key: "status_idx", type: "key", columns: ["status"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.parqSubmissions,
+    name: "PAR-Q submissions",
+    columns: [
+      { key: "student_id", kind: "varchar", size: 36, required: true },
+      { key: "signer_profile_id", kind: "varchar", size: 36, required: true },
+      { key: "signer_account_id", kind: "varchar", size: 36, required: true },
+      { key: "signer_name", kind: "varchar", size: 128, required: true },
+      { key: "signer_role", kind: "enum", elements: ["adult_student", "guardian", "admin"], required: true },
+      { key: "answers_json", kind: "text", required: true },
+      { key: "has_yes_answer", kind: "boolean", required: true },
+      { key: "requires_medical_certificate", kind: "boolean", required: true },
+      { key: "term_accepted", kind: "boolean", required: true },
+      { key: "signature_data_url", kind: "text", required: true },
+      { key: "content_hash", kind: "varchar", size: 64, required: true },
+      { key: "ip_fingerprint", kind: "varchar", size: 64, required: false },
+      { key: "signed_at", kind: "datetime", required: true },
+      { key: "expires_at", kind: "datetime", required: true },
+      { key: "created_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "student_signed_idx", type: "key", columns: ["student_id", "signed_at"] },
+      { key: "expires_at_idx", type: "key", columns: ["expires_at"] }
     ]
   },
   {

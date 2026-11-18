@@ -1,4 +1,5 @@
-import type { Enrollment, Student, StudentDocument } from "@/features/students/types";
+import { evaluateParqStatus, type ParqStatus } from "@/features/students/parq-rules";
+import type { Enrollment, ParqSubmission, Student, StudentDocument } from "@/features/students/types";
 import { daysBetweenIsoDates, saoPauloToday } from "@/lib/dates";
 
 export type MedicalComplianceStatus =
@@ -26,6 +27,13 @@ export type StudentComplianceAssessment = {
   medicalIssuedAt: string | null;
   medicalExpiresAt: string | null;
   daysUntilExpiration: number | null;
+  parqStatus: ParqStatus;
+  parqSignedAt: string | null;
+  parqExpiresAt: string | null;
+  parqDaysUntilExpiration: number | null;
+  parqHasYesAnswer: boolean;
+  parqRequiresMedicalCertificate: boolean;
+  parqYesQuestions: number[];
   hasApprovedPhoto: boolean;
   hasEmergencyContact: boolean;
 };
@@ -38,6 +46,12 @@ export type ComplianceSummary = {
   pendingReviewCount: number;
   missingCount: number;
   complianceRatePct: number;
+  parqValidCount: number;
+  parqExpiringSoonCount: number;
+  parqExpiredCount: number;
+  parqMissingCount: number;
+  parqYesCount: number;
+  parqComplianceRatePct: number;
   breakdown: Array<{ key: MedicalComplianceStatus; label: string; count: number }>;
 };
 
@@ -59,12 +73,14 @@ export function evaluateStudentCompliance(input: {
   student: Student;
   enrollment?: Enrollment | null;
   documents: StudentDocument[];
+  latestParq?: ParqSubmission | null;
   trainingClassName?: string | null;
   referenceDate?: string;
 }): StudentComplianceAssessment {
   const referenceDay = (input.referenceDate ?? saoPauloToday()).slice(0, 10);
   const medCert = input.documents.find((doc) => doc.document_type === "medical_certificate");
   const photo = input.documents.find((doc) => doc.document_type === "profile_photo");
+  const parq = evaluateParqStatus(input.latestParq, referenceDay);
 
   let medicalStatus: MedicalComplianceStatus = "missing";
   let medicalIssuedAt: string | null = null;
@@ -106,6 +122,13 @@ export function evaluateStudentCompliance(input: {
     medicalIssuedAt,
     medicalExpiresAt,
     daysUntilExpiration,
+    parqStatus: parq.status,
+    parqSignedAt: parq.signedAt,
+    parqExpiresAt: parq.expiresAt,
+    parqDaysUntilExpiration: parq.daysUntilExpiration,
+    parqHasYesAnswer: parq.hasYesAnswer,
+    parqRequiresMedicalCertificate: parq.requiresMedicalCertificate,
+    parqYesQuestions: parq.yesQuestionNumbers,
     hasApprovedPhoto: photo?.status === "approved",
     hasEmergencyContact: Boolean(input.student.emergency_contact_phone?.trim()),
   };
@@ -136,6 +159,16 @@ export function summarizeCompliance(rows: StudentComplianceAssessment[]): Compli
       ? Math.round(((validCount + expiringSoonCount) / totalActive) * 100)
       : 100;
 
+  const parqValidCount = rows.filter((r) => r.parqStatus === "valid").length;
+  const parqExpiringSoonCount = rows.filter((r) => r.parqStatus === "expiring_soon").length;
+  const parqExpiredCount = rows.filter((r) => r.parqStatus === "expired").length;
+  const parqMissingCount = rows.filter((r) => r.parqStatus === "missing").length;
+  const parqYesCount = rows.filter((r) => r.parqHasYesAnswer).length;
+  const parqComplianceRatePct =
+    totalActive > 0
+      ? Math.round(((parqValidCount + parqExpiringSoonCount) / totalActive) * 100)
+      : 100;
+
   return {
     totalActive,
     validCount,
@@ -144,6 +177,12 @@ export function summarizeCompliance(rows: StudentComplianceAssessment[]): Compli
     pendingReviewCount,
     missingCount,
     complianceRatePct,
+    parqValidCount,
+    parqExpiringSoonCount,
+    parqExpiredCount,
+    parqMissingCount,
+    parqYesCount,
+    parqComplianceRatePct,
     breakdown: [
       { key: "valid", label: "Em dia", count: validCount },
       { key: "expiring_soon", label: "Vence em 30d", count: expiringSoonCount },

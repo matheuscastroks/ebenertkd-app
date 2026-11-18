@@ -17,6 +17,7 @@ export const ROUTES = {
   studentAchievements: "/aluno/conquistas",
   studentCalendar: "/aluno/calendario",
   studentCard: "/aluno/carteirinha",
+  studentParq: "/aluno/parq",
   studentExams: "/aluno/exames",
   adminContracts: "/admin/contratos",
   adminContractRenewals: "/admin/contratos/renovacoes",
@@ -160,6 +161,7 @@ export function navigationForProfile(
     { label: "Calendário", href: ROUTES.studentCalendar, icon: "attendance", group: "Treino" },
     { label: "Meus exames", shortLabel: "Exames", bottomNav: minor, href: ROUTES.studentExams, icon: "exams", group: "Treino" },
     { label: "Carteirinha e saúde", shortLabel: "Carteirinha", href: ROUTES.studentCard, icon: "family", group: "Matrícula" },
+    { label: "PAR-Q anual", shortLabel: "PAR-Q", href: ROUTES.studentParq, icon: "enrollment", group: "Matrícula" },
     { label: "Minha matrícula", shortLabel: "Matrícula", href: ROUTES.studentEnrollment, icon: "enrollment", group: "Matrícula" },
     { label: "Contratos", href: ROUTES.studentContracts, icon: "contracts", group: "Matrícula" }
   ];
@@ -196,6 +198,10 @@ export function adminExamPath(eventId: string) {
 
 export function guardianEnrollmentPath(profileId: string) {
   return `${ROUTES.guardianDependents}/${encodeURIComponent(profileId)}/matricula`;
+}
+
+export function guardianParqPath(profileId: string) {
+  return `${ROUTES.guardianDependents}/${encodeURIComponent(profileId)}/parq`;
 }
 
 export function studentContractPath(contractId: string) {

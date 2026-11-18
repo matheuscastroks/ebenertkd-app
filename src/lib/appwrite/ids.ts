@@ -14,6 +14,7 @@ export const APPWRITE_IDS = {
     students: "students",
     enrollments: "enrollments",
     studentDocuments: "student_documents",
+    parqSubmissions: "parq_submissions",
     enrollmentReviews: "enrollment_reviews",
     contractTemplates: "contract_templates",
     contractVersions: "contract_versions",

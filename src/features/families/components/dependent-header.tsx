@@ -13,7 +13,7 @@ import {
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
 
-const sections = { resumo: "Resumo", financeiro: "Financeiro", frequencia: "Frequência", exames: "Exames", contratos: "Contratos", matricula: "Matrícula" };
+const sections = { resumo: "Resumo", financeiro: "Financeiro", frequencia: "Frequência", exames: "Exames", parq: "PAR-Q anual", contratos: "Contratos", matricula: "Matrícula" };
 export type DependentSection = keyof typeof sections;
 
 const pathFor = (profileId: string, section: DependentSection) =>

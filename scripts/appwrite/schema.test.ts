@@ -29,6 +29,7 @@ describe("Appwrite infrastructure schema", () => {
       "students",
       "enrollments",
       "student_documents",
+      "parq_submissions",
       "enrollment_reviews",
       "contract_templates",
       "contract_versions",

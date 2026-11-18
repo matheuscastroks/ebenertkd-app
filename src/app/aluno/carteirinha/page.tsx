@@ -7,10 +7,12 @@ import { CardGridSkeleton } from "@/components/skeletons";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import type { Profile } from "@/features/auth/types";
+import { getStudentAppAccessByStudentId } from "@/features/billing/access-lock-service";
 import type { MedicalComplianceStatus } from "@/features/students/compliance-rules";
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { getStudentJourneySnapshot } from "@/features/students/journey-service";
+import { PARQ_STATUS_LABELS, type ParqStatus } from "@/features/students/parq-rules";
 import { requireCapability } from "@/lib/auth/session";
 import { formatBusinessDateBr } from "@/lib/dates";
 import { ROUTES } from "@/lib/navigation/routes";
@@ -32,6 +34,13 @@ const MEDICAL_TONES: Record<MedicalComplianceStatus, StatusTone> = {
   missing: "danger",
 };
 
+const PARQ_TONES: Record<ParqStatus, StatusTone> = {
+  valid: "success",
+  expiring_soon: "warning",
+  expired: "danger",
+  missing: "warning",
+};
+
 async function StudentCardContent({ profile }: { profile: Profile }) {
   const snapshot = await getStudentJourneySnapshot(profile);
 
@@ -50,6 +59,10 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
   }
 
   const { student, enrollment, trainingClass, compliance } = snapshot;
+  const isMinor = profile.role === "minor_student";
+  const accessState = isMinor
+    ? null
+    : await getStudentAppAccessByStudentId(student.$id).catch(() => null);
   const studentCode = student.$id.slice(0, 8).toUpperCase();
   const isActive =
     student.status === "active" ||
@@ -60,6 +73,11 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
     compliance.medicalStatus === "expired" ||
     compliance.medicalStatus === "expiring_soon" ||
     compliance.medicalStatus === "missing";
+
+  const needsParqAction =
+    compliance.parqStatus === "expired" ||
+    compliance.parqStatus === "expiring_soon" ||
+    compliance.parqStatus === "missing";
 
   return (
     <div className="space-y-6">
@@ -78,6 +96,29 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
                 <ArrowRight className="size-3.5" aria-hidden="true" />
               </Link>
             </Button>
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {needsParqAction ? (
+        <Alert>
+          <AlertTitle>{PARQ_STATUS_LABELS[compliance.parqStatus]}</AlertTitle>
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+            <span>
+              {isMinor
+                ? "O questionário anual de prontidão física (PAR-Q) precisa ser preenchido e assinado pelo responsável legal."
+                : compliance.parqStatus === "expiring_soon"
+                  ? `Seu PAR-Q anual vence em ${formatBusinessDateBr(compliance.parqExpiresAt)}. Renove agora pelo aplicativo.`
+                  : "Preencha e assine o questionário oficial de prontidão para atividade física (PAR-Q) com validade anual."}
+            </span>
+            {!isMinor ? (
+              <Button asChild size="sm" variant="outline" className="min-h-9">
+                <Link href={ROUTES.studentParq}>
+                  Preencher PAR-Q
+                  <ArrowRight className="size-3.5" aria-hidden="true" />
+                </Link>
+              </Button>
+            ) : null}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -166,6 +207,26 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
                 </dd>
               </div>
               <div className="flex items-center justify-between gap-3 py-2.5">
+                <dt className="text-muted-foreground">PAR-Q anual (CREF1)</dt>
+                <dd className="flex items-center gap-2">
+                  <StatusBadge tone={PARQ_TONES[compliance.parqStatus]}>
+                    {compliance.parqExpiresAt
+                      ? `Até ${formatBusinessDateBr(compliance.parqExpiresAt)}`
+                      : PARQ_STATUS_LABELS[compliance.parqStatus]}
+                  </StatusBadge>
+                </dd>
+              </div>
+              {!isMinor && accessState && accessState.status !== "not_applicable" ? (
+                <div className="flex items-center justify-between gap-3 py-2.5">
+                  <dt className="text-muted-foreground">Ciclo mensal de acesso (30d)</dt>
+                  <dd className="font-medium tabular-nums text-foreground">
+                    {accessState.accessValidUntil
+                      ? `Válido até ${formatBusinessDateBr(accessState.accessValidUntil)}`
+                      : "Ativo"}
+                  </dd>
+                </div>
+              ) : null}
+              <div className="flex items-center justify-between gap-3 py-2.5">
                 <dt className="text-muted-foreground">Foto de identificação</dt>
                 <dd>
                   <StatusBadge tone={compliance.hasApprovedPhoto ? "success" : "warning"}>
@@ -190,12 +251,20 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
             </dl>
           </div>
 
-          <Button asChild variant="outline" className="min-h-11 w-full">
-            <Link href={ROUTES.studentEnrollment}>
-              Atualizar documentos e ficha médica
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </Link>
-          </Button>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Button asChild variant="outline" className="min-h-11 w-full">
+              <Link href={ROUTES.studentParq}>
+                PAR-Q anual
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="min-h-11 w-full">
+              <Link href={ROUTES.studentEnrollment}>
+                Atualizar ficha médica
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+            </Button>
+          </div>
         </section>
       </div>
     </div>

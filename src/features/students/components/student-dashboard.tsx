@@ -12,6 +12,9 @@ import { formatNextTraining } from "@/features/families/next-training";
 import { listStudentContracts } from "@/features/contracts/contract-service";
 import { buildPendencies, primaryPendency } from "@/features/families/pendencies";
 import { PendencyList } from "@/features/families/components/pendency-list";
+import { evaluateParqStatus } from "@/features/students/parq-rules";
+import { getLatestParqForStudent } from "@/features/students/parq-service";
+import { saoPauloToday } from "@/lib/dates";
 import { GraduationCard } from "./graduation-card";
 import { ROUTES, studentContractPath } from "@/lib/navigation/routes";
 
@@ -26,11 +29,26 @@ export async function StudentDashboardDynamic({ profile, minor, aside }: { profi
     minor ? Promise.resolve("hidden" as const) : listStudentContracts(profile).catch(() => null)
   ]);
   const student = attendance.student;
-  const trainingClass = student?.training_class_id ? await getTrainingClass(student.training_class_id).catch(() => null) : null;
+  const [trainingClass, latestParq] = await Promise.all([
+    student?.training_class_id ? getTrainingClass(student.training_class_id).catch(() => null) : Promise.resolve(null),
+    student?.$id ? getLatestParqForStudent(student.$id).catch(() => null) : Promise.resolve(null),
+  ]);
+  const parqAssessment = student?.$id ? evaluateParqStatus(latestParq, saoPauloToday()) : null;
   const next = trainingClass ? getNextClassSchedule(trainingClass) : null;
   const pendencies = buildPendencies({
-    studentStatus: student?.status, charges, contracts, canSign: !minor,
-    links: { enrollment: ROUTES.studentEnrollment, billing: ROUTES.studentBilling, contracts: ROUTES.studentContracts, contract: studentContractPath }
+    studentStatus: student?.status,
+    charges,
+    contracts,
+    parqStatus: parqAssessment?.status,
+    parqExpiresAt: parqAssessment?.expiresAt,
+    canSign: !minor,
+    links: {
+      enrollment: ROUTES.studentEnrollment,
+      billing: ROUTES.studentBilling,
+      contracts: ROUTES.studentContracts,
+      contract: studentContractPath,
+      parq: ROUTES.studentParq,
+    }
   });
   const primary = primaryPendency(pendencies);
   const { summary } = attendance;

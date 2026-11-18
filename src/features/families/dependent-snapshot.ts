@@ -1,14 +1,18 @@
 import "server-only";
 
 import type { Profile } from "@/features/auth/types";
+import { getStudentAppAccessByStudentId } from "@/features/billing/access-lock-service";
 import { listChargesForStudent } from "@/features/billing/charge-service";
 import { getAttendanceHistory } from "@/features/classes/attendance-history-service";
 import { listTrainingClasses } from "@/features/classes/service";
 import { getNextClassSchedule } from "@/features/classes/schedule";
 import { listStudentContracts } from "@/features/contracts/contract-service";
 import { buildPendencies } from "@/features/families/pendencies";
+import { evaluateParqStatus } from "@/features/students/parq-rules";
+import { getLatestParqForStudent } from "@/features/students/parq-service";
 import { listProfilePhotoDocumentIds } from "@/features/students/service";
-import { guardianBillingPath, guardianContractPath, guardianContractsPath, guardianEnrollmentPath } from "@/lib/navigation/routes";
+import { saoPauloToday } from "@/lib/dates";
+import { guardianBillingPath, guardianContractPath, guardianContractsPath, guardianEnrollmentPath, guardianParqPath } from "@/lib/navigation/routes";
 
 export type DependentSnapshot = Awaited<ReturnType<typeof loadDependentSnapshots>>[number];
 
@@ -25,12 +29,28 @@ export async function loadDependentSnapshots(guardian: Profile, minors: Profile[
       listStudentContracts(guardian, minor.$id).catch(() => null)
     ]);
     const student = history.student;
+    const [latestParq, accessState] = student?.$id
+      ? await Promise.all([
+          getLatestParqForStudent(student.$id).catch(() => null),
+          getStudentAppAccessByStudentId(student.$id).catch(() => null),
+        ])
+      : [null, null];
+    const parqAssessment = student?.$id ? evaluateParqStatus(latestParq, saoPauloToday()) : null;
     const trainingClass = classes.find((item) => item.$id === student?.training_class_id);
     const pendencies = buildPendencies({
-      studentStatus: student?.status, charges, contracts, canSign: true,
+      studentStatus: student?.status,
+      charges,
+      contracts,
+      parqStatus: parqAssessment?.status,
+      parqExpiresAt: parqAssessment?.expiresAt,
+      accessLocked: accessState?.locked ?? false,
+      canSign: true,
       links: {
-        enrollment: guardianEnrollmentPath(minor.$id), billing: guardianBillingPath(minor.$id),
-        contracts: guardianContractsPath(minor.$id), contract: (contractId) => guardianContractPath(minor.$id, contractId)
+        enrollment: guardianEnrollmentPath(minor.$id),
+        billing: guardianBillingPath(minor.$id),
+        contracts: guardianContractsPath(minor.$id),
+        contract: (contractId) => guardianContractPath(minor.$id, contractId),
+        parq: guardianParqPath(minor.$id),
       }
     });
     return {

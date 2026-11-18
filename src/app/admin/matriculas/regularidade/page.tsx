@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { listTrainingClasses } from "@/features/classes/service";
 import type { MedicalComplianceStatus } from "@/features/students/compliance-rules";
 import { getAnnualComplianceOverview } from "@/features/students/compliance-service";
+import { PARQ_STATUS_LABELS, type ParqStatus } from "@/features/students/parq-rules";
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import { ComplianceChart } from "@/features/students/components/compliance-chart";
 import { ComplianceFilters } from "@/features/students/components/compliance-filters";
@@ -35,6 +36,13 @@ const STATUS_TONES: Record<MedicalComplianceStatus, StatusTone> = {
   expired: "danger",
   pending_review: "info",
   missing: "danger",
+};
+
+const PARQ_TONES: Record<ParqStatus, StatusTone> = {
+  valid: "success",
+  expiring_soon: "warning",
+  expired: "danger",
+  missing: "warning",
 };
 
 const allowedStatuses = new Set<MedicalComplianceStatus>([
@@ -143,6 +151,50 @@ async function ComplianceContent({ searchParams }: { searchParams: SearchParams 
 
       <ComplianceChart summary={summary} />
 
+      <section
+        aria-label="Resumo anual do PAR-Q"
+        className="grid grid-cols-2 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs sm:grid-cols-4 sm:divide-x sm:divide-y-0"
+      >
+        <div className="p-4 sm:px-5">
+          <p className="text-xs font-medium text-muted-foreground">PAR-Q em dia</p>
+          <p className="mt-1 text-xl font-semibold tracking-tight tabular-nums text-success-foreground">
+            {summary.parqValidCount}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {summary.parqComplianceRatePct}% da base com PAR-Q vigente
+          </p>
+        </div>
+        <div className="p-4 sm:px-5">
+          <p className="text-xs font-medium text-muted-foreground">PAR-Q vence em 30d</p>
+          <p className="mt-1 text-xl font-semibold tracking-tight tabular-nums text-foreground">
+            {summary.parqExpiringSoonCount}
+          </p>
+          <p className="text-xs text-muted-foreground">próximos da renovação anual</p>
+        </div>
+        <div className="p-4 sm:px-5">
+          <p className="text-xs font-medium text-muted-foreground">PAR-Q vencido / pendente</p>
+          <p
+            className={
+              summary.parqExpiredCount + summary.parqMissingCount > 0
+                ? "mt-1 text-xl font-semibold tracking-tight tabular-nums text-destructive"
+                : "mt-1 text-xl font-semibold tracking-tight tabular-nums text-foreground"
+            }
+          >
+            {summary.parqExpiredCount + summary.parqMissingCount}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {summary.parqExpiredCount} vencidos · {summary.parqMissingCount} sem envio
+          </p>
+        </div>
+        <div className="p-4 sm:px-5">
+          <p className="text-xs font-medium text-muted-foreground">PAR-Q com &quot;Sim&quot;</p>
+          <p className="mt-1 text-xl font-semibold tracking-tight tabular-nums text-warning-foreground">
+            {summary.parqYesCount}
+          </p>
+          <p className="text-xs text-muted-foreground">recomendam conferência de atestado</p>
+        </div>
+      </section>
+
       {rows.length === 0 ? (
         <EmptyState
           title="Nenhum aluno encontrado para este filtro"
@@ -184,15 +236,24 @@ async function ComplianceContent({ searchParams }: { searchParams: SearchParams 
                       <StatusBadge tone={STATUS_TONES[row.medicalStatus]}>
                         {STATUS_LABELS[row.medicalStatus]}
                       </StatusBadge>
+                      <StatusBadge tone={PARQ_TONES[row.parqStatus]}>
+                        {PARQ_STATUS_LABELS[row.parqStatus]}
+                      </StatusBadge>
+                      {row.parqHasYesAnswer ? (
+                        <StatusBadge tone="warning">PAR-Q com &quot;Sim&quot;</StatusBadge>
+                      ) : null}
                       <BeltBadge belt={row.currentBelt} gub={row.gub} size="sm" />
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {row.trainingClassName}
                       {row.medicalExpiresAt
-                        ? ` · Validade até ${formatBusinessDateBr(row.medicalExpiresAt)}`
+                        ? ` · Atestado até ${formatBusinessDateBr(row.medicalExpiresAt)}`
                         : row.medicalIssuedAt
-                          ? ` · Enviado em ${formatBusinessDateBr(row.medicalIssuedAt)}`
-                          : " · Sem envio registrado"}
+                          ? ` · Atestado enviado em ${formatBusinessDateBr(row.medicalIssuedAt)}`
+                          : " · Sem atestado registrado"}
+                      {row.parqExpiresAt
+                        ? ` · PAR-Q até ${formatBusinessDateBr(row.parqExpiresAt)}`
+                        : " · PAR-Q não preenchido"}
                       {!row.hasEmergencyContact ? " · Contato de emergência ausente" : ""}
                       {!row.hasApprovedPhoto ? " · Foto pendente" : ""}
                     </p>
@@ -200,6 +261,38 @@ async function ComplianceContent({ searchParams }: { searchParams: SearchParams 
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 lg:shrink-0">
+                  {row.parqStatus === "expired" ||
+                  row.parqStatus === "expiring_soon" ||
+                  row.parqStatus === "missing" ? (
+                    <form action={sendTargetedNotificationAction}>
+                      <input type="hidden" name="profile_id" value={row.profileId} />
+                      <input type="hidden" name="return_to" value={ROUTES.adminCompliance} />
+                      <input type="hidden" name="action_url" value={ROUTES.studentParq} />
+                      <input
+                        type="hidden"
+                        name="title"
+                        value="Atualização anual do questionário PAR-Q"
+                      />
+                      <input
+                        type="hidden"
+                        name="body"
+                        value={
+                          row.parqStatus === "expiring_soon" && row.parqExpiresAt
+                            ? `Olá! O questionário anual PAR-Q vence em ${formatBusinessDateBr(row.parqExpiresAt)}. Acesse a área PAR-Q anual no portal para renovar.`
+                            : "Olá! Precisamos do preenchimento e assinatura anual do questionário de prontidão física (PAR-Q) no portal para manter sua matrícula regular."
+                        }
+                      />
+                      <FormSubmitButton
+                        size="sm"
+                        variant="outline"
+                        className="min-h-10"
+                        pendingLabel="Solicitando…"
+                      >
+                        <Bell className="size-3.5" aria-hidden="true" />
+                        Solicitar PAR-Q
+                      </FormSubmitButton>
+                    </form>
+                  ) : null}
                   {row.medicalStatus === "expired" ||
                   row.medicalStatus === "expiring_soon" ||
                   row.medicalStatus === "missing" ? (
@@ -266,7 +359,7 @@ export default async function AdminCompliancePage({
       profile={admin}
       activePath={ROUTES.adminCompliance}
       title="Regularidade anual"
-      subtitle="Controle a validade anual de atestados médicos e pendências de ficha dos alunos ativos."
+      subtitle="Controle a validade anual de atestados médicos, questionários PAR-Q (CREF1) e pendências de ficha dos alunos ativos."
       breadcrumbs={[
         { label: "Matrículas", href: ROUTES.adminEnrollments },
         { label: "Regularidade anual" },
