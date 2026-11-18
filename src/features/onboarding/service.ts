@@ -4,7 +4,11 @@ import { cookies } from "next/headers";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import type { Profile } from "@/features/auth/types";
+import { invalidateTags } from "@/lib/cache/invalidate";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { OnboardingPreferences } from "./types";
+
+const profileChanged = (actor: Profile) => invalidateTags(CACHE_TAGS.profiles, CACHE_TAGS.profileAccount(actor.account_id), CACHE_TAGS.studentAccess);
 
 const COOKIE_NAME = "ebener_onboarding_completed";
 
@@ -29,6 +33,7 @@ export async function saveOnboarding(
     },
   });
 
+  profileChanged(actor);
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, "true", {
     path: "/",
@@ -56,6 +61,7 @@ export async function skipOnboarding(actor: Profile): Promise<void> {
     },
   });
 
+  profileChanged(actor);
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, "true", {
     path: "/",
@@ -80,6 +86,7 @@ export async function resetOnboarding(actor: Profile): Promise<void> {
     },
   });
 
+  profileChanged(actor);
   const cookieStore = await cookies();
   cookieStore.delete(COOKIE_NAME);
 }
