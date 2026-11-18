@@ -29,13 +29,12 @@ async function addGuardians(profiles: Profile[]) {
   const { tables, config } = createAppwriteAdminClient();
   const result = new Map(profiles.map((profile) => [profile.$id, profile]));
   const minors = profiles.filter((profile) => profile.role === "minor_student");
-  for (const minor of minors) {
-    const links = await tables.listRows<{ guardian_profile_id: string } & import("node-appwrite").Models.Row>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.guardianStudentLinks, queries: [Query.equal("student_profile_id", [minor.$id]), Query.equal("status", ["active"]), Query.limit(20)] });
-    for (const link of links.rows) {
-      const guardian = await tables.getRow<Profile>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.profiles, rowId: link.guardian_profile_id });
-      if (guardian.status === "active") result.set(guardian.$id, guardian);
-    }
-  }
+  if (minors.length === 0) return [...result.values()];
+  const links = await tables.listRows<{ guardian_profile_id: string } & import("node-appwrite").Models.Row>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.guardianStudentLinks, queries: [Query.equal("student_profile_id", minors.map((minor) => minor.$id)), Query.equal("status", ["active"]), Query.limit(500)] });
+  const guardianIds = [...new Set(links.rows.map((link) => link.guardian_profile_id))];
+  if (guardianIds.length === 0) return [...result.values()];
+  const guardians = await tables.listRows<Profile>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.profiles, queries: [Query.equal("$id", guardianIds), Query.equal("status", ["active"]), Query.limit(500)] });
+  for (const guardian of guardians.rows) result.set(guardian.$id, guardian);
   return [...result.values()];
 }
 
