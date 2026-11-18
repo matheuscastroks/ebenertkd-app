@@ -98,23 +98,30 @@ export function NotificationInbox({ items: initialItems }: { items: InboxItem[] 
     });
   };
 
+  const kinds = new Set(items.map((item) => item.notification.kind));
+  const list = (entries: InboxItem[], empty: { title: string; hint: string }) => entries.length
+    ? <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">{entries.map((item) => <NotificationItem key={item.recipient.$id} notification={item} onMarkRead={handleMarkAsRead} />)}</div>
+    : <div className="rounded-xl border border-border bg-card px-4 py-8 text-center"><p className="text-sm font-medium">{empty.title}</p><p className="mt-1 text-sm text-muted-foreground">{empty.hint}</p></div>;
+
   return <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "unread" | "history")} className="space-y-4">
-    <TabsList className="h-auto" aria-label="Caixa de avisos">
-      <TabsTrigger value="unread" className="min-h-11">Avisos ({totalUnread})</TabsTrigger>
-      <TabsTrigger value="history" className="min-h-11">Histórico ({totalHistory})</TabsTrigger>
-    </TabsList>
-    <div className="flex flex-wrap items-center gap-3">
-      <Select value={kindFilter} onValueChange={(value) => setKindFilter(value as "all" | NotificationKind)}>
-        <SelectTrigger aria-label="Tipo de aviso" className="h-11 w-48"><SelectValue /></SelectTrigger>
-        <SelectContent><SelectItem value="all">Todos os tipos</SelectItem><SelectItem value="announcement">Avisos</SelectItem><SelectItem value="payment_reminder">Financeiro</SelectItem><SelectItem value="system">Sistema</SelectItem></SelectContent>
-      </Select>
-      {totalUnread > 1 && <Button type="button" variant="outline" className="h-11" onClick={handleMarkAllRead}>Marcar todos como lidos</Button>}
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <TabsList className="h-auto" aria-label="Caixa de avisos">
+        <TabsTrigger value="unread" className="min-h-11 tabular-nums">Novos ({totalUnread})</TabsTrigger>
+        <TabsTrigger value="history" className="min-h-11 tabular-nums">Histórico ({totalHistory})</TabsTrigger>
+      </TabsList>
+      <div className="flex flex-wrap items-center gap-2">
+        {kinds.size > 1 || kindFilter !== "all" ? <Select value={kindFilter} onValueChange={(value) => setKindFilter(value as "all" | NotificationKind)}>
+          <SelectTrigger aria-label="Tipo de aviso" className="h-11 w-44"><SelectValue /></SelectTrigger>
+          <SelectContent><SelectItem value="all">Todos os tipos</SelectItem><SelectItem value="announcement">Avisos</SelectItem><SelectItem value="payment_reminder">Financeiro</SelectItem><SelectItem value="system">Sistema</SelectItem></SelectContent>
+        </Select> : null}
+        {totalUnread > 1 && activeTab === "unread" ? <Button type="button" variant="ghost" className="h-11" onClick={handleMarkAllRead}>Marcar todos como lidos</Button> : null}
+      </div>
     </div>
-    <TabsContent value="unread" className="space-y-3">
-      {unreadItems.length ? unreadItems.map((item) => <NotificationItem key={item.recipient.$id} notification={item} onMarkRead={handleMarkAsRead} />) : <p className="py-6 text-sm text-muted-foreground">Nenhum aviso novo</p>}
+    <TabsContent value="unread">
+      {list(unreadItems, { title: "Nenhum aviso novo", hint: "Avisos lidos ficam no Histórico." })}
     </TabsContent>
-    <TabsContent value="history" className="space-y-3">
-      {historyItems.length ? historyItems.map((item) => <NotificationItem key={item.recipient.$id} notification={item} onMarkRead={handleMarkAsRead} />) : <p className="py-6 text-sm text-muted-foreground">Histórico vazio</p>}
+    <TabsContent value="history">
+      {list(historyItems, { title: "Histórico vazio", hint: "Os avisos aparecem aqui depois de lidos." })}
     </TabsContent>
   </Tabs>;
 }
