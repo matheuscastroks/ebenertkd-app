@@ -65,8 +65,33 @@ describe("navigationForProfile", () => {
         ROUTES.adminSystem,
       ],
       guardian: [ROUTES.guardian, ROUTES.notifications, ROUTES.guardianDependents],
-      minor_student: [ROUTES.student, ROUTES.notifications, ROUTES.studentAttendance, ROUTES.studentExams, ROUTES.studentEnrollment, ROUTES.studentContracts],
-      adult_student: [ROUTES.student, ROUTES.notifications, ROUTES.studentAttendance, ROUTES.studentExams, ROUTES.studentEnrollment, ROUTES.studentContracts, ROUTES.studentBilling]
+      minor_student: [
+        ROUTES.student,
+        ROUTES.notifications,
+        ROUTES.studentAttendance,
+        ROUTES.studentEvolution,
+        ROUTES.studentStudies,
+        ROUTES.studentAchievements,
+        ROUTES.studentCalendar,
+        ROUTES.studentExams,
+        ROUTES.studentCard,
+        ROUTES.studentEnrollment,
+        ROUTES.studentContracts,
+      ],
+      adult_student: [
+        ROUTES.student,
+        ROUTES.notifications,
+        ROUTES.studentAttendance,
+        ROUTES.studentEvolution,
+        ROUTES.studentStudies,
+        ROUTES.studentAchievements,
+        ROUTES.studentCalendar,
+        ROUTES.studentExams,
+        ROUTES.studentCard,
+        ROUTES.studentEnrollment,
+        ROUTES.studentContracts,
+        ROUTES.studentBilling,
+      ]
     } as const;
     for (const [role, hrefs] of Object.entries(expected)) {
       const items = navigationForProfile({ role: role as keyof typeof expected, capabilities: [] });

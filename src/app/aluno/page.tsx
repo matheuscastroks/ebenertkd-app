@@ -38,6 +38,9 @@ export default async function StudentPage() {
   const shortcuts = <section aria-labelledby="student-shortcuts-title" className="space-y-2.5">
     <h2 id="student-shortcuts-title" className="text-base font-semibold">Dados e documentos</h2>
     <nav aria-label="Meus dados e documentos" className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card px-4 shadow-xs">
+      <Link className={rowClass} href={ROUTES.studentEvolution}>Caminho da faixa<ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" /></Link>
+      <Link className={rowClass} href={ROUTES.studentStudies}>Guia de estudos<ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" /></Link>
+      <Link className={rowClass} href={ROUTES.studentCard}>Carteirinha e saúde<ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" /></Link>
       <Link className={rowClass} href={ROUTES.studentEnrollment}>Meus dados<ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" /></Link>
       <Link className={rowClass} href={ROUTES.studentContracts}>Documentos e contratos<ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" /></Link>
       {minor ? null : profile.capabilities.includes("guardian")

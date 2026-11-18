@@ -1,0 +1,264 @@
+import Link from "next/link";
+import { Suspense } from "react";
+import { PortalShell } from "@/components/dashboard/portal-shell";
+import { EmptyState } from "@/components/shared/empty-state";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { CardGridSkeleton, MetricCardsSkeleton } from "@/components/skeletons";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import type { Profile } from "@/features/auth/types";
+import { BeltBadge } from "@/features/students/components/belt-badge";
+import { BeltProgressionPill } from "@/features/students/components/belt-progression-pill";
+import { StudentMonthlyProgressChart } from "@/features/students/components/journey-charts";
+import { getStudentJourneySnapshot } from "@/features/students/journey-service";
+import { requireCapability } from "@/lib/auth/session";
+import { formatBusinessDateBr } from "@/lib/dates";
+import { ROUTES } from "@/lib/navigation/routes";
+import { ArrowRight, BookOpen, CheckCircle2 } from "lucide-react";
+
+async function StudentEvolutionContent({ profile }: { profile: Profile }) {
+  const snapshot = await getStudentJourneySnapshot(profile);
+
+  if (!snapshot.student) {
+    return (
+      <EmptyState
+        title="Complete sua matrícula para acompanhar sua faixa"
+        description="Assim que sua ficha for aprovada, o caminho da faixa e o progresso para o próximo exame aparecerão aqui."
+        action={
+          <Button asChild className="min-h-11">
+            <Link href={ROUTES.studentEnrollment}>Ir para minha matrícula</Link>
+          </Button>
+        }
+      />
+    );
+  }
+
+  const { readiness, roadmap, beltHistory, monthlySeries } = snapshot;
+
+  return (
+    <div className="space-y-6">
+      <section
+        aria-labelledby="readiness-heading"
+        className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border"
+      >
+        <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-2">
+            <p id="readiness-heading" className="text-sm font-medium text-muted-foreground">
+              Seu momento no Caminho da Faixa
+            </p>
+            {readiness.targetBelt && readiness.targetGub != null ? (
+              <BeltProgressionPill
+                fromBelt={readiness.currentBelt}
+                fromGub={readiness.currentGub}
+                toBelt={readiness.targetBelt}
+                toGub={readiness.targetGub}
+                size="lg"
+              />
+            ) : (
+              <BeltBadge belt={readiness.currentBelt} gub={readiness.currentGub} size="lg" />
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge tone={readiness.isPedagogicallyReady ? "success" : "info"}>
+              {readiness.isBlackBelt
+                ? "Graduação Dan"
+                : readiness.isPedagogicallyReady
+                  ? "Critérios mínimos atingidos"
+                  : `${readiness.overallProgressPct}% da meta técnica`}
+            </StatusBadge>
+            <Button asChild variant="outline" size="sm" className="min-h-10">
+              <Link href={ROUTES.studentStudies}>
+                <BookOpen className="size-4" aria-hidden="true" />
+                Estudar {readiness.currentPoomsae}
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        {!readiness.isBlackBelt ? (
+          <div className="grid gap-5 p-5 md:grid-cols-2">
+            <div className="space-y-2">
+              <div className="flex items-baseline justify-between gap-2 text-sm">
+                <span className="font-medium text-foreground">Treinos na faixa atual</span>
+                <span className="font-semibold tabular-nums text-foreground">
+                  {readiness.presencesSinceLastBelt} de {readiness.minPresencesRequired} aulas
+                </span>
+              </div>
+              <Progress value={readiness.presenceProgressPct} className="h-2.5" />
+              <p className="text-xs text-muted-foreground">
+                {readiness.remainingPresences === 0
+                  ? "Meta mínima de presenças cumprida!"
+                  : `Faltam ${readiness.remainingPresences} presença${readiness.remainingPresences === 1 ? "" : "s"} para atingir a referência do exame.`}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-baseline justify-between gap-2 text-sm">
+                <span className="font-medium text-foreground">Tempo de carência na faixa</span>
+                <span className="font-semibold tabular-nums text-foreground">
+                  {readiness.monthsInCurrentBelt} de {readiness.minMonthsRequired} meses
+                </span>
+              </div>
+              <Progress value={readiness.timeProgressPct} className="h-2.5" />
+              <p className="text-xs text-muted-foreground">
+                {readiness.remainingDays === 0
+                  ? "Tempo mínimo de permanência cumprido!"
+                  : `Faltam cerca de ${readiness.remainingDays} dia${readiness.remainingDays === 1 ? "" : "s"} na faixa atual.`}
+              </p>
+            </div>
+          </div>
+        ) : null}
+
+        <div className="grid gap-4 bg-muted/30 p-5 text-sm sm:grid-cols-3">
+          <div>
+            <p className="text-xs font-medium text-muted-foreground">Poomsae atual</p>
+            <p className="mt-0.5 font-semibold text-foreground">{readiness.currentPoomsae}</p>
+          </div>
+          <div>
+            <p className="text-xs font-medium text-muted-foreground">Próximo Poomsae</p>
+            <p className="mt-0.5 font-semibold text-foreground">
+              {readiness.nextPoomsae ?? "Aperfeiçoamento Dan"}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-medium text-muted-foreground">Na faixa atual desde</p>
+            <p className="mt-0.5 font-semibold tabular-nums text-foreground">
+              {formatBusinessDateBr(readiness.beltStartDate)}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+        <section
+          aria-labelledby="roadmap-heading"
+          className="space-y-3 rounded-xl border border-border bg-card p-5 shadow-xs"
+        >
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 id="roadmap-heading" className="text-base font-semibold">
+              Trilha completa das faixas
+            </h2>
+            <span className="text-xs text-muted-foreground">10º GUB ao 1º Dan</span>
+          </div>
+
+          <ol className="t-stagger divide-y divide-border">
+            {roadmap.map((step) => (
+              <li
+                key={step.gub}
+                className="flex flex-wrap items-center justify-between gap-3 py-3"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <BeltBadge belt={step.belt} gub={step.gub} size="sm" />
+                  <span className="truncate text-xs text-muted-foreground">{step.poomsae}</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {step.achievedAt ? (
+                    <span className="text-xs text-muted-foreground tabular-nums">
+                      {formatBusinessDateBr(step.achievedAt)}
+                    </span>
+                  ) : null}
+                  {step.state === "achieved" ? (
+                    <StatusBadge tone="success">
+                      <CheckCircle2 className="mr-1 size-3" aria-hidden="true" />
+                      Conquistada
+                    </StatusBadge>
+                  ) : step.state === "current" ? (
+                    <StatusBadge tone="info">Faixa atual</StatusBadge>
+                  ) : step.state === "next" ? (
+                    <StatusBadge tone="warning">Próximo objetivo</StatusBadge>
+                  ) : (
+                    <StatusBadge tone="neutral">Futura</StatusBadge>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <div className="space-y-6">
+          <section
+            aria-labelledby="monthly-progress-heading"
+            className="rounded-xl border border-border bg-card p-5 shadow-xs"
+          >
+            <h2 id="monthly-progress-heading" className="mb-2 text-base font-semibold">
+              Ritmo de treinos
+            </h2>
+            <StudentMonthlyProgressChart series={monthlySeries} />
+          </section>
+
+          <section
+            aria-labelledby="belt-history-heading"
+            className="space-y-3 rounded-xl border border-border bg-card p-5 shadow-xs"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <h2 id="belt-history-heading" className="text-base font-semibold">
+                Histórico de graduações
+              </h2>
+              <Button asChild variant="ghost" size="sm" className="min-h-9">
+                <Link href={ROUTES.studentExams}>
+                  Ver exames
+                  <ArrowRight className="size-3.5" aria-hidden="true" />
+                </Link>
+              </Button>
+            </div>
+
+            {beltHistory.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Suas promoções de faixa aprovadas em exame ficarão registradas aqui.
+              </p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {beltHistory.map((item) => (
+                  <li
+                    key={item.$id}
+                    className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm"
+                  >
+                    <BeltProgressionPill
+                      fromBelt={item.previous_belt}
+                      fromGub={item.previous_gub}
+                      toBelt={item.new_belt}
+                      toGub={item.new_gub}
+                      size="sm"
+                    />
+                    <span className="text-xs text-muted-foreground tabular-nums">
+                      {formatBusinessDateBr(item.achieved_at)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default async function StudentEvolutionPage() {
+  const profile = await requireCapability("student");
+
+  return (
+    <PortalShell
+      profile={profile}
+      activePath={ROUTES.studentEvolution}
+      title="Caminho da faixa"
+      subtitle="Veja seu avanço rumo à próxima graduação, o Poomsae da sua faixa e seu histórico."
+      breadcrumbs={[{ label: "Caminho da faixa" }]}
+    >
+      <div className="w-full min-w-0 space-y-6">
+        <Suspense
+          fallback={
+            <div className="space-y-6">
+              <MetricCardsSkeleton count={2} />
+              <CardGridSkeleton count={2} columns={2} />
+            </div>
+          }
+        >
+          <StudentEvolutionContent profile={profile} />
+        </Suspense>
+      </div>
+    </PortalShell>
+  );
+}
