@@ -40,6 +40,21 @@ export function renewalEvent(endDate: string, referenceDate: string) {
   return null;
 }
 
+export type RenewalBucket = "expired" | "due_7d" | "due_30d" | "due_60d" | "due_90d" | "healthy";
+
+export function classifyContractRenewalBucket(
+  endDate: string,
+  referenceDate: string
+): { bucket: RenewalBucket; daysRemaining: number } {
+  const daysRemaining = contractReminderDays(endDate, referenceDate);
+  if (daysRemaining < 0) return { bucket: "expired", daysRemaining };
+  if (daysRemaining <= 7) return { bucket: "due_7d", daysRemaining };
+  if (daysRemaining <= 30) return { bucket: "due_30d", daysRemaining };
+  if (daysRemaining <= 60) return { bucket: "due_60d", daysRemaining };
+  if (daysRemaining <= 90) return { bucket: "due_90d", daysRemaining };
+  return { bucket: "healthy", daysRemaining };
+}
+
 export function privacyIpFingerprint(ip?: string | null) {
   if (!ip) return undefined;
   const reduced = ip.includes(":") ? ip.split(":").slice(0, 4).join(":") : ip.split(".").slice(0, 3).join(".");
