@@ -82,7 +82,7 @@ export function OnboardingChecklist({
                 key={item.id}
                 href={item.href}
                 className={cn(
-                  "flex min-h-11 items-center gap-2.5 rounded-lg border p-2.5 text-sm transition-colors",
+                  "flex min-h-11 items-center gap-2.5 rounded-lg border p-2.5 text-sm transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none",
                   item.completed
                     ? "border-border bg-success-soft text-muted-foreground line-through"
                     : "border-border bg-card hover:bg-muted text-foreground font-medium"

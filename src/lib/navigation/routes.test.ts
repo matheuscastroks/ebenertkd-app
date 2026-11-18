@@ -9,9 +9,20 @@ describe("navigationForProfile", () => {
     expect(items.find((item) => item.href === ROUTES.notifications)?.badge).toBe(2);
     expect(items.find((item) => item.href === ROUTES.adminContracts)?.children?.map((item) => item.href)).toEqual([
       ROUTES.adminContracts,
+      ROUTES.adminContractRenewals,
       ROUTES.adminContractTemplate,
       ROUTES.adminCancellations,
     ]);
+    expect(items.find((item) => item.href === ROUTES.adminExams)).toMatchObject({ group: "Academia", icon: "exams" });
+    expect(items.find((item) => item.href === ROUTES.adminExams)?.children?.map((item) => item.href)).toEqual([
+      ROUTES.adminExams,
+      ROUTES.adminExamEligibility,
+    ]);
+    expect(items.find((item) => item.href === ROUTES.adminBilling)?.children?.map((item) => item.href)).toEqual([
+      ROUTES.adminBilling,
+      ROUTES.adminBillingClosing,
+    ]);
+    expect(items.find((item) => item.href === ROUTES.adminAnnualReport)).toMatchObject({ group: "Gestão", icon: "dashboard" });
     expect(items.find((item) => item.href === ROUTES.adminSystem)).toMatchObject({ group: "Gestão", icon: "system" });
   });
 
@@ -34,7 +45,25 @@ describe("navigationForProfile", () => {
   it("keeps every destination reachable without duplicates in each profile", () => {
     const flatten = (items: ReturnType<typeof navigationForProfile>) => items.flatMap((item) => [item.href, ...(item.children ?? []).map((child) => child.href)]);
     const expected = {
-      admin: [ROUTES.admin, ROUTES.notifications, ROUTES.adminEnrollments, ROUTES.adminStudentAccess, ROUTES.adminClasses, ROUTES.adminExams, ROUTES.adminBilling, ROUTES.adminBillingSettings, ROUTES.adminContracts, ROUTES.adminContractTemplate, ROUTES.adminCancellations, ROUTES.adminSystem],
+      admin: [
+        ROUTES.admin,
+        ROUTES.notifications,
+        ROUTES.adminEnrollments,
+        ROUTES.adminRetention,
+        ROUTES.adminCompliance,
+        ROUTES.adminStudentAccess,
+        ROUTES.adminClasses,
+        ROUTES.adminExams,
+        ROUTES.adminExamEligibility,
+        ROUTES.adminBilling,
+        ROUTES.adminBillingClosing,
+        ROUTES.adminContracts,
+        ROUTES.adminContractRenewals,
+        ROUTES.adminContractTemplate,
+        ROUTES.adminCancellations,
+        ROUTES.adminAnnualReport,
+        ROUTES.adminSystem,
+      ],
       guardian: [ROUTES.guardian, ROUTES.notifications, ROUTES.guardianDependents],
       minor_student: [ROUTES.student, ROUTES.notifications, ROUTES.studentAttendance, ROUTES.studentExams, ROUTES.studentEnrollment, ROUTES.studentContracts],
       adult_student: [ROUTES.student, ROUTES.notifications, ROUTES.studentAttendance, ROUTES.studentExams, ROUTES.studentEnrollment, ROUTES.studentContracts, ROUTES.studentBilling]

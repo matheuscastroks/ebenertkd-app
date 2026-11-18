@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { EyeIcon } from "@/components/ui/eye";
+import { EyeOffIcon } from "@/components/ui/eye-off";
 import { loginAdultAction, loginMinorAction } from "@/app/actions/auth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
@@ -14,11 +15,14 @@ export function PasswordToggle({ visible, onToggle }: { visible: boolean; onTogg
     <button
       type="button"
       onClick={onToggle}
-      className="absolute right-0 top-0 flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
+      className="absolute right-0 top-0 flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
       aria-label={visible ? "Ocultar senha" : "Ver senha"}
       aria-pressed={visible}
     >
-      {visible ? <EyeOff className="size-4" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
+      <span className="t-icon-swap" data-state={visible ? "b" : "a"} aria-hidden="true">
+        <EyeIcon className="t-icon size-4" data-icon="a" />
+        <EyeOffIcon className="t-icon size-4" data-icon="b" />
+      </span>
     </button>
   );
 }
@@ -38,11 +42,11 @@ export function LoginCard({
   const describedBy = errorMessage ? errorId : undefined;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3.5">
       {isMinor ? (
         <div className="space-y-1">
           <h2 className="text-base font-semibold">Acesso do aluno menor</h2>
-          <p className="text-sm text-muted-foreground">Use o usuário e a senha que o professor entregou.</p>
+          <p className="text-sm text-muted-foreground">Entre com o nome de usuário criado pelo seu responsável ou professor.</p>
         </div>
       ) : null}
 
@@ -52,7 +56,7 @@ export function LoginCard({
         </Alert>
       ) : null}
 
-      <form action={action} className="space-y-4">
+      <form action={action} className="space-y-3">
         {isMinor ? (
           <Field>
             <FieldLabel htmlFor="login-username">Nome de usuário</FieldLabel>
@@ -92,7 +96,7 @@ export function LoginCard({
             {!isMinor ? (
               <Link
                 href="/recuperar"
-                className="-my-3 inline-flex min-h-11 items-center rounded-lg text-sm text-muted-foreground underline-offset-4 transition-colors duration-150 hover:text-foreground hover:underline! focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 motion-reduce:transition-none"
+                className="-my-3 inline-flex min-h-11 items-center rounded-lg text-sm text-muted-foreground underline-offset-4 transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:text-foreground hover:underline! focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 motion-reduce:transition-none"
               >
                 Esqueci minha senha
               </Link>

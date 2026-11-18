@@ -1,12 +1,9 @@
 import Link from "next/link";
-import {
-  CalendarCheck2,
-  Clock,
-  MapPin,
-  Pencil,
-  Plus,
-  UsersRound
-} from "lucide-react";
+import { Clock, MapPin } from "lucide-react";
+import { CalendarCheck2Icon } from "@/components/ui/calendar-check-2";
+import { PlusIcon } from "@/components/ui/plus";
+import { SquarePenIcon } from "@/components/ui/square-pen";
+import { UsersRoundIcon } from "@/components/ui/users-round";
 import { createTrainingClassAction, updateTrainingClassAction } from "@/app/actions/training-classes";
 import { EmptyState } from "@/components/shared/empty-state";
 import { OperationToast } from "@/components/shared/operation-toast";
@@ -15,7 +12,6 @@ import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -42,7 +38,7 @@ function WeekdayFields({ selected = [], idSuffix }: { selected?: string[]; idSuf
           <label
             key={day}
             htmlFor={`weekday-${day}-${idSuffix}`}
-            className="flex min-h-11 cursor-pointer touch-manipulation items-center gap-2 rounded-lg border border-border bg-card px-3 text-sm font-medium transition-colors duration-150 hover:bg-muted motion-reduce:transition-none"
+            className="flex min-h-11 cursor-pointer touch-manipulation items-center gap-2 rounded-lg border border-border bg-card px-3 text-sm font-medium transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:bg-muted motion-reduce:transition-none"
           >
             <Checkbox
               id={`weekday-${day}-${idSuffix}`}
@@ -148,7 +144,7 @@ export function ClassManager({ classes, notice, noticeTone = "success" }: { clas
         <ResponsiveDialog
           trigger={
             <Button className="min-h-11 shrink-0 font-medium touch-manipulation">
-              <Plus className="size-4 mr-1.5" aria-hidden="true" />
+              <PlusIcon className="size-4 mr-1.5" aria-hidden="true" />
               Nova turma
             </Button>
           }
@@ -171,58 +167,58 @@ export function ClassManager({ classes, notice, noticeTone = "success" }: { clas
             description="Use Nova turma para cadastrar o primeiro horário. Os alunos escolhem a turma no cadastro."
           />
         ) : (
-          <div className="grid gap-4 md:grid-cols-2">
+          <ul className="t-stagger divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
             {classes.map((trainingClass) => {
               const active = trainingClass.status === "active";
               return (
-                <Card key={trainingClass.$id} >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="space-y-1">
-                        <CardTitle className="text-base sm:text-lg font-semibold">
-                          {trainingClass.name}
-                        </CardTitle>
-                        <CardDescription className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground pt-0.5">
-                          <span className="flex items-center gap-1 font-medium text-foreground">
-                            <Clock className="size-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
-                            {trainingClass.start_time} às {trainingClass.end_time}
-                          </span>
-                          {trainingClass.location ? (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="size-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
-                              {trainingClass.location}
-                            </span>
-                          ) : null}
-                          {trainingClass.capacity ? (
-                            <span className="flex items-center gap-1">
-                              <UsersRound className="size-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
-                              Até {trainingClass.capacity} alunos
-                            </span>
-                          ) : null}
-                        </CardDescription>
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        <StatusBadge tone={active ? "success" : "neutral"}>
-                          {active ? "Ativa" : "Pausada"}
-                        </StatusBadge>
-                        <ClassStatusToggle classId={trainingClass.$id} active={active} />
-                      </div>
+                <li
+                  key={trainingClass.$id}
+                  className="t-interactive-row flex flex-col gap-3 px-4 py-4 hover:bg-muted sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                >
+                  <div className="min-w-0 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-base font-semibold text-foreground">
+                        {trainingClass.name}
+                      </p>
+                      <StatusBadge tone={active ? "success" : "neutral"}>
+                        {active ? "Ativa" : "Pausada"}
+                      </StatusBadge>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-1 pt-2">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1 font-medium text-foreground tabular-nums">
+                        <Clock className="size-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
+                        {trainingClass.start_time} às {trainingClass.end_time}
+                      </span>
+                      {trainingClass.location ? (
+                        <span className="flex items-center gap-1">
+                          <MapPin className="size-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
+                          {trainingClass.location}
+                        </span>
+                      ) : null}
+                      {trainingClass.capacity ? (
+                        <span className="flex items-center gap-1">
+                          <UsersRoundIcon className="size-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
+                          Até {trainingClass.capacity} alunos
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1.5">
                       {trainingClass.weekdays.map((day) => (
-                        <Badge key={day} variant="secondary" className="px-2 py-0.5 text-sm font-medium">
+                        <Badge key={day} variant="secondary" className="px-2 py-0.5 text-xs font-medium">
                           {weekdayLabels[day] ?? day.slice(0, 3)}
                         </Badge>
                       ))}
                     </div>
-                  </CardHeader>
+                  </div>
 
-                  <CardContent className="flex flex-wrap gap-2 border-t border-border pt-3">
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    <ClassStatusToggle classId={trainingClass.$id} active={active} />
+
                     <Button asChild size="sm" variant="outline" className="min-h-11 touch-manipulation">
                       <Link href={adminClassPath(trainingClass.$id)}>
-                        <CalendarCheck2 className="size-4 mr-1.5" aria-hidden="true" />
+                        <CalendarCheck2Icon className="size-4 mr-1.5" aria-hidden="true" />
                         Fazer chamada
                       </Link>
                     </Button>
@@ -230,7 +226,7 @@ export function ClassManager({ classes, notice, noticeTone = "success" }: { clas
                     <ResponsiveDialog
                       trigger={
                         <Button variant="ghost" size="sm" className="min-h-11 touch-manipulation">
-                          <Pencil className="size-3.5 mr-1.5" aria-hidden="true" />
+                          <SquarePenIcon className="size-3.5 mr-1.5" aria-hidden="true" />
                           Editar
                         </Button>
                       }
@@ -245,11 +241,11 @@ export function ClassManager({ classes, notice, noticeTone = "success" }: { clas
                         </FormSubmitButton>
                       </form>
                     </ResponsiveDialog>
-                  </CardContent>
-                </Card>
+                  </div>
+                </li>
               );
             })}
-          </div>
+          </ul>
         )}
       </section>
     </div>

@@ -5,19 +5,19 @@ import { cn } from "@/lib/utils";
 
 function BrandMark({ className }: { className?: string }) {
   return (
-    <div className={cn("flex items-center gap-3", className)}>
+    <div className={cn("flex items-center gap-2.5 lg:gap-3", className)}>
       <Image
         src="/brand-icon.png"
         alt=""
-        width={48}
-        height={48}
+        width={44}
+        height={44}
         unoptimized
         priority
-        className="size-12 shrink-0 object-contain"
+        className="size-9 shrink-0 object-contain lg:size-11"
       />
       <div className="leading-tight">
-        <p className="text-base font-semibold">Ebener TKD</p>
-        <p className="text-sm text-muted-foreground">Portal da academia</p>
+        <p className="text-sm font-semibold lg:text-base">Ebener TKD</p>
+        <p className="text-xs text-muted-foreground lg:text-sm">Portal da academia</p>
       </div>
     </div>
   );
@@ -40,31 +40,31 @@ export function AuthShell({
   footer?: ReactNode;
 }) {
   return (
-    <div className="min-h-dvh bg-background lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+    <div className="min-h-dvh lg:h-dvh lg:overflow-hidden bg-background lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
       <section
         aria-label="Ebener TKD"
-        className="hidden border-r border-border bg-card lg:flex lg:flex-col lg:justify-between lg:p-12"
+        className="hidden border-r border-border bg-card lg:flex lg:flex-col lg:justify-between lg:p-10"
       >
         <BrandMark />
         <div className="max-w-md space-y-3">
           <p className="text-3xl font-semibold tracking-tight text-balance">
-            Aulas, graduações e mensalidades da academia em um só lugar.
+            Seus treinos, exames de faixa e a rotina da família em um só lugar.
           </p>
           <p className="text-base text-muted-foreground">
-            Para alunos, responsáveis e professores.
+            Acompanhe sua evolução no tatame ou gerencie a matrícula e as mensalidades dos seus filhos.
           </p>
         </div>
       </section>
 
-      <main className="flex min-h-dvh flex-col px-4 pt-6 pb-8 sm:px-6 lg:justify-center lg:py-12">
-        <div className="mx-auto flex w-full max-w-sm flex-col gap-6">
+      <main className="flex min-h-dvh flex-col justify-center px-4 py-4 sm:px-6 lg:h-dvh lg:overflow-y-auto lg:py-6">
+        <div className="mx-auto flex w-full max-w-sm flex-col gap-3.5">
           <BrandMark className="lg:hidden" />
-          <header className="space-y-1.5">
-            <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+          <header className="space-y-1">
+            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">{title}</h1>
             {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
           </header>
           {children}
-          {footer ? <div className="text-sm text-muted-foreground">{footer}</div> : null}
+          {footer ? <div className="text-xs text-muted-foreground">{footer}</div> : null}
         </div>
       </main>
     </div>
@@ -77,7 +77,7 @@ export function AuthTextLink({ href, children, standalone = false }: { href: str
     <Link
       href={href}
       className={cn(
-        "rounded-sm font-medium text-foreground underline! decoration-muted-foreground! underline-offset-4 transition-colors duration-150 hover:decoration-foreground! focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 motion-reduce:transition-none",
+        "rounded-sm font-medium text-foreground underline! decoration-muted-foreground! underline-offset-4 transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:decoration-foreground! focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 motion-reduce:transition-none",
         standalone && "inline-flex min-h-11 items-center"
       )}
     >

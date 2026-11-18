@@ -2,7 +2,7 @@
 
 import { useTransition, type FormEvent, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Settings2 } from "lucide-react";
+import { SlidersHorizontalIcon } from "@/components/ui/sliders-horizontal";
 import { toast } from "sonner";
 import { saveBillingSettingsAction } from "@/app/actions/billing";
 import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
@@ -39,7 +39,7 @@ export function PixSettingsDialog({ settings, trigger }: { settings: BillingSett
       }
     });
   };
-  return <ResponsiveDialog open={open} onOpenChange={onOpenChange} trigger={trigger ?? <Button variant="outline" className="min-h-11"><Settings2 aria-hidden="true" />Configurar PIX</Button>} title="Dados PIX" description="Esses dados aparecem para alunos e responsáveis na hora de pagar.">
+  return <ResponsiveDialog open={open} onOpenChange={onOpenChange} triggerTooltip="Alterar as informações da chave PIX de recebimento" trigger={trigger ?? <Button variant="outline" className="min-h-11"><SlidersHorizontalIcon aria-hidden="true" />Configurar PIX</Button>} title="Dados PIX" description="Esses dados aparecem para alunos e responsáveis na hora de pagar.">
     <form onSubmit={onSubmit} className="grid gap-4">
       <Field><FieldLabel htmlFor="modal-beneficiary-name">Beneficiário</FieldLabel><Input id="modal-beneficiary-name" name="beneficiary_name" defaultValue={settings?.beneficiary_name} required /></Field>
       <Field><FieldLabel htmlFor="modal-pix-key-type">Tipo da chave</FieldLabel><Select name="pix_key_type" defaultValue={settings?.pix_key_type ?? "random"}><SelectTrigger id="modal-pix-key-type" className="w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="cpf">CPF</SelectItem><SelectItem value="cnpj">CNPJ</SelectItem><SelectItem value="email">E-mail</SelectItem><SelectItem value="phone">Telefone</SelectItem><SelectItem value="random">Aleatória</SelectItem></SelectContent></Select></Field>

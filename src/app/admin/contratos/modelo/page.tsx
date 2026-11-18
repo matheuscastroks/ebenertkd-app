@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ContractContentEditor } from "@/features/contracts/components/contract-content-editor";
-import { Badge } from "@/components/ui/badge";
 import { CONTRACT_VARIABLES } from "@/features/contracts/rules";
 import { DEFAULT_CONTRACT_CONTENT, getContractTemplate, listContractVersions } from "@/features/contracts/template-service";
 import { requireProfile } from "@/lib/auth/session";
@@ -46,7 +45,7 @@ export default async function ContractTemplatePage({
         <OperationToast tone="error" title="Revise o texto e as variáveis obrigatórias utilizadas" clearParams={["error"]} />
       ) : null}
 
-      <div className="w-full min-w-0 grid gap-6 lg:grid-cols-[1fr_340px]">
+      <div className="w-full min-w-0 grid gap-6 lg:grid-cols-[1fr_340px] lg:items-start">
         {/* Editor Principal */}
         <Card>
           <CardHeader className="space-y-1">
@@ -71,7 +70,6 @@ export default async function ContractTemplatePage({
               <Field>
                 <div className="flex items-center justify-between">
                   <FieldLabel htmlFor="template-content">Conteúdo e cláusulas</FieldLabel>
-                  
                 </div>
                 <ContractContentEditor content={template?.draft_content ?? DEFAULT_CONTRACT_CONTENT} />
               </Field>
@@ -82,7 +80,7 @@ export default async function ContractTemplatePage({
                   value="save"
                   type="submit"
                   variant="outline"
-                  className="h-11 font-medium sm:flex-1"
+                  className="min-h-11 font-medium sm:flex-1"
                 >
                   <Save className="size-4" aria-hidden="true" />
                   Salvar rascunho
@@ -93,53 +91,54 @@ export default async function ContractTemplatePage({
           </CardContent>
         </Card>
 
-        {/* Sidebar com Variáveis e Histórico */}
-        <div className="space-y-6">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Variáveis disponíveis</CardTitle>
-              <CardDescription className="text-xs">
+        {/* Sidebar agrupada com Variáveis e Histórico */}
+        <aside
+          aria-label="Variáveis e histórico de versões"
+          className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs"
+        >
+          <section className="p-5 space-y-3">
+            <div>
+              <h2 className="text-base font-semibold text-foreground">Variáveis disponíveis</h2>
+              <p className="mt-1 text-xs text-muted-foreground">
                 Substituídas automaticamente pelos dados do aluno e da mensalidade.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-1.5">
-                {CONTRACT_VARIABLES.map((variable) => (
-                  <code
-                    key={variable}
-                    className="inline-block select-all rounded-lg border border-border bg-muted px-2 py-1 font-mono text-sm text-foreground"
-                  >
-                    {`{{ ${variable} }}`}
-                  </code>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {CONTRACT_VARIABLES.map((variable) => (
+                <code
+                  key={variable}
+                  className="inline-block select-all rounded-lg border border-border bg-muted px-2 py-1 font-mono text-sm text-foreground"
+                >
+                  {`{{ ${variable} }}`}
+                </code>
+              ))}
+            </div>
+          </section>
 
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Histórico de versões</CardTitle>
-              <CardDescription className="text-xs">
+          <section className="p-5 space-y-3">
+            <div>
+              <h2 className="text-base font-semibold text-foreground">Histórico de versões</h2>
+              <p className="mt-1 text-xs text-muted-foreground">
                 Versões publicadas e data de disponibilização.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="divide-y divide-border">
+              </p>
+            </div>
+            <div className="divide-y divide-border">
               {versions.length ? (
                 versions.map((version) => (
                   <div
                     key={version.$id}
-                    className="flex items-center justify-between py-2"
+                    className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0"
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm">Versão {version.version}</span>
+                        <span className="font-semibold text-sm text-foreground">Versão {version.version}</span>
                         {version.$id === template?.published_version_id && (
                           <StatusBadge tone="success">
                             Vigente
                           </StatusBadge>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">
+                      <p className="text-xs text-muted-foreground mt-0.5 tabular-nums">
                         {new Date(version.published_at).toLocaleString("pt-BR", {
                           day: "2-digit",
                           month: "short",
@@ -152,11 +151,11 @@ export default async function ContractTemplatePage({
                   </div>
                 ))
               ) : (
-                <p className="py-2 text-sm text-muted-foreground">Nenhuma versão publicada. Novos contratos só podem ser gerados depois da primeira publicação.</p>
+                <p className="py-1 text-sm text-muted-foreground">Nenhuma versão publicada. Novos contratos só podem ser gerados depois da primeira publicação.</p>
               )}
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </section>
+        </aside>
       </div>
     </PortalShell>
   );

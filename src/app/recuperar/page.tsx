@@ -2,7 +2,6 @@ import { requestRecoveryAction } from "@/app/actions/auth";
 import { AuthShell, AuthTextLink } from "@/components/auth/auth-shell";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
-import { Card } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
@@ -28,26 +27,24 @@ export default async function RecoveryPage({
         />
       ) : null}
 
-      <Card className="p-4 sm:p-5">
-        <form action={requestRecoveryAction} className="space-y-4">
-          <Field>
-            <FieldLabel htmlFor="recovery-email">E-mail</FieldLabel>
-            <Input
-              id="recovery-email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              placeholder="voce@exemplo.com"
-              className="h-11"
-              required
-            />
-          </Field>
+      <form action={requestRecoveryAction} className="space-y-3.5">
+        <Field>
+          <FieldLabel htmlFor="recovery-email">E-mail</FieldLabel>
+          <Input
+            id="recovery-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder="voce@exemplo.com"
+            className="h-11"
+            required
+          />
+        </Field>
 
-          <FormSubmitButton className="h-11 w-full touch-manipulation" pendingLabel="Enviando…">
-            Enviar link
-          </FormSubmitButton>
-        </form>
-      </Card>
+        <FormSubmitButton className="h-11 w-full touch-manipulation" pendingLabel="Enviando…">
+          Enviar link
+        </FormSubmitButton>
+      </form>
 
       <p className="text-sm text-muted-foreground">
         Aluno menor de idade? Peça uma nova senha ao professor.

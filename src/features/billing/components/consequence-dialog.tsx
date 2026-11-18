@@ -3,8 +3,9 @@
 import { startTransition, useRef, useState, type ReactNode } from "react";
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
-export function ConsequenceDialog({ trigger, title, summary, effect, confirmLabel, destructive, action, children, formId, values }: {
+export function ConsequenceDialog({ trigger, title, summary, effect, confirmLabel, destructive, action, children, formId, values, onOptimisticStart, onOptimisticReset }: {
   trigger: ReactNode;
   title: string;
   summary: Array<{ label: string; value: string; field?: string; kind?: "money" | "date" }>;
@@ -15,6 +16,8 @@ export function ConsequenceDialog({ trigger, title, summary, effect, confirmLabe
   children?: ReactNode;
   formId?: string;
   values?: Record<string, string>;
+  onOptimisticStart?: () => void;
+  onOptimisticReset?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
@@ -56,10 +59,12 @@ export function ConsequenceDialog({ trigger, title, summary, effect, confirmLabe
         setPending(true);
         setError("");
         startTransition(async () => {
+        onOptimisticStart?.();
         try {
           await action(data);
           setOpen(false);
         } finally {
+          onOptimisticReset?.();
           locked.current = false;
           setPending(false);
         }
@@ -69,7 +74,9 @@ export function ConsequenceDialog({ trigger, title, summary, effect, confirmLabe
         {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={pending} type="button">Cancelar</AlertDialogCancel>
-          <Button disabled={pending} type="submit" variant={destructive ? "destructive" : "default"} className="min-h-11">{pending ? "Enviando…" : confirmLabel}</Button>
+          <Button disabled={pending} type="submit" variant={destructive ? "destructive" : "default"} className="min-h-11">
+            {pending ? <><Spinner aria-hidden="true" />Enviando…</> : confirmLabel}
+          </Button>
         </AlertDialogFooter>
       </form>
     </AlertDialogContent>

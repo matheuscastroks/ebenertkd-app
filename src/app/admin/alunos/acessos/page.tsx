@@ -80,7 +80,7 @@ export default async function StudentAccessPage({
         <details className="group rounded-xl border border-border bg-card p-4 text-sm">
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 font-medium [&::-webkit-details-marker]:hidden">
             Como funciona o acesso de alunos menores
-            <ChevronDown className="size-4 text-muted-foreground transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none" aria-hidden="true" />
+            <ChevronDown className="size-4 text-muted-foreground transition-transform duration-(--duration-fast) ease-(--ease-smooth-out) group-open:-scale-y-100 motion-reduce:transition-none" aria-hidden="true" />
           </summary>
           <div className="space-y-2 pt-2 text-muted-foreground">
             <p>Alunos menores entram com nome de usuário e senha simples, gerenciados pelo responsável legal.</p>

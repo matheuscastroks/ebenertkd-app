@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useOptimistic, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ptBR } from "date-fns/locale";
 import {
@@ -17,12 +17,15 @@ import {
 } from "lucide-react";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Progress } from "@/components/ui/progress";
+import {
+  AttendanceEvolutionAreaChart,
+  StudentAttendanceChart,
+  type AttendanceEvolutionPoint
+} from "@/features/classes/components/attendance-chart";
 import { attendanceCalendarStatus, type AttendanceCalendarStatus } from "@/features/classes/attendance-calendar-rules";
 import type { AttendanceCalendarEntry } from "@/features/classes/types";
-import { cn } from "@/lib/utils";
 
 const labels: Record<AttendanceCalendarStatus, string> = {
   present: "Presente",
@@ -42,6 +45,46 @@ const tones = {
   cancelled: "neutral"
 } as const;
 
+function buildAttendanceEvolution(entries: AttendanceCalendarEntry[]): AttendanceEvolutionPoint[] {
+  const recorded = [...entries]
+    .filter((entry) => entry.lesson.status !== "cancelled" && entry.record)
+    .sort((a, b) =>
+      `${a.lesson.lesson_date}:${a.lesson.start_time}`.localeCompare(
+        `${b.lesson.lesson_date}:${b.lesson.start_time}`
+      )
+    );
+
+  const dayTotals = new Map<string, number>();
+  for (const entry of recorded) {
+    const day = entry.lesson.lesson_date.slice(0, 10);
+    dayTotals.set(day, (dayTotals.get(day) ?? 0) + 1);
+  }
+
+  let attended = 0;
+  let total = 0;
+  const points: AttendanceEvolutionPoint[] = [];
+  for (const entry of recorded) {
+    total += 1;
+    if (entry.record!.status === "present") attended += 1;
+    const isoDay = entry.lesson.lesson_date.slice(0, 10);
+    const [, monthPart, dayPart] = isoDay.split("-");
+    const shortDay = `${dayPart}/${monthPart}`;
+    const dateLabel =
+      (dayTotals.get(isoDay) ?? 0) > 1
+        ? `${shortDay} ${entry.lesson.start_time}`
+        : shortDay;
+    points.push({
+      dateLabel,
+      lessonLabel: entry.trainingClass?.name ?? "Treino regular",
+      rate: Math.round((attended / total) * 100),
+      attended,
+      total,
+      statusLabel: labels[entry.record!.status]
+    });
+  }
+  return points;
+}
+
 export function AttendanceHistory({
   entries,
   summary,
@@ -54,9 +97,11 @@ export function AttendanceHistory({
   basePath: string;
 }) {
   const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [optimisticMonth, setOptimisticMonth] = useOptimistic(month);
   const firstDate = entries[0]?.lesson.lesson_date.slice(0, 10) ?? `${month}-01`;
   const [selected, setSelected] = useState<Date | undefined>(new Date(`${firstDate}T12:00:00`));
-  const [visibleMonth, setVisibleMonth] = useState<Date>(new Date(`${month}-01T12:00:00`));
+  const visibleMonth = useMemo(() => new Date(`${optimisticMonth}-01T12:00:00`), [optimisticMonth]);
 
   const dayKey = (date: Date) =>
     `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -82,10 +127,12 @@ export function AttendanceHistory({
   const selectedEntries = selected ? byDay.get(dayKey(selected)) ?? [] : [];
 
   const changeMonth = (next: Date) => {
-    setVisibleMonth(next);
-    setSelected(undefined);
     const key = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}`;
-    router.replace(`${basePath}?month=${key}`, { scroll: false });
+    setSelected(undefined);
+    startTransition(() => {
+      setOptimisticMonth(key);
+      router.replace(`${basePath}?month=${key}`, { scroll: false });
+    });
   };
 
   const goToPreviousMonth = () => {
@@ -103,15 +150,35 @@ export function AttendanceHistory({
     year: "numeric"
   });
 
+  const counts = useMemo(() => {
+    let present = 0;
+    let absent = 0;
+    let excused = 0;
+    let scheduled = 0;
+    for (const entry of entries) {
+      const status = attendanceCalendarStatus(entry.lesson, entry.record?.status);
+      if (status === "present") present += 1;
+      else if (status === "absent") absent += 1;
+      else if (status === "excused") excused += 1;
+      else if (status === "scheduled") scheduled += 1;
+    }
+    return { present, absent, excused, scheduled };
+  }, [entries]);
+
+  const evolutionPoints = useMemo(() => buildAttendanceEvolution(entries), [entries]);
+
   return (
-    <div className="space-y-6">
-      {/* Resumo Mensal de Frequência */}
-      <Card>
-        <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5">
+    <div aria-busy={pending} className="space-y-6 transition-opacity duration-(--duration-quick) motion-reduce:transition-none aria-busy:opacity-80">
+      {/* Resumo Mensal e Gráficos de Frequência */}
+      <section
+        aria-labelledby="attendance-summary-title"
+        className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs"
+      >
+        <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-muted-foreground">
+            <h2 id="attendance-summary-title" className="text-sm font-semibold text-muted-foreground">
               Desempenho no mês de {monthLabel}
-            </p>
+            </h2>
             <div className="flex items-baseline gap-3">
               <span className="text-3xl font-semibold tabular-nums text-foreground">
                 {summary.total ? `${summary.rate}%` : "—"}
@@ -129,113 +196,156 @@ export function AttendanceHistory({
             </p>
           </div>
 
-          {summary.total > 0 ? <div className="w-full sm:max-w-xs space-y-2">
-            <div className="flex justify-between text-sm text-muted-foreground font-medium">
-              <span>Meta da academia: 75%</span>
-              <span className="font-semibold text-foreground">{summary.rate}%</span>
-            </div>
-            <Progress
-              value={summary.rate}
-              className="h-2.5"
-              aria-label={`Taxa de presença de ${summary.rate}%`}
-            />
-          </div> : null}
-        </CardContent>
-      </Card>
-
-      {/* Grade com Calendário e Detalhes do Dia */}
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,0.85fr)]">
-        {/* Card do Calendário */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between gap-2">
-              <div className="space-y-0.5">
-                <CardTitle className="text-base font-semibold flex items-center gap-2">
-                  <CalendarDays className="size-4 text-primary-text" aria-hidden="true" />
-                  Calendário de treinos
-                </CardTitle>
-                <CardDescription className="text-sm">
-                  Toque em um dia para inspecionar os detalhes da aula e a chamada.
-                </CardDescription>
+          {summary.total > 0 ? (
+            <div className="w-full space-y-2 sm:max-w-xs">
+              <div className="flex justify-between text-sm font-medium text-muted-foreground">
+                <span>Meta da academia: 75%</span>
+                <span className="font-semibold tabular-nums text-foreground">{summary.rate}%</span>
               </div>
-
-              <div className="flex items-center gap-1">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon-sm"
-                  onClick={goToPreviousMonth}
-                  aria-label="Mês anterior"
-                >
-                  <ChevronLeft className="size-4" aria-hidden="true" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon-sm"
-                  onClick={goToNextMonth}
-                  aria-label="Próximo mês"
-                >
-                  <ChevronRight className="size-4" aria-hidden="true" />
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-
-          <CardContent className="space-y-4">
-            <div className="overflow-x-auto pb-1">
-              <Calendar
-                mode="single"
-                selected={selected}
-                onSelect={setSelected}
-                month={visibleMonth}
-                onMonthChange={changeMonth}
-                locale={ptBR}
-                modifiers={{
-                  present: markedDates("present"),
-                  absent: markedDates("absent"),
-                  excused: markedDates("excused"),
-                  scheduled: markedDates("scheduled"),
-                  not_recorded: markedDates("not_recorded"),
-                  cancelled: markedDates("cancelled")
-                }}
-                modifiersClassNames={{
-                  present: "[&>button]:bg-success/20 [&>button]:text-success-foreground [&>button]:font-semibold",
-                  absent: "[&>button]:bg-destructive/15 [&>button]:text-destructive [&>button]:font-semibold",
-                  excused: "[&>button]:bg-warning/20 [&>button]:text-warning-foreground",
-                  scheduled: "[&>button]:bg-info/15 [&>button]:text-info",
-                  not_recorded: "[&>button]:ring-1 [&>button]:ring-muted-foreground/50",
-                  cancelled: "[&>button]:line-through [&>button]:text-muted-foreground"
-                }}
-                className="mx-auto w-fit p-1"
+              <Progress
+                value={summary.rate}
+                className="h-2.5"
+                aria-label={`Taxa de presença de ${summary.rate}%`}
               />
             </div>
+          ) : null}
+        </div>
 
-            {/* Legenda Visual */}
-            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 pt-2 border-t text-sm text-muted-foreground">
-              <span className="flex items-center gap-1.5 font-medium text-foreground">
-                <Check className="size-3.5 text-success" aria-hidden="true" /> Presença
-              </span>
-              <span className="flex items-center gap-1.5 font-medium text-foreground">
-                <X className="size-3.5 text-destructive" aria-hidden="true" /> Falta
-              </span>
-              <span className="flex items-center gap-1.5 font-medium text-foreground">
-                <Minus className="size-3.5 text-warning" aria-hidden="true" /> Justificada
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Clock3 className="size-3.5 text-info" aria-hidden="true" /> Aula prevista
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Ban className="size-3.5 text-muted-foreground" aria-hidden="true" /> Cancelada
-              </span>
+        {summary.total > 0 ? (
+          <div
+            className={
+              evolutionPoints.length >= 2
+                ? "grid divide-y divide-border lg:grid-cols-2 lg:divide-x lg:divide-y-0"
+                : "grid"
+            }
+          >
+            {evolutionPoints.length >= 2 ? (
+              <div className="min-w-0 space-y-3 p-5">
+                <div className="space-y-0.5">
+                  <h3 className="text-base font-semibold leading-snug text-foreground">
+                    Evolução da frequência
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Acompanhamento acumulado ao longo das chamadas do mês.
+                  </p>
+                </div>
+                <AttendanceEvolutionAreaChart points={evolutionPoints} />
+              </div>
+            ) : null}
+
+            <div className="min-w-0 space-y-3 p-5">
+              <div className="space-y-0.5">
+                <h3 className="text-base font-semibold leading-snug text-foreground">
+                  Composição do mês
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Proporção entre presenças, faltas, justificativas{counts.scheduled > 0 ? " e aulas previstas" : ""}.
+                </p>
+              </div>
+              <StudentAttendanceChart
+                present={entries.length > 0 ? counts.present : summary.attended}
+                absent={counts.absent}
+                excused={counts.excused}
+                scheduled={counts.scheduled}
+                rate={summary.rate}
+              />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        ) : null}
+      </section>
 
-        {/* Card de Detalhes do Dia Selecionado */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">
+      {/* Grade Unificada com Calendário e Detalhes do Dia */}
+      <section
+        aria-labelledby="attendance-calendar-title"
+        className="grid divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs xl:grid-cols-[minmax(0,1fr)_minmax(20rem,0.85fr)] xl:divide-x xl:divide-y-0"
+      >
+        {/* Metade Esquerda: Calendário */}
+        <div className="min-w-0 space-y-4 p-5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="space-y-0.5">
+              <h2 id="attendance-calendar-title" className="flex items-center gap-2 text-base font-semibold leading-snug text-foreground">
+                <CalendarDays className="size-4 text-primary-text" aria-hidden="true" />
+                Calendário de treinos
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Toque em um dia para inspecionar os detalhes da aula e a chamada.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                onClick={goToPreviousMonth}
+                aria-label="Mês anterior"
+              >
+                <ChevronLeft className="size-4" aria-hidden="true" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                onClick={goToNextMonth}
+                aria-label="Próximo mês"
+              >
+                <ChevronRight className="size-4" aria-hidden="true" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto pb-1">
+            <Calendar
+              mode="single"
+              selected={selected}
+              onSelect={setSelected}
+              month={visibleMonth}
+              onMonthChange={changeMonth}
+              locale={ptBR}
+              modifiers={{
+                present: markedDates("present"),
+                absent: markedDates("absent"),
+                excused: markedDates("excused"),
+                scheduled: markedDates("scheduled"),
+                not_recorded: markedDates("not_recorded"),
+                cancelled: markedDates("cancelled")
+              }}
+              modifiersClassNames={{
+                present: "[&>button]:bg-success/20 [&>button]:text-success-foreground [&>button]:font-semibold",
+                absent: "[&>button]:bg-destructive/15 [&>button]:text-destructive [&>button]:font-semibold",
+                excused: "[&>button]:bg-warning/20 [&>button]:text-warning-foreground",
+                scheduled: "[&>button]:bg-info/15 [&>button]:text-info",
+                not_recorded: "[&>button]:ring-1 [&>button]:ring-muted-foreground/50",
+                cancelled: "[&>button]:line-through [&>button]:text-muted-foreground"
+              }}
+              className="mx-auto w-fit bg-transparent p-1"
+            />
+          </div>
+
+          {/* Legenda Visual */}
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-border pt-3 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5 font-medium text-foreground">
+              <Check className="size-3.5 text-success" aria-hidden="true" /> Presença
+            </span>
+            <span className="flex items-center gap-1.5 font-medium text-foreground">
+              <X className="size-3.5 text-destructive" aria-hidden="true" /> Falta
+            </span>
+            <span className="flex items-center gap-1.5 font-medium text-foreground">
+              <Minus className="size-3.5 text-warning" aria-hidden="true" /> Justificada
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Clock3 className="size-3.5 text-info" aria-hidden="true" /> Aula prevista
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Ban className="size-3.5 text-muted-foreground" aria-hidden="true" /> Cancelada
+            </span>
+          </div>
+        </div>
+
+        {/* Metade Direita: Detalhes do Dia Selecionado */}
+        <div className="min-w-0 space-y-3 p-5">
+          <div className="space-y-0.5">
+            <h3 className="text-base font-semibold leading-snug text-foreground">
               {selected
                 ? selected.toLocaleDateString("pt-BR", {
                     weekday: "long",
@@ -243,25 +353,25 @@ export function AttendanceHistory({
                     month: "long"
                   })
                 : "Selecione uma data no calendário"}
-            </CardTitle>
-            <CardDescription className="text-sm">
+            </h3>
+            <p className="text-sm text-muted-foreground">
               {selectedEntries.length
                 ? `${selectedEntries.length} ${selectedEntries.length === 1 ? "aula registrada" : "aulas registradas"} neste dia`
                 : "Nenhuma aula programada ou chamada para este dia"}
-            </CardDescription>
-          </CardHeader>
+            </p>
+          </div>
 
-          <CardContent className="space-y-3">
-            {selectedEntries.length > 0 ? (
-              selectedEntries.map(({ record, lesson, trainingClass }) => {
+          {selectedEntries.length > 0 ? (
+            <div className="divide-y divide-border">
+              {selectedEntries.map(({ record, lesson, trainingClass }) => {
                 const status = attendanceCalendarStatus(lesson, record?.status);
                 return (
                   <div
                     key={lesson.$id}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-surface-recessed/60 p-3.5 "
+                    className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
                   >
-                    <div className="space-y-1 min-w-0">
-                      <p className="font-semibold text-sm truncate">
+                    <div className="min-w-0 space-y-1">
+                      <p className="truncate text-sm font-semibold">
                         {trainingClass?.name ?? "Treino regular"}
                       </p>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
@@ -283,17 +393,17 @@ export function AttendanceHistory({
                     </StatusBadge>
                   </div>
                 );
-              })
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
-                <CalendarCheck2 className="size-8 stroke-1 mb-2 opacity-50" aria-hidden="true" />
-                <p className="text-sm font-medium">Sem atividades neste dia</p>
-                <p className="text-sm mt-0.5">Selecione os dias com marcadores no calendário acima para ver o registro de presença.</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
+              <CalendarCheck2 className="mb-2 size-8 stroke-1 text-muted-foreground" aria-hidden="true" />
+              <p className="text-sm font-medium">Sem atividades neste dia</p>
+              <p className="mt-0.5 text-sm">Selecione os dias com marcadores no calendário acima para ver o registro de presença.</p>
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

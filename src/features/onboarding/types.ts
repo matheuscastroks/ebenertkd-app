@@ -137,7 +137,7 @@ export const ONBOARDING_CONFIGS: Record<OnboardingRole, RoleOnboardingConfig> = 
   },
   guardian: {
     welcomeTitle: "Portal da família",
-    welcomeSubtitle: "Acompanhe a presença, as faixas e as mensalidades de quem você acompanha.",
+    welcomeSubtitle: "Acompanhe a presença, as faixas e as mensalidades dos seus filhos em um só lugar.",
     welcomeHighlight: "Responsável pelo Aluno",
     ahaMomentDescription: "Veja as presenças, a faixa e as pendências de cada dependente.",
     benefitBullets: [

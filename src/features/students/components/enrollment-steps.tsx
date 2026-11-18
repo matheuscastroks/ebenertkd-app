@@ -278,7 +278,7 @@ export function DocumentsEnrollmentStep({ bundle }: StepProps) {
       description="Arquivos seguros de até 5 MB. A foto é obrigatória para conclusão e emissão de graduação."
     >
       <div className="grid gap-5 md:grid-cols-2">
-        <div className="flex items-start gap-4 rounded-xl border bg-muted/20 p-4">
+        <div className="flex items-start gap-4">
           <StudentAvatar
             name={student.full_name}
             photoDocumentId={profilePhoto?.$id}
@@ -298,7 +298,7 @@ export function DocumentsEnrollmentStep({ bundle }: StepProps) {
           </div>
         </div>
 
-        <div className="rounded-xl border bg-muted/20 p-4">
+        <div>
           <FileField
             name="medical_certificate"
             label="Atestado médico"

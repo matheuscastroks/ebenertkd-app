@@ -135,7 +135,7 @@ export async function CancellationsList() {
       {decided.length ? (
         <details className="group space-y-3">
           <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden">
-            <ChevronDown className="size-4 transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none" aria-hidden="true" />
+            <ChevronDown className="size-4 transition-transform duration-(--duration-fast) ease-(--ease-smooth-out) group-open:-scale-y-100 motion-reduce:transition-none" aria-hidden="true" />
             Pedidos decididos ({decided.length})
           </summary>
           <DecidedList rows={decided} />

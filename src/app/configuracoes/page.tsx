@@ -7,7 +7,6 @@ import { ThemePreference } from "@/components/dashboard/theme-preference";
 import { LogoutButton } from "@/components/dashboard/logout-button";
 import { NotificationPreferences } from "@/features/notifications/components/notification-preferences";
 import { PushPermissionCard } from "@/features/notifications/components/push-permission-card";
-import { ReplayOnboardingCard } from "@/features/onboarding/components/replay-onboarding-card";
 import { getNotificationPreferences } from "@/features/notifications/preferences-service";
 import { hasActivePushSubscription } from "@/features/notifications/push-service";
 import { requireProfile } from "@/lib/auth/session";
@@ -58,8 +57,7 @@ export default async function SettingsPage() {
               </div>
               <LogoutButton />
             </div>
-            <ReplayOnboardingCard role={profile.role} />
-            <Link href={ROUTES.privacy} className="flex min-h-12 items-center justify-between gap-3 p-4 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring motion-reduce:transition-none">
+            <Link href={ROUTES.privacy} className="flex min-h-12 items-center justify-between gap-3 p-4 text-sm font-medium transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring motion-reduce:transition-none">
               Política de privacidade<ChevronRight className="size-4 text-muted-foreground" aria-hidden="true" />
             </Link>
           </div>

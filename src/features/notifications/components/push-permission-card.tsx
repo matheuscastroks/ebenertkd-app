@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { Bell, BellOff } from "lucide-react";
+import { useEffect, useOptimistic, useState, useTransition } from "react";
+import { BellOff } from "lucide-react";
 import { toast } from "sonner";
 import { revokePushSubscriptionAction, savePushSubscriptionAction } from "@/app/actions/notifications";
+import { BellIcon } from "@/components/ui/bell";
 import { Button } from "@/components/ui/button";
 import { applicationServerKey, toSubscriptionPayload } from "@/features/notifications/subscription-payload";
 
@@ -16,7 +17,10 @@ export function PushPermissionCard({
 }) {
   const [permission, setPermission] = useState<NotificationPermission | "unsupported">("default");
   const [active, setActive] = useState(initiallyActive);
-  const [pending, startTransition] = useTransition();
+  const [optimisticActive, setOptimisticActive] = useOptimistic(active);
+  const [enabling, startEnabling] = useTransition();
+  const [disabling, startDisabling] = useTransition();
+  const pending = enabling || disabling;
 
   useEffect(() => {
     const initialize = window.setTimeout(
@@ -32,7 +36,7 @@ export function PushPermissionCard({
   }, []);
 
   const enable = () =>
-    startTransition(async () => {
+    startEnabling(async () => {
       try {
         const result = await Notification.requestPermission();
         setPermission(result);
@@ -60,7 +64,9 @@ export function PushPermissionCard({
     });
 
   const disable = () =>
-    startTransition(async () => {
+    startDisabling(async () => {
+      setOptimisticActive(false);
+      setActive(false);
       try {
         const registration = await navigator.serviceWorker.ready;
         const subscription = await registration.pushManager.getSubscription();
@@ -68,9 +74,9 @@ export function PushPermissionCard({
           await revokePushSubscriptionAction(subscription.endpoint);
           await subscription.unsubscribe();
         }
-        setActive(false);
         toast.success("Alertas desativados neste aparelho");
       } catch {
+        setActive(true);
         toast.error("Não foi possível desativar os alertas. Tente de novo.");
       }
     });
@@ -89,18 +95,18 @@ export function PushPermissionCard({
         <div className="min-w-0">
           <p className="text-sm font-medium">Alertas neste aparelho</p>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            {active ? "Ativados. Você recebe avisos mesmo com o aplicativo fechado." : "Receba avisos mesmo com o aplicativo fechado."}
+            {optimisticActive ? "Ativados. Você recebe avisos mesmo com o aplicativo fechado." : "Receba avisos mesmo com o aplicativo fechado."}
           </p>
         </div>
-        {active ? (
+        {optimisticActive ? (
           <Button variant="outline" onClick={disable} disabled={pending} className="min-h-11 w-full shrink-0 sm:w-auto">
             <BellOff aria-hidden="true" />
             Desativar
           </Button>
         ) : (
           <Button onClick={enable} disabled={pending || Boolean(notice)} className="min-h-11 w-full shrink-0 sm:w-auto">
-            <Bell aria-hidden="true" />
-            {pending ? "Ativando…" : "Ativar alertas"}
+            <BellIcon aria-hidden="true" />
+            {enabling ? "Ativando…" : "Ativar alertas"}
           </Button>
         )}
       </div>

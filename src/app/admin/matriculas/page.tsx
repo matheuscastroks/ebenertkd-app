@@ -83,12 +83,20 @@ export default async function EnrollmentsPage({
       subtitle="Analise cadastros, documentação, atestados médicos e condições financeiras."
       breadcrumbs={[{ label: "Matrículas" }]}
       headerActions={
-        <Button asChild variant="outline" className="min-h-11 font-medium">
-          <Link href={ROUTES.adminStudentAccess}>
-            <KeyRound aria-hidden="true" className="mr-2 size-4" />
-            Acessos dos alunos
-          </Link>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button asChild variant="outline" className="min-h-11 font-medium">
+            <Link href={ROUTES.adminRetention}>Retenção</Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11 font-medium">
+            <Link href={ROUTES.adminCompliance}>Regularidade anual</Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11 font-medium">
+            <Link href={ROUTES.adminStudentAccess}>
+              <KeyRound aria-hidden="true" className="mr-2 size-4" />
+              Acessos dos alunos
+            </Link>
+          </Button>
+        </div>
       }
     >
       <div className="w-full min-w-0 space-y-6">

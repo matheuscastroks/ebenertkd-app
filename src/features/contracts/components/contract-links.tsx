@@ -17,6 +17,10 @@ export async function ContractLinks() {
       <div><h2 className="text-base font-semibold">Modelo de contrato</h2><p className="text-sm text-muted-foreground">Editar o rascunho e publicar versões para novos contratos.</p></div>
       <StatusBadge tone={published ? "success" : "warning"}>{published ? "Versão publicada" : "Publicação pendente"}</StatusBadge>
     </Link>
+    <Link href={ROUTES.adminContractRenewals} className="flex min-h-11 flex-wrap items-center justify-between gap-3 p-4 focus-visible:outline-2 focus-visible:outline-ring">
+      <div><h2 className="text-base font-semibold">Esteira de renovações</h2><p className="text-sm text-muted-foreground">Acompanhar contratos vencendo em até 90 dias e emitir renovações.</p></div>
+      <StatusBadge tone="info">Ciclo semestral / anual</StatusBadge>
+    </Link>
     <Link href={ROUTES.adminCancellations} className="flex min-h-11 flex-wrap items-center justify-between gap-3 p-4 focus-visible:outline-2 focus-visible:outline-ring">
       <div><h2 className="text-base font-semibold">Cancelamentos e saídas</h2><p className="text-sm text-muted-foreground">Analisar pedidos, saída e eventual taxa.</p></div>
       <StatusBadge tone={pending ? "warning" : "neutral"}>{pending ? `${pending} pedido${pending === 1 ? "" : "s"} aguardando análise` : "Nenhum pedido pendente"}</StatusBadge>

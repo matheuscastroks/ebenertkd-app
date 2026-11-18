@@ -5,16 +5,22 @@ export const ROUTES = {
   notifications: "/avisos",
   admin: "/admin",
   adminEnrollments: "/admin/matriculas",
+  adminRetention: "/admin/matriculas/retencao",
+  adminCompliance: "/admin/matriculas/regularidade",
   adminStudentAccess: "/admin/matriculas/acessos",
   adminClasses: "/admin/turmas",
   adminExams: "/admin/exames",
+  adminExamEligibility: "/admin/exames/elegibilidade",
   studentAttendance: "/aluno/frequencia",
   studentExams: "/aluno/exames",
   adminContracts: "/admin/contratos",
+  adminContractRenewals: "/admin/contratos/renovacoes",
   adminContractTemplate: "/admin/contratos/modelo",
   adminCancellations: "/admin/contratos/cancelamentos",
   adminBilling: "/admin/financeiro",
+  adminBillingClosing: "/admin/financeiro/fechamento",
   adminBillingSettings: "/admin/financeiro/configuracoes",
+  adminAnnualReport: "/admin/relatorios/anual",
   adminSystem: "/admin/sistema",
   student: "/aluno",
   studentEnrollment: "/aluno/matricula",
@@ -74,20 +80,29 @@ export function navigationForProfile(
         group: "Academia",
         badge: counts.enrollments,
         children: [
-          { label: "Fila de matrículas", href: ROUTES.adminEnrollments, exact: true },
-          { label: "Acessos dos alunos", href: ROUTES.adminStudentAccess }
+          { label: "Fichas de matrícula", href: ROUTES.adminEnrollments, exact: true },
+          { label: "Retenção e frequência", href: ROUTES.adminRetention },
+          { label: "Regularidade anual", href: ROUTES.adminCompliance },
+          { label: "Acessos ao portal", href: ROUTES.adminStudentAccess }
         ]
       },
       {
-        label: "Turmas e horários",
+        label: "Turmas e chamadas",
         shortLabel: "Turmas",
         bottomNav: true,
         href: ROUTES.adminClasses,
         icon: "classes",
+        group: "Academia"
+      },
+      {
+        label: "Exames de faixa",
+        shortLabel: "Exames",
+        href: ROUTES.adminExams,
+        icon: "exams",
         group: "Academia",
         children: [
-          { label: "Grade de turmas", href: ROUTES.adminClasses, exact: true },
-          { label: "Exames de faixa", href: ROUTES.adminExams }
+          { label: "Bancas de exame", href: ROUTES.adminExams, exact: true },
+          { label: "Elegibilidade", href: ROUTES.adminExamEligibility }
         ]
       },
       {
@@ -97,8 +112,8 @@ export function navigationForProfile(
         icon: "billing",
         group: "Gestão",
         children: [
-          { label: "Visão geral", href: ROUTES.adminBilling, exact: true },
-          { label: "Configurações PIX", href: ROUTES.adminBillingSettings }
+          { label: "Cobranças do mês", href: ROUTES.adminBilling, exact: true },
+          { label: "Fechamento mensal", href: ROUTES.adminBillingClosing }
         ]
       },
       {
@@ -107,12 +122,14 @@ export function navigationForProfile(
         icon: "contracts",
         group: "Gestão",
         children: [
-          { label: "Visão geral", href: ROUTES.adminContracts, exact: true },
-          { label: "Modelo", href: ROUTES.adminContractTemplate },
-          { label: "Cancelamentos", href: ROUTES.adminCancellations }
+          { label: "Contratos emitidos", href: ROUTES.adminContracts, exact: true },
+          { label: "Renovações", href: ROUTES.adminContractRenewals },
+          { label: "Modelo de contrato", href: ROUTES.adminContractTemplate },
+          { label: "Pedidos de rescisão", href: ROUTES.adminCancellations }
         ]
       },
-      { label: "Sistema e operação", shortLabel: "Sistema", href: ROUTES.adminSystem, icon: "system", group: "Gestão" }
+      { label: "Balanço anual", shortLabel: "Anual", href: ROUTES.adminAnnualReport, icon: "dashboard", group: "Gestão" },
+      { label: "Saúde do sistema", shortLabel: "Sistema", href: ROUTES.adminSystem, icon: "system", group: "Gestão" }
     ];
   }
 

@@ -84,11 +84,11 @@ export function StudentAccessTable({
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody className="t-stagger">
               {sortedItems.map((student) => (
                 <TableRow
                   key={student.$id}
-                  className="hover:bg-muted/20 transition-colors"
+                  className="t-interactive-row hover:bg-muted/20"
                 >
                   <TableCell className="font-semibold text-sm text-foreground">
                     {student.full_name}
@@ -147,7 +147,7 @@ export function StudentAccessTable({
         </div>
       }
       mobile={
-        <div className="space-y-3">
+        <div className="t-stagger space-y-3">
           {sortedItems.length ? (
             sortedItems.map((student) => (
               <Card key={student.$id}>

@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { ChevronDown, UserPlus } from "lucide-react";
+import { ChevronDownIcon } from "@/components/ui/chevron-down";
+import { UserPlusIcon } from "@/components/ui/user-plus";
 import { resetMinorPasswordAction, revokeMinorSessionsAction } from "@/app/actions/family";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -43,7 +44,7 @@ async function GuardianMinorsList({ minors }: { minors: Profile[] }) {
   if (minors.length === 0) {
     return <EmptyState title="Nenhum dependente cadastrado"
       description="Cadastre seu filho para preencher a ficha de matrícula, assinar o contrato e acompanhar os treinos."
-      action={<CreateMinorDialog idPrefix="minor-empty" trigger={<Button className="min-h-11"><UserPlus aria-hidden="true" />Cadastrar dependente</Button>} />} />;
+      action={<CreateMinorDialog idPrefix="minor-empty" trigger={<Button className="min-h-11"><UserPlusIcon aria-hidden="true" />Cadastrar dependente</Button>} />} />;
   }
 
   return <Card><CardContent>
@@ -65,7 +66,7 @@ async function GuardianMinorsList({ minors }: { minors: Profile[] }) {
               <CollapsibleTrigger asChild>
                 <Button variant="ghost" aria-label={`Acesso e senha de ${minor.full_name}`} className="group min-h-11 flex-1 sm:flex-none">
                   Acesso e senha
-                  <ChevronDown aria-hidden="true" className="transition-transform group-data-[state=open]:rotate-180 motion-reduce:transition-none" />
+                  <ChevronDownIcon aria-hidden="true" className="size-4 transition-transform duration-(--duration-fast) ease-(--ease-smooth-out) group-data-[state=open]:-scale-y-100 motion-reduce:transition-none" />
                 </Button>
               </CollapsibleTrigger>
             </div>
@@ -117,7 +118,7 @@ export default async function DependentsPage({ searchParams }: { searchParams: P
       title="Gerenciar dependentes"
       subtitle="Cadastre filhos e cuide do acesso de cada um ao aplicativo."
       breadcrumbs={[{ label: "Minha família", href: ROUTES.guardian }, { label: "Gerenciar dependentes" }]}
-      headerActions={minors.length === 0 ? undefined : <CreateMinorDialog idPrefix="minor-modal" trigger={<Button className="min-h-11"><UserPlus aria-hidden="true" />Adicionar dependente</Button>} />}
+      headerActions={minors.length === 0 ? undefined : <CreateMinorDialog idPrefix="minor-modal" trigger={<Button className="min-h-11"><UserPlusIcon aria-hidden="true" />Adicionar dependente</Button>} />}
     >
       {params.created ? <OperationToast tone="success" title="Dependente cadastrado" description="O acesso já está ativo. Envie o usuário e a senha para o seu filho." clearParams={["created"]} /> : null}
       {params.reset ? <OperationToast tone="success" title="Senha atualizada" description="Os acessos abertos do seu filho foram encerrados. Envie a nova senha a ele." clearParams={["reset"]} /> : null}

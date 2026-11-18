@@ -26,7 +26,7 @@ export function GraduationCard({ currentBelt, gub, startedAtTkd, attendanceRate,
       <details className="group border-t border-border pt-3">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 font-medium text-foreground marker:hidden focus-visible:outline-2 focus-visible:outline-ring [&::-webkit-details-marker]:hidden">
           Como funciona o exame
-          <ChevronDown className="size-4 text-muted-foreground transition-transform group-open:rotate-180 motion-reduce:transition-none" aria-hidden="true" />
+          <ChevronDown className="size-4 text-muted-foreground transition-transform duration-(--duration-fast) ease-(--ease-smooth-out) group-open:-scale-y-100 motion-reduce:transition-none" aria-hidden="true" />
         </summary>
         <p className="pt-1 text-muted-foreground">O professor avalia formas, luta, quebramento e teoria. A data do próximo exame aparece em Exames quando for marcada.</p>
       </details>

@@ -8,8 +8,13 @@ import { renewContractAction } from "@/app/actions/renewals";
 import { DateField } from "@/components/shared/date-field";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { OperationToast } from "@/components/shared/operation-toast";
+import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { CheckIcon } from "@/components/ui/check";
+import { FilePenLineIcon } from "@/components/ui/file-pen-line";
+import { SheetClose } from "@/components/ui/sheet";
+import { XIcon } from "@/components/ui/x";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,9 +26,17 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
+import {
+  Attachment,
+  AttachmentAction,
+  AttachmentActions,
+  AttachmentContent,
+  AttachmentDescription,
+  AttachmentMedia,
+  AttachmentTitle
+} from "@/components/ui/attachment";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -41,20 +54,15 @@ import {
 import type { EnrollmentBundle } from "@/features/students/types";
 import { centsToReaisInput } from "@/lib/money";
 import { formatBrazilianPhone } from "@/lib/phone";
-import { ROUTES } from "@/lib/navigation/routes";
 import {
-  Activity,
   AlertTriangle,
   Award,
-  Calendar,
   CheckCircle2,
-  Clock,
-  FileCheck,
+  ExternalLink,
   FileText,
   HeartPulse,
   ImageIcon,
   Phone,
-  User,
   Users
 } from "lucide-react";
 
@@ -140,50 +148,47 @@ export function ReviewPanel({
 
       {/* Grid de 2 Colunas no Desktop (Painel de Inspeção e Conferência) */}
       <div className="grid gap-6 lg:grid-cols-12 lg:items-start">
-        {/* Coluna da Esquerda (7 colunas): Ficha cadastral e Documentos */}
-        <div className="space-y-6 lg:col-span-7">
-          {/* Card de Dados para Revisão */}
-          <Card className="overflow-hidden border-border/80 shadow-xs">
-            <CardHeader className="pb-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <div>
-                    <CardTitle className="text-base font-semibold">Ficha cadastral do aluno</CardTitle>
-                    <CardDescription>
-                      Conferência detalhada dos dados pessoais, contato, emergência, turma e cuidados de saúde.
-                    </CardDescription>
-                  </div>
-                </div>
-                <EditStudentDialog student={student} classes={classes} />
+        {/* Coluna da Esquerda (7 colunas): Superfície agrupada com Ficha, Documentos e Histórico */}
+        <div className="lg:col-span-7 overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
+          {/* Seção 1: Ficha cadastral do aluno */}
+          <section className="p-5 space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-base font-semibold text-foreground">Ficha cadastral do aluno</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Conferência detalhada dos dados pessoais, contato, emergência, turma e cuidados de saúde.
+                </p>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-6 pt-6">
+              <EditStudentDialog student={student} classes={classes} />
+            </div>
+
+            <div className="space-y-5">
               {/* Bloco A: Identificação e Contato */}
               <div>
                 <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                   <Phone className="size-4" aria-hidden="true" /> Identificação e Contato
                 </h3>
-                <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 text-sm">
-                  <div className="rounded-lg border bg-muted/10 p-3">
-                    <span className="text-sm text-muted-foreground block">Data de Nascimento</span>
+                <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 text-sm">
+                  <div className="space-y-0.5">
+                    <span className="text-xs text-muted-foreground block">Data de Nascimento</span>
                     <span className="font-medium text-foreground">
                       {dateValue(student.birth_date)
                         ? new Date(`${dateValue(student.birth_date)}T12:00:00`).toLocaleDateString("pt-BR")
                         : "—"}
                     </span>
                   </div>
-                  <div className="rounded-lg border bg-muted/10 p-3">
-                    <span className="text-sm text-muted-foreground block">WhatsApp</span>
+                  <div className="space-y-0.5">
+                    <span className="text-xs text-muted-foreground block">WhatsApp</span>
                     <span className="font-medium text-foreground">
                       {formatBrazilianPhone(student.whatsapp) || "—"}
                     </span>
                   </div>
-                  <div className="rounded-lg border bg-muted/10 p-3">
-                    <span className="text-sm text-muted-foreground block">Contato do Responsável</span>
+                  <div className="space-y-0.5">
+                    <span className="text-xs text-muted-foreground block">Contato do Responsável</span>
                     <span className="font-medium text-foreground">{student.guardian_contact || "Não informado / próprio aluno"}</span>
                   </div>
-                  <div className="rounded-lg border bg-muted/10 p-3 sm:col-span-2 lg:col-span-3">
-                    <span className="text-sm text-muted-foreground block">Endereço Residencial</span>
+                  <div className="space-y-0.5 sm:col-span-2 lg:col-span-3">
+                    <span className="text-xs text-muted-foreground block">Endereço Residencial</span>
                     <span className="font-medium text-foreground">{student.address || "—"}</span>
                   </div>
                 </div>
@@ -196,17 +201,17 @@ export function ReviewPanel({
                 <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                   <Users className="size-4" aria-hidden="true" /> Contato de Emergência
                 </h3>
-                <div className="mt-3 grid gap-3 sm:grid-cols-3 text-sm">
-                  <div className="rounded-lg border bg-muted/10 p-3">
-                    <span className="text-sm text-muted-foreground block">Nome</span>
+                <div className="mt-3 grid gap-4 sm:grid-cols-3 text-sm">
+                  <div className="space-y-0.5">
+                    <span className="text-xs text-muted-foreground block">Nome</span>
                     <span className="font-medium text-foreground">{student.emergency_contact_name || "—"}</span>
                   </div>
-                  <div className="rounded-lg border bg-muted/10 p-3">
-                    <span className="text-sm text-muted-foreground block">Parentesco / Relação</span>
+                  <div className="space-y-0.5">
+                    <span className="text-xs text-muted-foreground block">Parentesco / Relação</span>
                     <span className="font-medium text-foreground">{student.emergency_contact_relationship || "—"}</span>
                   </div>
-                  <div className="rounded-lg border bg-muted/10 p-3">
-                    <span className="text-sm text-muted-foreground block">Telefone</span>
+                  <div className="space-y-0.5">
+                    <span className="text-xs text-muted-foreground block">Telefone</span>
                     <span className="font-medium text-foreground">
                       {formatBrazilianPhone(student.emergency_contact_phone) || "—"}
                     </span>
@@ -221,20 +226,20 @@ export function ReviewPanel({
                 <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                   <Award className="size-4" aria-hidden="true" /> Taekwondo e Turma
                 </h3>
-                <div className="mt-3 grid gap-3 sm:grid-cols-3 text-sm">
-                  <div className="rounded-lg border bg-muted/10 p-3">
-                    <span className="text-sm text-muted-foreground block">Turma Escolhida</span>
+                <div className="mt-3 grid gap-4 sm:grid-cols-3 text-sm">
+                  <div className="space-y-0.5">
+                    <span className="text-xs text-muted-foreground block">Turma Escolhida</span>
                     <span className="font-medium text-foreground">{student.training_class || "—"}</span>
                   </div>
-                  <div className="rounded-lg border bg-muted/10 p-3">
-                    <span className="text-sm text-muted-foreground block">Graduação Atual</span>
+                  <div className="space-y-0.5">
+                    <span className="text-xs text-muted-foreground block">Graduação Atual</span>
                     <span className="font-medium text-foreground">
                       {currentBelt ? `Faixa ${currentBelt}` : "—"}{" "}
                       {student.gub ? `(${student.gub}º GUB)` : (student.gub === 0 ? "(Dan)" : "")}
                     </span>
                   </div>
-                  <div className="rounded-lg border bg-muted/10 p-3">
-                    <span className="text-sm text-muted-foreground block">Início no Taekwondo</span>
+                  <div className="space-y-0.5">
+                    <span className="text-xs text-muted-foreground block">Início no Taekwondo</span>
                     <span className="font-medium text-foreground">
                       {dateValue(student.started_at_tkd)
                         ? new Date(`${dateValue(student.started_at_tkd)}T12:00:00`).toLocaleDateString("pt-BR")
@@ -248,7 +253,7 @@ export function ReviewPanel({
 
               {/* Bloco D: Saúde e Cuidados */}
               <div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                     <HeartPulse className="size-4" aria-hidden="true" /> Saúde e Cuidados
                   </h3>
@@ -266,7 +271,7 @@ export function ReviewPanel({
                 </div>
 
                 {student.health_condition === "yes" ? (
-                  <div className="mt-3 space-y-3 rounded-xl border border-warning/40 bg-warning/5 p-4 text-sm">
+                  <div className="mt-3 space-y-3 border-l-2 border-warning pl-4 text-sm">
                     {student.health_details ? (
                       <div>
                         <span className="text-sm font-medium text-muted-foreground block">Detalhes da condição</span>
@@ -290,68 +295,68 @@ export function ReviewPanel({
                   </div>
                 ) : null}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </section>
 
-          {/* Documentos e Anexos */}
-          <Card className="shadow-xs">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Documentos e anexos</CardTitle>
-              <CardDescription>
+          {/* Seção 2: Documentos enviados */}
+          <section className="p-5 space-y-4">
+            <div>
+              <h2 className="text-base font-semibold text-foreground">Documentos enviados</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
                 A foto é item cadastral. O atestado médico requer validação da administração antes da assinatura.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-2">
-              {/* Card da Foto */}
-              <div className="flex items-start justify-between gap-3 rounded-xl border border-border p-4">
-                <div className="flex items-start gap-3">
-                  <ImageIcon className="size-5 text-muted-foreground mt-0.5 shrink-0" aria-hidden="true" />
-                  <div>
-                    <p className="font-medium text-sm">Foto do aluno (identificação)</p>
-                    {profilePhoto ? (
-                      <Link
-                        href={`/api/student-documents/${profilePhoto.$id}`}
-                        className="text-sm text-primary-text underline mt-0.5 block"
-                        target="_blank"
-                      >
-                        Visualizar imagem original
-                      </Link>
-                    ) : (
-                      <p className="text-sm text-muted-foreground mt-0.5">Nenhuma foto enviada</p>
-                    )}
-                  </div>
+              </p>
+            </div>
+
+            <div className="divide-y divide-border">
+              {/* Foto do Aluno */}
+              <div className="space-y-3 py-3.5 first:pt-0">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium text-foreground">Foto do aluno (identificação)</p>
+                  {profilePhoto ? (
+                    <Badge variant="outline" className="text-sm">
+                      Cadastrada
+                    </Badge>
+                  ) : (
+                    <Badge variant="destructive" className="text-sm">
+                      Pendente
+                    </Badge>
+                  )}
                 </div>
                 {profilePhoto ? (
-                  <Badge variant="outline" className="text-sm">
-                    Cadastrada
-                  </Badge>
+                  <Attachment className="w-full">
+                    <AttachmentMedia>
+                      <ImageIcon aria-hidden="true" />
+                    </AttachmentMedia>
+                    <AttachmentContent>
+                      <AttachmentTitle>
+                        {profilePhoto.original_name || "Foto de identificação"}
+                      </AttachmentTitle>
+                      <AttachmentDescription>
+                        Item cadastral do aluno
+                      </AttachmentDescription>
+                    </AttachmentContent>
+                    <AttachmentActions>
+                      <AttachmentAction asChild size="sm" variant="outline">
+                        <Link
+                          href={`/api/student-documents/${profilePhoto.$id}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <ExternalLink aria-hidden="true" />
+                          Visualizar imagem original
+                        </Link>
+                      </AttachmentAction>
+                    </AttachmentActions>
+                  </Attachment>
                 ) : (
-                  <Badge variant="destructive" className="text-sm">
-                    Pendente
-                  </Badge>
+                  <p className="text-sm text-muted-foreground">Nenhuma foto enviada</p>
                 )}
               </div>
 
-              {/* Card do Atestado Médico */}
-              <div className="space-y-3 rounded-xl border bg-muted/20 p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-start gap-3">
-                    <Activity className="size-5 text-muted-foreground mt-0.5 shrink-0" aria-hidden="true" />
-                    <div>
-                      <p className="font-medium text-sm">Atestado médico</p>
-                      {medicalCertificate ? (
-                        <Link
-                          href={`/api/student-documents/${medicalCertificate.$id}`}
-                          className="text-sm text-primary-text underline mt-0.5 block"
-                          target="_blank"
-                        >
-                          Abrir documento enviado
-                        </Link>
-                      ) : (
-                        <p className="text-sm text-muted-foreground mt-0.5">Nenhum atestado anexado</p>
-                      )}
-                    </div>
-                  </div>
+              {/* Atestado Médico */}
+              <div className="space-y-3 py-3.5 last:pb-0">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium text-foreground">Atestado médico</p>
                   {medicalCertificate ? (
                     <StatusBadge
                       tone={
@@ -375,52 +380,92 @@ export function ReviewPanel({
                   )}
                 </div>
 
+                {medicalCertificate ? (
+                  <Attachment className="w-full">
+                    <AttachmentMedia>
+                      <FileText aria-hidden="true" />
+                    </AttachmentMedia>
+                    <AttachmentContent>
+                      <AttachmentTitle>
+                        {medicalCertificate.original_name || "Atestado médico enviado"}
+                      </AttachmentTitle>
+                      <AttachmentDescription>
+                        {medicalCertificate.status === "approved"
+                          ? "Validado pela administração"
+                          : medicalCertificate.status === "rejected"
+                            ? "Aguardando novo envio"
+                            : "Aguardando conferência"}
+                      </AttachmentDescription>
+                    </AttachmentContent>
+                    <AttachmentActions>
+                      <AttachmentAction asChild size="sm" variant="outline">
+                        <Link
+                          href={`/api/student-documents/${medicalCertificate.$id}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <ExternalLink aria-hidden="true" />
+                          Abrir documento enviado
+                        </Link>
+                      </AttachmentAction>
+                    </AttachmentActions>
+                  </Attachment>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Nenhum atestado anexado</p>
+                )}
+
                 {medicalCertificate && medicalCertificate.status !== "approved" ? (
-                  <div className="flex flex-wrap gap-2 pt-2 border-t">
+                  <div className="flex flex-wrap gap-2 border-t border-border pt-3">
                     <form action={reviewDocumentAction}>
                       <input type="hidden" name="student_id" value={student.$id} />
                       <input type="hidden" name="document_id" value={medicalCertificate.$id} />
                       <input type="hidden" name="decision" value="approved" />
                       <FormSubmitButton variant="outline" className="min-h-11" size="sm" pendingLabel="Aprovando…">
+                        <CheckIcon aria-hidden="true" />
                         Aprovar atestado
                       </FormSubmitButton>
                     </form>
 
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
+                    <ResponsiveDialog
+                      trigger={
                         <Button className="min-h-11 text-destructive" variant="outline" size="sm">
+                          <XIcon aria-hidden="true" />
                           Reprovar
                         </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Reprovar atestado médico?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Informe o motivo da reprovação para que o aluno ou responsável possa enviar um documento legível ou atualizado.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <form action={reviewDocumentAction} className="space-y-4">
-                          <input type="hidden" name="student_id" value={student.$id} />
-                          <input type="hidden" name="document_id" value={medicalCertificate.$id} />
-                          <input type="hidden" name="decision" value="rejected" />
-                          <Field>
-                            <FieldLabel htmlFor="document-reason">Motivo da reprovação</FieldLabel>
-                            <Input
-                              id="document-reason"
-                              name="reason"
-                              placeholder="Ex.: Imagem cortada ou vencido"
-                              required
-                            />
-                          </Field>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel type="button">Cancelar</AlertDialogCancel>
-                            <AlertDialogAction type="submit" variant="destructive">
-                              Confirmar reprovação
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </form>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                      }
+                      title="Reprovar atestado médico?"
+                      description="Informe o motivo da reprovação para que o aluno ou responsável possa enviar um documento legível ou atualizado."
+                    >
+                      <form action={reviewDocumentAction} className="space-y-4 pt-2">
+                        <input type="hidden" name="student_id" value={student.$id} />
+                        <input type="hidden" name="document_id" value={medicalCertificate.$id} />
+                        <input type="hidden" name="decision" value="rejected" />
+                        <Field>
+                          <FieldLabel htmlFor="document-reason">Motivo da reprovação</FieldLabel>
+                          <Input
+                            id="document-reason"
+                            name="reason"
+                            placeholder="Ex.: Imagem cortada ou vencido"
+                            className="h-11"
+                            required
+                          />
+                        </Field>
+                        <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+                          <SheetClose asChild>
+                            <Button type="button" variant="outline" className="min-h-11">
+                              Cancelar
+                            </Button>
+                          </SheetClose>
+                          <FormSubmitButton
+                            variant="destructive"
+                            className="min-h-11"
+                            pendingLabel="Reprovando…"
+                          >
+                            Confirmar reprovação
+                          </FormSubmitButton>
+                        </div>
+                      </form>
+                    </ResponsiveDialog>
                   </div>
                 ) : medicalCertificate?.status === "approved" ? (
                   <p className="flex items-center gap-1.5 pt-1 text-sm text-muted-foreground">
@@ -429,203 +474,217 @@ export function ReviewPanel({
                   </p>
                 ) : null}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </section>
 
-          {/* Histórico de Análises Realizadas */}
-          <Card className="shadow-xs">
-            <CardContent className="pt-6">
-              <Accordion type="single" collapsible>
-                <AccordionItem value="history">
-                  <AccordionTrigger className="text-sm font-medium">
-                    Histórico da análise ({reviews.length})
-                  </AccordionTrigger>
-                  <AccordionContent className="space-y-3 pt-2">
-                    {reviews.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">Nenhuma análise registrada.</p>
-                    ) : (
-                      reviews.map((review) => (
-                        <div key={String(review.$id)} className="border-l-2 pl-3 text-sm">
-                          <p className="font-medium">{String(review.action).replaceAll("_", " ")}</p>
-                          <p className="text-muted-foreground text-sm">
-                            {new Date(String(review.created_at)).toLocaleString("pt-BR")}
-                            {review.notes ? ` · ${String(review.notes)}` : ""}
-                          </p>
-                        </div>
-                      ))
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </CardContent>
-          </Card>
+          {/* Seção 3: Histórico de Análises Realizadas */}
+          <section className="px-5 py-2">
+            <Accordion type="single" collapsible>
+              <AccordionItem value="history" className="border-b-0">
+                <AccordionTrigger className="text-sm font-medium">
+                  Histórico da análise ({reviews.length})
+                </AccordionTrigger>
+                <AccordionContent className="space-y-3 pt-2">
+                  {reviews.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Nenhuma análise registrada.</p>
+                  ) : (
+                    reviews.map((review) => (
+                      <div key={String(review.$id)} className="border-l-2 pl-3 text-sm">
+                        <p className="font-medium">{String(review.action).replaceAll("_", " ")}</p>
+                        <p className="text-muted-foreground text-sm">
+                          {new Date(String(review.created_at)).toLocaleString("pt-BR")}
+                          {review.notes ? ` · ${String(review.notes)}` : ""}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </section>
         </div>
 
-        {/* Coluna da Direita (5 colunas): Condições Financeiras e Conclusão */}
-        <div className="space-y-6 lg:col-span-5 lg:sticky lg:top-6">
-          {/* Card de Condições Financeiras e Contrato */}
-          <Card className="shadow-xs">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Condições financeiras e contrato</CardTitle>
-              <CardDescription>
+        {/* Coluna da Direita (5 colunas): Superfície agrupada com Condições Financeiras e Conclusão */}
+        <div className="lg:col-span-5 lg:sticky lg:top-6 overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
+          {/* Seção 1: Condições Financeiras e Contrato */}
+          <section className="p-5 space-y-4">
+            <div>
+              <h2 className="text-base font-semibold text-foreground">Condições financeiras e contratuais</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
                 Valores e vigência de 1 ano pré-preenchidos com base no dia {dueDay}. Ajuste conforme necessário antes de salvar.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form action={saveFinancialReviewAction} className="space-y-4">
-                <input type="hidden" name="student_id" value={student.$id} />
+              </p>
+            </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <Field>
-                    <FieldLabel htmlFor="review-monthly-fee">Mensalidade acordada (R$)</FieldLabel>
-                    <Input
-                      id="review-monthly-fee"
-                      name="monthly_fee_reais"
-                      type="number"
-                      inputMode="decimal"
-                      min="0"
-                      step="0.01"
-                      placeholder="Ex.: 150,00"
-                      defaultValue={centsToReaisInput(enrollment.monthly_fee_cents ?? 15000)}
-                      required
-                    />
-                  </Field>
+            <form action={saveFinancialReviewAction} className="space-y-4">
+              <input type="hidden" name="student_id" value={student.$id} />
 
-                  <Field>
-                    <FieldLabel htmlFor="review-discount">Desconto mensal (R$)</FieldLabel>
-                    <Input
-                      id="review-discount"
-                      name="discount_reais"
-                      type="number"
-                      inputMode="decimal"
-                      min="0"
-                      step="0.01"
-                      placeholder="0,00"
-                      defaultValue={centsToReaisInput(enrollment.discount_cents ?? 0)}
-                    />
-                  </Field>
-                </div>
-
+              <div className="grid gap-3 sm:grid-cols-2 items-end">
                 <Field>
-                  <FieldLabel htmlFor="review-due-day">Dia de vencimento aprovado</FieldLabel>
-                  <Select name="approved_due_day" defaultValue={String(dueDay)} required>
-                    <SelectTrigger id="review-due-day" className="w-full">
-                      <SelectValue placeholder="Selecione o dia" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DUE_DAY_OPTIONS.map((day) => (
-                        <SelectItem key={day} value={String(day)}>
-                          Dia {day} de cada mês
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FieldLabel htmlFor="review-monthly-fee">Mensalidade acordada (R$)</FieldLabel>
+                  <Input
+                    id="review-monthly-fee"
+                    name="monthly_fee_reais"
+                    type="number"
+                    inputMode="decimal"
+                    min="0"
+                    step="0.01"
+                    placeholder="Ex.: 150,00"
+                    defaultValue={centsToReaisInput(enrollment.monthly_fee_cents ?? 15000)}
+                    required
+                  />
                 </Field>
 
-                <Separator />
+                <Field>
+                  <FieldLabel htmlFor="review-discount">Desconto mensal (R$)</FieldLabel>
+                  <Input
+                    id="review-discount"
+                    name="discount_reais"
+                    type="number"
+                    inputMode="decimal"
+                    min="0"
+                    step="0.01"
+                    placeholder="0,00"
+                    defaultValue={centsToReaisInput(enrollment.discount_cents ?? 0)}
+                  />
+                </Field>
+              </div>
 
-                <div className="space-y-3">
+              <Field>
+                <FieldLabel htmlFor="review-due-day">Dia de vencimento aprovado</FieldLabel>
+                <Select name="approved_due_day" defaultValue={String(dueDay)} required>
+                  <SelectTrigger id="review-due-day" className="w-full">
+                    <SelectValue placeholder="Selecione o dia" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DUE_DAY_OPTIONS.map((day) => (
+                      <SelectItem key={day} value={String(day)}>
+                        Dia {day} de cada mês
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <DateField
+                  id="review-first-due"
+                  name="first_due_date"
+                  label="Primeiro vencimento"
+                  defaultValue={defaultFirstDueDate}
+                  required
+                />
+
+                <div className="grid gap-3 sm:grid-cols-2 items-end">
                   <DateField
-                    id="review-first-due"
-                    name="first_due_date"
-                    label="Primeiro vencimento"
-                    defaultValue={defaultFirstDueDate}
+                    id="review-contract-start"
+                    name="contract_start"
+                    label="Início do contrato"
+                    defaultValue={contractDates.start}
                     required
                   />
 
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <DateField
-                      id="review-contract-start"
-                      name="contract_start"
-                      label="Início do contrato"
-                      defaultValue={contractDates.start}
-                      required
-                    />
-
-                    <DateField
-                      id="review-contract-end"
-                      name="contract_end"
-                      label="Fim do contrato (1 ano padrão)"
-                      defaultValue={contractDates.end}
-                      required
-                    />
-                  </div>
+                  <DateField
+                    id="review-contract-end"
+                    name="contract_end"
+                    label="Fim do contrato (1 ano padrão)"
+                    defaultValue={contractDates.end}
+                    required
+                  />
                 </div>
+              </div>
 
-                <Separator />
+              <Separator />
 
-                <FormSubmitButton variant="outline" className="min-h-11 w-full" pendingLabel="Salvando condições…">
-                  Salvar condições contratuais
+              <FormSubmitButton variant="outline" className="min-h-11 w-full" pendingLabel="Salvando condições…">
+                Salvar condições contratuais
+              </FormSubmitButton>
+            </form>
+          </section>
+
+          {/* Seção 2: Conclusão / Renovação */}
+          {enrollment.status === "awaiting_renewal" ? (
+            <section className="p-5 space-y-4">
+              <div>
+                <h2 className="text-base font-semibold text-foreground">Renovar contrato</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Uma nova versão será emitida mantendo o histórico anterior preservado.
+                </p>
+              </div>
+
+              <form id="renew-contract-form" action={renewContractAction} className="space-y-3">
+                <input type="hidden" name="student_id" value={student.$id} />
+                <DateField
+                  id="renewal-end"
+                  name="ends_at"
+                  label="Nova data final"
+                  min={new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" })}
+                  required
+                />
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button type="button" className="min-h-11 w-full">
+                      Emitir renovação
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Emitir renovação do contrato?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Uma nova versão do contrato será emitida para assinatura de {student.full_name}, mantendo o histórico anterior preservado.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel type="button">Voltar</AlertDialogCancel>
+                      <AlertDialogAction type="submit" form="renew-contract-form">
+                        Emitir renovação
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </form>
+            </section>
+          ) : (
+            <section className="p-5 space-y-4">
+              <div>
+                <h2 className="text-base font-semibold text-foreground">Concluir análise e emitir contrato</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  A assinatura digital é liberada após conferência dos dados, validação do atestado médico e confirmação das condições financeiras.
+                </p>
+              </div>
+
+              {/* Checklist de requisitos para liberar assinatura */}
+              <div className="divide-y divide-border border-y border-border py-1 text-sm">
+                <p className="py-1.5 font-medium">Pré-requisitos</p>
+                <div className="flex items-center justify-between py-1.5">
+                  <span className="text-muted-foreground">Foto cadastrada:</span>
+                  <span className={isPhotoUploaded ? "font-medium text-foreground" : "font-medium text-warning-foreground"}>
+                    {isPhotoUploaded ? "Presente" : "Não enviada"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between py-1.5">
+                  <span className="text-muted-foreground">Atestado médico:</span>
+                  <span className={isMedApproved ? "font-medium text-foreground" : "font-medium text-muted-foreground"}>
+                    {isMedApproved ? "Aprovado" : "Pendente ou opcional"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between py-1.5">
+                  <span className="text-muted-foreground">Turma vinculada:</span>
+                  <span className={student.training_class ? "font-medium text-foreground" : "font-medium text-muted-foreground"}>
+                    {student.training_class ? "Definida" : "Não definida"}
+                  </span>
+                </div>
+              </div>
+
+              <form action={advanceToSignatureAction}>
+                <input type="hidden" name="student_id" value={student.$id} />
+                <FormSubmitButton className="min-h-11 w-full" pendingLabel="Liberando assinatura…">
+                  <FilePenLineIcon aria-hidden="true" />
+                  Liberar para assinatura digital
                 </FormSubmitButton>
               </form>
-            </CardContent>
-          </Card>
-
-          {/* Card de Conclusão / Renovação */}
-          {enrollment.status === "awaiting_renewal" ? (
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold">Renovar contrato</CardTitle>
-                <CardDescription>
-                  Uma nova versão será emitida mantendo o histórico anterior preservado.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form action={renewContractAction} className="space-y-3">
-                  <input type="hidden" name="student_id" value={student.$id} />
-                  <DateField
-                    id="renewal-end"
-                    name="ends_at"
-                    label="Nova data final"
-                    min={new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" })}
-                    required
-                  />
-                  <FormSubmitButton className="min-h-11 w-full" pendingLabel="Emitindo renovação…">
-                    Emitir renovação
-                  </FormSubmitButton>
-                </form>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold">Concluir análise e emitir contrato</CardTitle>
-                <CardDescription>
-                  A assinatura digital é liberada após conferência dos dados, validação do atestado médico e confirmação das condições financeiras.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Checklist de requisitos para liberar assinatura */}
-                <div className="space-y-2 rounded-lg border border-border p-3 text-sm">
-                  <p className="font-medium">Pré-requisitos</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Foto cadastrada:</span>
-                    <span className={isPhotoUploaded ? "font-medium text-foreground" : "font-medium text-warning-foreground"}>
-                      {isPhotoUploaded ? "Presente" : "Não enviada"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Atestado médico:</span>
-                    <span className={isMedApproved ? "font-medium text-foreground" : "font-medium text-muted-foreground"}>
-                      {isMedApproved ? "Aprovado" : "Pendente ou opcional"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Turma vinculada:</span>
-                    <span className={student.training_class ? "font-medium text-foreground" : "font-medium text-muted-foreground"}>
-                      {student.training_class ? "Definida" : "Não definida"}
-                    </span>
-                  </div>
-                </div>
-
-                <form action={advanceToSignatureAction}>
-                  <input type="hidden" name="student_id" value={student.$id} />
-                  <FormSubmitButton className="min-h-11 w-full" pendingLabel="Liberando assinatura…">
-                    Liberar para assinatura digital
-                  </FormSubmitButton>
-                </form>
-              </CardContent>
-            </Card>
+            </section>
           )}
         </div>
       </div>

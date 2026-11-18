@@ -10,12 +10,14 @@ it("identifica o filho e troca mantendo a seção", async () => {
   expect(screen.getByRole("region", { name: "Financeiro de Ana" })).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "Ana" })).toHaveAttribute("href", "/responsavel/dependentes/ana");
   expect(screen.getByText(/Branca/)).toBeInTheDocument();
-  await userEvent.selectOptions(screen.getByLabelText("Trocar dependente"), "bia");
+  await userEvent.click(screen.getByRole("combobox", { name: "Trocar dependente" }));
+  await userEvent.click(screen.getByRole("option", { name: "Bia" }));
   expect(push).toHaveBeenCalledWith("/responsavel/dependentes/bia/financeiro");
 });
 it("no resumo, troca de filho continua no resumo", async () => {
   render(<DependentSwitcher currentProfileId="ana" siblings={siblings} section="resumo" />);
-  await userEvent.selectOptions(screen.getByLabelText("Trocar dependente"), "bia");
+  await userEvent.click(screen.getByRole("combobox", { name: "Trocar dependente" }));
+  await userEvent.click(screen.getByRole("option", { name: "Bia" }));
   expect(push).toHaveBeenCalledWith("/responsavel/dependentes/bia");
 });
 it("não mostra seletor com apenas um filho", () => {

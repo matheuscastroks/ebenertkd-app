@@ -9,8 +9,8 @@ import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
 const ACCOUNT_TYPES = [
-  { value: "adult_student", label: "Aluno", hint: "Maior de idade" },
-  { value: "guardian", label: "Responsável", hint: "De aluno menor" }
+  { value: "adult_student", label: "Vou treinar (Aluno)", hint: "Tenho 18 anos ou mais" },
+  { value: "guardian", label: "Acompanhar filho (Responsável)", hint: "Matricular menor de 18" }
 ] as const;
 
 /** Cadastro de aluno adulto ou responsável. Menores recebem acesso pelo professor. */
@@ -19,40 +19,37 @@ export function RegisterCard({ errorMessage }: { errorMessage?: string }) {
   const [password, setPassword] = useState("");
 
   return (
-    <div className="space-y-5">
-      <p className="text-sm text-muted-foreground">
-        Para alunos maiores de idade e responsáveis. O acesso de alunos menores é criado pelo professor.
-      </p>
-
+    <div className="space-y-3.5">
       {errorMessage ? (
         <Alert role="alert" variant="destructive" id="register-error">
           <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       ) : null}
 
-      <form action={registerAdultAction} className="space-y-4" aria-describedby={errorMessage ? "register-error" : undefined}>
-        <fieldset className="space-y-2">
-          <legend className="mb-2 text-sm font-medium">Você é</legend>
-          <div className="grid grid-cols-2 gap-2">
+      <form action={registerAdultAction} className="space-y-3" aria-describedby={errorMessage ? "register-error" : undefined}>
+        <fieldset className="space-y-1.5">
+          <legend className="mb-1.5 text-sm font-medium">Como você vai usar o portal?</legend>
+          <div className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
             {ACCOUNT_TYPES.map((option, index) => (
               <label
                 key={option.value}
-                className="flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border border-input bg-background px-3 py-2 transition-colors duration-150 hover:bg-muted has-checked:outline-2 has-checked:-outline-offset-1 has-checked:outline-foreground has-focus-visible:ring-3 has-focus-visible:ring-ring/50 motion-reduce:transition-none dark:bg-input/20"
+                className="flex min-h-11 cursor-pointer flex-col justify-center rounded-md px-2.5 py-1.5 text-left transition-[color,background-color,box-shadow] duration-(--duration-quick) ease-(--ease-smooth-out) text-muted-foreground hover:text-foreground has-checked:bg-card has-checked:text-foreground has-checked:shadow-xs has-focus-visible:ring-2 has-focus-visible:ring-ring motion-reduce:transition-none"
               >
                 <input
                   type="radio"
                   name="account_type"
                   value={option.value}
                   defaultChecked={index === 0}
-                  className="size-4 shrink-0 accent-foreground outline-none"
+                  className="sr-only"
                 />
-                <span className="leading-tight">
-                  <span className="block text-sm font-medium">{option.label}</span>
-                  <span className="block text-xs text-muted-foreground">{option.hint}</span>
-                </span>
+                <span className="block text-sm font-medium leading-tight">{option.label}</span>
+                <span className="block text-xs leading-tight text-muted-foreground">{option.hint}</span>
               </label>
             ))}
           </div>
+          <p className="text-xs text-muted-foreground">
+            Treina e também tem filhos na academia? Crie como Aluno — você poderá adicionar dependentes no painel.
+          </p>
         </fieldset>
 
         <Field>
@@ -73,43 +70,45 @@ export function RegisterCard({ errorMessage }: { errorMessage?: string }) {
           />
         </Field>
 
-        <Field>
-          <FieldLabel htmlFor="register-password">Senha de acesso</FieldLabel>
-          <div className="relative">
+        <div className="grid items-start gap-3 sm:grid-cols-2">
+          <Field>
+            <FieldLabel htmlFor="register-password">Senha de acesso</FieldLabel>
+            <div className="relative">
+              <Input
+                id="register-password"
+                name="password"
+                value={password}
+                onChange={(event) => {
+                  setPassword(event.target.value);
+                  const confirmation = event.target.form?.elements.namedItem("password_confirmation") as HTMLInputElement | null;
+                  if (confirmation) confirmation.setCustomValidity(confirmation.value === event.target.value ? "" : "As senhas devem ser iguais.");
+                }}
+                type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
+                minLength={8}
+                aria-describedby="register-password-hint"
+                className="h-11 pr-12"
+                required
+              />
+              <PasswordToggle visible={showPassword} onToggle={() => setShowPassword((prev) => !prev)} />
+            </div>
+            <FieldDescription id="register-password-hint">Pelo menos 8 caracteres.</FieldDescription>
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="register-confirm-password">Confirmar senha</FieldLabel>
             <Input
-              id="register-password"
-              name="password"
-              value={password}
-              onChange={(event) => {
-                setPassword(event.target.value);
-                const confirmation = event.target.form?.elements.namedItem("password_confirmation") as HTMLInputElement | null;
-                if (confirmation) confirmation.setCustomValidity(confirmation.value === event.target.value ? "" : "As senhas devem ser iguais.");
-              }}
+              id="register-confirm-password"
+              name="password_confirmation"
               type={showPassword ? "text" : "password"}
               autoComplete="new-password"
               minLength={8}
-              aria-describedby="register-password-hint"
-              className="h-11 pr-12"
               required
+              className="h-11"
+              onChange={(event) => event.target.setCustomValidity(event.target.value === password ? "" : "As senhas devem ser iguais.")}
             />
-            <PasswordToggle visible={showPassword} onToggle={() => setShowPassword((prev) => !prev)} />
-          </div>
-          <FieldDescription id="register-password-hint">Pelo menos 8 caracteres.</FieldDescription>
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="register-confirm-password">Confirmar senha</FieldLabel>
-          <Input
-            id="register-confirm-password"
-            name="password_confirmation"
-            type={showPassword ? "text" : "password"}
-            autoComplete="new-password"
-            minLength={8}
-            required
-            className="h-11"
-            onChange={(event) => event.target.setCustomValidity(event.target.value === password ? "" : "As senhas devem ser iguais.")}
-          />
-        </Field>
+          </Field>
+        </div>
 
         <FormSubmitButton className="h-11 w-full touch-manipulation" pendingLabel="Criando conta…">
           Criar conta

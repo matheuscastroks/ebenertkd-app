@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useOptimistic, useRef, useState, useTransition } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -20,6 +20,11 @@ const STATUS_OPTIONS = [
   { value: "active", label: "Ativa" },
 ] as const;
 
+type EnrollmentFilterKey = "q" | "status" | "belt" | "turma";
+type EnrollmentFilterState = Record<EnrollmentFilterKey, string>;
+
+const isSet = (value: string) => Boolean(value && value !== "all");
+
 export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
@@ -28,6 +33,17 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
   const searchParams = useSearchParams();
   const searchInput = useRef<HTMLInputElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const currentFilters: EnrollmentFilterState = {
+    q: searchParams.get("q") ?? "",
+    status: searchParams.get("status") ?? "",
+    belt: searchParams.get("belt") ?? "",
+    turma: searchParams.get("turma") ?? "",
+  };
+  const [optimisticFilters, setOptimisticFilters] = useOptimistic(
+    currentFilters,
+    (state: EnrollmentFilterState, patch: Partial<EnrollmentFilterState>): EnrollmentFilterState => ({ ...state, ...patch })
+  );
 
   useEffect(() => {
     const restore = () => {
@@ -42,15 +58,22 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
     };
   }, []);
 
-  const update = (name: string, value: string) => {
+  const update = (name: EnrollmentFilterKey, value: string) => {
+    const normalized = !value || value === "all" ? "" : value;
     const query = new URLSearchParams(window.location.search);
-    if (!value || value === "all") {
+    if (!normalized) {
       query.delete(name);
     } else {
-      query.set(name, value);
+      query.set(name, normalized);
     }
     query.delete("page");
-    startTransition(() => router.replace(`${pathname}${query.size ? `?${query}` : ""}`, { scroll: false }));
+    if (name === "q" && !normalized && searchInput.current && document.activeElement !== searchInput.current) {
+      searchInput.current.value = "";
+    }
+    startTransition(() => {
+      setOptimisticFilters({ [name]: normalized });
+      router.replace(`${pathname}${query.size ? `?${query}` : ""}`, { scroll: false });
+    });
   };
 
   const onSearchChange = (value: string) => {
@@ -61,19 +84,22 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
   const handleClear = () => {
     if (timer.current) clearTimeout(timer.current);
     if (searchInput.current) searchInput.current.value = "";
-    startTransition(() => router.replace(ROUTES.adminEnrollments, { scroll: false }));
+    startTransition(() => {
+      setOptimisticFilters({ q: "", status: "", belt: "", turma: "" });
+      router.replace(ROUTES.adminEnrollments, { scroll: false });
+    });
   };
 
   const hasActiveFilters = Boolean(
-    searchParams.get("q") ||
-    (searchParams.get("status") && searchParams.get("status") !== "all") ||
-    (searchParams.get("belt") && searchParams.get("belt") !== "all") ||
-    (searchParams.get("turma") && searchParams.get("turma") !== "all")
+    optimisticFilters.q ||
+    isSet(optimisticFilters.status) ||
+    isSet(optimisticFilters.belt) ||
+    isSet(optimisticFilters.turma)
   );
 
-  const activeCount = ["status", "belt", "turma"].filter((key) => searchParams.get(key) && searchParams.get(key) !== "all").length;
+  const activeCount = (["status", "belt", "turma"] as const).filter((key) => isSet(optimisticFilters[key])).length;
   return (
-    <div aria-busy={pending} className={`space-y-3 rounded-xl border border-border bg-card p-4 shadow-xs ${pending ? "opacity-60" : ""}`}>
+    <div aria-busy={pending} className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-xs transition-opacity duration-(--duration-quick) motion-reduce:transition-none aria-busy:opacity-80">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Field>
           <FieldLabel htmlFor="enrollment-search">Aluno</FieldLabel>
@@ -96,7 +122,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
         <Field>
           <FieldLabel htmlFor="enrollment-status">Status</FieldLabel>
           <Select
-            value={searchParams.get("status") ?? "all"}
+            value={optimisticFilters.status || "all"}
             onValueChange={(val) => update("status", val)}
           >
             <SelectTrigger id="enrollment-status" className="w-full h-11">
@@ -115,7 +141,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
         <Field>
           <FieldLabel htmlFor="enrollment-belt">Faixa</FieldLabel>
           <Select
-            value={searchParams.get("belt") ?? "all"}
+            value={optimisticFilters.belt || "all"}
             onValueChange={(val) => update("belt", val)}
           >
             <SelectTrigger id="enrollment-belt" className="w-full h-11">
@@ -135,7 +161,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
         <Field>
           <FieldLabel htmlFor="enrollment-class">Turma</FieldLabel>
           <Select
-            value={searchParams.get("turma") ?? "all"}
+            value={optimisticFilters.turma || "all"}
             onValueChange={(val) => update("turma", val)}
           >
             <SelectTrigger id="enrollment-class" className="w-full h-11">
@@ -153,7 +179,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
         </Field>
         </div>
       </div>
-      <div className="flex flex-wrap gap-2">{["status", "belt", "turma"].filter((key) => searchParams.get(key) && searchParams.get(key) !== "all").map((key) => <Button key={key} type="button" variant="outline" className="min-h-11" onClick={() => update(key, "all")}>Remover {key === "status" ? STATUS_OPTIONS.find((option) => option.value === searchParams.get(key))?.label : searchParams.get(key)}</Button>)}</div>
+      <div className="flex flex-wrap gap-2">{(["status", "belt", "turma"] as const).filter((key) => isSet(optimisticFilters[key])).map((key) => <Button key={key} type="button" variant="outline" className="min-h-11" onClick={() => update(key, "all")}>Remover {key === "status" ? STATUS_OPTIONS.find((option) => option.value === optimisticFilters.status)?.label : optimisticFilters[key]}</Button>)}</div>
       {hasActiveFilters && (
         <div className="flex justify-end pt-1">
           <Button type="button" variant="ghost" size="sm" onClick={handleClear}>

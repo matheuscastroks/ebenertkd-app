@@ -1,10 +1,12 @@
 import { Suspense } from "react";
 import { isPushConfigured } from "@/features/notifications/push-config";
-import { Bell, Plus } from "lucide-react";
+import { BellIcon } from "@/components/ui/bell";
+import { PlusIcon } from "@/components/ui/plus";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ListItemsSkeleton } from "@/components/skeletons";
 import { AnnouncementForm } from "@/features/notifications/components/announcement-form";
 import { NotificationCenter } from "@/features/notifications/components/notification-center";
@@ -36,7 +38,7 @@ async function HeaderActionButtons({ profile }: { profile: Profile }) {
       <ResponsiveDialog
         trigger={
           <Button variant="outline">
-            <Bell aria-hidden="true" />
+            <BellIcon aria-hidden="true" />
             Notificações
           </Button>
         }
@@ -49,7 +51,7 @@ async function HeaderActionButtons({ profile }: { profile: Profile }) {
         <ResponsiveDialog
           trigger={
             <Button>
-              <Plus aria-hidden="true" />
+              <PlusIcon aria-hidden="true" />
               Novo aviso
             </Button>
           }
@@ -83,7 +85,7 @@ export default async function NotificationsPage({
       title="Avisos"
       subtitle="Comunicados e lembretes da academia."
       headerActions={
-        <Suspense fallback={<div className="h-9 w-28 rounded-lg bg-muted animate-pulse" />}>
+        <Suspense fallback={<Skeleton className="h-9 w-28 rounded-lg" />}>
           <HeaderActionButtons profile={profile} />
         </Suspense>
       }

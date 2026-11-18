@@ -4,10 +4,10 @@ import { PortalShell } from "@/components/dashboard/portal-shell";
 import { EmptyState } from "@/components/shared/empty-state";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { ListPagination } from "@/components/shared/list-pagination";
-import { MetricCard } from "@/components/shared/metric-card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ChargeStatus } from "@/features/billing/types";
+import { BillingOverviewChart } from "@/features/billing/components/billing-overview-chart";
 import { BillingTable } from "@/features/billing/components/billing-table";
 import { BillingFilters, BillingToolbar } from "@/features/billing/components/billing-filters";
 import { getBillingOverview, getBillingSummary } from "@/features/billing/report-service";
@@ -107,19 +107,96 @@ async function BillingToolbarContent() { const settings = await getBillingSettin
 async function BillingMetrics() {
   const summary = await getBillingSummary();
   return (
-    <div className="space-y-2">
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-        <Link href={`${ROUTES.adminBilling}?status=paid`} className="rounded-xl focus-visible:outline-2 focus-visible:outline-ring" aria-label="Filtrar: Recebido no mês"><MetricCard label="Recebido no mês" value={money(summary.receivedCents)} tone="success" /></Link>
-        <Link href={`${ROUTES.adminBilling}?status=pending`} className="rounded-xl focus-visible:outline-2 focus-visible:outline-ring" aria-label="Filtrar: A receber"><MetricCard label="A receber" value={money(summary.pendingCents)} tone="warning" /></Link>
-        <Link href={`${ROUTES.adminBilling}?status=overdue`} className="rounded-xl focus-visible:outline-2 focus-visible:outline-ring" aria-label="Filtrar: Em atraso"><MetricCard label="Em atraso" value={money(summary.overdueCents)} tone="danger" /></Link>
-        <Link href={`${ROUTES.adminBilling}?status=proof_under_review`} className="rounded-xl focus-visible:outline-2 focus-visible:outline-ring" aria-label="Filtrar: Comprovantes em análise"><MetricCard label="Comprovantes em análise" value={money(summary.underReviewCents)} tone="info" /></Link>
+    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
+      <div className="grid grid-cols-2 lg:grid-cols-4">
+        <Link
+          href={`${ROUTES.adminBilling}?status=paid`}
+          className="t-interactive-row block border-r border-b border-border p-4 hover:bg-muted focus-visible:-outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring sm:px-5 lg:border-b-0"
+          aria-label="Filtrar: Recebido no mês"
+        >
+          <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <span className="size-2 shrink-0 rounded-full bg-success" aria-hidden="true" />
+            Recebido no mês
+          </p>
+          <p className="mt-1 text-xl font-semibold tracking-tight tabular-nums text-success-foreground sm:text-2xl">
+            {money(summary.receivedCents)}
+          </p>
+        </Link>
+
+        <Link
+          href={`${ROUTES.adminBilling}?status=pending`}
+          className="t-interactive-row block border-b border-border p-4 hover:bg-muted focus-visible:-outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring sm:px-5 lg:border-b-0 lg:border-r"
+          aria-label="Filtrar: A receber"
+        >
+          <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <span className="size-2 shrink-0 rounded-full bg-warning" aria-hidden="true" />
+            A receber
+          </p>
+          <p className="mt-1 text-xl font-semibold tracking-tight tabular-nums text-foreground sm:text-2xl">
+            {money(summary.pendingCents)}
+          </p>
+        </Link>
+
+        <Link
+          href={`${ROUTES.adminBilling}?status=overdue`}
+          className="t-interactive-row block border-r border-border p-4 hover:bg-muted focus-visible:-outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring sm:px-5"
+          aria-label="Filtrar: Em atraso"
+        >
+          <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <span
+              className={
+                summary.overdueCents > 0
+                  ? "size-2 shrink-0 rounded-full bg-destructive"
+                  : "size-2 shrink-0 rounded-full bg-muted-foreground"
+              }
+              aria-hidden="true"
+            />
+            Em atraso
+          </p>
+          <p
+            className={
+              summary.overdueCents > 0
+                ? "mt-1 text-xl font-semibold tracking-tight tabular-nums text-destructive sm:text-2xl"
+                : "mt-1 text-xl font-semibold tracking-tight tabular-nums text-foreground sm:text-2xl"
+            }
+          >
+            {money(summary.overdueCents)}
+          </p>
+        </Link>
+
+        <Link
+          href={`${ROUTES.adminBilling}?status=proof_under_review`}
+          className="t-interactive-row block p-4 hover:bg-muted focus-visible:-outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring sm:px-5"
+          aria-label="Filtrar: Comprovantes em análise"
+        >
+          <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <span className="size-2 shrink-0 rounded-full bg-info" aria-hidden="true" />
+            Comprovantes em análise
+          </p>
+          <p className="mt-1 text-xl font-semibold tracking-tight tabular-nums text-foreground sm:text-2xl">
+            {money(summary.underReviewCents)}
+          </p>
+        </Link>
       </div>
-      <p className="text-xs text-muted-foreground">
-        {summary.paidCharges}{" "}
-        {summary.paidCharges === 1 ? "pagamento confirmado" : "pagamentos confirmados"} de{" "}
-        {summary.distinctPayingStudents}{" "}
-        {summary.distinctPayingStudents === 1 ? "aluno" : "alunos"} neste mês.
-      </p>
+
+      <div className="p-4 sm:p-5">
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <p className="text-sm font-medium text-muted-foreground">Distribuição do mês</p>
+          <p className="text-xs text-muted-foreground tabular-nums">
+            {summary.paidCharges}{" "}
+            {summary.paidCharges === 1 ? "pagamento confirmado" : "pagamentos confirmados"} de{" "}
+            {summary.distinctPayingStudents}{" "}
+            {summary.distinctPayingStudents === 1 ? "aluno" : "alunos"} neste mês.
+          </p>
+        </div>
+        <BillingOverviewChart
+          monthlySeries={summary.monthlySeries}
+          receivedCents={summary.receivedCents}
+          pendingCents={summary.pendingCents}
+          overdueCents={summary.overdueCents}
+          underReviewCents={summary.underReviewCents}
+        />
+      </div>
     </div>
   );
 }

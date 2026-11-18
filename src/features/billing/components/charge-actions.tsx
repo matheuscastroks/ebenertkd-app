@@ -6,6 +6,8 @@ import { ConsequenceDialog } from "./consequence-dialog";
 import { formatBrl } from "@/lib/money";
 import Link from "next/link";
 import { ExternalLink, FileText } from "lucide-react";
+import { CheckIcon } from "@/components/ui/check";
+import { XIcon } from "@/components/ui/x";
 import {
   adjustChargeAction,
   decidePaymentProofAction,
@@ -15,6 +17,15 @@ import {
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { DateField } from "@/components/shared/date-field";
 import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
+import {
+  Attachment,
+  AttachmentAction,
+  AttachmentActions,
+  AttachmentContent,
+  AttachmentDescription,
+  AttachmentMedia,
+  AttachmentTitle
+} from "@/components/ui/attachment";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -67,32 +78,36 @@ export function ChargeActions({
             <TabsContent value="proof" className="pt-4 space-y-4">
               {proof ? (
                 <div className="space-y-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border p-3">
-                    <div className="flex items-center gap-2 text-sm font-medium">
-                      <FileText className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                      <span>Comprovante anexado pelo aluno (v{proof.version})</span>
-                    </div>
-                    <Button asChild size="sm" variant="outline">
-                      <Link
-                        href={`/api/payment-proofs/${proof.$id}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center gap-1.5"
-                      >
-                        <ExternalLink className="size-3.5" aria-hidden="true" />
-                        Visualizar arquivo
-                      </Link>
-                    </Button>
-                  </div>
+                  <Attachment className="w-full">
+                    <AttachmentMedia>
+                      <FileText aria-hidden="true" />
+                    </AttachmentMedia>
+                    <AttachmentContent>
+                      <AttachmentTitle>Comprovante anexado pelo aluno</AttachmentTitle>
+                      <AttachmentDescription>Versão {proof.version}</AttachmentDescription>
+                    </AttachmentContent>
+                    <AttachmentActions>
+                      <AttachmentAction asChild size="sm" variant="outline">
+                        <Link
+                          href={`/api/payment-proofs/${proof.$id}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <ExternalLink aria-hidden="true" />
+                          Visualizar arquivo
+                        </Link>
+                      </AttachmentAction>
+                    </AttachmentActions>
+                  </Attachment>
 
                   {/* Aprovar Comprovante */}
-                  <ConfirmationForm id={`approve-${instanceId}-${proof.$id}`} action={decidePaymentProofAction} className="space-y-3 rounded-xl border border-border p-4">
+                  <ConfirmationForm id={`approve-${instanceId}-${proof.$id}`} action={decidePaymentProofAction} className="space-y-3 border-t border-border pt-4">
                     <input type="hidden" name="proof_id" value={proof.$id} />
                     <input type="hidden" name="decision" value="approved" />
                     <p className="text-sm font-semibold">
                       Aprovar recebimento
                     </p>
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid items-end gap-3 sm:grid-cols-2">
                       <DateField
                         id={`paid-at-${instanceId}-${proof.$id}`}
                         name="paid_at"
@@ -102,7 +117,7 @@ export function ChargeActions({
                         required
                       />
                       <div className="flex items-end">
-                        <ConsequenceDialog trigger={<Button type="button" className="min-h-11">Aprovar comprovante</Button>} title="Aprovar comprovante?" summary={[...summary, { label: "Data do pagamento", value: today(), field: "paid_at", kind: "date" }]} effect="A cobrança será marcada como paga e o aluno verá a confirmação." confirmLabel="Aprovar comprovante" action={decidePaymentProofAction} formId={`approve-${instanceId}-${proof.$id}`} />
+                        <ConsequenceDialog trigger={<Button type="button" className="min-h-11"><CheckIcon aria-hidden="true" />Aprovar comprovante</Button>} title="Aprovar comprovante?" summary={[...summary, { label: "Data do pagamento", value: today(), field: "paid_at", kind: "date" }]} effect="A cobrança será marcada como paga e o aluno verá a confirmação." confirmLabel="Aprovar comprovante" action={decidePaymentProofAction} formId={`approve-${instanceId}-${proof.$id}`} />
                       </div>
                     </div>
                   </ConfirmationForm>
@@ -110,7 +125,7 @@ export function ChargeActions({
                   {/* Recusar Comprovante */}
                   <ConfirmationForm
                     id={`reject-form-${instanceId}-${proof.$id}`} action={decidePaymentProofAction}
-                    className="space-y-3 rounded-xl border border-border p-4"
+                    className="space-y-3 border-t border-border pt-4"
                   >
                     <input type="hidden" name="proof_id" value={proof.$id} />
                     <input type="hidden" name="decision" value="rejected" />
@@ -130,7 +145,7 @@ export function ChargeActions({
                         O aluno receberá esta orientação no portal e poderá enviar um novo arquivo.
                       </FieldDescription>
                     </Field>
-                    <ConsequenceDialog trigger={<Button type="button" variant="outline" className="min-h-11 text-destructive">Recusar comprovante</Button>} title="Recusar comprovante?" summary={summary} effect="O aluno receberá o motivo e poderá enviar outro comprovante. A cobrança continua em aberto." confirmLabel="Recusar comprovante" destructive action={decidePaymentProofAction} formId={`reject-form-${instanceId}-${proof.$id}`} />
+                    <ConsequenceDialog trigger={<Button type="button" variant="outline" className="min-h-11 text-destructive"><XIcon aria-hidden="true" />Recusar comprovante</Button>} title="Recusar comprovante?" summary={summary} effect="O aluno receberá o motivo e poderá enviar outro comprovante. A cobrança continua em aberto." confirmLabel="Recusar comprovante" destructive action={decidePaymentProofAction} formId={`reject-form-${instanceId}-${proof.$id}`} />
                   </ConfirmationForm>
                 </div>
               ) : null}

@@ -2,6 +2,8 @@
 
 Diretrizes centrais de experiência do usuário para o aplicativo da academia Ebener TKD.
 
+Este documento opera em conjunto com o [Contrato de Design](./contrato-de-design.md), as [Diretrizes Apple HIG para Web](./apple-hig-web-guidelines.md) e as [Diretrizes de Carga Cognitiva](./diretrizes-carga-cognitiva.md). Em qualquer conflito visual ou estrutural, o [Contrato de Design](./contrato-de-design.md) prevalece.
+
 ---
 
 ## 1. Princípios Centrais

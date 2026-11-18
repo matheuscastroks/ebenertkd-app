@@ -34,7 +34,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           <TooltipProvider>
             <RegisterServiceWorker />
             {children}
-            <Toaster richColors closeButton position="top-right" />
+            <Toaster closeButton position="top-right" />
           </TooltipProvider>
         </ThemeProvider>
       </body>

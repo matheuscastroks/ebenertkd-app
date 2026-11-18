@@ -1,9 +1,8 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronRight } from "lucide-react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronRightIcon } from "@/components/ui/chevron-right";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Profile } from "@/features/auth/types";
 import { DependentSwitcher } from "@/features/families/components/dependent-header";
@@ -27,35 +26,33 @@ async function DependentSummary({ guardian, minor }: { guardian: Profile; minor:
   const firstName = minor.full_name.split(" ")[0];
   return <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start">
     <div className="min-w-0 space-y-6">
-      <section aria-labelledby="dependent-pendencies" className="space-y-3">
+      <section aria-labelledby="dependent-pendencies" className="space-y-2.5">
         <h2 id="dependent-pendencies" className="text-base font-semibold">Pendências</h2>
-        <Card><CardContent>
+        <div className="overflow-hidden rounded-xl border border-border bg-card px-4 py-3 shadow-xs">
           <PendencyList items={pendencies} primaryKey={primaryPendency(pendencies)?.id} subject={minor.full_name} emptyLabel={`Nada pendente para ${firstName}.`} />
-        </CardContent></Card>
+        </div>
       </section>
-      <Card>
-        <CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">Próximo treino</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
+      <section aria-labelledby="dependent-next-training" className="space-y-3 rounded-xl border border-border bg-card p-5 shadow-xs">
+        <h2 id="dependent-next-training" className="text-sm font-medium text-muted-foreground">Próximo treino</h2>
+        <div className="space-y-1">
           <p className="text-xl font-semibold tracking-tight tabular-nums">{formatNextTraining(next)}</p>
           <p className="text-sm text-muted-foreground">{trainingClass ? `${trainingClass.name} · ${trainingClass.location || "Local não informado"}` : "A turma é definida pelo professor ao aprovar a matrícula."}</p>
-          <p className="border-t border-border pt-3 text-sm tabular-nums">{summary.total ? `Frequência ${summary.rate}% · ${summary.attended} de ${summary.total} aulas` : "Ainda sem aulas registradas"}</p>
-        </CardContent>
-      </Card>
+        </div>
+        <p className="border-t border-border pt-3 text-sm tabular-nums">{summary.total ? `Frequência ${summary.rate}% · ${summary.attended} de ${summary.total} aulas` : "Ainda sem aulas registradas"}</p>
+      </section>
     </div>
     <div className="min-w-0 space-y-6">
       <GraduationCard title="Faixa" currentBelt={student?.current_belt} gub={student?.gub} startedAtTkd={student?.started_at_tkd} />
-      <Card>
-        <CardHeader><CardTitle>Áreas de {firstName}</CardTitle></CardHeader>
-        <CardContent>
-          <nav aria-label={`Áreas de ${minor.full_name}`} className="divide-y divide-border">
-            {[...dependentSections(minor.$id), { key: "acesso", label: "Acesso e senha", description: "Login no aplicativo", href: `${ROUTES.guardianDependents}#dependente-${minor.$id}` }].map((section) =>
-              <Link key={section.key} href={section.href} className="flex min-h-12 items-center justify-between gap-3 py-2 transition-colors hover:text-primary-text focus-visible:outline-2 focus-visible:outline-ring motion-reduce:transition-none">
-                <span className="min-w-0"><span className="block text-sm font-medium">{section.label}</span><span className="block text-sm text-muted-foreground">{section.description}</span></span>
-                <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-              </Link>)}
-          </nav>
-        </CardContent>
-      </Card>
+      <section aria-labelledby="dependent-areas-title" className="space-y-2.5">
+        <h2 id="dependent-areas-title" className="text-base font-semibold">Áreas de {firstName}</h2>
+        <nav aria-label={`Áreas de ${minor.full_name}`} className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card px-4 shadow-xs">
+          {[...dependentSections(minor.$id), { key: "acesso", label: "Acesso e senha", description: "Login no aplicativo", href: `${ROUTES.guardianDependents}#dependente-${minor.$id}` }].map((section) =>
+            <Link key={section.key} href={section.href} className="flex min-h-12 items-center justify-between gap-3 py-2.5 transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:text-primary-text focus-visible:outline-2 focus-visible:outline-ring motion-reduce:transition-none">
+              <span className="min-w-0"><span className="block text-sm font-medium">{section.label}</span><span className="block text-sm text-muted-foreground">{section.description}</span></span>
+              <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            </Link>)}
+        </nav>
+      </section>
     </div>
   </div>;
 }
@@ -63,10 +60,19 @@ async function DependentSummary({ guardian, minor }: { guardian: Profile; minor:
 function SummarySkeleton() {
   return <div role="status" aria-label="Carregando resumo" className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
     <div className="space-y-6">
-      <Card><CardContent className="space-y-3"><Skeleton className="h-5 w-32" /><Skeleton className="h-4 w-56" /></CardContent></Card>
-      <Card><CardContent className="space-y-3"><Skeleton className="h-4 w-28" /><Skeleton className="h-7 w-56 max-w-full" /></CardContent></Card>
+      <div className="space-y-2.5">
+        <Skeleton className="h-5 w-28" />
+        <Skeleton className="h-24 w-full rounded-xl" />
+      </div>
+      <Skeleton className="h-36 w-full rounded-xl" />
     </div>
-    <Card><CardContent className="space-y-3"><Skeleton className="h-5 w-20" /><Skeleton className="h-6 w-36" /></CardContent></Card>
+    <div className="space-y-6">
+      <Skeleton className="h-52 w-full rounded-xl" />
+      <div className="space-y-2.5">
+        <Skeleton className="h-5 w-32" />
+        <Skeleton className="h-64 w-full rounded-xl" />
+      </div>
+    </div>
   </div>;
 }
 

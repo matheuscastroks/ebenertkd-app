@@ -1,7 +1,8 @@
 import { beforeEach, expect, it, vi } from "vitest";
 import { logoutAction } from "./auth";
 
-const mocks = vi.hoisted(() => ({ revoke: vi.fn(), profile: vi.fn(), deleteSession: vi.fn(), deleteCookie: vi.fn(), session: vi.fn() }));
+const mocks = vi.hoisted(() => ({ invalidate: vi.fn(), revoke: vi.fn(), profile: vi.fn(), deleteSession: vi.fn(), deleteCookie: vi.fn(), session: vi.fn() }));
+vi.mock("@/lib/cache/invalidate", () => ({ invalidateTags: mocks.invalidate }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ delete: mocks.deleteCookie }), headers: vi.fn() }));
 vi.mock("next/navigation", () => ({ redirect: (path: string) => { throw new Error(`redirect:${path}`); } }));
 vi.mock("@/lib/appwrite/session", () => ({ createAppwriteSessionClient: mocks.session, appwriteSessionCookie: vi.fn() }));
@@ -39,4 +40,9 @@ it("sem endpoint não revoga inscrições de outros aparelhos", async () => {
   await expect(logoutAction()).rejects.toThrow("redirect:/");
   expect(mocks.revoke).not.toHaveBeenCalled();
   expect(mocks.deleteSession).toHaveBeenCalledTimes(1);
+});
+
+it("ao sair derruba o perfil em cache daquela conta", async () => {
+  await expect(logoutAction()).rejects.toThrow("redirect:/");
+  expect(mocks.invalidate).toHaveBeenCalledWith("profile-account:account-current");
 });

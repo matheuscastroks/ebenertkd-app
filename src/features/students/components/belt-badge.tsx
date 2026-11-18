@@ -398,7 +398,7 @@ export function BeltBadge({
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-md border border-neutral-200/90 dark:border-neutral-800 bg-neutral-100/90 dark:bg-neutral-900/70 text-neutral-800 dark:text-neutral-200 font-sans select-none transition-colors shadow-xs",
+        "inline-flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-md border border-neutral-200/90 dark:border-neutral-800 bg-neutral-100/90 dark:bg-neutral-900/70 text-neutral-800 dark:text-neutral-200 font-sans select-none transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none shadow-xs",
         size === "sm" && "h-6 px-2 text-xs",
         size === "md" && "h-7 px-2.5 text-xs",
         size === "lg" && "h-8 px-3 text-sm",
@@ -432,7 +432,7 @@ export function BeltBadge({
         </span>
       </span>
 
-      <span className="font-semibold tracking-tight">Faixa {config.name}</span>
+      <span className="font-semibold tracking-tight whitespace-nowrap">Faixa {config.name}</span>
 
       {showGub && (resolvedGub != null || config.dan != null) && (
         <span
