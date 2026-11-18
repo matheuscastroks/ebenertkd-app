@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, UserPen } from "lucide-react";
+import { SquarePenIcon } from "@/components/ui/square-pen";
 import { adminUpdateStudentAction } from "@/app/actions/enrollment-review";
 import { DateField } from "@/components/shared/date-field";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
@@ -9,13 +9,13 @@ import { PhoneField } from "@/components/shared/phone-field";
 import { AddressFields } from "@/components/shared/address-fields";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
+} from "@/components/ui/sheet";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -40,33 +40,34 @@ export function EditStudentDialog({
   const today = new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" });
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs">
-          <Pencil className="size-3.5" aria-hidden="true" />
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="outline" size="sm" className="gap-1.5">
+          <SquarePenIcon className="size-3.5" aria-hidden="true" />
           <span>Editar dados</span>
         </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-lg">
-            <UserPen className="size-5 text-primary-text" aria-hidden="true" />
+      </SheetTrigger>
+      <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-xl">
+        <SheetHeader>
+          <SheetTitle className="flex items-center gap-2 text-lg font-semibold">
+            <SquarePenIcon className="size-5 text-primary-text" aria-hidden="true" />
             Editar Dados do Aluno
-          </DialogTitle>
-          <DialogDescription>
+          </SheetTitle>
+          <SheetDescription>
             Atualize as informações cadastrais, de contato, graduação ou saúde de {student.full_name}.
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
 
-        <form action={adminUpdateStudentAction} className="space-y-5 pt-2 text-sm">
-          <input type="hidden" name="student_id" value={student.$id} />
+        <div className="px-4 pb-6">
+          <form action={adminUpdateStudentAction} className="space-y-5 text-sm">
+            <input type="hidden" name="student_id" value={student.$id} />
 
-          {/* 1. Identificação Básica */}
-          <div>
-            <h4 className="font-semibold text-xs text-muted-foreground mb-3">
-              Identificação
-            </h4>
-            <div className="grid gap-3 sm:grid-cols-2">
+            {/* 1. Identificação Básica */}
+            <div>
+              <h4 className="mb-3 text-sm font-semibold text-muted-foreground">
+                Identificação
+              </h4>
+              <div className="grid items-start gap-3 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <Field>
                   <FieldLabel htmlFor="edit-full-name">Nome completo *</FieldLabel>
@@ -133,10 +134,10 @@ export function EditStudentDialog({
 
           {/* 2. Graduação */}
           <div>
-            <h4 className="font-semibold text-xs text-muted-foreground mb-3">
+            <h4 className="mb-3 text-sm font-semibold text-muted-foreground">
               Graduação Marcial
             </h4>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid items-start gap-3 sm:grid-cols-2">
               <GraduationFields
                 defaultBelt={student.current_belt}
                 defaultGub={student.gub}
@@ -146,10 +147,10 @@ export function EditStudentDialog({
 
           {/* 3. Contato e Endereço */}
           <div>
-            <h4 className="font-semibold text-xs text-muted-foreground mb-3">
+            <h4 className="mb-3 text-sm font-semibold text-muted-foreground">
               Contato e Localização
             </h4>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid items-start gap-3 sm:grid-cols-2">
               <div>
                 <PhoneField
                   id="edit-whatsapp"
@@ -179,10 +180,10 @@ export function EditStudentDialog({
 
           {/* 4. Contato de Emergência */}
           <div>
-            <h4 className="font-semibold text-xs text-muted-foreground mb-3">
+            <h4 className="mb-3 text-sm font-semibold text-muted-foreground">
               Contato de Emergência
             </h4>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid items-start gap-3 sm:grid-cols-3">
               <div>
                 <Field>
                   <FieldLabel htmlFor="edit-em-name">Nome do contato</FieldLabel>
@@ -218,7 +219,7 @@ export function EditStudentDialog({
 
           {/* 5. Saúde e Cuidados */}
           <div>
-            <h4 className="font-semibold text-xs text-muted-foreground mb-3">
+            <h4 className="mb-3 text-sm font-semibold text-muted-foreground">
               Saúde e Cuidados
             </h4>
             <div className="space-y-3">
@@ -244,7 +245,7 @@ export function EditStudentDialog({
               </div>
 
               {hasHealthCondition === "yes" && (
-                <div className="grid gap-3 sm:grid-cols-2 pt-1">
+                <div className="grid gap-3 pt-1 sm:grid-cols-2">
                   <div>
                     <Field>
                       <FieldLabel htmlFor="edit-health-details">Detalhes da condição</FieldLabel>
@@ -294,7 +295,7 @@ export function EditStudentDialog({
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t">
+          <div className="flex justify-end gap-2 border-t border-border pt-3">
             <Button
               type="button"
               variant="outline"
@@ -306,8 +307,9 @@ export function EditStudentDialog({
               Salvar alterações
             </FormSubmitButton>
           </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+          </form>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }

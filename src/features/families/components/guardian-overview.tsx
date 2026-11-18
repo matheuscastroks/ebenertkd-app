@@ -32,7 +32,7 @@ export async function GuardianMinorsOverview({ guardian, minors }: { guardian: P
     return <Card key={minor.$id} aria-labelledby={`dependent-${minor.$id}`}>
       <CardHeader>
         <div className="flex items-center gap-3">
-          <StudentAvatar name={minor.full_name} photoDocumentId={photoDocumentId} className="size-11" />
+          <StudentAvatar name={minor.full_name} photoDocumentId={photoDocumentId} size="md" className="size-14" />
           <div className="min-w-0 flex-1 space-y-1">
             <h2 id={`dependent-${minor.$id}`} className="truncate text-base font-semibold">
               <Link href={dependentSummaryPath(minor.$id)} className="underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring">{minor.full_name}</Link>
@@ -57,7 +57,7 @@ export async function GuardianMinorsOverview({ guardian, minors }: { guardian: P
         </dl>
         <nav aria-label={`Acessos de ${minor.full_name}`} className="flex flex-wrap gap-x-1 gap-y-1 border-t border-border pt-3">
           {dependentSections(minor.$id).map((section) => <Link key={section.key} href={section.href}
-            className="inline-flex min-h-11 items-center rounded-lg px-2 font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring motion-reduce:transition-none">{section.label}</Link>)}
+            className="inline-flex min-h-11 items-center rounded-lg px-2 font-medium text-muted-foreground transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring motion-reduce:transition-none">{section.label}</Link>)}
         </nav>
       </CardContent>
     </Card>;

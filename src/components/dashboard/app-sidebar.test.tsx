@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/dashboard/logout-button", () => ({ LogoutButton: () => <button>Sair</button> }));
@@ -54,5 +54,42 @@ describe("AppSidebar", () => {
     expect(screen.getByLabelText("3 pendentes")).toHaveTextContent("3");
     expect(screen.getByRole("button", { name: "Alternar submenu de Contratos" })).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByRole("link", { name: "Modelo" })).toHaveAttribute("data-active", "true");
+  });
+
+  it("starts and stops icon animations when hovering parent sidebar items", () => {
+    const { container } = render(
+      <TooltipProvider>
+        <SidebarProvider>
+          <AppSidebar
+            badge="Professor"
+            profileName="Ricardo Almeida"
+            navItems={[
+              { label: "Visão geral", href: "/admin", group: "Principal", icon: "dashboard", active: true },
+              {
+                label: "Contratos",
+                href: "/admin/contratos",
+                group: "Documentos",
+                icon: "contracts",
+                children: [{ label: "Modelo", href: "/admin/contratos/modelo" }]
+              }
+            ]}
+          />
+        </SidebarProvider>
+      </TooltipProvider>
+    );
+
+    const overviewItem = screen.getByRole("link", { name: "Visão geral" }).closest("li");
+    const contractsLink = screen.getByRole("link", { name: "Contratos" });
+    const contractsToggle = screen.getByRole("button", { name: "Alternar submenu de Contratos" });
+
+    expect(overviewItem).not.toBeNull();
+    fireEvent.mouseEnter(overviewItem!);
+    fireEvent.mouseLeave(overviewItem!);
+    fireEvent.mouseEnter(contractsLink);
+    fireEvent.mouseLeave(contractsLink);
+    fireEvent.mouseEnter(contractsToggle);
+    fireEvent.mouseLeave(contractsToggle);
+
+    expect(container.querySelectorAll("svg").length).toBeGreaterThanOrEqual(2);
   });
 });

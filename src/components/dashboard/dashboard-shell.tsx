@@ -94,7 +94,7 @@ export function DashboardShell({
           ) : null}
         </div>
       </header>
-      <div className="space-y-6">{children}</div>
+      <div className="t-page-enter space-y-6">{children}</div>
     </>
   );
 }

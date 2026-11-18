@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronsUpDown, Settings, Shield } from "lucide-react";
+import { ChevronsUpDownIcon } from "@/components/ui/chevrons-up-down";
+import { SettingsIcon } from "@/components/ui/settings";
+import { ShieldCheckIcon } from "@/components/ui/shield-check";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -57,7 +59,7 @@ export function AccountMenu({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="size-8">
+              <Avatar className="size-9">
                 {avatarUrl ? <AvatarImage src={avatarUrl} alt={name} /> : null}
                 <AvatarFallback className="text-xs font-medium">{initials}</AvatarFallback>
               </Avatar>
@@ -67,7 +69,7 @@ export function AccountMenu({
                   {displaySubtitle}
                 </span>
               </div>
-              <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" aria-hidden="true" />
+              <ChevronsUpDownIcon className="ml-auto size-4 text-muted-foreground" aria-hidden="true" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -78,7 +80,7 @@ export function AccountMenu({
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="size-8">
+                <Avatar className="size-9">
                   {avatarUrl ? <AvatarImage src={avatarUrl} alt={name} /> : null}
                   <AvatarFallback className="text-xs font-medium">{initials}</AvatarFallback>
                 </Avatar>
@@ -97,13 +99,13 @@ export function AccountMenu({
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
                 <Link href={ROUTES.settings} className="cursor-pointer">
-                  <Settings className="size-4" aria-hidden="true" />
+                  <SettingsIcon className="size-4" aria-hidden="true" />
                   <span>Configurações</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={ROUTES.privacy} className="cursor-pointer">
-                  <Shield className="size-4" aria-hidden="true" />
+                  <ShieldCheckIcon className="size-4" aria-hidden="true" />
                   <span>Privacidade</span>
                 </Link>
               </DropdownMenuItem>

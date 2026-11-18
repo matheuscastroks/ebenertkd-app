@@ -3,7 +3,9 @@
 import * as React from "react";
 import { useTheme } from "next-themes";
 import { changeTheme } from "@/lib/theme-transition";
-import { Moon, Sun, Monitor } from "lucide-react";
+import { Monitor } from "lucide-react";
+import { MoonIcon } from "@/components/ui/moon";
+import { SunIcon } from "@/components/ui/sun";
 import { cn } from "@/lib/utils";
 
 const emptySubscribe = () => () => {};
@@ -17,8 +19,8 @@ export function ThemePreference() {
   );
 
   const themes = [
-    { value: "light", label: "Claro", icon: Sun },
-    { value: "dark", label: "Escuro", icon: Moon },
+    { value: "light", label: "Claro", icon: SunIcon },
+    { value: "dark", label: "Escuro", icon: MoonIcon },
     { value: "system", label: "Sistema", icon: Monitor },
   ] as const;
 
@@ -40,13 +42,13 @@ export function ThemePreference() {
               type="button"
               onClick={() => changeTheme(setTheme, value)}
               className={cn(
-                "flex flex-col items-center justify-center gap-2 rounded-xl border p-3.5 text-xs font-semibold transition-colors duration-200 motion-reduce:transition-none h-20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring select-none",
+                "flex flex-col items-center justify-center gap-2 rounded-xl border p-3.5 text-xs font-semibold transition-[color,background-color,border-color,box-shadow] duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none h-20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring select-none",
                 isActive
                   ? "border-primary bg-primary/10 text-primary-text shadow-xs ring-1 ring-primary"
                   : "border-border/60 bg-muted/20 text-muted-foreground hover:bg-muted/40 hover:text-foreground"
               )}
             >
-              <Icon className={cn("size-5", isActive ? "text-primary-text" : "text-muted-foreground")} />
+              <Icon className={cn("size-5", isActive ? "text-primary-text" : "text-muted-foreground")} aria-hidden="true" />
               <span>{label}</span>
             </button>
           );

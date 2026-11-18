@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronRight } from "lucide-react";
+import { useRef } from "react";
+import { ChevronRightIcon, type ChevronRightIconHandle } from "@/components/ui/chevron-right";
 import { NAV_ICONS } from "@/lib/navigation/nav-icons";
+import type { AnimatedIconHandle } from "@/lib/use-parent-hover-animation";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Sidebar,
@@ -31,11 +35,15 @@ export type AppSidebarNavItem = SidebarNavItem;
 function NavigationItem({ item }: { item: AppSidebarNavItem }) {
   const { isMobile, setOpenMobile } = useSidebar();
   const Icon = NAV_ICONS[item.icon ?? "dashboard"];
+  const iconRef = useRef<AnimatedIconHandle>(null);
+  const chevronRef = useRef<ChevronRightIconHandle>(null);
   const handleNavClick = () => {
     if (isMobile) {
       setOpenMobile(false);
     }
   };
+  const startIconAnimation = () => iconRef.current?.startAnimation();
+  const stopIconAnimation = () => iconRef.current?.stopAnimation();
 
   if (item.icon === "notifications") {
     return (
@@ -47,10 +55,10 @@ function NavigationItem({ item }: { item: AppSidebarNavItem }) {
 
   if (!item.children?.length) {
     return (
-      <SidebarMenuItem>
+      <SidebarMenuItem onMouseEnter={startIconAnimation} onMouseLeave={stopIconAnimation}>
         <SidebarMenuButton asChild isActive={item.active} tooltip={item.label}>
           <Link href={item.href} onClick={handleNavClick}>
-            <Icon aria-hidden="true" className="size-4 shrink-0" strokeWidth={2} />
+            <Icon ref={iconRef} aria-hidden="true" className="size-4 shrink-0" strokeWidth={2} />
             <span>{item.label}</span>
           </Link>
         </SidebarMenuButton>
@@ -71,17 +79,34 @@ function NavigationItem({ item }: { item: AppSidebarNavItem }) {
       className="group/collapsible"
     >
       <SidebarMenuItem>
-        <SidebarMenuButton asChild isActive={item.active} tooltip={item.label}>
+        <SidebarMenuButton
+          asChild
+          isActive={item.active}
+          tooltip={item.label}
+          onMouseEnter={startIconAnimation}
+          onMouseLeave={stopIconAnimation}
+        >
           <Link href={item.href} onClick={handleNavClick}>
-            <Icon aria-hidden="true" className="size-4 shrink-0" strokeWidth={2} />
+            <Icon ref={iconRef} aria-hidden="true" className="size-4 shrink-0" strokeWidth={2} />
             <span>{item.label}</span>
           </Link>
         </SidebarMenuButton>
         <CollapsibleTrigger asChild>
-          <SidebarMenuAction aria-label={`Alternar submenu de ${item.label}`}>
-            <ChevronRight
+          <SidebarMenuAction
+            aria-label={`Alternar submenu de ${item.label}`}
+            onMouseEnter={() => {
+              startIconAnimation();
+              chevronRef.current?.startAnimation();
+            }}
+            onMouseLeave={() => {
+              stopIconAnimation();
+              chevronRef.current?.stopAnimation();
+            }}
+          >
+            <ChevronRightIcon
+              ref={chevronRef}
               aria-hidden="true"
-              className="transition-transform duration-200 motion-reduce:transition-none group-data-[state=open]/collapsible:rotate-90"
+              className="size-4 transition-transform duration-(--duration-fast) ease-(--ease-smooth-out) motion-reduce:transition-none group-data-[state=open]/collapsible:rotate-90"
             />
           </SidebarMenuAction>
         </CollapsibleTrigger>
