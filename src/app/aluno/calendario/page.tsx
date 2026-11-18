@@ -6,7 +6,8 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { CardGridSkeleton, ListItemsSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import type { Profile } from "@/features/auth/types";
-import { IcsDownloadButton } from "@/features/classes/components/ics-download-button";
+import { AddToCalendarButton } from "@/features/classes/components/add-to-calendar-button";
+import { findFirstOccurrenceDate } from "@/features/classes/student-calendar-rules";
 import { getStudentCalendarData } from "@/features/classes/student-calendar-service";
 import { requireCapability } from "@/lib/auth/session";
 import { formatBusinessDateBr } from "@/lib/dates";
@@ -16,6 +17,10 @@ import { ArrowRight, Clock, MapPin } from "lucide-react";
 async function StudentCalendarContent({ profile }: { profile: Profile }) {
   const data = await getStudentCalendarData(profile);
   const { trainingClass, upcomingSessions, upcomingExams } = data;
+  const firstClassDate =
+    trainingClass && trainingClass.weekdays.length > 0
+      ? findFirstOccurrenceDate(trainingClass.weekdays)
+      : null;
 
   return (
     <div className="space-y-6">
@@ -49,6 +54,20 @@ async function StudentCalendarContent({ profile }: { profile: Profile }) {
                 <MapPin className="size-4" aria-hidden="true" />
                 {trainingClass.location || "Dojang principal"}
               </span>
+              {firstClassDate ? (
+                <AddToCalendarButton
+                  uid={`class-weekly-${trainingClass.$id}`}
+                  title={`Taekwondo · ${trainingClass.name}`}
+                  date={firstClassDate}
+                  startTime={trainingClass.start_time}
+                  endTime={trainingClass.end_time}
+                  location={trainingClass.location}
+                  description={`Treino semanal da turma ${trainingClass.name} (${trainingClass.weekdays.join(", ")}). Portal Ebener TKD.`}
+                  recurrenceWeekdays={trainingClass.weekdays}
+                  fileName={`grade-${trainingClass.$id}`}
+                  label="Salvar grade na agenda"
+                />
+              ) : null}
             </div>
           ) : null}
         </div>
@@ -102,7 +121,7 @@ async function StudentCalendarContent({ profile }: { profile: Profile }) {
                     </p>
                   </div>
 
-                  <IcsDownloadButton
+                  <AddToCalendarButton
                     uid={session.id}
                     title={`Taekwondo · ${session.className}`}
                     date={session.date}
@@ -111,7 +130,7 @@ async function StudentCalendarContent({ profile }: { profile: Profile }) {
                     location={session.location}
                     description="Treino agendado pelo portal Ebener TKD."
                     fileName={`treino-${session.date}`}
-                    label="Agenda (.ics)"
+                    label="Adicionar à agenda"
                   />
                 </li>
               ))}
@@ -157,7 +176,7 @@ async function StudentCalendarContent({ profile }: { profile: Profile }) {
                     </p>
                   </div>
 
-                  <IcsDownloadButton
+                  <AddToCalendarButton
                     uid={`exam-${exam.id}`}
                     title={exam.name}
                     date={exam.date}
@@ -184,7 +203,7 @@ export default async function StudentCalendarPage() {
       profile={profile}
       activePath={ROUTES.studentCalendar}
       title="Calendário de treinos"
-      subtitle="Consulte sua grade semanal, próximas aulas e exames agendados com exportação para sua agenda."
+      subtitle="Consulte sua grade semanal, próximas aulas e exames agendados e salve direto na sua agenda."
       breadcrumbs={[{ label: "Calendário" }]}
     >
       <div className="w-full min-w-0 space-y-6">
