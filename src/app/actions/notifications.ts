@@ -50,5 +50,5 @@ export async function setNotificationPreferenceAction(key: keyof NotificationPre
   const actor = await requireProfile();
   if (!["announcements_enabled", "financial_enabled", "system_enabled"].includes(key) || typeof enabled !== "boolean") throw new Error("invalid_preference");
   await setNotificationPreference(actor, key, enabled);
-  updateTag(CACHE_TAGS.notificationPreferences);
+  updateTag(CACHE_TAGS.notificationPreferences(actor.account_id));
 }
