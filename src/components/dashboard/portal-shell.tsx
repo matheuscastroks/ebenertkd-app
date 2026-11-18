@@ -10,12 +10,26 @@ export async function PortalFrame({ profile, children }: { profile: Profile; chi
   const badge = profile.role === "admin" ? "Professor" : profile.role === "guardian" ? "Responsável" : "Aluno";
   const [enrollments, notifications] = await Promise.all([profile.role === "admin" ? countEnrollmentsRequiringReview().catch(() => 0) : Promise.resolve(undefined), countUnreadNotifications(profile).catch(() => 0)]);
   const email = profile.email || (profile.username ? `@${profile.username}` : undefined);
+
+  let avatarUrl: string | undefined;
+  try {
+    if (profile.onboarding_preferences) {
+      const prefs = JSON.parse(profile.onboarding_preferences) as { avatar_file_id?: string };
+      if (prefs.avatar_file_id) {
+        avatarUrl = `/api/profile/avatar/${prefs.avatar_file_id}`;
+      }
+    }
+  } catch {
+    // Ignore invalid JSON in preferences
+  }
+
   return (
     <DashboardFrame
       badge={badge}
       profileName={profile.full_name}
       profileEmail={email}
       role={profile.role}
+      avatarUrl={avatarUrl}
       navItems={navigationForProfile(profile, { enrollments, notifications })}
       unreadNotifications={notifications}
     >

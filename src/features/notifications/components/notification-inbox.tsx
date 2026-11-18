@@ -129,7 +129,7 @@ export function NotificationInbox({
 
   const renderList = (entries: InboxItem[], empty: { title: string; hint: string }) =>
     entries.length ? (
-      <div className="t-stagger divide-y divide-border/70 overflow-hidden rounded-2xl border border-border/70 bg-card shadow-xs">
+      <div className="t-stagger space-y-2.5">
         {entries.map((item) => (
           <NotificationItem
             key={item.recipient.$id}

@@ -63,7 +63,10 @@ export function NotificationHeaderButton({
   const notifyUnreadToast = useCallback((unreadCount: number) => {
     if (unreadCount <= 0) return;
     const key = "ebener:unread-toast-shown";
+    const viewedKey = "ebener:notifications:last-viewed-count";
     try {
+      const lastViewed = localStorage.getItem(viewedKey);
+      if (lastViewed && Number(lastViewed) >= unreadCount) return;
       if (sessionStorage.getItem(key) === String(unreadCount)) return;
       sessionStorage.setItem(key, String(unreadCount));
     } catch {
@@ -76,9 +79,29 @@ export function NotificationHeaderButton({
       {
         id: "unread-notifications",
         description: "Toque em Ver para abrir a central de comunicados.",
-        action: { label: "Ver", onClick: () => setDrawerOpen(true) },
+        action: {
+          label: "Ver",
+          onClick: () => {
+            setDrawerOpen(true);
+            try {
+              localStorage.setItem("ebener:notifications:last-viewed-count", String(unreadCount));
+            } catch {
+              // Ignore
+            }
+          },
+        },
       }
     );
+  }, []);
+
+  const openDrawer = useCallback(() => {
+    setDrawerOpen(true);
+    try {
+      localStorage.setItem("ebener:notifications:last-viewed-count", String(countRef.current));
+      sessionStorage.setItem("ebener:unread-toast-shown", String(countRef.current));
+    } catch {
+      // Ignore
+    }
   }, []);
 
   useEffect(() => {
@@ -86,8 +109,17 @@ export function NotificationHeaderButton({
       setCount(resolvedInitialCount);
       if (resolvedInitialCount > 0) {
         setDisplayCount(resolvedInitialCount);
-        pulseBell();
-        notifyUnreadToast(resolvedInitialCount);
+        // Só dispara toast se a contagem for estritamente nova e ainda não visualizada
+        try {
+          const lastViewed = localStorage.getItem("ebener:notifications:last-viewed-count");
+          if (!lastViewed || Number(lastViewed) < resolvedInitialCount) {
+            pulseBell();
+            notifyUnreadToast(resolvedInitialCount);
+          }
+        } catch {
+          pulseBell();
+          notifyUnreadToast(resolvedInitialCount);
+        }
       }
       countRef.current = resolvedInitialCount;
     }, 0);
@@ -157,7 +189,7 @@ export function NotificationHeaderButton({
     <>
       <button
         type="button"
-        onClick={() => setDrawerOpen(true)}
+        onClick={openDrawer}
         onMouseEnter={() => bellIconRef.current?.startAnimation()}
         onMouseLeave={() => bellIconRef.current?.stopAnimation()}
         aria-label={hasUnread ? `Avisos, ${count} não lidos` : "Avisos"}
@@ -177,11 +209,11 @@ export function NotificationHeaderButton({
           className="flex size-4.5"
         />
         <span
-          className="t-badge pointer-events-none absolute -right-0.5 -top-0.5"
+          className="t-badge pointer-events-none absolute -right-1 -top-1"
           data-open={hasUnread ? "true" : "false"}
           aria-hidden="true"
         >
-          <span className="t-badge-dot flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold leading-none text-primary-foreground tabular-nums shadow-xs ring-2 ring-sidebar">
+          <span className="t-badge-dot flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-bold leading-none text-primary-foreground tabular-nums shadow-xs ring-2 ring-sidebar select-none text-center">
             {formattedCount}
           </span>
         </span>

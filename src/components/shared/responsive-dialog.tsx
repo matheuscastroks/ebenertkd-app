@@ -32,6 +32,8 @@ export function ResponsiveDialog({
   open,
   onOpenChange,
   modal,
+  size = "default",
+  className,
 }: {
   trigger: ReactNode;
   triggerTooltip?: string;
@@ -41,11 +43,21 @@ export function ResponsiveDialog({
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   modal?: boolean;
+  size?: "default" | "md" | "lg" | "xl" | "2xl";
+  className?: string;
 }) {
   const mobile = useIsMobile();
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = open !== undefined;
   const resolvedOpen = isControlled ? open : internalOpen;
+
+  const sizeClasses = {
+    default: "sm:max-w-lg",
+    md: "sm:max-w-lg",
+    lg: "sm:max-w-xl",
+    xl: "sm:max-w-2xl",
+    "2xl": "sm:max-w-3xl",
+  }[size];
 
   const handleOpenChange = useCallback(
     (next: boolean) => {
@@ -76,7 +88,7 @@ export function ResponsiveDialog({
         className={
           mobile
             ? "max-h-[88dvh] overflow-y-auto rounded-t-2xl pb-6"
-            : "w-full overflow-y-auto sm:max-w-lg"
+            : `w-full overflow-y-auto ${sizeClasses} ${className ?? ""}`
         }
       >
         <SheetHeader>

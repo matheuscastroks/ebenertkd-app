@@ -17,6 +17,8 @@ import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/componen
 import { Input } from "@/components/ui/input";
 import { ClassStatusToggle } from "@/features/classes/components/class-status-toggle";
 import { WEEKDAYS, type TrainingClass } from "@/features/classes/types";
+import { LocationSelect } from "@/features/locations/components/location-select";
+import type { TrainingLocation } from "@/features/locations/types";
 import { adminClassPath } from "@/lib/navigation/routes";
 
 const weekdayLabels: Record<string, string> = {
@@ -54,11 +56,17 @@ function WeekdayFields({ selected = [], idSuffix }: { selected?: string[]; idSuf
   );
 }
 
-function Fields({ trainingClass }: { trainingClass?: TrainingClass }) {
+function Fields({
+  trainingClass,
+  locations = [],
+}: {
+  trainingClass?: TrainingClass;
+  locations?: TrainingLocation[];
+}) {
   const suffix = trainingClass?.$id ?? "new";
   return (
-    <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2">
+    <div className="space-y-4 pt-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Field>
           <FieldLabel htmlFor={`class-name-${suffix}`}>Nome da turma</FieldLabel>
           <Input
@@ -72,19 +80,19 @@ function Fields({ trainingClass }: { trainingClass?: TrainingClass }) {
         </Field>
         <Field>
           <FieldLabel htmlFor={`class-location-${suffix}`}>Dojang / Local de treino</FieldLabel>
-          <Input
+          <LocationSelect
             id={`class-location-${suffix}`}
             name="location"
             defaultValue={trainingClass?.location ?? ""}
-            placeholder="Ex.: Dojang Principal ou Tatame 2"
-            className="h-11 text-sm"
+            locations={locations}
+            placeholder="Selecione o dojang ou local"
           />
         </Field>
       </div>
 
       <WeekdayFields selected={trainingClass?.weekdays} idSuffix={suffix} />
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-3">
         <Field>
           <FieldLabel htmlFor={`class-start-${suffix}`}>Horário de início</FieldLabel>
           <Input
@@ -125,7 +133,17 @@ function Fields({ trainingClass }: { trainingClass?: TrainingClass }) {
   );
 }
 
-export function ClassManager({ classes, notice, noticeTone = "success" }: { classes: TrainingClass[]; notice?: string; noticeTone?: "error" | "success" }) {
+export function ClassManager({
+  classes,
+  locations = [],
+  notice,
+  noticeTone = "success",
+}: {
+  classes: TrainingClass[];
+  locations?: TrainingLocation[];
+  notice?: string;
+  noticeTone?: "error" | "success";
+}) {
   return (
     <div className="space-y-6">
       {notice ? (
@@ -142,6 +160,7 @@ export function ClassManager({ classes, notice, noticeTone = "success" }: { clas
         </p>
 
         <ResponsiveDialog
+          size="xl"
           trigger={
             <Button className="min-h-11 shrink-0 font-medium touch-manipulation">
               <PlusIcon className="size-4 mr-1.5" aria-hidden="true" />
@@ -152,7 +171,7 @@ export function ClassManager({ classes, notice, noticeTone = "success" }: { clas
           description="Adicione uma turma com horários e dias fixos para os treinos da academia."
         >
           <form action={createTrainingClassAction} className="space-y-5">
-            <Fields />
+            <Fields locations={locations} />
             <FormSubmitButton className="min-h-11 w-full sm:w-auto" pendingLabel="Criando turma…">
               Salvar nova turma
             </FormSubmitButton>
@@ -224,6 +243,7 @@ export function ClassManager({ classes, notice, noticeTone = "success" }: { clas
                     </Button>
 
                     <ResponsiveDialog
+                      size="xl"
                       trigger={
                         <Button variant="ghost" size="sm" className="min-h-11 touch-manipulation">
                           <SquarePenIcon className="size-3.5 mr-1.5" aria-hidden="true" />
@@ -235,7 +255,7 @@ export function ClassManager({ classes, notice, noticeTone = "success" }: { clas
                     >
                       <form action={updateTrainingClassAction} className="space-y-5">
                         <input type="hidden" name="class_id" value={trainingClass.$id} />
-                        <Fields trainingClass={trainingClass} />
+                        <Fields trainingClass={trainingClass} locations={locations} />
                         <FormSubmitButton className="min-h-11 w-full sm:w-auto" pendingLabel="Salvando…">
                           Salvar alterações
                         </FormSubmitButton>

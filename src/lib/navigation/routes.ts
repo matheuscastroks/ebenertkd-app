@@ -9,6 +9,7 @@ export const ROUTES = {
   adminCompliance: "/admin/matriculas/regularidade",
   adminStudentAccess: "/admin/matriculas/acessos",
   adminClasses: "/admin/turmas",
+  adminLocations: "/admin/locais",
   adminExams: "/admin/exames",
   adminExamEligibility: "/admin/exames/elegibilidade",
   studentAttendance: "/aluno/frequencia",
@@ -38,7 +39,7 @@ export const ROUTES = {
   privacy: "/privacidade"
 } as const;
 
-export type SidebarNavIcon = "dashboard" | "notifications" | "enrollment" | "students" | "classes" | "exams" | "attendance" | "family" | "contracts" | "billing" | "system";
+export type SidebarNavIcon = "dashboard" | "notifications" | "enrollment" | "students" | "classes" | "exams" | "attendance" | "family" | "contracts" | "billing" | "system" | "reports";
 // "Principal" abre a navegação sem rótulo visível; os demais nomes agrupam destinos afins.
 // Os nomes antigos continuam aceitos para não quebrar chamadas existentes.
 export type SidebarNavGroup =
@@ -98,7 +99,11 @@ export function navigationForProfile(
         bottomNav: true,
         href: ROUTES.adminClasses,
         icon: "classes",
-        group: "Academia"
+        group: "Academia",
+        children: [
+          { label: "Grade de turmas", href: ROUTES.adminClasses, exact: true },
+          { label: "Locais e dojangs", href: ROUTES.adminLocations },
+        ]
       },
       {
         label: "Exames de faixa",
@@ -134,7 +139,7 @@ export function navigationForProfile(
           { label: "Pedidos de rescisão", href: ROUTES.adminCancellations }
         ]
       },
-      { label: "Balanço anual", shortLabel: "Anual", href: ROUTES.adminAnnualReport, icon: "dashboard", group: "Gestão" },
+      { label: "Balanço anual", shortLabel: "Anual", href: ROUTES.adminAnnualReport, icon: "reports", group: "Gestão" },
       { label: "Saúde do sistema", shortLabel: "Sistema", href: ROUTES.adminSystem, icon: "system", group: "Gestão" }
     ];
   }

@@ -48,13 +48,15 @@ async function MonthlyClosingContent({ searchParams }: { searchParams: SearchPar
       </div>
 
       {!report.readyToClose ? (
-        <Alert>
-          <AlertTitle>Conciliação pendente em {label}</AlertTitle>
-          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+        <Alert className="rounded-xl border border-warning/30 bg-warning/10 p-4 sm:p-5 text-warning-foreground shadow-xs">
+          <AlertTitle className="text-base font-semibold text-warning-foreground">
+            Conciliação pendente em {label}
+          </AlertTitle>
+          <AlertDescription className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-sm">
             <span>
-              Existem {report.underReviewCount} comprovante(s) ({formatBrl(report.underReviewCents)}) aguardando validação para fechar o mês contábil.
+              Existem <strong>{report.underReviewCount} comprovante(s)</strong> ({formatBrl(report.underReviewCents)}) aguardando validação para fechar o mês contábil.
             </span>
-            <Button asChild size="sm" variant="outline" className="min-h-9">
+            <Button asChild size="sm" variant="outline" className="min-h-10 bg-background/80 hover:bg-background shrink-0 font-medium">
               <Link
                 href={`${ROUTES.adminBilling}?status=proof_under_review&competence=${encodeURIComponent(report.competence)}`}
               >

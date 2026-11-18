@@ -15,6 +15,36 @@ export type DemoClassKey =
   | "competition-team"
   | "masters-morning";
 
+export type DemoEnrollmentStatus =
+  | "draft"
+  | "submitted"
+  | "under_review"
+  | "awaiting_signature"
+  | "active"
+  | "paused"
+  | "cancelled"
+  | "awaiting_renewal";
+
+export type DemoParqScenario =
+  | "valid"
+  | "requires_doctor"
+  | "expiring_soon"
+  | "expired"
+  | "missing";
+
+export type DemoMedicalCertScenario =
+  | "approved"
+  | "pending"
+  | "expired"
+  | "missing";
+
+export type DemoAttendancePattern =
+  | "exemplary"
+  | "regular"
+  | "warning"
+  | "dropout_risk"
+  | "none";
+
 export type DemoStudentScenario = {
   key: DemoStudentKey;
   fullName: string;
@@ -24,7 +54,7 @@ export type DemoStudentScenario = {
   guardianEmail?: string;
   guardianName?: string;
   guardianPhone?: string;
-  classKey: "adult-night" | "children-morning" | "youth-afternoon" | "competition-team" | "masters-morning";
+  classKey: DemoClassKey;
   classKeys?: DemoClassKey[];
   belt: string;
   gub: number;
@@ -36,21 +66,55 @@ export type DemoStudentScenario = {
   dueDay: number;
   monthlyFeeCents: number;
   discountCents: number;
+  startMonth?: string;
   charges: Array<{ competence: string; state: DemoChargeState }>;
   healthCondition?: "yes" | "no";
   healthDetails?: string | null;
   medications?: string | null;
   allergies?: string | null;
   injuries?: string | null;
-  enrollmentStatus?: "active" | "submitted" | "under_review" | "paused";
+  enrollmentStatus: DemoEnrollmentStatus;
+  accessOverrideUntil?: string | null;
+  contractScenario?: "signed" | "pending_signature" | "expired" | "cancelled" | "none";
+  parqScenario?: DemoParqScenario;
+  medicalCertScenario?: DemoMedicalCertScenario;
+  attendancePattern?: DemoAttendancePattern;
+  cancellationDetails?: {
+    noticeDate: string;
+    targetExitMonth: string;
+    suggestedFeeCents: number;
+    decidedFeeCents: number;
+    reason: string;
+    decisionNotes: string;
+  };
+  examParticipations?: Array<{
+    eventIdKey: "exam-2025-1" | "exam-2025-2" | "exam-2026-1" | "upcoming-exam";
+    targetBelt: string;
+    targetGub: number;
+    feeCents: number;
+    status: "approved" | "failed" | "absent" | "registered" | "cancelled";
+    chargeStatus?: "paid" | "pending" | "proof_under_review";
+    notes?: string;
+    gradedAt?: string;
+  }>;
+  pastExamRecords?: Array<{
+    eventIdKey: "exam-2025-1" | "exam-2025-2" | "exam-2026-1";
+    previousBelt: string;
+    previousGub: number;
+    newBelt: string;
+    newGub: number;
+    achievedAt: string;
+  }>;
+  // Campos retrocompatíveis
   examParticipation?: {
-    eventIdKey: "past-exam" | "upcoming-exam";
+    eventIdKey: "past-exam" | "upcoming-exam" | "exam-2025-1" | "exam-2025-2" | "exam-2026-1";
     targetBelt: string;
     targetGub: number;
     feeCents: number;
     status: "approved" | "failed" | "absent" | "registered";
     chargeStatus?: "paid" | "pending" | "proof_under_review";
     notes?: string;
+    gradedAt?: string;
   };
   pastExamRecord?: {
     previousBelt: string;
@@ -70,18 +134,76 @@ export function monthOffset(reference: string, offset: number) {
   return new Date(Date.UTC(year, month - 1 + offset, 1)).toISOString().slice(0, 7);
 }
 
+export function monthsBetween(startCompetence: string, endCompetence: string): string[] {
+  const [sYear, sMonth] = startCompetence.split("-").map(Number);
+  const [eYear, eMonth] = endCompetence.split("-").map(Number);
+  const result: string[] = [];
+
+  let curYear = sYear;
+  let curMonth = sMonth;
+  while (curYear < eYear || (curYear === eYear && curMonth <= eMonth)) {
+    result.push(`${curYear}-${String(curMonth).padStart(2, "0")}`);
+    curMonth++;
+    if (curMonth > 12) {
+      curMonth = 1;
+      curYear++;
+    }
+  }
+  return result;
+}
+
 export function demoDueDate(competence: string, dueDay: number) {
   const [year, month] = competence.split("-").map(Number);
   const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
   return `${competence}-${String(Math.min(dueDay, lastDay)).padStart(2, "0")}T12:00:00.000Z`;
 }
 
-export function buildDemoScenario(referenceDate = new Date().toISOString()): DemoStudentScenario[] {
-  const previous = monthOffset(referenceDate, -1);
+export function buildChargesTimeline(
+  startMonth: string,
+  referenceDate: string,
+  options: {
+    specialState?: "normal" | "locked" | "override" | "proof_under_review" | "cancelled" | "paused";
+    exitMonth?: string;
+  } = {}
+): Array<{ competence: string; state: DemoChargeState }> {
   const current = monthOffset(referenceDate, 0);
   const next = monthOffset(referenceDate, 1);
+  const previous = monthOffset(referenceDate, -1);
+  const special = options.specialState ?? "normal";
+
+  if (special === "cancelled" && options.exitMonth) {
+    const list = monthsBetween(startMonth, options.exitMonth);
+    return list.map((competence) => ({ competence, state: "paid" }));
+  }
+
+  const endMonth = next;
+  const allMonths = monthsBetween(startMonth, endMonth);
+
+  return allMonths.map((competence) => {
+    if (competence === next) {
+      return { competence, state: "pending" };
+    }
+    if (competence === current) {
+      if (special === "locked") return { competence, state: "overdue" };
+      if (special === "override") return { competence, state: "overdue" };
+      if (special === "proof_under_review") return { competence, state: "proof_under_review" };
+      if (special === "paused") return { competence, state: "pending" };
+      return { competence, state: "paid" };
+    }
+    if (competence === previous) {
+      if (special === "locked") return { competence, state: "overdue" };
+      return { competence, state: "paid" };
+    }
+    // Meses históricos (Jan 2025 a M-2) sempre pagos em dia
+    return { competence, state: "paid" };
+  });
+}
+
+export function buildDemoScenario(referenceDate = new Date().toISOString()): DemoStudentScenario[] {
+  const current = monthOffset(referenceDate, 0);
 
   return [
+    // 1. Camila Ferreira (Persona Aluno Adulto - Competidora Faixa Azul)
     {
       key: "adult",
       fullName: "Camila Ferreira",
@@ -99,13 +221,44 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 10,
       monthlyFeeCents: 17000,
       discountCents: 2000,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "overdue" },
-        { competence: next, state: "pending" }
-      ],
+      startMonth: "2025-01",
+      charges: buildChargesTimeline("2025-01", referenceDate),
       injuries: "Entorse no tornozelo direito em 2023, sem limitações atuais.",
       enrollmentStatus: "active",
+      contractScenario: "signed",
+      parqScenario: "valid",
+      medicalCertScenario: "approved",
+      attendancePattern: "exemplary",
+      examParticipations: [
+        {
+          eventIdKey: "exam-2025-2",
+          targetBelt: "Azul",
+          targetGub: 4,
+          feeCents: 15000,
+          status: "approved",
+          chargeStatus: "paid",
+          gradedAt: "2025-12-13T16:00:00.000Z",
+          notes: "Excelente execução do Poomsae Taegeuk Oh Jang e chutes combinados."
+        },
+        {
+          eventIdKey: "upcoming-exam",
+          targetBelt: "Ponta Vermelha",
+          targetGub: 3,
+          feeCents: 15000,
+          status: "registered",
+          chargeStatus: "paid"
+        }
+      ],
+      pastExamRecords: [
+        {
+          eventIdKey: "exam-2025-2",
+          previousBelt: "Ponta Azul",
+          previousGub: 5,
+          newBelt: "Azul",
+          newGub: 4,
+          achievedAt: "2025-12-13T16:00:00.000Z"
+        }
+      ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
         targetBelt: "Ponta Vermelha",
@@ -115,6 +268,8 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         chargeStatus: "paid"
       }
     },
+
+    // 2. Lucas Mendes (Persona Aluno Menor - Filho de Juliana Mendes)
     {
       key: "minor",
       fullName: "Lucas Mendes",
@@ -136,15 +291,64 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 5,
       monthlyFeeCents: 12000,
       discountCents: 0,
-      charges: [
-        { competence: previous, state: "overdue" },
-        { competence: current, state: "proof_under_review" },
-        { competence: next, state: "pending" }
-      ],
+      startMonth: "2025-01",
+      charges: buildChargesTimeline("2025-01", referenceDate, { specialState: "proof_under_review" }),
       healthCondition: "yes",
-      healthDetails: "Asma leve, com uso de bombinha conforme orientação médica.",
-      medications: "Salbutamol, somente quando necessário.",
+      healthDetails: "Asma leve controlada, com uso de bombinha se necessário.",
+      medications: "Salbutamol spray, somente em crises eventuais.",
       enrollmentStatus: "active",
+      contractScenario: "signed",
+      parqScenario: "requires_doctor",
+      medicalCertScenario: "approved",
+      attendancePattern: "exemplary",
+      examParticipations: [
+        {
+          eventIdKey: "exam-2025-1",
+          targetBelt: "Ponta Amarela",
+          targetGub: 9,
+          feeCents: 15000,
+          status: "approved",
+          chargeStatus: "paid",
+          gradedAt: "2025-06-21T15:00:00.000Z",
+          notes: "Ótima flexibilidade e disciplina no Dojang."
+        },
+        {
+          eventIdKey: "exam-2025-2",
+          targetBelt: "Amarela",
+          targetGub: 8,
+          feeCents: 15000,
+          status: "approved",
+          chargeStatus: "paid",
+          gradedAt: "2025-12-13T15:00:00.000Z",
+          notes: "Demonstrou firmeza no Taegeuk Il Jang."
+        },
+        {
+          eventIdKey: "upcoming-exam",
+          targetBelt: "Ponta Verde",
+          targetGub: 7,
+          feeCents: 15000,
+          status: "registered",
+          chargeStatus: "proof_under_review"
+        }
+      ],
+      pastExamRecords: [
+        {
+          eventIdKey: "exam-2025-1",
+          previousBelt: "Branca",
+          previousGub: 10,
+          newBelt: "Ponta Amarela",
+          newGub: 9,
+          achievedAt: "2025-06-21T15:00:00.000Z"
+        },
+        {
+          eventIdKey: "exam-2025-2",
+          previousBelt: "Ponta Amarela",
+          previousGub: 9,
+          newBelt: "Amarela",
+          newGub: 8,
+          achievedAt: "2025-12-13T15:00:00.000Z"
+        }
+      ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
         targetBelt: "Ponta Verde",
@@ -154,6 +358,8 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         chargeStatus: "proof_under_review"
       }
     },
+
+    // 3. Pedro Ferreira (Aluno Menor Juvenil)
     {
       key: "junior",
       fullName: "Pedro Ferreira",
@@ -161,8 +367,8 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       username: "pedro.ferreira",
       role: "minor_student",
       guardianEmail: "camila.ferreira@ebenertkd.app",
-      guardianName: "Marcos Ferreira",
-      guardianPhone: "21982345679",
+      guardianName: "Camila Ferreira",
+      guardianPhone: "21984567231",
       classKey: "youth-afternoon",
       classKeys: ["youth-afternoon"],
       belt: "Ponta Verde",
@@ -175,14 +381,46 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 20,
       monthlyFeeCents: 14000,
       discountCents: 1000,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "overdue" },
-        { competence: next, state: "pending" }
-      ],
+      startMonth: "2025-06",
+      charges: buildChargesTimeline("2025-06", referenceDate),
       allergies: "Dipirona.",
-      enrollmentStatus: "active"
+      enrollmentStatus: "active",
+      contractScenario: "signed",
+      parqScenario: "valid",
+      medicalCertScenario: "approved",
+      attendancePattern: "regular",
+      examParticipations: [
+        {
+          eventIdKey: "exam-2025-2",
+          targetBelt: "Ponta Verde",
+          targetGub: 7,
+          feeCents: 15000,
+          status: "approved",
+          chargeStatus: "paid",
+          gradedAt: "2025-12-13T16:00:00.000Z"
+        },
+        {
+          eventIdKey: "upcoming-exam",
+          targetBelt: "Verde",
+          targetGub: 6,
+          feeCents: 15000,
+          status: "registered",
+          chargeStatus: "paid"
+        }
+      ],
+      pastExamRecords: [
+        {
+          eventIdKey: "exam-2025-2",
+          previousBelt: "Amarela",
+          previousGub: 8,
+          newBelt: "Ponta Verde",
+          newGub: 7,
+          achievedAt: "2025-12-13T16:00:00.000Z"
+        }
+      ]
     },
+
+    // 4. Beatriz Mendes (Menor - Irmã de Lucas Mendes)
     {
       key: "student-04",
       fullName: "Beatriz Mendes",
@@ -204,21 +442,44 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 5,
       monthlyFeeCents: 12000,
       discountCents: 2000,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "paid" },
-        { competence: next, state: "pending" }
-      ],
+      startMonth: "2026-01",
+      charges: buildChargesTimeline("2026-01", referenceDate),
       enrollmentStatus: "active",
+      contractScenario: "signed",
+      parqScenario: "valid",
+      medicalCertScenario: "approved",
+      attendancePattern: "regular",
+      examParticipations: [
+        {
+          eventIdKey: "exam-2026-1",
+          targetBelt: "Ponta Amarela",
+          targetGub: 9,
+          feeCents: 15000,
+          status: "approved",
+          chargeStatus: "paid",
+          gradedAt: "2026-06-20T14:30:00.000Z",
+          notes: "Excelente execução dos chutes básicos e disciplina exemplar."
+        }
+      ],
+      pastExamRecords: [
+        {
+          eventIdKey: "exam-2026-1",
+          previousBelt: "Branca",
+          previousGub: 10,
+          newBelt: "Ponta Amarela",
+          newGub: 9,
+          achievedAt: "2026-06-20T14:30:00.000Z"
+        }
+      ],
       pastExamRecord: {
         previousBelt: "Branca",
         previousGub: 10,
         newBelt: "Ponta Amarela",
         newGub: 9,
-        achievedAt: "2026-06-15T12:00:00.000Z"
+        achievedAt: "2026-06-20T14:30:00.000Z"
       },
       examParticipation: {
-        eventIdKey: "past-exam",
+        eventIdKey: "exam-2026-1",
         targetBelt: "Ponta Amarela",
         targetGub: 9,
         feeCents: 15000,
@@ -226,6 +487,8 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         notes: "Excelente execução dos chutes básicos e disciplina exemplar."
       }
     },
+
+    // 5. Rodrigo Silveira (Adulto Faixa Vermelha)
     {
       key: "student-05",
       fullName: "Rodrigo Silveira",
@@ -243,12 +506,59 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 15,
       monthlyFeeCents: 18000,
       discountCents: 0,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "paid" },
-        { competence: next, state: "pending" }
-      ],
+      startMonth: "2025-01",
+      charges: buildChargesTimeline("2025-01", referenceDate),
       enrollmentStatus: "active",
+      contractScenario: "signed",
+      parqScenario: "valid",
+      medicalCertScenario: "approved",
+      attendancePattern: "exemplary",
+      examParticipations: [
+        {
+          eventIdKey: "exam-2025-1",
+          targetBelt: "Ponta Vermelha",
+          targetGub: 3,
+          feeCents: 15000,
+          status: "approved",
+          chargeStatus: "paid",
+          gradedAt: "2025-06-21T17:00:00.000Z"
+        },
+        {
+          eventIdKey: "exam-2026-1",
+          targetBelt: "Vermelha",
+          targetGub: 2,
+          feeCents: 15000,
+          status: "approved",
+          chargeStatus: "paid",
+          gradedAt: "2026-06-20T17:00:00.000Z"
+        },
+        {
+          eventIdKey: "upcoming-exam",
+          targetBelt: "Ponta Preta",
+          targetGub: 1,
+          feeCents: 15000,
+          status: "registered",
+          chargeStatus: "paid"
+        }
+      ],
+      pastExamRecords: [
+        {
+          eventIdKey: "exam-2025-1",
+          previousBelt: "Azul",
+          previousGub: 4,
+          newBelt: "Ponta Vermelha",
+          newGub: 3,
+          achievedAt: "2025-06-21T17:00:00.000Z"
+        },
+        {
+          eventIdKey: "exam-2026-1",
+          previousBelt: "Ponta Vermelha",
+          previousGub: 3,
+          newBelt: "Vermelha",
+          newGub: 2,
+          achievedAt: "2026-06-20T17:00:00.000Z"
+        }
+      ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
         targetBelt: "Ponta Preta",
@@ -258,6 +568,8 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         chargeStatus: "paid"
       }
     },
+
+    // 6. Mariana Albuquerque (PAR-Q a vencer em ≤ 30 dias!)
     {
       key: "student-06",
       fullName: "Mariana Albuquerque",
@@ -275,12 +587,23 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 10,
       monthlyFeeCents: 16000,
       discountCents: 0,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "pending" },
-        { competence: next, state: "pending" }
-      ],
+      startMonth: "2025-06",
+      charges: buildChargesTimeline("2025-06", referenceDate),
       enrollmentStatus: "active",
+      contractScenario: "signed",
+      parqScenario: "expiring_soon",
+      medicalCertScenario: "approved",
+      attendancePattern: "regular",
+      examParticipations: [
+        {
+          eventIdKey: "upcoming-exam",
+          targetBelt: "Ponta Azul",
+          targetGub: 5,
+          feeCents: 15000,
+          status: "registered",
+          chargeStatus: "pending"
+        }
+      ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
         targetBelt: "Ponta Azul",
@@ -290,6 +613,8 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         chargeStatus: "pending"
       }
     },
+
+    // 7. Gabriel Souza (Risco Warning de Retenção + Reprovado no exame anterior)
     {
       key: "student-07",
       fullName: "Gabriel Souza",
@@ -307,21 +632,43 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 25,
       monthlyFeeCents: 17000,
       discountCents: 0,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "paid" },
-        { competence: next, state: "pending" }
-      ],
+      startMonth: "2025-01",
+      charges: buildChargesTimeline("2025-01", referenceDate),
       enrollmentStatus: "active",
+      contractScenario: "signed",
+      parqScenario: "valid",
+      medicalCertScenario: "approved",
+      attendancePattern: "warning",
+      examParticipations: [
+        {
+          eventIdKey: "exam-2026-1",
+          targetBelt: "Vermelha",
+          targetGub: 2,
+          feeCents: 15000,
+          status: "failed",
+          gradedAt: "2026-06-20T17:00:00.000Z",
+          notes: "Necessário maior controle de base no Poomsae Taeguk Chil Jang e equilíbrio nos chutes giratórios."
+        },
+        {
+          eventIdKey: "upcoming-exam",
+          targetBelt: "Vermelha",
+          targetGub: 2,
+          feeCents: 15000,
+          status: "registered",
+          chargeStatus: "paid"
+        }
+      ],
       examParticipation: {
-        eventIdKey: "past-exam",
+        eventIdKey: "exam-2026-1",
         targetBelt: "Vermelha",
         targetGub: 2,
         feeCents: 15000,
         status: "failed",
-        notes: "Necessário maior controle de base no Poomsae e equilíbrio nos chutes giratórios."
+        notes: "Necessário maior controle de base no Poomsae Taeguk Chil Jang e equilíbrio nos chutes giratórios."
       }
     },
+
+    // 8. Larissa Prado (PAR-Q vencido + Risco Crítico de Evasão)
     {
       key: "student-08",
       fullName: "Larissa Prado",
@@ -339,20 +686,32 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 10,
       monthlyFeeCents: 15000,
       discountCents: 0,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "paid" },
-        { competence: next, state: "pending" }
-      ],
+      startMonth: "2025-01",
+      charges: buildChargesTimeline("2025-01", referenceDate),
       enrollmentStatus: "active",
+      contractScenario: "signed",
+      parqScenario: "expired",
+      medicalCertScenario: "expired",
+      attendancePattern: "dropout_risk",
+      examParticipations: [
+        {
+          eventIdKey: "exam-2026-1",
+          targetBelt: "Ponta Verde",
+          targetGub: 7,
+          feeCents: 15000,
+          status: "absent"
+        }
+      ],
       examParticipation: {
-        eventIdKey: "past-exam",
+        eventIdKey: "exam-2026-1",
         targetBelt: "Ponta Verde",
         targetGub: 7,
         feeCents: 15000,
         status: "absent"
       }
     },
+
+    // 9. Thiago Barreto (Avançado Ponta Preta)
     {
       key: "student-09",
       fullName: "Thiago Barreto",
@@ -370,12 +729,42 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 5,
       monthlyFeeCents: 22000,
       discountCents: 3000,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "paid" },
-        { competence: next, state: "pending" }
-      ],
+      startMonth: "2025-01",
+      charges: buildChargesTimeline("2025-01", referenceDate),
       enrollmentStatus: "active",
+      contractScenario: "signed",
+      parqScenario: "valid",
+      medicalCertScenario: "approved",
+      attendancePattern: "exemplary",
+      examParticipations: [
+        {
+          eventIdKey: "exam-2025-2",
+          targetBelt: "Ponta Preta",
+          targetGub: 1,
+          feeCents: 15000,
+          status: "approved",
+          chargeStatus: "paid",
+          gradedAt: "2025-12-13T17:30:00.000Z"
+        },
+        {
+          eventIdKey: "upcoming-exam",
+          targetBelt: "Preta",
+          targetGub: 0,
+          feeCents: 25000,
+          status: "registered",
+          chargeStatus: "paid"
+        }
+      ],
+      pastExamRecords: [
+        {
+          eventIdKey: "exam-2025-2",
+          previousBelt: "Vermelha",
+          previousGub: 2,
+          newBelt: "Ponta Preta",
+          newGub: 1,
+          achievedAt: "2025-12-13T17:30:00.000Z"
+        }
+      ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
         targetBelt: "Preta",
@@ -385,6 +774,8 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         chargeStatus: "paid"
       }
     },
+
+    // 10. Sofia Castro (Juvenil)
     {
       key: "student-10",
       fullName: "Sofia Castro",
@@ -405,13 +796,16 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 15,
       monthlyFeeCents: 14000,
       discountCents: 0,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "paid" },
-        { competence: next, state: "pending" }
-      ],
-      enrollmentStatus: "active"
+      startMonth: "2025-06",
+      charges: buildChargesTimeline("2025-06", referenceDate),
+      enrollmentStatus: "active",
+      contractScenario: "signed",
+      parqScenario: "valid",
+      medicalCertScenario: "approved",
+      attendancePattern: "regular"
     },
+
+    // 11. Felipe Vasconcelos (BLOQUEADO: Atrasado > 30 dias sem pagamento!)
     {
       key: "student-11",
       fullName: "Felipe Vasconcelos",
@@ -429,21 +823,15 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 10,
       monthlyFeeCents: 16000,
       discountCents: 0,
-      charges: [
-        { competence: previous, state: "overdue" },
-        { competence: current, state: "overdue" },
-        { competence: next, state: "pending" }
-      ],
+      startMonth: "2026-03",
+      charges: buildChargesTimeline("2026-03", referenceDate, { specialState: "locked" }),
       enrollmentStatus: "active",
-      examParticipation: {
-        eventIdKey: "upcoming-exam",
-        targetBelt: "Ponta Amarela",
-        targetGub: 9,
-        feeCents: 15000,
-        status: "registered",
-        chargeStatus: "pending"
-      }
+      contractScenario: "signed",
+      parqScenario: "valid",
+      attendancePattern: "dropout_risk"
     },
+
+    // 12. Julio Cesar Martins (CARÊNCIA / OVERRIDE MANUAL PELO MESTRE)
     {
       key: "student-12",
       fullName: "Julio Cesar Martins",
@@ -461,21 +849,43 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 20,
       monthlyFeeCents: 16000,
       discountCents: 0,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "paid" },
-        { competence: next, state: "pending" }
-      ],
+      startMonth: "2025-06",
+      charges: buildChargesTimeline("2025-06", referenceDate, { specialState: "override" }),
       enrollmentStatus: "active",
+      accessOverrideUntil: `${current}-28T23:59:59.000Z`,
+      contractScenario: "signed",
+      parqScenario: "valid",
+      attendancePattern: "regular",
+      examParticipations: [
+        {
+          eventIdKey: "exam-2026-1",
+          targetBelt: "Verde",
+          targetGub: 6,
+          feeCents: 15000,
+          status: "approved",
+          chargeStatus: "paid",
+          gradedAt: "2026-06-20T16:00:00.000Z"
+        }
+      ],
+      pastExamRecords: [
+        {
+          eventIdKey: "exam-2026-1",
+          previousBelt: "Ponta Verde",
+          previousGub: 7,
+          newBelt: "Verde",
+          newGub: 6,
+          achievedAt: "2026-06-20T16:00:00.000Z"
+        }
+      ],
       pastExamRecord: {
         previousBelt: "Ponta Verde",
         previousGub: 7,
         newBelt: "Verde",
         newGub: 6,
-        achievedAt: "2026-06-15T12:00:00.000Z"
+        achievedAt: "2026-06-20T16:00:00.000Z"
       },
       examParticipation: {
-        eventIdKey: "past-exam",
+        eventIdKey: "exam-2026-1",
         targetBelt: "Verde",
         targetGub: 6,
         feeCents: 15000,
@@ -483,6 +893,8 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         notes: "Muito seguro nas defesas e contra-ataques."
       }
     },
+
+    // 13. Isabela Fontes (Atestado Médico Pendente de Aprovação)
     {
       key: "student-13",
       fullName: "Isabela Fontes",
@@ -500,12 +912,23 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 15,
       monthlyFeeCents: 15000,
       discountCents: 0,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "pending" },
-        { competence: next, state: "pending" }
-      ],
+      startMonth: "2026-01",
+      charges: buildChargesTimeline("2026-01", referenceDate),
       enrollmentStatus: "active",
+      contractScenario: "signed",
+      parqScenario: "valid",
+      medicalCertScenario: "pending",
+      attendancePattern: "regular",
+      examParticipations: [
+        {
+          eventIdKey: "upcoming-exam",
+          targetBelt: "Amarela",
+          targetGub: 8,
+          feeCents: 15000,
+          status: "registered",
+          chargeStatus: "paid"
+        }
+      ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
         targetBelt: "Amarela",
@@ -515,6 +938,8 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         chargeStatus: "paid"
       }
     },
+
+    // 14. Enzo Gabriel Ramos (Infantil)
     {
       key: "student-14",
       fullName: "Enzo Gabriel Ramos",
@@ -535,12 +960,22 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 5,
       monthlyFeeCents: 12000,
       discountCents: 0,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "paid" },
-        { competence: next, state: "pending" }
-      ],
+      startMonth: "2026-05",
+      charges: buildChargesTimeline("2026-05", referenceDate),
       enrollmentStatus: "active",
+      contractScenario: "signed",
+      parqScenario: "valid",
+      attendancePattern: "exemplary",
+      examParticipations: [
+        {
+          eventIdKey: "upcoming-exam",
+          targetBelt: "Ponta Amarela",
+          targetGub: 9,
+          feeCents: 15000,
+          status: "registered",
+          chargeStatus: "paid"
+        }
+      ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
         targetBelt: "Ponta Amarela",
@@ -550,6 +985,8 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         chargeStatus: "paid"
       }
     },
+
+    // 15. Rafael Guimarães (Adulto Faixa Azul)
     {
       key: "student-15",
       fullName: "Rafael Guimarães",
@@ -567,12 +1004,22 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 10,
       monthlyFeeCents: 18000,
       discountCents: 0,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "paid" },
-        { competence: next, state: "pending" }
-      ],
+      startMonth: "2025-01",
+      charges: buildChargesTimeline("2025-01", referenceDate),
       enrollmentStatus: "active",
+      contractScenario: "signed",
+      parqScenario: "valid",
+      attendancePattern: "exemplary",
+      examParticipations: [
+        {
+          eventIdKey: "upcoming-exam",
+          targetBelt: "Ponta Vermelha",
+          targetGub: 3,
+          feeCents: 15000,
+          status: "registered",
+          chargeStatus: "paid"
+        }
+      ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
         targetBelt: "Ponta Vermelha",
@@ -582,6 +1029,8 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         chargeStatus: "paid"
       }
     },
+
+    // 16. Carolina Nogueira
     {
       key: "student-16",
       fullName: "Carolina Nogueira",
@@ -599,13 +1048,15 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 15,
       monthlyFeeCents: 15000,
       discountCents: 0,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "paid" },
-        { competence: next, state: "pending" }
-      ],
-      enrollmentStatus: "active"
+      startMonth: "2025-06",
+      charges: buildChargesTimeline("2025-06", referenceDate),
+      enrollmentStatus: "active",
+      contractScenario: "signed",
+      parqScenario: "valid",
+      attendancePattern: "regular"
     },
+
+    // 17. Matheus Barbosa
     {
       key: "student-17",
       fullName: "Matheus Barbosa",
@@ -623,21 +1074,42 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 10,
       monthlyFeeCents: 17000,
       discountCents: 0,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "paid" },
-        { competence: next, state: "pending" }
-      ],
+      startMonth: "2025-01",
+      charges: buildChargesTimeline("2025-01", referenceDate),
       enrollmentStatus: "active",
+      contractScenario: "signed",
+      parqScenario: "valid",
+      attendancePattern: "exemplary",
+      examParticipations: [
+        {
+          eventIdKey: "exam-2025-2",
+          targetBelt: "Vermelha",
+          targetGub: 2,
+          feeCents: 15000,
+          status: "approved",
+          chargeStatus: "paid",
+          gradedAt: "2025-12-13T17:00:00.000Z"
+        }
+      ],
+      pastExamRecords: [
+        {
+          eventIdKey: "exam-2025-2",
+          previousBelt: "Ponta Vermelha",
+          previousGub: 3,
+          newBelt: "Vermelha",
+          newGub: 2,
+          achievedAt: "2025-12-13T17:00:00.000Z"
+        }
+      ],
       pastExamRecord: {
         previousBelt: "Ponta Vermelha",
         previousGub: 3,
         newBelt: "Vermelha",
         newGub: 2,
-        achievedAt: "2026-06-15T12:00:00.000Z"
+        achievedAt: "2025-12-13T17:00:00.000Z"
       },
       examParticipation: {
-        eventIdKey: "past-exam",
+        eventIdKey: "exam-2025-2",
         targetBelt: "Vermelha",
         targetGub: 2,
         feeCents: 15000,
@@ -645,6 +1117,8 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         notes: "Ótima potência nos socos e chutes na linha de cintura."
       }
     },
+
+    // 18. Alice Coimbra
     {
       key: "student-18",
       fullName: "Alice Coimbra",
@@ -665,12 +1139,22 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 20,
       monthlyFeeCents: 14000,
       discountCents: 0,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "proof_under_review" },
-        { competence: next, state: "pending" }
-      ],
+      startMonth: "2025-06",
+      charges: buildChargesTimeline("2025-06", referenceDate, { specialState: "proof_under_review" }),
       enrollmentStatus: "active",
+      contractScenario: "signed",
+      parqScenario: "valid",
+      attendancePattern: "regular",
+      examParticipations: [
+        {
+          eventIdKey: "upcoming-exam",
+          targetBelt: "Verde",
+          targetGub: 6,
+          feeCents: 15000,
+          status: "registered",
+          chargeStatus: "proof_under_review"
+        }
+      ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
         targetBelt: "Verde",
@@ -680,6 +1164,8 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         chargeStatus: "proof_under_review"
       }
     },
+
+    // 19. Vinicius Teixeira (MATRÍCULA SUBMETIDA: Aguardando Análise do Professor)
     {
       key: "student-19",
       fullName: "Vinicius Teixeira",
@@ -698,8 +1184,13 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       monthlyFeeCents: 15000,
       discountCents: 0,
       charges: [{ competence: current, state: "pending" }],
-      enrollmentStatus: "under_review"
+      enrollmentStatus: "submitted",
+      contractScenario: "none",
+      parqScenario: "valid",
+      attendancePattern: "none"
     },
+
+    // 20. Daniela Meireles (AGUARDANDO RENOVAÇÃO: Contrato anual venceu!)
     {
       key: "student-20",
       fullName: "Daniela Meireles",
@@ -717,13 +1208,15 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 15,
       monthlyFeeCents: 16000,
       discountCents: 0,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "paid" },
-        { competence: next, state: "pending" }
-      ],
-      enrollmentStatus: "active"
+      startMonth: "2025-01",
+      charges: buildChargesTimeline("2025-01", referenceDate),
+      enrollmentStatus: "awaiting_renewal",
+      contractScenario: "expired",
+      parqScenario: "expired",
+      attendancePattern: "regular"
     },
+
+    // 21. Arthur Medeiros
     {
       key: "student-21",
       fullName: "Arthur Medeiros",
@@ -744,12 +1237,22 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 5,
       monthlyFeeCents: 12000,
       discountCents: 0,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "pending" },
-        { competence: next, state: "pending" }
-      ],
+      startMonth: "2026-04",
+      charges: buildChargesTimeline("2026-04", referenceDate),
       enrollmentStatus: "active",
+      contractScenario: "signed",
+      parqScenario: "valid",
+      attendancePattern: "regular",
+      examParticipations: [
+        {
+          eventIdKey: "upcoming-exam",
+          targetBelt: "Ponta Amarela",
+          targetGub: 9,
+          feeCents: 15000,
+          status: "registered",
+          chargeStatus: "pending"
+        }
+      ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
         targetBelt: "Ponta Amarela",
@@ -759,6 +1262,8 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         chargeStatus: "pending"
       }
     },
+
+    // 22. Bernardo Lima (MATRÍCULA PAUSADA: Trancada temporariamente)
     {
       key: "student-22",
       fullName: "Bernardo Lima",
@@ -776,11 +1281,166 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       dueDay: 10,
       monthlyFeeCents: 17000,
       discountCents: 0,
-      charges: [
-        { competence: previous, state: "paid" },
-        { competence: current, state: "overdue" }
-      ],
-      enrollmentStatus: "paused"
+      startMonth: "2025-01",
+      charges: buildChargesTimeline("2025-01", referenceDate, { specialState: "paused" }),
+      enrollmentStatus: "paused",
+      contractScenario: "signed",
+      parqScenario: "valid",
+      attendancePattern: "none"
+    },
+
+    // 23. Larissa Duarte (MATRÍCULA DRAFT: Rascunho inicial não enviado)
+    {
+      key: "student-23",
+      fullName: "Larissa Duarte",
+      email: "larissa.duarte@ebenertkd.app",
+      role: "adult_student",
+      classKey: "adult-night",
+      classKeys: ["adult-night"],
+      belt: "Branca",
+      gub: 10,
+      birthDate: "2000-05-10",
+      phone: "21991238877",
+      cpf: "90000000023",
+      address: "Rua Cambaúba, 800 — Jardim Guanabara, Rio de Janeiro/RJ, CEP 21940-000",
+      photoUrl: "https://randomuser.me/api/portraits/women/62.jpg",
+      dueDay: 10,
+      monthlyFeeCents: 16000,
+      discountCents: 0,
+      charges: [],
+      enrollmentStatus: "draft",
+      contractScenario: "none",
+      parqScenario: "missing",
+      attendancePattern: "none"
+    },
+
+    // 24. Guilherme Prado (AGUARDANDO ASSINATURA: Contrato gerado pela academia)
+    {
+      key: "student-24",
+      fullName: "Guilherme Prado",
+      email: "guilherme.prado@ebenertkd.app",
+      role: "adult_student",
+      classKey: "adult-night",
+      classKeys: ["adult-night"],
+      belt: "Branca",
+      gub: 10,
+      birthDate: "1995-10-24",
+      phone: "21983451122",
+      cpf: "90000000024",
+      address: "Estrada do Galeão, 1400 — Portuguesa, Rio de Janeiro/RJ, CEP 21931-522",
+      photoUrl: "https://randomuser.me/api/portraits/men/50.jpg",
+      dueDay: 15,
+      monthlyFeeCents: 16000,
+      discountCents: 0,
+      charges: [{ competence: current, state: "pending" }],
+      enrollmentStatus: "awaiting_signature",
+      contractScenario: "pending_signature",
+      parqScenario: "valid",
+      attendancePattern: "none"
+    },
+
+    // 25. Renan Duarte (CANCELADA: Rescisão formal com taxa de saída quitada)
+    {
+      key: "student-25",
+      fullName: "Renan Duarte",
+      email: "renan.duarte@ebenertkd.app",
+      role: "adult_student",
+      classKey: "adult-night",
+      classKeys: ["adult-night"],
+      belt: "Amarela",
+      gub: 8,
+      birthDate: "1988-12-03",
+      phone: "21997654433",
+      cpf: "90000000025",
+      address: "Rua República Árabe Unida, 200 — Ilha do Governador, Rio de Janeiro/RJ, CEP 21931-500",
+      photoUrl: "https://randomuser.me/api/portraits/men/42.jpg",
+      dueDay: 10,
+      monthlyFeeCents: 16000,
+      discountCents: 0,
+      startMonth: "2025-05",
+      charges: buildChargesTimeline("2025-05", referenceDate, {
+        specialState: "cancelled",
+        exitMonth: "2026-04"
+      }),
+      enrollmentStatus: "cancelled",
+      contractScenario: "cancelled",
+      cancellationDetails: {
+        noticeDate: "2026-03-18T12:00:00.000Z",
+        targetExitMonth: "2026-04-01T12:00:00.000Z",
+        suggestedFeeCents: 10000,
+        decidedFeeCents: 10000,
+        reason: "Mudança de cidade para a Região dos Lagos por motivos profissionais.",
+        decisionNotes: "Cancelamento solicitado com antecedência regular. Taxa rescisória de R$ 100,00 quitada."
+      },
+      parqScenario: "expired",
+      attendancePattern: "none"
+    },
+
+    // 26. Leticia Ramos (EM ANÁLISE: Coordenação avaliando documentação)
+    {
+      key: "student-26",
+      fullName: "Leticia Ramos",
+      email: "leticia.ramos@ebenertkd.app",
+      role: "adult_student",
+      classKey: "masters-morning",
+      classKeys: ["masters-morning"],
+      belt: "Branca",
+      gub: 10,
+      birthDate: "1992-04-18",
+      phone: "21981237766",
+      cpf: "90000000026",
+      address: "Rua Maestro Paulo e Silva, 600 — Jardim Guanabara, Rio de Janeiro/RJ, CEP 21940-340",
+      photoUrl: "https://randomuser.me/api/portraits/women/31.jpg",
+      dueDay: 20,
+      monthlyFeeCents: 16000,
+      discountCents: 0,
+      charges: [{ competence: current, state: "pending" }],
+      enrollmentStatus: "under_review",
+      contractScenario: "none",
+      parqScenario: "valid",
+      attendancePattern: "none"
+    }
+  ];
+}
+
+export function demoExamDefinitions(referenceDate = new Date().toISOString()) {
+  const currentMonth = monthOffset(referenceDate, 0);
+  return [
+    {
+      key: "exam-2025-1",
+      name: "30º Exame de Faixas — Primeiro Semestre 2025",
+      event_date: "2025-06-21T12:00:00.000Z",
+      location: "Dojang Central Ebener TKD",
+      default_fee_cents: 15000,
+      status: "completed" as const,
+      created_at: "2025-05-01T12:00:00.000Z"
+    },
+    {
+      key: "exam-2025-2",
+      name: "31º Exame de Faixas — Segundo Semestre 2025",
+      event_date: "2025-12-13T12:00:00.000Z",
+      location: "Dojang Central Ebener TKD",
+      default_fee_cents: 15000,
+      status: "completed" as const,
+      created_at: "2025-11-01T12:00:00.000Z"
+    },
+    {
+      key: "exam-2026-1",
+      name: "32º Exame de Faixas — Primeiro Semestre 2026",
+      event_date: "2026-06-20T12:00:00.000Z",
+      location: "Dojang Central Ebener TKD",
+      default_fee_cents: 15000,
+      status: "completed" as const,
+      created_at: "2026-05-01T12:00:00.000Z"
+    },
+    {
+      key: "upcoming-exam",
+      name: "33º Exame de Faixas — Segundo Semestre 2026",
+      event_date: `${currentMonth}-28T12:00:00.000Z`,
+      location: "Dojang Central Ebener TKD",
+      default_fee_cents: 15000,
+      status: "confirmed" as const,
+      created_at: `${currentMonth}-01T12:00:00.000Z`
     }
   ];
 }

@@ -14,9 +14,9 @@ import { CACHE_TAGS } from "@/lib/cache/tags";
 
 export const DEFAULT_CONTRACT_CONTENT = `CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE TAEKWONDO
 
-A academia {{ academy.name }} prestará aulas de taekwondo ao aluno {{ student.full_name }}, CPF {{ student.cpf }}, sob responsabilidade de {{ guardian.full_name }} quando aplicável.
+A academia {{ academia.nome }} prestará aulas de taekwondo ao aluno {{ aluno.nome_completo }}, CPF {{ aluno.cpf }}, sob responsabilidade de {{ responsavel.nome_completo }} quando aplicável.
 
-A mensalidade é de {{ financial.monthly_fee }}, com vencimento todo dia {{ financial.due_day }}. A vigência inicia em {{ contract.starts_at }} e termina em {{ contract.ends_at }}.
+A mensalidade é de {{ mensalidade.valor }}, com vencimento todo dia {{ mensalidade.dia_vencimento }}. A vigência inicia em {{ contrato.data_inicio }} e termina em {{ contrato.data_termino }}.
 
 O cancelamento sem ônus deve ser comunicado até o dia 20 do mês anterior à saída. Após esse prazo será devida uma mensalidade. Após mais de seis meses afastado, uma nova matrícula poderá ser exigida.
 

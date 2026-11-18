@@ -17,6 +17,8 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { examEventLabels, examEventTones, formatExamDate } from "@/features/exams/labels";
 import { getExamsOverview } from "@/features/exams/service";
+import { LocationSelect } from "@/features/locations/components/location-select";
+import { listLocations } from "@/features/locations/locations-service";
 import { formatBrl } from "@/lib/money";
 import { adminExamPath, ROUTES } from "@/lib/navigation/routes";
 import { requireProfile } from "@/lib/auth/session";
@@ -186,8 +188,9 @@ export default async function ExamsPage({
 }: {
   searchParams: Promise<{ error?: string; cancelled?: string }>;
 }) {
-  const [admin, query] = await Promise.all([
+  const [admin, locations, query] = await Promise.all([
     requireProfile("admin"),
+    listLocations(),
     searchParams,
   ]);
 
@@ -204,6 +207,7 @@ export default async function ExamsPage({
             <Link href={ROUTES.adminExamEligibility}>Elegibilidade</Link>
           </Button>
           <ResponsiveDialog
+            size="xl"
             trigger={
               <Button className="min-h-11">
                 <PlusIcon className="size-4" aria-hidden="true" />
@@ -228,7 +232,12 @@ export default async function ExamsPage({
 
             <Field className="sm:col-span-2">
               <FieldLabel htmlFor="exam-location">Local da avaliação</FieldLabel>
-              <Input id="exam-location" name="location" placeholder="Ex.: Dojang principal" className="h-11" />
+              <LocationSelect
+                id="exam-location"
+                name="location"
+                locations={locations}
+                placeholder="Selecione o dojang ou local do exame"
+              />
             </Field>
 
             <div className="pt-2 sm:col-span-2">

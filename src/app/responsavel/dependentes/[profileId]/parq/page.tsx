@@ -74,7 +74,7 @@ export default async function GuardianParqPage({
       title="Questionário de saúde"
       subtitle="10 perguntas rápidas preenchidas uma vez por ano pelo responsável."
     >
-      <div className="mx-auto w-full max-w-3xl min-w-0 space-y-6">
+      <div className="w-full min-w-0 space-y-6">
         <DependentContext guardian={guardian} profileId={profileId} section="parq" />
 
         {query.submitted ? (

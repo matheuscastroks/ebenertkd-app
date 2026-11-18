@@ -41,26 +41,33 @@ export function PageSkeleton({
     >
       <PageHeaderSkeleton />
 
-      <div className="flex min-h-0 flex-1 flex-col gap-6 border-t border-border/60 bg-background p-4 md:mb-2 md:mr-2 md:overflow-y-auto md:rounded-xl md:border md:border-border/60 md:p-6 md:shadow-sm">
-        {metrics ? (
-          <div aria-hidden="true" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {Array.from({ length: metricCount }, (_, index) => (
-              <div key={index} className="space-y-2 rounded-xl border border-border bg-card p-5">
-                <Skeleton className="h-4 w-28" />
-                <Skeleton className="h-8 w-36" />
-                <Skeleton className="h-4 w-44" />
+      <main
+        data-slot="dashboard-content"
+        className="relative flex min-h-0 flex-1 flex-col border-t border-border/60 bg-background md:mb-2 md:mr-2 md:overflow-y-auto md:rounded-xl md:border md:border-border/60 md:shadow-sm"
+      >
+        <div className="min-w-0 flex-1 p-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:p-6 md:pb-8">
+          <div className="flex w-full min-w-0 flex-col gap-6">
+            {metrics ? (
+              <div aria-hidden="true" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {Array.from({ length: metricCount }, (_, index) => (
+                  <div key={index} className="space-y-2 rounded-xl border border-border bg-card p-5">
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-8 w-36" />
+                    <Skeleton className="h-4 w-44" />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        ) : null}
+            ) : null}
 
-        <div aria-hidden="true" className="space-y-3 rounded-xl border border-border bg-card p-4 md:p-5">
-          <Skeleton className="h-5 w-40" />
-          {Array.from({ length: rows }, (_, index) => (
-            <Skeleton key={index} className="h-14 w-full" />
-          ))}
+            <div aria-hidden="true" className="space-y-3 rounded-xl border border-border bg-card p-4 md:p-5">
+              <Skeleton className="h-5 w-40" />
+              {Array.from({ length: rows }, (_, index) => (
+                <Skeleton key={index} className="h-14 w-full" />
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      </main>
       <span className="sr-only">Carregando conteúdo…</span>
     </div>
   );

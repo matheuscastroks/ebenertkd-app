@@ -60,7 +60,7 @@ export default async function StudentParqPage({
       subtitle="Responda 10 perguntas rápidas uma vez por ano para treinar com segurança."
       breadcrumbs={[{ label: "Questionário de saúde" }]}
     >
-      <div className="mx-auto w-full max-w-3xl min-w-0 space-y-5">
+      <div className="w-full min-w-0 space-y-6">
         {query.submitted ? (
           <OperationToast
             tone="success"

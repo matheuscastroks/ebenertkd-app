@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ContractContentEditor } from "@/features/contracts/components/contract-content-editor";
-import { CONTRACT_VARIABLES } from "@/features/contracts/rules";
+import { FRIENDLY_CONTRACT_VARIABLES } from "@/features/contracts/rules";
 import { DEFAULT_CONTRACT_CONTENT, getContractTemplate, listContractVersions } from "@/features/contracts/template-service";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
@@ -98,19 +98,27 @@ export default async function ContractTemplatePage({
         >
           <section className="p-5 space-y-3">
             <div>
-              <h2 className="text-base font-semibold text-foreground">Variáveis disponíveis</h2>
+              <h2 className="text-base font-semibold text-foreground">Variáveis em Português</h2>
               <p className="mt-1 text-xs text-muted-foreground">
-                Substituídas automaticamente pelos dados do aluno e da mensalidade.
+                Copie e cole no texto. O sistema preenche com os dados reais ao emitir o contrato.
               </p>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {CONTRACT_VARIABLES.map((variable) => (
-                <code
-                  key={variable}
-                  className="inline-block select-all rounded-lg border border-border bg-muted px-2 py-1 font-mono text-sm text-foreground"
+            <div className="space-y-2.5">
+              {FRIENDLY_CONTRACT_VARIABLES.map((item) => (
+                <div
+                  key={item.ptKey}
+                  className="rounded-lg border border-border bg-muted/40 p-2.5 space-y-1"
                 >
-                  {`{{ ${variable} }}`}
-                </code>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-semibold text-foreground">{item.label}</span>
+                    <code className="select-all rounded bg-background px-1.5 py-0.5 font-mono text-[11px] font-medium text-primary-text border border-border">
+                      {`{{ ${item.ptKey} }}`}
+                    </code>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-snug">
+                    {item.description}
+                  </p>
+                </div>
               ))}
             </div>
           </section>

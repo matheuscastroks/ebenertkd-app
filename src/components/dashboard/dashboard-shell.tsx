@@ -92,10 +92,13 @@ export function DashboardShell({
                 <PageBreadcrumb items={breadcrumbs!} />
               </div>
             ) : null}
-            <h1 className="font-display text-2xl font-semibold tracking-tight text-sidebar-foreground text-balance break-words">
+            <h1 className="font-display text-2xl font-semibold tracking-tight text-sidebar-foreground">
               {title}
             </h1>
-            <p className="max-w-prose text-sm text-muted-foreground text-pretty">
+            <p
+              className="text-sm text-muted-foreground md:max-w-5xl md:truncate"
+              title={subtitle}
+            >
               {subtitle}
             </p>
           </div>

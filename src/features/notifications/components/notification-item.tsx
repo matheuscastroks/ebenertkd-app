@@ -51,15 +51,17 @@ export function NotificationItem({
   return (
     <article
       className={cn(
-        "t-interactive-row transition-colors duration-(--duration-quick)",
-        compact ? "px-4 py-3.5" : "px-5 py-4",
-        unread ? "bg-card hover:bg-muted/30" : "bg-card/60 hover:bg-muted/25"
+        "t-interactive-row rounded-xl border transition-colors duration-(--duration-quick)",
+        compact ? "p-3.5" : "p-4",
+        unread
+          ? "border-primary/25 bg-card shadow-xs hover:border-primary/40"
+          : "border-border/70 bg-card/70 hover:bg-card hover:border-border"
       )}
     >
       <div className="flex items-start gap-3">
         <div
           className={cn(
-            "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl",
+            "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg",
             iconBg[item.notification.kind]
           )}
         >
@@ -73,10 +75,10 @@ export function NotificationItem({
                 <span
                   aria-label="Não lido"
                   role="img"
-                  className="size-2 shrink-0 rounded-full bg-primary"
+                  className="size-1.5 shrink-0 rounded-full bg-primary"
                 />
               ) : null}
-              <span className="font-medium">{labels[item.notification.kind]}</span>
+              <span className="font-medium text-[11px] uppercase tracking-wider">{labels[item.notification.kind]}</span>
             </div>
             <time
               dateTime={item.notification.published_at}
@@ -89,23 +91,23 @@ export function NotificationItem({
           <h3
             className={cn(
               "text-sm leading-snug text-foreground",
-              unread ? "font-semibold" : "font-medium text-foreground/85"
+              unread ? "font-semibold" : "font-medium text-foreground/90"
             )}
           >
             {item.notification.title}
           </h3>
 
-          <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+          <p className="whitespace-pre-wrap text-xs sm:text-sm leading-relaxed text-muted-foreground">
             {item.notification.body}
           </p>
 
           {item.notification.action_url || unread ? (
-            <div className="-mb-1.5 -ml-2 flex flex-wrap items-center gap-1 pt-0.5">
+            <div className="-mb-1 -ml-1.5 flex flex-wrap items-center gap-1.5 pt-1">
               {item.notification.action_url ? (
                 <Link
                   href={item.notification.action_url}
                   onClick={onNavigate}
-                  className="inline-flex h-11 items-center gap-1 rounded-lg px-2.5 text-xs font-medium text-primary-text transition-colors duration-(--duration-quick) hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="inline-flex h-11 min-h-11 items-center gap-1 rounded-md px-2.5 text-xs font-medium text-primary-text transition-colors duration-(--duration-quick) hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   Abrir página
                   <ArrowUpRight className="size-3.5" aria-hidden="true" />
@@ -115,7 +117,7 @@ export function NotificationItem({
                 <button
                   type="button"
                   onClick={() => onMarkRead(item.recipient.$id)}
-                  className="inline-flex h-11 items-center gap-1 rounded-lg px-2.5 text-xs font-medium text-muted-foreground transition-colors duration-(--duration-quick) hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="inline-flex h-11 min-h-11 items-center gap-1 rounded-md px-2.5 text-xs font-medium text-muted-foreground transition-colors duration-(--duration-quick) hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <Check className="size-3.5" aria-hidden="true" />
                   Marcar como lido
