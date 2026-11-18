@@ -3,9 +3,13 @@ import { assertNextGraduation, examChargeCancellation, groupStudentExams, sortBe
 import type { BeltHistory, ExamEvent, ExamParticipant } from "@/features/exams/types";
 
 describe("exam rules", () => {
-  it("accepts only the next coherent GUB and belt", () => {
+  it("accepts any higher coherent GUB and belt, including skipping belts", () => {
     expect(() => assertNextGraduation(6, 5, "Ponta Azul")).not.toThrow();
-    expect(() => assertNextGraduation(6, 4, "Azul")).toThrow("exam_graduation_must_be_next");
+    expect(() => assertNextGraduation(6, 4, "Azul")).not.toThrow();
+    expect(() => assertNextGraduation(10, 8, "Amarela")).not.toThrow();
+    expect(() => assertNextGraduation(1, 0, "Preta")).not.toThrow();
+    expect(() => assertNextGraduation(6, 6, "Verde")).toThrow("exam_graduation_must_be_next");
+    expect(() => assertNextGraduation(6, 7, "Ponta Verde")).toThrow("exam_graduation_must_be_next");
     expect(() => assertNextGraduation(6, 5, "Azul")).toThrow("exam_graduation_mismatch");
   });
 

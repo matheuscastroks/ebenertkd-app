@@ -18,7 +18,9 @@ export type PaidChargeDecision = "future_credit" | "keep_charge";
 
 export function assertNextGraduation(currentGub: number | null | undefined, targetGub: GubOption, targetBelt: BeltOption) {
   if (!graduationMatches(targetGub, targetBelt)) throw new Error("exam_graduation_mismatch");
-  if (currentGub == null || targetGub !== currentGub - 1) throw new Error("exam_graduation_must_be_next");
+  if (currentGub == null || currentGub <= 0 || targetGub >= currentGub || targetGub < 0) {
+    throw new Error("exam_graduation_must_be_next");
+  }
 }
 
 export function examChargeCancellation(status: ChargeStatus, decision?: PaidChargeDecision) {

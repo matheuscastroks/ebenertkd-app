@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { ChevronDown, Plus } from "lucide-react";
+import { ArrowRightIcon } from "@/components/ui/arrow-right";
+import { ChevronDownIcon } from "@/components/ui/chevron-down";
+import { PlusIcon } from "@/components/ui/plus";
 import { createExamEventAction } from "@/app/actions/exams";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { DateField } from "@/components/shared/date-field";
@@ -12,33 +14,50 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { examEventLabels, examEventTones, formatExamDate } from "@/features/exams/labels";
 import { getExamsOverview } from "@/features/exams/service";
 import { formatBrl } from "@/lib/money";
 import { adminExamPath, ROUTES } from "@/lib/navigation/routes";
 import { requireProfile } from "@/lib/auth/session";
-import { ListItemsSkeleton } from "@/components/skeletons";
 
 type ExamOverview = Awaited<ReturnType<typeof getExamsOverview>>;
 
 function ExamList({ events }: { events: ExamOverview["events"] }) {
   return (
-    <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+    <ul className="t-stagger divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
       {events.map((event) => (
-        <li key={event.$id} className="flex flex-wrap items-center justify-between gap-3 p-4">
+        <li
+          key={event.$id}
+          className="t-interactive-row flex flex-col gap-3 px-4 py-3.5 hover:bg-muted sm:flex-row sm:items-center sm:justify-between sm:px-5"
+        >
           <div className="min-w-0 space-y-1">
-            <p className="text-sm font-medium">{event.name}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="truncate text-base font-medium text-foreground">{event.name}</p>
+              <StatusBadge tone={examEventTones[event.status]}>{examEventLabels[event.status]}</StatusBadge>
+            </div>
             <p className="text-sm text-muted-foreground">
               {formatExamDate(event.event_date, { day: "2-digit", month: "short", year: "numeric" })}
-              {" · "}{event.location || "Local não informado"}
-              {" · "}<span className="tabular-nums">{event.participantCount} {event.participantCount === 1 ? "candidato" : "candidatos"}</span>
-              {" · "}Taxa <span className="tabular-nums">{formatBrl(event.default_fee_cents)}</span>
+              {" · "}
+              {event.location || "Local não informado"}
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <StatusBadge tone={examEventTones[event.status]}>{examEventLabels[event.status]}</StatusBadge>
-            <Button asChild variant="outline" size="sm" className="min-h-11">
-              <Link href={adminExamPath(event.$id)}>Abrir banca</Link>
+          <div className="flex flex-wrap items-center justify-between gap-4 sm:shrink-0 sm:justify-end">
+            <div className="text-left sm:text-right">
+              <p className="text-sm font-medium tabular-nums text-foreground">
+                {event.participantCount} {event.participantCount === 1 ? "candidato" : "candidatos"}
+              </p>
+              <p className="text-sm tabular-nums text-muted-foreground">
+                {event.participantCount > 0
+                  ? `${formatBrl(event.totalFeesCents)} previstos`
+                  : `Taxa ${formatBrl(event.default_fee_cents)}`}
+              </p>
+            </div>
+            <Button asChild variant="outline" size="sm" className="h-11 shrink-0 px-3 sm:h-9">
+              <Link href={adminExamPath(event.$id)}>
+                Abrir banca
+                <ArrowRightIcon className="size-3.5" aria-hidden="true" />
+              </Link>
             </Button>
           </div>
         </li>
@@ -49,7 +68,9 @@ function ExamList({ events }: { events: ExamOverview["events"] }) {
 
 async function ExamEventsContent() {
   const { events, nextUpcomingEvent, totalActiveParticipants, totalProjectedRevenueCents } = await getExamsOverview();
-  const active = events.filter((event) => event.status === "planned" || event.status === "confirmed");
+  const active = events
+    .filter((event) => event.status === "planned" || event.status === "confirmed")
+    .sort((a, b) => a.event_date.localeCompare(b.event_date));
   const closed = events.filter((event) => event.status === "completed" || event.status === "cancelled");
 
   if (events.length === 0) {
@@ -63,26 +84,99 @@ async function ExamEventsContent() {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm text-muted-foreground">
-        Próximo exame: {nextUpcomingEvent ? formatExamDate(nextUpcomingEvent.event_date) : "nenhum agendado"} · <span className="tabular-nums">{totalActiveParticipants}</span> inscritos · Taxas previstas: <span className="tabular-nums">{formatBrl(totalProjectedRevenueCents)}</span>
-      </p>
+      <dl
+        aria-label="Resumo dos exames"
+        className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs sm:grid-cols-3 sm:divide-x sm:divide-y-0"
+      >
+        <div className="p-4 sm:px-5">
+          <dt className="text-sm font-medium text-muted-foreground">Próximo exame</dt>
+          <dd className="mt-1 space-y-0.5">
+            <p className="text-xl font-semibold tracking-tight tabular-nums text-foreground">
+              {nextUpcomingEvent
+                ? formatExamDate(nextUpcomingEvent.event_date, { day: "2-digit", month: "short", year: "numeric" })
+                : "Nenhum agendado"}
+            </p>
+            <p className="truncate text-sm text-muted-foreground">
+              {nextUpcomingEvent
+                ? `${nextUpcomingEvent.name}${nextUpcomingEvent.location ? ` · ${nextUpcomingEvent.location}` : ""}`
+                : "Use Novo exame para agendar"}
+            </p>
+          </dd>
+        </div>
+        <div className="p-4 sm:px-5">
+          <dt className="text-sm font-medium text-muted-foreground">Candidatos inscritos</dt>
+          <dd className="mt-1 space-y-0.5">
+            <p className="text-xl font-semibold tracking-tight tabular-nums text-foreground">
+              {totalActiveParticipants}
+            </p>
+            <p className="text-sm text-muted-foreground">aguardando avaliação</p>
+          </dd>
+        </div>
+        <div className="p-4 sm:px-5">
+          <dt className="text-sm font-medium text-muted-foreground">Receita prevista</dt>
+          <dd className="mt-1 space-y-0.5">
+            <p className="text-xl font-semibold tracking-tight tabular-nums text-foreground">
+              {formatBrl(totalProjectedRevenueCents)}
+            </p>
+            <p className="text-sm text-muted-foreground">em taxas de inscrição</p>
+          </dd>
+        </div>
+      </dl>
 
       <section className="space-y-3" aria-labelledby="exames-abertos">
         <h2 id="exames-abertos" className="text-base font-semibold">Exames em aberto</h2>
-        {active.length ? <ExamList events={active} /> : (
-          <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">Nenhum exame em aberto. Use Novo exame para agendar a próxima banca.</p>
+        {active.length ? (
+          <ExamList events={active} />
+        ) : (
+          <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">
+            Nenhum exame em aberto. Use Novo exame para agendar a próxima banca.
+          </p>
         )}
       </section>
 
       {closed.length ? (
-        <details className="group space-y-3">
+        <details open={active.length === 0} className="group space-y-3">
           <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden">
-            <ChevronDown className="size-4 transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none" aria-hidden="true" />
+            <ChevronDownIcon className="size-4 transition-transform duration-(--duration-fast) ease-(--ease-smooth-out) group-open:-scale-y-100 motion-reduce:transition-none" aria-hidden="true" />
             Concluídos e cancelados ({closed.length})
           </summary>
           <ExamList events={closed} />
         </details>
       ) : null}
+    </div>
+  );
+}
+
+function ExamsOverviewSkeleton() {
+  return (
+    <div aria-label="Carregando exames…" aria-busy="true" className="space-y-6">
+      <div className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        {Array.from({ length: 3 }, (_, index) => (
+          <div key={index} className="space-y-2 p-4 sm:px-5">
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-7 w-32" />
+            <Skeleton className="h-4 w-40" />
+          </div>
+        ))}
+      </div>
+      <div className="space-y-3">
+        <Skeleton className="h-5 w-36" />
+        <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+          {Array.from({ length: 3 }, (_, index) => (
+            <div key={index} className="flex flex-col gap-3 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-48" />
+                <Skeleton className="h-4 w-56" />
+              </div>
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-9 w-24" />
+                <Skeleton className="h-9 w-28 rounded-lg" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <span className="sr-only">Carregando exames…</span>
     </div>
   );
 }
@@ -105,16 +199,20 @@ export default async function ExamsPage({
       subtitle="Agende bancas, inscreva alunos e registre as novas graduações."
       breadcrumbs={[{ label: "Exames de faixa" }]}
       headerActions={
-        <ResponsiveDialog
-          trigger={
-            <Button className="min-h-11">
-              <Plus className="size-4" aria-hidden="true" />
-              Novo exame
-            </Button>
-          }
-          title="Novo exame de faixa"
-          description="A taxa informada será o valor padrão das inscrições."
-        >
+        <div className="flex flex-wrap items-center gap-2">
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={ROUTES.adminExamEligibility}>Elegibilidade</Link>
+          </Button>
+          <ResponsiveDialog
+            trigger={
+              <Button className="min-h-11">
+                <PlusIcon className="size-4" aria-hidden="true" />
+                Novo exame
+              </Button>
+            }
+            title="Novo exame de faixa"
+            description="A taxa informada será o valor padrão das inscrições."
+          >
           <form action={createExamEventAction} className="grid gap-4 pt-2 sm:grid-cols-2">
             <Field className="sm:col-span-2">
               <FieldLabel htmlFor="exam-name">Nome do evento</FieldLabel>
@@ -135,11 +233,12 @@ export default async function ExamsPage({
 
             <div className="pt-2 sm:col-span-2">
               <FormSubmitButton className="min-h-11 w-full" pendingLabel="Criando exame…">
-                Cadastrar exame
+                Cadastrar exame de faixa
               </FormSubmitButton>
             </div>
           </form>
         </ResponsiveDialog>
+        </div>
       }
     >
       <div className="w-full min-w-0 space-y-6">
@@ -160,7 +259,7 @@ export default async function ExamsPage({
           />
         ) : null}
 
-        <Suspense fallback={<ListItemsSkeleton count={4} />}>
+        <Suspense fallback={<ExamsOverviewSkeleton />}>
           <ExamEventsContent />
         </Suspense>
       </div>

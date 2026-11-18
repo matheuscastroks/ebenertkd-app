@@ -10,7 +10,9 @@ it("mostra ações com alvo de 44px e confirma a mudança de faixa e a taxa", ()
   expect(screen.getByRole("button", { name: "Reprovar" })).toHaveClass("h-11");
   expect(screen.getByRole("button", { name: "Ausente" })).toHaveClass("h-11");
   fireEvent.click(screen.getByRole("button", { name: "Aprovar" }));
+  expect(screen.getByRole("dialog")).toBeVisible();
   expect(screen.getByText(/Muda a faixa de Branca para Amarela/)).toBeVisible();
   expect(screen.getByText(/150,00/)).toBeVisible();
   expect(screen.getByText("Ana Souza")).toBeVisible();
+  expect(screen.getByRole("button", { name: "Confirmar: aprovar" })).toBeVisible();
 });
