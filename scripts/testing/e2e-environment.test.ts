@@ -22,6 +22,12 @@ describe("isolamento de E2E autenticado sem rede", () => {
     expect(() => assertIsolatedEnvironment()).toThrow(/production Appwrite/);
   });
 
+  it("recusa o projeto de produção atual (Nova York)", () => {
+    vi.stubEnv("E2E_APPWRITE_PROJECT_ID", "6afcff9a00236190e9fa");
+    vi.stubEnv("NEXT_PUBLIC_APPWRITE_PROJECT_ID", "6afcff9a00236190e9fa");
+    expect(() => assertIsolatedEnvironment()).toThrow(/production Appwrite/);
+  });
+
   it("recusa produção adicional informada pelo ambiente", () => {
     vi.stubEnv("PRODUCTION_APPWRITE_PROJECT_ID", "isolated-test");
     expect(() => assertIsolatedEnvironment()).toThrow(/production Appwrite/);

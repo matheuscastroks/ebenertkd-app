@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NEXT_PUBLIC_APPWRITE_ENDPOINT: https://fra.cloud.appwrite.io/v1
+  NEXT_PUBLIC_APPWRITE_ENDPOINT: https://nyc.cloud.appwrite.io/v1
   NEXT_PUBLIC_APPWRITE_PROJECT_ID: e2e-public-no-data
   APPWRITE_PROJECT_NAME: CI isolated placeholder
   APPWRITE_API_KEY: ci-no-access
