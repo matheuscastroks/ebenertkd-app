@@ -15,6 +15,8 @@ type GuardianLink = Models.Row & {
 };
 
 export async function enableGuardianCapability(profile: Profile) {
+  // Só adulto pode ser responsável: a interface esconde a opção, mas a action precisa recusar por conta própria.
+  if (profile.role === "minor_student" || profile.role === "admin") throw new Error("guardian_not_allowed_for_role");
   if (profile.capabilities.includes("guardian")) return profile;
   const { tables, config } = createAppwriteAdminClient();
   const capabilities: AppCapability[] = [...profile.capabilities, "guardian"];
