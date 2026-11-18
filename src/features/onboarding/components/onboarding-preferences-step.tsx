@@ -16,11 +16,11 @@ export function OnboardingPreferencesStep({
   return (
     <div className="space-y-6 py-2">
       <div className="space-y-1 text-center sm:text-left">
-        <h2 className="text-xl font-semibold tracking-tight text-foreground">
-          Personalize sua Experiência
+        <h2 className="text-xl font-semibold tracking-tight">
+          Personalize o aplicativo
         </h2>
         <p className="text-sm text-muted-foreground">
-          Responda a estas perguntas rápidas para ajustarmos o aplicativo exatamente ao que você precisa.
+          Perguntas rápidas para mostrar primeiro o que importa para você.
         </p>
       </div>
 
@@ -54,17 +54,17 @@ export function OnboardingPreferencesStep({
                       onClick={() => onChange(question.id, option.id)}
                       className={cn(
                         "flex items-start justify-between gap-3 rounded-xl border p-3.5 text-left transition-colors duration-150 motion-reduce:transition-none",
-                        "hover:border-primary/50 hover:bg-muted/30 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
+                        "hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
                         isSelected
-                          ? "border-primary bg-primary/5 shadow-xs ring-1 ring-primary/20"
-                          : "border-border/70 bg-card text-muted-foreground"
+                          ? "border-primary bg-card ring-1 ring-primary"
+                          : "border-border bg-card"
                       )}
                     >
                       <div className="space-y-1">
                         <p
                           className={cn(
                             "text-sm font-medium",
-                            isSelected ? "text-foreground font-semibold" : "text-foreground"
+                            "text-foreground"
                           )}
                         >
                           {option.label}
@@ -79,7 +79,7 @@ export function OnboardingPreferencesStep({
                           "flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors duration-150 motion-reduce:transition-none mt-0.5",
                           isSelected
                             ? "border-primary bg-primary text-primary-foreground"
-                            : "border-muted-foreground/30 bg-muted/20"
+                            : "border-border bg-background"
                         )}
                       >
                         {isSelected && <Check className="size-3 stroke-[3]" />}

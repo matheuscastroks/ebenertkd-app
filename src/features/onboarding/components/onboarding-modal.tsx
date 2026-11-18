@@ -84,15 +84,15 @@ export function OnboardingModal({
   const stepLabels: Record<1 | 2 | 3, string> = {
     1: "Boas-vindas",
     2: "Personalização",
-    3: "Alertas & Notificações",
+    3: "Notificações",
   };
 
   const progressPercentage = step === 1 ? 33 : step === 2 ? 66 : 100;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => { if (!open && !isPending) { if (step === 1) onClose(); else handleBack(); } }}>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open && !isPending) { if (step === 1) handleSkip(); else handleBack(); } }}>
       <DialogContent
-        className="max-w-xl p-0 overflow-hidden border border-border shadow-md rounded-2xl"
+        className="max-w-xl gap-0 overflow-hidden rounded-2xl border border-border p-0 shadow-md"
         showCloseButton={false}
       >
         <DialogTitle className="sr-only">Introdução ao aplicativo Ebener TKD</DialogTitle>
@@ -101,7 +101,7 @@ export function OnboardingModal({
         </DialogDescription>
 
         {/* Top Header com Progresso & Pular */}
-        <div className="border-b border-border/60 bg-muted/30 px-6 pt-5 pb-3">
+        <div className="border-b border-border px-6 pt-5 pb-3">
           <div className="flex items-center justify-between gap-4">
             <span aria-live="polite" className="text-sm font-semibold text-muted-foreground">
               Passo {step} de 3 · {stepLabels[step]}
@@ -151,7 +151,7 @@ export function OnboardingModal({
 
         {/* Rodapé de Navegação */}
         {step < 3 && (
-          <div className="flex items-center justify-between border-t border-border/60 bg-muted/20 px-6 py-4">
+          <div className="flex items-center justify-between border-t border-border px-6 py-4">
             {step > 1 ? (
               <Button
                 type="button"
@@ -173,7 +173,7 @@ export function OnboardingModal({
               size="sm"
               onClick={handleNext}
               disabled={isPending}
-              className="h-11 gap-1.5 font-semibold"
+              className="h-11 gap-1.5"
             >
               <span>Continuar</span>
               <ArrowRight className="size-3.5" />

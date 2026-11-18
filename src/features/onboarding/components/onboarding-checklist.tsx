@@ -40,7 +40,7 @@ export function OnboardingChecklist({
   };
 
   return (
-    <Card className="border-primary/30 overflow-hidden">
+    <Card className="overflow-hidden">
       <CardHeader className="p-4 pb-3">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -75,7 +75,7 @@ export function OnboardingChecklist({
       </CardHeader>
 
       {!collapsed && (
-        <CardContent className="p-4 pt-1 border-t border-border/40">
+        <CardContent className="p-4 pt-1 border-t border-border">
           <div className="grid gap-2 sm:grid-cols-2 pt-2">
             {items.map((item) => (
               <Link
@@ -85,13 +85,13 @@ export function OnboardingChecklist({
                   "flex min-h-11 items-center gap-2.5 rounded-lg border p-2.5 text-sm transition-colors",
                   item.completed
                     ? "border-border bg-success-soft text-muted-foreground line-through"
-                    : "border-border/80 bg-card hover:border-primary/50 hover:bg-muted/40 text-foreground font-medium"
+                    : "border-border bg-card hover:bg-muted text-foreground font-medium"
                 )}
               >
                 {item.completed ? (
                   <CheckCircle2 className="size-4 text-success-foreground shrink-0" />
                 ) : (
-                  <Circle className="size-4 text-muted-foreground/60 shrink-0" />
+                  <Circle className="size-4 text-muted-foreground shrink-0" />
                 )}
                 <span className="truncate">{item.label}</span>
               </Link>
