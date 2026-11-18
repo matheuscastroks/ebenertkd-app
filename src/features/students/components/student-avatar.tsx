@@ -19,7 +19,7 @@ export function StudentAvatar({ name, photoDocumentId, size = "md", className }:
 }) {
   return (
     <Avatar className={cn(sizes[size], className)} aria-label={`Foto de ${name}`}>
-      {photoDocumentId ? <AvatarImage src={`/api/student-documents/${photoDocumentId}`} alt={name} /> : null}
+      {photoDocumentId ? <AvatarImage src={`/api/student-documents/${photoDocumentId}`} alt={name} loading="lazy" decoding="async" /> : null}
       <AvatarFallback className={size === "lg" ? "text-base font-semibold" : "font-medium"}>{initials(name)}</AvatarFallback>
     </Avatar>
   );

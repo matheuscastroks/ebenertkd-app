@@ -32,6 +32,7 @@ export async function addExamParticipantAction(formData: FormData) {
     redirect(`${adminExamPath(eventId)}?error=participant`);
   }
   updateTag(CACHE_TAGS.examEvents);
+  updateTag(CACHE_TAGS.billingCharges);
   revalidatePath(adminExamPath(eventId));
   redirect(`${adminExamPath(eventId)}?added=1`);
 }
@@ -59,6 +60,7 @@ export async function cancelExamParticipantAction(formData: FormData) {
     redirect(`${adminExamPath(eventId)}?error=cancel`);
   }
   updateTag(CACHE_TAGS.examEvents);
+  updateTag(CACHE_TAGS.billingCharges);
   revalidatePath(adminExamPath(eventId));
   redirect(`${adminExamPath(eventId)}?cancelled=1`);
 }

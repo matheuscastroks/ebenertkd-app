@@ -8,7 +8,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ doc
     const { documentId } = await params;
     const { buffer, document } = await downloadStudentDocument(profile, documentId);
     const filename = document.original_name.replace(/["\r\n]/g, "_");
-    return new Response(buffer, { headers: { "Content-Type": document.mime_type, "Content-Disposition": `inline; filename="${filename}"`, "Cache-Control": "private, no-store" } });
+    return new Response(buffer, { headers: { "Content-Type": document.mime_type, "Content-Disposition": `inline; filename="${filename}"`, "Cache-Control": "private, max-age=300, stale-while-revalidate=3600" } });
   } catch {
     return new Response("Documento não encontrado", { status: 404 });
   }

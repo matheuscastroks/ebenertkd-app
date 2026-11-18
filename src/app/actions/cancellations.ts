@@ -30,6 +30,7 @@ export async function decideCancellationAction(formData: FormData) {
     redirect(`${ROUTES.adminCancellations}?error=decision`);
   }
   updateTag(CACHE_TAGS.cancellations);
+  updateTag(CACHE_TAGS.billingCharges);
   revalidatePath(ROUTES.adminCancellations);
   redirect(`${ROUTES.adminCancellations}?updated=1`);
 }

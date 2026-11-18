@@ -28,7 +28,7 @@ export async function uploadPaymentProofAction(formData: FormData) {
     if (!(file instanceof File)) throw new Error("proof_required");
     await uploadPaymentProof(actor, String(formData.get("charge_id") ?? ""), file);
   } catch { redirect(`${returnPath}?error=proof`); }
-  revalidatePath(returnPath); revalidatePath(ROUTES.adminBilling); redirect(`${returnPath}?updated=proof`);
+  updateTag(CACHE_TAGS.billingCharges); revalidatePath(returnPath); revalidatePath(ROUTES.adminBilling); redirect(`${returnPath}?updated=proof`);
 }
 
 export async function decidePaymentProofAction(formData: FormData) {

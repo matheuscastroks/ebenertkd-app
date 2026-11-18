@@ -5,5 +5,5 @@ export async function GET(_: Request, { params }: { params: Promise<{ proofId: s
   const actor = await requireProfile();
   const { proofId } = await params;
   const { buffer, proof } = await downloadPaymentProof(actor, proofId);
-  return new Response(buffer, { headers: { "Content-Type": proof.mime_type, "Content-Disposition": `inline; filename*=UTF-8''${encodeURIComponent(proof.original_name)}`, "Cache-Control": "private, no-store" } });
+  return new Response(buffer, { headers: { "Content-Type": proof.mime_type, "Content-Disposition": `inline; filename*=UTF-8''${encodeURIComponent(proof.original_name)}`, "Cache-Control": "private, max-age=300, stale-while-revalidate=3600" } });
 }

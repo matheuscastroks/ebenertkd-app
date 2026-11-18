@@ -7,6 +7,9 @@ import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 
 export async function resolveStudentProfile(actor: Profile, requestedProfileId?: string | null) {
   const targetId = requestedProfileId || actor.$id;
+  if (targetId === actor.$id && (actor.role === "admin" || actor.capabilities.includes("student"))) {
+    return actor;
+  }
   const { tables, config } = createAppwriteAdminClient();
   const target = await tables.getRow<Profile>({
     databaseId: config.databaseId,
@@ -33,6 +36,8 @@ export async function resolveStudentProfile(actor: Profile, requestedProfileId?:
 }
 
 export async function canAccessStudent(actor: Profile, studentProfileId: string) {
+  if (actor.role === "admin") return true;
+  if (studentProfileId === actor.$id && actor.capabilities.includes("student")) return true;
   try {
     await resolveStudentProfile(actor, studentProfileId);
     return true;

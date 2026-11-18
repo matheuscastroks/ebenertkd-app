@@ -106,14 +106,34 @@ export const listEnrollmentsForReview = unstable_cache(
     if (page !== requestedPage) {
       students = await tables.listRows<Student>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, queries: [...queries, Query.limit(ENROLLMENTS_PAGE_SIZE), Query.offset((page - 1) * ENROLLMENTS_PAGE_SIZE)] });
     }
-    const rows = await Promise.all(students.rows.map(async (student) => {
-      const [enrollments, photos] = await Promise.all([
-        tables.listRows<Enrollment>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, queries: [Query.equal("student_id", [student.$id]), Query.limit(1)] }),
-        tables.listRows<StudentDocument>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.studentDocuments, queries: [Query.equal("student_id", [student.$id]), Query.equal("document_type", ["profile_photo"]), Query.limit(1)] })
-      ]);
-      const photo = photos.rows[0];
-      return { student, enrollment: enrollments.rows[0] ?? null, profilePhotoDocumentId: photo?.status === "rejected" ? undefined : photo?.$id };
-    }));
+    if (students.rows.length === 0) {
+      return { rows: [], page, pageSize: ENROLLMENTS_PAGE_SIZE, total: students.total, totalPages };
+    }
+    const studentIds = students.rows.map((s) => s.$id);
+    const [enrollments, photos] = await Promise.all([
+      tables.listRows<Enrollment>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, queries: [Query.equal("student_id", studentIds), Query.limit(100)] }),
+      tables.listRows<StudentDocument>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.studentDocuments, queries: [Query.equal("student_id", studentIds), Query.equal("document_type", ["profile_photo"]), Query.limit(100)] })
+    ]);
+    const enrollmentByStudent = new Map<string, Enrollment>();
+    for (const enrollment of enrollments.rows) {
+      if (!enrollmentByStudent.has(enrollment.student_id)) {
+        enrollmentByStudent.set(enrollment.student_id, enrollment);
+      }
+    }
+    const photoByStudent = new Map<string, StudentDocument>();
+    for (const photo of photos.rows) {
+      if (!photoByStudent.has(photo.student_id)) {
+        photoByStudent.set(photo.student_id, photo);
+      }
+    }
+    const rows = students.rows.map((student) => {
+      const photo = photoByStudent.get(student.$id);
+      return {
+        student,
+        enrollment: enrollmentByStudent.get(student.$id) ?? null,
+        profilePhotoDocumentId: photo?.status === "rejected" ? undefined : photo?.$id
+      };
+    });
     return {
       rows: JSON.parse(JSON.stringify(rows)) as Array<{
         student: Student;

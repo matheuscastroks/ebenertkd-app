@@ -1,6 +1,5 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { NAV_ICONS } from "@/lib/navigation/nav-icons";
 import { SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
@@ -9,9 +8,14 @@ import { NotificationDrawer } from "@/features/notifications/components/notifica
 const BellIcon = NAV_ICONS.notifications;
 
 export function NotificationNavItem({ initialCount, active }: { initialCount: number; active?: boolean }) {
-  const pathname = usePathname();
+  const [prevInitialCount, setPrevInitialCount] = useState(initialCount);
   const [count, setCount] = useState(initialCount);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  if (prevInitialCount !== initialCount) {
+    setPrevInitialCount(initialCount);
+    setCount(initialCount);
+  }
 
   useEffect(() => {
     const handleOpen = () => setDrawerOpen(true);
@@ -35,7 +39,6 @@ export function NotificationNavItem({ initialCount, active }: { initialCount: nu
     const onVisible = () => {
       if (document.visibilityState === "visible") void refresh();
     };
-    void refresh();
     const interval = setInterval(() => {
       if (document.visibilityState === "visible") void refresh();
     }, 60000);
@@ -49,7 +52,7 @@ export function NotificationNavItem({ initialCount, active }: { initialCount: nu
       window.removeEventListener("notifications:changed", refresh);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [pathname]);
+  }, []);
 
   return (
     <>

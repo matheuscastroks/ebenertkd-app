@@ -8,7 +8,7 @@ import { canAccessStudent } from "@/features/students/access";
 import { recordReview } from "@/features/students/enrollment-service";
 import { canRoleViewStudentDocument, validateDocumentFile } from "@/features/students/rules";
 import { getEnrollmentBundleByStudentId } from "@/features/students/service";
-import type { DocumentType, StudentDocument } from "@/features/students/types";
+import type { DocumentType, Student, StudentDocument } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { notifyAdmins } from "@/features/notifications/notification-service";
@@ -100,8 +100,14 @@ export async function downloadStudentDocument(actor: Profile, documentId: string
     rowId: documentId
   });
   if (!canRoleViewStudentDocument(actor.role, document.document_type)) throw new Error("sensitive_document_access_denied");
-  const bundle = await getEnrollmentBundleByStudentId(document.student_id);
-  if (!(await canAccessStudent(actor, bundle.student.profile_id))) throw new Error("student_access_denied");
+  if (actor.role !== "admin") {
+    const student = await tables.getRow<Student>({
+      databaseId: config.databaseId,
+      tableId: APPWRITE_IDS.tables.students,
+      rowId: document.student_id
+    });
+    if (!(await canAccessStudent(actor, student.profile_id))) throw new Error("student_access_denied");
+  }
   const buffer = await storage.getFileDownload({ bucketId: APPWRITE_IDS.bucket, fileId: document.file_id });
   return { buffer, document };
 }

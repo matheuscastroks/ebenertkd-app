@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { Query } from "node-appwrite";
 import { billingSummary, csvCell } from "@/features/billing/rules";
 import { listCharges } from "@/features/billing/charge-service";
@@ -9,6 +10,7 @@ import type { PaymentProof } from "@/features/billing/types";
 import type { Student, StudentDocument } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 type BillingFilters = NonNullable<Parameters<typeof listCharges>[0]> & { student?: string; trainingClass?: string; page?: number };
 
@@ -35,11 +37,17 @@ async function allRows<Row extends { $id: string }>(tableId: string, queries: st
   return rows;
 }
 
+const listBillingStudents = unstable_cache(
+  async () => allRows<Student>(APPWRITE_IDS.tables.students),
+  ["billing-students"],
+  { tags: [CACHE_TAGS.enrollments, CACHE_TAGS.billingCharges], revalidate: 60 }
+);
+
 export async function getBillingOverview(filters: BillingFilters = {}) {
   const [allCharges, payments] = await loadBillingLedger();
   const rawCharges = allCharges.filter((charge) => (!filters.status || charge.status === filters.status) && (!filters.competence || charge.competence === filters.competence) && (!filters.type || charge.charge_type === filters.type));
-  const students = await allRows<Student>(APPWRITE_IDS.tables.students);
-  const names = new Map(students.map((student) => [student.$id, student.full_name]));
+  const students = await listBillingStudents();
+  const allNames = new Map(students.map((student) => [student.$id, student.full_name]));
   const normalizedSearch = filters.student?.trim().toLocaleLowerCase("pt-BR");
   const allowedStudents = new Set(students.filter((student) => (!normalizedSearch || student.full_name.toLocaleLowerCase("pt-BR").includes(normalizedSearch)) && (!filters.trainingClass || student.training_class_id === filters.trainingClass)).map((student) => student.$id));
   const filteredCharges = rawCharges.filter((charge) => allowedStudents.has(charge.student_id));
@@ -48,6 +56,14 @@ export async function getBillingOverview(filters: BillingFilters = {}) {
   const page = requestedPage ? Math.min(requestedPage, Math.max(1, totalPages)) : undefined;
   const charges = page ? filteredCharges.slice((page - 1) * BILLING_PAGE_SIZE, page * BILLING_PAGE_SIZE) : filteredCharges;
   const visibleStudentIds = [...new Set(charges.map((charge) => charge.student_id))];
+  const visibleChargeIds = new Set(charges.map((charge) => charge.$id));
+  const returnedPayments = page ? payments.filter((payment) => visibleChargeIds.has(payment.charge_id)) : payments;
+  const names = page
+    ? new Map(visibleStudentIds.flatMap((id) => {
+        const name = allNames.get(id);
+        return name ? [[id, name] as const] : [];
+      }))
+    : allNames;
   const [photoDocuments, proofs] = await Promise.all([
     filters.page && visibleStudentIds.length ? allRows<StudentDocument>(APPWRITE_IDS.tables.studentDocuments, [Query.equal("student_id", visibleStudentIds), Query.equal("document_type", ["profile_photo"])]) : Promise.resolve([]),
     filters.page && charges.length ? allRows<PaymentProof>(APPWRITE_IDS.tables.paymentProofs, [Query.equal("charge_id", charges.map((charge) => charge.$id)), Query.equal("status", ["pending"])]) : Promise.resolve([])
@@ -59,7 +75,7 @@ export async function getBillingOverview(filters: BillingFilters = {}) {
   const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)).toISOString().slice(0, 10);
   return {
     charges,
-    payments,
+    payments: returnedPayments,
     names,
     photosByStudent,
     proofsByCharge,

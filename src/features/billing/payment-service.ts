@@ -1,5 +1,6 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import { ID, Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import { effectiveChargeStatus } from "@/features/billing/rules";
@@ -7,6 +8,7 @@ import { manualPaymentSchema, proofDecisionSchema, reversalSchema } from "@/feat
 import type { Charge, Payment, PaymentProof, PaymentReversal } from "@/features/billing/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { notifyStudentFinancial } from "@/features/notifications/notification-service";
 
 async function confirmedPayment(chargeId: string) {
@@ -104,14 +106,18 @@ export async function reversePayment(actor: Profile, raw: unknown) {
   return updated;
 }
 
-export async function listPayments() {
-  const { tables, config } = createAppwriteAdminClient();
-  const rows: Payment[] = [];
-  let cursor: string | undefined;
-  do {
-    const result = await tables.listRows<Payment>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.payments, queries: [Query.orderDesc("paid_at"), Query.limit(500), ...(cursor ? [Query.cursorAfter(cursor)] : [])] });
-    rows.push(...result.rows);
-    cursor = result.rows.length === 500 ? result.rows.at(-1)?.$id : undefined;
-  } while (cursor);
-  return rows;
-}
+export const listPayments = unstable_cache(
+  async () => {
+    const { tables, config } = createAppwriteAdminClient();
+    const rows: Payment[] = [];
+    let cursor: string | undefined;
+    do {
+      const result = await tables.listRows<Payment>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.payments, queries: [Query.orderDesc("paid_at"), Query.limit(500), ...(cursor ? [Query.cursorAfter(cursor)] : [])] });
+      rows.push(...result.rows);
+      cursor = result.rows.length === 500 ? result.rows.at(-1)?.$id : undefined;
+    } while (cursor);
+    return rows;
+  },
+  ["list-payments"],
+  { tags: [CACHE_TAGS.billingCharges], revalidate: 60 }
+);

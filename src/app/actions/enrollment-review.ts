@@ -22,6 +22,7 @@ export async function reviewDocumentAction(formData: FormData) {
   } catch {
     redirect(reviewPath(studentId, "?error=document"));
   }
+  updateTag(CACHE_TAGS.enrollments);
   revalidatePath(reviewPath(studentId));
   redirect(reviewPath(studentId, "?updated=document"));
 }
@@ -106,6 +107,7 @@ export async function adminUpdateStudentAction(formData: FormData) {
   } catch {
     redirect(reviewPath(studentId, "?error=update_student"));
   }
+  updateTag(CACHE_TAGS.enrollments);
   revalidatePath(reviewPath(studentId));
   redirect(reviewPath(studentId, "?updated=student"));
 }

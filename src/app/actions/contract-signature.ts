@@ -1,10 +1,12 @@
 "use server";
 
+import { updateTag } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getContractForActor } from "@/features/contracts/contract-service";
 import { signContract } from "@/features/contracts/signature-service";
 import { requireProfile } from "@/lib/auth/session";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { guardianContractPath, studentContractPath } from "@/lib/navigation/routes";
 
 export async function signContractAction(formData: FormData) {
@@ -20,5 +22,7 @@ export async function signContractAction(formData: FormData) {
   } catch {
     redirect(`${destination}?error=signature`);
   }
+  updateTag(CACHE_TAGS.billingCharges);
+  updateTag(CACHE_TAGS.enrollments);
   redirect(`${destination}?signed=1`);
 }
