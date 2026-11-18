@@ -39,7 +39,7 @@ export async function getClassAttendanceSummary(classId: string, month: string) 
   const lessons = await tables.listRows<Lesson>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.lessons, queries: [Query.equal("training_class_id", [classId]), Query.limit(500)] });
   const completed = lessons.rows.filter((lesson) => lesson.status === "completed" && lesson.lesson_date.startsWith(month));
   if (completed.length === 0) return { month, lessonCount: 0, rows: [] };
-  const attendance = await tables.listRows<AttendanceRecord>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.attendanceRecords, queries: [Query.equal("lesson_id", completed.map((lesson) => lesson.$id)), Query.limit(500)] });
+  const attendance = await tables.listRows<AttendanceRecord>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.attendanceRecords, queries: [Query.equal("lesson_id", completed.map((lesson) => lesson.$id)), Query.limit(5000)] });
   const studentIds = [...new Set(attendance.rows.map((record) => record.student_id))];
   if (studentIds.length === 0) return { month, lessonCount: completed.length, rows: [] };
   const [students, photos] = await Promise.all([

@@ -19,6 +19,8 @@ export async function saveEnrollmentDraft(target: Profile, actor: Profile, input
   const parsed = (submit ? studentSubmissionSchema : studentDraftSchema).parse(input);
   const bundle = await getOrCreateEnrollmentBundle(target, actor);
   const isDraft = bundle.enrollment.status === "draft";
+  // Depois do rascunho a graduação só muda por exame (ou pelo professor): aluno e responsável não editam a faixa.
+  const keepGraduation = !isDraft && actor.role !== "admin";
   if (isDraft && submit && !hasRequiredSubmissionPhoto(bundle.documents)) throw new Error("profile_photo_required");
   const trainingClass = parsed.trainingClassId ? await getTrainingClass(parsed.trainingClassId) : null;
   if (trainingClass && trainingClass.status !== "active") throw new Error("training_class_inactive");
@@ -46,10 +48,10 @@ export async function saveEnrollmentDraft(target: Profile, actor: Profile, input
       emergency_contact_relationship: parsed.emergencyContactRelationship,
       emergency_contact_phone: parsed.emergencyContactPhone,
       started_at_tkd: isoDate(parsed.startedAtTkd),
-      current_belt: parsed.currentBelt ?? (parsed.gub != null ? beltForGub(parsed.gub as GubOption) : undefined),
+      current_belt: keepGraduation ? bundle.student.current_belt : parsed.currentBelt ?? (parsed.gub != null ? beltForGub(parsed.gub as GubOption) : undefined),
       training_class_id: trainingClass?.$id ?? bundle.student.training_class_id,
       training_class: trainingClass?.name ?? bundle.student.training_class,
-      gub: parsed.gub,
+      gub: keepGraduation ? bundle.student.gub : parsed.gub,
       health_condition: parsed.healthCondition,
       health_details: parsed.healthDetails,
       medications: parsed.medications,
