@@ -50,6 +50,7 @@ export type AddressFieldsProps = {
   required?: boolean;
   disabled?: boolean;
   name?: string;
+  compact?: boolean;
   className?: string;
 };
 
@@ -58,6 +59,7 @@ export function AddressFields({
   required = false,
   disabled = false,
   name = "address",
+  compact = false,
   className,
 }: AddressFieldsProps) {
   const uid = useId();
@@ -130,7 +132,7 @@ export function AddressFields({
       <input type="hidden" name={name} value={compiledAddress} />
 
       {/* CEP */}
-      <div className="sm:col-span-12 md:col-span-4">
+      <div className={compact ? "sm:col-span-4 lg:col-span-2" : "sm:col-span-4"}>
         <Field>
           <FieldLabel htmlFor={`${uid}-cep`}>
             CEP {required ? "*" : ""}
@@ -187,7 +189,7 @@ export function AddressFields({
       </div>
 
       {/* Rua / Logradouro */}
-      <div className="sm:col-span-12 md:col-span-8">
+      <div className={compact ? "sm:col-span-8 lg:col-span-5" : "sm:col-span-8"}>
         <Field>
           <FieldLabel htmlFor={`${uid}-street`}>
             Rua / Logradouro {required ? "*" : ""}
@@ -205,7 +207,7 @@ export function AddressFields({
       </div>
 
       {/* Número */}
-      <div className="sm:col-span-12 sm:col-span-4 md:col-span-3">
+      <div className={compact ? "sm:col-span-4 lg:col-span-2" : "sm:col-span-4 md:col-span-3"}>
         <Field>
           <FieldLabel htmlFor={`${uid}-number`}>
             Número {required ? "*" : ""}
@@ -224,7 +226,7 @@ export function AddressFields({
       </div>
 
       {/* Complemento */}
-      <div className="sm:col-span-12 sm:col-span-8 md:col-span-4">
+      <div className={compact ? "sm:col-span-8 lg:col-span-3" : "sm:col-span-8 md:col-span-4"}>
         <Field>
           <FieldLabel htmlFor={`${uid}-complement`}>
             Complemento{" "}
@@ -244,7 +246,7 @@ export function AddressFields({
       </div>
 
       {/* Bairro */}
-      <div className="sm:col-span-12 md:col-span-5">
+      <div className={compact ? "sm:col-span-5 lg:col-span-5" : "sm:col-span-12 md:col-span-5"}>
         <Field>
           <FieldLabel htmlFor={`${uid}-neighborhood`}>
             Bairro {required ? "*" : ""}
@@ -262,7 +264,7 @@ export function AddressFields({
       </div>
 
       {/* Cidade */}
-      <div className="sm:col-span-12 sm:col-span-8 md:col-span-8">
+      <div className={compact ? "sm:col-span-5 lg:col-span-5" : "sm:col-span-8"}>
         <Field>
           <FieldLabel htmlFor={`${uid}-city`}>
             Cidade {required ? "*" : ""}
@@ -280,7 +282,7 @@ export function AddressFields({
       </div>
 
       {/* Estado / UF */}
-      <div className="sm:col-span-12 sm:col-span-4 md:col-span-4">
+      <div className={compact ? "sm:col-span-2 lg:col-span-2" : "sm:col-span-4"}>
         <Field>
           <FieldLabel htmlFor={`${uid}-state`}>
             Estado (UF) {required ? "*" : ""}

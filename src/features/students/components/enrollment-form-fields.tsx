@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Field as FormField, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
+
 export function Field({
   label,
   name,
@@ -43,23 +43,23 @@ export function Field({
 export function Section({
   title,
   description,
-  children
+  children,
 }: {
   title: string;
-  description: string;
+  description?: string;
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border bg-card p-5 md:p-6 shadow-xs space-y-4">
-      <div className="flex items-start gap-3">
-        <div>
-          <h2 className="text-base font-semibold text-foreground">{title}</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">{description}</p>
-        </div>
+    <section className="space-y-3 py-4 first:pt-0 last:pb-0">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {title}
+        </h3>
+        {description ? (
+          <p className="text-xs text-muted-foreground">{description}</p>
+        ) : null}
       </div>
-      <Separator />
       {children}
     </section>
   );
 }
-

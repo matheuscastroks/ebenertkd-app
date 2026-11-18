@@ -176,4 +176,57 @@ describe("EnrollmentForm", () => {
     expect(payload.get("started_at_tkd")).toBe("2020-01-10");
     expect((payload.get("profile_photo") as File).name).toBe("aluno.png");
   });
+
+  it("exibe tela de status da matrícula quando a ficha já foi enviada e permite abrir edição", async () => {
+    const user = userEvent.setup();
+    render(
+      <EnrollmentForm
+        bundle={{
+          ...bundle,
+          enrollment: {
+            ...enrollment,
+            status: "submitted",
+            submitted_at: "2026-11-18T12:00:00Z",
+          },
+        }}
+        targetProfileId="profile-1"
+        classes={classes}
+        contractsHref="/aluno/contratos"
+      />
+    );
+
+    expect(screen.getByText("Matrícula enviada para análise")).toBeInTheDocument();
+    expect(screen.queryByText("Passo 1 de 4 · Dados pessoais")).not.toBeInTheDocument();
+    expect(screen.getByText("Documento precisa de correção")).toBeInTheDocument();
+
+    // Clicar em Corrigir documentos abre direto no passo 4
+    await user.click(screen.getByRole("button", { name: "Corrigir documentos" }));
+    expect(screen.getByText("Passo 4 de 4 · Documentos")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Salvar alterações" })).toBeInTheDocument();
+
+    // Voltar ao resumo retorna à tela de status
+    await user.click(screen.getByRole("button", { name: /voltar ao resumo/i }));
+    expect(screen.getByText("Matrícula enviada para análise")).toBeInTheDocument();
+  });
+
+  it("exibe atalho para assinar contrato quando a matrícula aguarda assinatura", () => {
+    render(
+      <EnrollmentForm
+        bundle={{
+          ...bundle,
+          enrollment: { ...enrollment, status: "awaiting_signature" },
+          documents: [documents[0]],
+        }}
+        targetProfileId="profile-1"
+        classes={classes}
+        contractsHref="/aluno/contratos"
+      />
+    );
+
+    expect(screen.getByText("Ficha aprovada · Falta assinar o contrato")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /assinar contrato/i })).toHaveAttribute(
+      "href",
+      "/aluno/contratos"
+    );
+  });
 });
