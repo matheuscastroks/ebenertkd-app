@@ -4,7 +4,8 @@ import type { Charge } from "@/features/billing/types";
 
 vi.mock("@/app/actions/billing", () => ({ uploadPaymentProofAction: vi.fn() }));
 
-import { chargeTitle, mostUrgentChargeId, PayerBillingView } from "./payer-billing-view";
+import { chargeTitle } from "./charge-title";
+import { mostUrgentChargeId, PayerBillingView } from "./payer-billing-view";
 
 const charge = (overrides: Partial<Charge>) => ({
   $id: "c1", charge_type: "monthly_fee", competence: "2026-10", description: "Mensalidade 2026-10",

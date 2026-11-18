@@ -108,7 +108,7 @@ async function BillingMetrics() {
   const summary = await getBillingSummary();
   return (
     <div className="space-y-2">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <Link href={`${ROUTES.adminBilling}?status=paid`} className="rounded-xl focus-visible:outline-2 focus-visible:outline-ring" aria-label="Filtrar: Recebido no mês"><MetricCard label="Recebido no mês" value={money(summary.receivedCents)} tone="success" /></Link>
         <Link href={`${ROUTES.adminBilling}?status=pending`} className="rounded-xl focus-visible:outline-2 focus-visible:outline-ring" aria-label="Filtrar: A receber"><MetricCard label="A receber" value={money(summary.pendingCents)} tone="warning" /></Link>
         <Link href={`${ROUTES.adminBilling}?status=overdue`} className="rounded-xl focus-visible:outline-2 focus-visible:outline-ring" aria-label="Filtrar: Em atraso"><MetricCard label="Em atraso" value={money(summary.overdueCents)} tone="danger" /></Link>

@@ -150,14 +150,14 @@ export function StudentAccessTable({
         <div className="space-y-3">
           {sortedItems.length ? (
             sortedItems.map((student) => (
-              <Card key={student.$id} className="border-border/80 shadow-xs">
+              <Card key={student.$id}>
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-1">
+                    <div className="min-w-0 space-y-1">
                       <p className="font-semibold text-foreground text-sm">
                         {student.full_name}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="break-all text-sm text-muted-foreground">
                         {student.role === "minor_student"
                           ? "Acesso menor"
                           : "Acesso próprio"}{" "}
@@ -176,7 +176,7 @@ export function StudentAccessTable({
                     </Badge>
                   </div>
 
-                  <div className="pt-2 border-t border-border/40 flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 border-t border-border pt-2">
                       {student.role === "minor_student" &&
                         student.status === "active" && (
                           <PromoteMinorDialog

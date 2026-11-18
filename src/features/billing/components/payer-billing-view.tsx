@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CopyPixButton } from "@/features/billing/components/copy-pix-button";
 import { formatCompetence } from "@/features/billing/format-competence";
+import { chargeTitle, chargeTypeLabels } from "@/features/billing/components/charge-title";
 import { filterPayerCharges, type PayerChargeView } from "@/features/billing/payer-billing-filters";
 import type { BillingSettings, Charge, PaymentProof } from "@/features/billing/types";
 
@@ -27,19 +28,7 @@ const labels = { pending: "Pendente", proof_under_review: "Em análise", paid: "
 const tones: Record<keyof typeof labels, StatusTone> = { pending: "warning", proof_under_review: "info", paid: "success", overdue: "danger", cancelled: "neutral" };
 const money = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value / 100);
 const date = (value: string) => new Date(value).toLocaleDateString("pt-BR", { timeZone: "UTC" });
-const typeLabels: Record<Charge["charge_type"], string> = { monthly_fee: "Mensalidade", enrollment_fee: "Taxa de matrícula", exam_fee: "Taxa de exame", exit_fee: "Taxa de saída" };
 const ALL_MONTHS = "all";
-
-/** Título legível da cobrança: troca a competência crua ("2026-10") por "out/2026". */
-export function chargeTitle(charge: Pick<Charge, "description" | "competence" | "charge_type">) {
-  const readable = formatCompetence(charge.competence);
-  const base = charge.description?.trim() || typeLabels[charge.charge_type] || "Cobrança";
-  if (readable === "—") return base;
-  if (!base.includes(charge.competence)) return base;
-  const [before, after] = base.split(charge.competence, 2);
-  const prefix = before.replace(/[\s·-]+$/, "");
-  return `${prefix ? `${prefix} · ` : ""}${readable}${after ?? ""}`;
-}
 
 const isPayable = (charge: Charge) => charge.status === "pending" || charge.status === "overdue";
 
@@ -84,7 +73,7 @@ export function PayerBillingView({ charges, proofs, settings, profileId, initial
           </Button>
         }
         title={chargeTitle(charge)}
-        description={`${typeLabels[charge.charge_type] ?? "Cobrança"} referente a ${formatCompetence(charge.competence)}.`}
+        description={`${chargeTypeLabels[charge.charge_type] ?? "Cobrança"} referente a ${formatCompetence(charge.competence)}.`}
       >
         <ChargeDetails
           charge={charge}

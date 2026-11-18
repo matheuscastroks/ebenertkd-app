@@ -78,8 +78,8 @@ export function AttendanceSheet({ classId, lessonId, lessonCompleted, rows, noti
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-2 min-[390px]:grid-cols-3" role="group" aria-label={`Presença de ${row.studentName}`}>
-          {options.map(({ value, label, icon: Icon, active }) => <Button key={value} type="button" variant="outline" className={cn("h-11 touch-manipulation text-sm", statuses[row.classEnrollmentId] === value && active)} aria-pressed={statuses[row.classEnrollmentId] === value} onClick={() => setStatuses((current) => ({ ...current, [row.classEnrollmentId]: value }))}><Icon aria-hidden="true" />{label}</Button>)}
+        <div className="grid grid-cols-3 gap-2" role="group" aria-label={`Presença de ${row.studentName}`}>
+          {options.map(({ value, label, icon: Icon, active }) => <Button key={value} type="button" variant="outline" className={cn("h-11 touch-manipulation px-1 text-sm max-[389px]:[&_svg]:hidden", statuses[row.classEnrollmentId] === value && active)} aria-pressed={statuses[row.classEnrollmentId] === value} onClick={() => setStatuses((current) => ({ ...current, [row.classEnrollmentId]: value }))}><Icon aria-hidden="true" />{label}</Button>)}
         </div>
       </CardContent>
     </Card>)}

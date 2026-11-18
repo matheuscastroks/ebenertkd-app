@@ -29,7 +29,7 @@ function ExamList({ events }: { events: ExamOverview["events"] }) {
           <div className="min-w-0 space-y-1">
             <p className="text-sm font-medium">{event.name}</p>
             <p className="text-sm text-muted-foreground">
-              <span className="capitalize">{formatExamDate(event.event_date, { weekday: "short", day: "2-digit", month: "short", year: "numeric" })}</span>
+              {formatExamDate(event.event_date, { day: "2-digit", month: "short", year: "numeric" })}
               {" · "}{event.location || "Local não informado"}
               {" · "}<span className="tabular-nums">{event.participantCount} {event.participantCount === 1 ? "candidato" : "candidatos"}</span>
               {" · "}Taxa <span className="tabular-nums">{formatBrl(event.default_fee_cents)}</span>

@@ -32,7 +32,7 @@ export function AdminDeleteStudentDialog({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm" className="h-8 text-xs">
+        <Button variant="ghost" size="sm" className="min-h-11 text-destructive md:min-h-9">
           Excluir
         </Button>
       </AlertDialogTrigger>

@@ -51,6 +51,7 @@ Quem precisar de mudança fora da sua área registra em "Bloqueios" e pede ao do
 
 - 2026-11-17: plano criado; quatro agentes lançados.
 - 2026-11-17: Task 2 (estrutura) concluída: navegação agrupada por perfil sem remover destinos, barra inferior com rótulos curtos, cabeçalho de página com título único e ação à direita, menu da conta só com itens da conta e skeletons com a geometria do cabeçalho.
+- 2026-11-17: Task 3 (professor) concluída: uma única ação laranja por tela (chamada do próximo treino no painel, criar turma, aula de hoje, novo exame, concluir análise), ações raras recolhidas (PIX e exportação em "Mais ações", filtros raros do financeiro, aulas e exames antigos, pedidos decididos, cancelar exame), títulos duplicados removidos, resumo "Tudo funcionando" no sistema e financeiro do pagador com rótulo "Pagar", competência legível e filtro de mês legível.
 
 ### Task 1 (Agente A): Nova tela de entrada
 
@@ -71,9 +72,9 @@ Quem precisar de mudança fora da sua área registra em "Bloqueios" e pede ao do
 
 ### Task 3 (Agente C): Telas do professor
 
-- [ ] **Step 1:** Para cada tela de `/admin`, registrar tarefa principal e níveis de informação.
-- [ ] **Step 2:** Reorganizar (painel, matrículas, turmas, chamada, exames, financeiro, contratos, sistema) com progressive disclosure para ações avançadas, sem remover funções.
-- [ ] **Step 3:** Testes das mudanças de comportamento; verificação no navegador; PR.
+- [x] **Step 1:** Para cada tela de `/admin`, registrar tarefa principal e níveis de informação.
+- [x] **Step 2:** Reorganizar (painel, matrículas, turmas, chamada, exames, financeiro, contratos, sistema) com progressive disclosure para ações avançadas, sem remover funções.
+- [x] **Step 3:** Testes das mudanças de comportamento; verificação no navegador; PR.
 
 ### Task 4 (Agente D): Portais do aluno e do responsável
 

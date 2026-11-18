@@ -107,18 +107,11 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
             {sortedGroups.map((group) => (
               <div key={group.targetGub} className="space-y-3">
                 {/* Cabeçalho do Grupo de Faixa-Alvo */}
-                <div className="flex items-center justify-between px-1">
-                  <div className="flex items-center gap-2.5">
-                    <BeltProgressionPill
-                      belt={group.targetBelt}
-                      gub={group.targetGub}
-                      size="sm"
-                    />
-                    <h3 className="text-sm font-semibold">
-                      Faixa {group.targetBelt} ({group.targetGub === 0 ? "1º dan" : `${group.targetGub}º gub`})
-                    </h3>
-                  </div>
-                  <span className="text-xs text-muted-foreground font-medium">
+                <div className="flex items-baseline justify-between gap-3">
+                  <h3 className="text-sm font-semibold">
+                    Para faixa {group.targetBelt} ({group.targetGub === 0 ? "1º dan" : `${group.targetGub}º gub`})
+                  </h3>
+                  <span className="shrink-0 text-sm text-muted-foreground tabular-nums">
                     {group.participants.length} {group.participants.length === 1 ? "aluno" : "alunos"}
                   </span>
                 </div>
