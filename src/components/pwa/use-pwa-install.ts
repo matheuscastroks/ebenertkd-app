@@ -1,37 +1,37 @@
 "use client";
 
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 export type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
-// Global singleton state so no early event is lost before React components mount
+// Global singleton state so early events before React mounts are never missed
 let globalDeferredPrompt: BeforeInstallPromptEvent | null = null;
-const listeners = new Set<() => void>();
+const promptListeners = new Set<() => void>();
 
-function notifyListeners() {
-  listeners.forEach((listener) => listener());
+function notifyPromptListeners() {
+  promptListeners.forEach((listener) => listener());
 }
 
 if (typeof window !== "undefined") {
   window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
     globalDeferredPrompt = event as BeforeInstallPromptEvent;
-    notifyListeners();
+    notifyPromptListeners();
   });
 
   window.addEventListener("appinstalled", () => {
     globalDeferredPrompt = null;
-    notifyListeners();
+    notifyPromptListeners();
   });
 }
 
-function subscribe(callback: () => void) {
-  listeners.add(callback);
+function subscribePrompt(callback: () => void) {
+  promptListeners.add(callback);
   return () => {
-    listeners.delete(callback);
+    promptListeners.delete(callback);
   };
 }
 
@@ -43,35 +43,71 @@ function getServerPromptSnapshot() {
   return null;
 }
 
+// Standalone mode subscriber
+function subscribeStandalone(callback: () => void) {
+  if (typeof window === "undefined") return () => {};
+  const media = window.matchMedia("(display-mode: standalone)");
+  media.addEventListener("change", callback);
+  return () => media.removeEventListener("change", callback);
+}
+
+function getStandaloneSnapshot() {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    Boolean((window.navigator as unknown as { standalone?: boolean }).standalone)
+  );
+}
+
+function getServerStandaloneSnapshot() {
+  return false;
+}
+
+// Client-mount subscriber
+const emptySubscribe = () => () => {};
+
+function getMountedSnapshot() {
+  return true;
+}
+
+function getServerMountedSnapshot() {
+  return false;
+}
+
+// iOS detection snapshot
+function getIosSnapshot() {
+  if (typeof window === "undefined") return false;
+  return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+}
+
+function getServerIosSnapshot() {
+  return false;
+}
+
 export function usePwaInstall() {
   const prompt = useSyncExternalStore(
-    subscribe,
+    subscribePrompt,
     getPromptSnapshot,
     getServerPromptSnapshot
   );
 
-  const [isStandalone, setIsStandalone] = useState(false);
-  const [isIos, setIsIos] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+  const isStandalone = useSyncExternalStore(
+    subscribeStandalone,
+    getStandaloneSnapshot,
+    getServerStandaloneSnapshot
+  );
 
-  useEffect(() => {
-    const standalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      Boolean((window.navigator as unknown as { standalone?: boolean }).standalone);
-    const iosDevice = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+  const isMounted = useSyncExternalStore(
+    emptySubscribe,
+    getMountedSnapshot,
+    getServerMountedSnapshot
+  );
 
-    setIsStandalone(standalone);
-    setIsIos(iosDevice);
-    setIsMounted(true);
-
-    const media = window.matchMedia("(display-mode: standalone)");
-    const handleMediaChange = (e: MediaQueryListEvent) => {
-      setIsStandalone(e.matches);
-    };
-
-    media.addEventListener("change", handleMediaChange);
-    return () => media.removeEventListener("change", handleMediaChange);
-  }, []);
+  const isIos = useSyncExternalStore(
+    emptySubscribe,
+    getIosSnapshot,
+    getServerIosSnapshot
+  );
 
   const canInstall = !isStandalone && (Boolean(prompt) || isIos);
 
@@ -88,7 +124,7 @@ export function usePwaInstall() {
       const choice = await currentPrompt.userChoice;
       if (choice.outcome === "accepted") {
         globalDeferredPrompt = null;
-        notifyListeners();
+        notifyPromptListeners();
       }
       return choice.outcome;
     }

@@ -1,66 +1,89 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { toast } from "sonner";
-
-type InstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-};
+import { usePwaInstall } from "./use-pwa-install";
+import { InstallModal } from "./install-modal";
 
 const DISMISS_KEY = "ebenertkd-install-guide-dismissed";
+const dismissListeners = new Set<() => void>();
+
+function notifyDismissListeners() {
+  dismissListeners.forEach((listener) => listener());
+}
+
+function subscribeDismissed(callback: () => void) {
+  dismissListeners.add(callback);
+  if (typeof window !== "undefined") {
+    window.addEventListener("storage", callback);
+  }
+  return () => {
+    dismissListeners.delete(callback);
+    if (typeof window !== "undefined") {
+      window.removeEventListener("storage", callback);
+    }
+  };
+}
+
+function getDismissedSnapshot() {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(DISMISS_KEY) === "true";
+}
+
+function getServerDismissedSnapshot() {
+  return false;
+}
 
 export function InstallGuide() {
-  const [prompt, setPrompt] = useState<InstallPromptEvent | null>(null);
-  const [showIosGuide, setShowIosGuide] = useState(false);
-  const [dismissed, setDismissed] = useState(true);
+  const { isMounted, isStandalone, isIos, hasNativePrompt, promptInstall } = usePwaInstall();
+  const [modalOpen, setModalOpen] = useState(false);
 
-  useEffect(() => {
-    const alreadyInstalled = window.matchMedia("(display-mode: standalone)").matches;
-    const wasDismissed = window.localStorage.getItem(DISMISS_KEY) === "true";
-    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const initialize = window.setTimeout(() => {
-      setDismissed(wasDismissed || alreadyInstalled);
-      setShowIosGuide(isIos && !alreadyInstalled);
-    }, 0);
-
-    const handleInstallPrompt = (event: Event) => {
-      event.preventDefault();
-      setPrompt(event as InstallPromptEvent);
-    };
-    window.addEventListener("beforeinstallprompt", handleInstallPrompt);
-    return () => {
-      window.clearTimeout(initialize);
-      window.removeEventListener("beforeinstallprompt", handleInstallPrompt);
-    };
-  }, []);
+  const wasDismissed = useSyncExternalStore(
+    subscribeDismissed,
+    getDismissedSnapshot,
+    getServerDismissedSnapshot
+  );
 
   const dismiss = useCallback(() => {
-    window.localStorage.setItem(DISMISS_KEY, "true");
-    setDismissed(true);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(DISMISS_KEY, "true");
+      notifyDismissListeners();
+    }
     toast.dismiss("pwa-install");
   }, []);
 
-  const install = useCallback(async () => {
-    if (!prompt) return;
-    await prompt.prompt();
-    const result = await prompt.userChoice;
-    if (result.outcome === "accepted") dismiss();
-    setPrompt(null);
-  }, [dismiss, prompt]);
+  const handleInstallAction = useCallback(async () => {
+    if (hasNativePrompt) {
+      const result = await promptInstall();
+      if (result === "accepted") {
+        dismiss();
+      }
+    } else if (isIos) {
+      setModalOpen(true);
+      dismiss();
+    }
+  }, [dismiss, hasNativePrompt, isIos, promptInstall]);
 
   useEffect(() => {
-    if (dismissed || (!prompt && !showIosGuide)) return;
-    toast.info("Instale o Ebenert KD", {
+    if (!isMounted || wasDismissed || isStandalone) return;
+    if (!hasNativePrompt && !isIos) return;
+
+    toast.info("Instale o Ebener TKD", {
       id: "pwa-install",
-      description: showIosGuide
+      description: isIos
         ? "No Safari, toque em Compartilhar e depois em Adicionar à Tela de Início."
         : "Acesse a academia com mais rapidez pela tela inicial do celular.",
       duration: Infinity,
-      action: prompt ? { label: "Instalar", onClick: install } : { label: "Entendi", onClick: dismiss },
-      cancel: prompt ? { label: "Agora não", onClick: dismiss } : undefined
+      action: {
+        label: isIos ? "Como instalar" : "Instalar",
+        onClick: handleInstallAction,
+      },
+      cancel: {
+        label: "Agora não",
+        onClick: dismiss,
+      },
     });
-  }, [dismiss, dismissed, install, prompt, showIosGuide]);
+  }, [dismiss, handleInstallAction, hasNativePrompt, isIos, isMounted, isStandalone, wasDismissed]);
 
-  return null;
+  return <InstallModal open={modalOpen} onOpenChange={setModalOpen} />;
 }

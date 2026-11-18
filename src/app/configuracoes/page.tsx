@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { DeleteAccountSection } from "./delete-account-section";
 import { ProfileEditor } from "./profile-editor";
+import { InstallAppCard } from "@/components/pwa/install-app-card";
 
 function SettingsGroup({
   id,
@@ -143,6 +144,14 @@ export default async function SettingsPage({
 
             <SettingsGroup id="settings-appearance" title="Aparência">
               <ThemePreference />
+            </SettingsGroup>
+
+            <SettingsGroup
+              id="settings-app"
+              title="Aplicativo no Celular"
+              description="Instale o Ebener TKD no seu smartphone para acessar treinos e avisos direto da tela de início."
+            >
+              <InstallAppCard />
             </SettingsGroup>
           </TabsContent>
 

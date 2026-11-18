@@ -7,7 +7,6 @@ import {
 } from "@/components/dashboard/notification-nav-item";
 import { PageBreadcrumb, type BreadcrumbEntry } from "@/components/shared/page-breadcrumb";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { InstallGuide } from "@/components/pwa/install-guide";
 
 import { MobileBottomNav } from "@/components/dashboard/mobile-bottom-nav";
 import { MobileGestureDetector } from "@/components/dashboard/mobile-gesture-detector";
@@ -61,7 +60,6 @@ export function DashboardFrame({
         </div>
         <MobileBottomNav navItems={navItems} />
         <MobileGestureDetector />
-        <InstallGuide />
       </NotificationCountProvider>
     </SidebarProvider>
   );
