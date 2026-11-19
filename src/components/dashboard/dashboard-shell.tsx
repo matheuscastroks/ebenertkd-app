@@ -5,6 +5,7 @@ import {
   NotificationCountProvider,
   NotificationHeaderButton,
 } from "@/components/dashboard/notification-nav-item";
+import { HeaderActions } from "@/components/dashboard/header-actions";
 import { PageBreadcrumb, type BreadcrumbEntry } from "@/components/shared/page-breadcrumb";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
@@ -83,7 +84,7 @@ export function DashboardShell({
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-sidebar md:overflow-hidden">
       <header className="shrink-0 bg-sidebar px-4 pb-3 pt-4 md:px-6 md:pb-3.5 md:pt-4">
-        <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3 md:items-center">
+        <div className="flex flex-wrap items-start gap-x-4 gap-y-3 md:flex-nowrap md:items-center md:gap-x-6">
           <div className="min-w-0 flex-1 space-y-0.5">
             {hasBreadcrumbs ? (
               <div className="mb-1 min-w-0">
@@ -101,12 +102,8 @@ export function DashboardShell({
             </p>
           </div>
 
-          <div className="flex shrink-0 items-center gap-2.5">
-            {headerActions ? (
-              <div className="flex flex-wrap items-center gap-2">
-                {headerActions}
-              </div>
-            ) : null}
+          {headerActions ? <HeaderActions>{headerActions}</HeaderActions> : null}
+          <div className="flex shrink-0 items-center">
             <NotificationHeaderButton />
           </div>
         </div>

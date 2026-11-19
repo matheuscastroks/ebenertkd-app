@@ -48,7 +48,7 @@ export async function EnrollmentWorkspace({
         title="Minha matrícula"
         subtitle="Acompanhe sua graduação e o andamento da ficha."
       >
-        <div className="mx-auto max-w-3xl">
+        <div className="w-full min-w-0">
           <Card>
             <CardHeader>
               <CardTitle>Resumo da matrícula</CardTitle>

@@ -54,7 +54,7 @@ export default async function EnrollmentReviewPage({ params, searchParams }: { p
       subtitle="Análise da matrícula: ficha, documentos e condições."
       breadcrumbs={[{ label: "Matrículas", href: ROUTES.adminEnrollments }, { label: bundle.student.full_name }]}
     >
-      <div className="mx-auto w-full max-w-6xl">
+      <div className="w-full min-w-0">
         <ReviewPanel
           bundle={toClientData(bundle)}
           reviews={toClientData(reviews) as Array<Record<string, unknown>>}

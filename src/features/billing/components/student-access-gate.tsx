@@ -127,7 +127,7 @@ export function StudentAccessGate({
   return (
     <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col">
       {showLockedFinanceBanner ? (
-        <div className="mx-auto w-full max-w-6xl shrink-0 px-4 pt-4 sm:px-6 lg:px-8">
+        <div className="w-full shrink-0 px-4 pt-4 md:px-6">
           <Alert>
             <AlertTitle>Acesso às demais áreas pausado até a regularização mensal</AlertTitle>
             <AlertDescription>
@@ -138,7 +138,7 @@ export function StudentAccessGate({
       ) : null}
 
       {showExpiringCycleBanner ? (
-        <div className="mx-auto w-full max-w-6xl px-4 pt-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 pt-4 md:px-6">
           <Alert>
             <AlertTitle>
               Seu ciclo mensal de acesso vence{" "}
@@ -164,7 +164,7 @@ export function StudentAccessGate({
       ) : null}
 
       {showExpiredParqBanner ? (
-        <div className="mx-auto w-full max-w-6xl px-4 pt-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 pt-4 md:px-6">
           <Alert>
             <AlertTitle>Hora de renovar seu questionário de saúde</AlertTitle>
             <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
