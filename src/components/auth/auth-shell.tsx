@@ -45,10 +45,10 @@ export function AuthShell({
 }) {
   const { shortName } = useAcademyBrand();
   return (
-    <div className="min-h-dvh lg:h-dvh lg:overflow-hidden bg-background lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+    <div className="min-h-dvh lg:h-dvh lg:overflow-hidden bg-background lg:grid lg:grid-cols-2">
       <section
         aria-label={shortName}
-        className="hidden border-r border-border bg-card lg:flex lg:flex-col lg:justify-between lg:p-10"
+        className="hidden border-r border-border bg-card lg:flex lg:flex-col lg:justify-between lg:p-12 xl:p-16"
       >
         <BrandMark />
         <div className="max-w-md space-y-3">
@@ -61,12 +61,13 @@ export function AuthShell({
         </div>
       </section>
 
-      <main className="flex min-h-dvh flex-col justify-center px-4 py-4 sm:px-6 lg:h-dvh lg:overflow-y-auto lg:py-6">
-        <div className="mx-auto flex w-full max-w-sm flex-col gap-3.5">
+      {/* No desktop o formulário ocupa a coluna inteira até uma largura de leitura confortável. */}
+      <main className="flex min-h-dvh flex-col justify-center px-4 py-4 sm:px-6 lg:h-dvh lg:overflow-y-auto lg:px-12 lg:py-10 xl:px-16">
+        <div className="mx-auto flex w-full max-w-sm flex-col gap-3.5 sm:max-w-md lg:max-w-lg lg:gap-5">
           <BrandMark className="lg:hidden" />
-          <header className="space-y-1">
-            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">{title}</h1>
-            {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
+          <header className="space-y-1 lg:space-y-1.5">
+            <h1 className="text-xl font-semibold tracking-tight sm:text-2xl lg:text-3xl">{title}</h1>
+            {description ? <p className="text-sm text-muted-foreground lg:text-base">{description}</p> : null}
           </header>
           {children}
           {footer ? <div className="text-xs text-muted-foreground">{footer}</div> : null}

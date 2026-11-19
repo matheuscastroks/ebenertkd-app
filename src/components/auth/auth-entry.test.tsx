@@ -63,8 +63,9 @@ describe("Acesso acessivel", () => {
   });
   it("perfil de cadastro mostra as duas opções visíveis", async () => {
     const user = userEvent.setup(); render(<RegisterCard />);
-    const student = screen.getByRole("radio", { name: /Aluno/ });
-    const guardian = screen.getByRole("radio", { name: /Responsável/ });
+    expect(screen.getByRole("group", { name: "Para quem é a conta?" })).toBeInTheDocument();
+    const student = screen.getByRole("radio", { name: /Para mim/ });
+    const guardian = screen.getByRole("radio", { name: /Para meu filho ou filha/ });
     expect(student).toBeChecked();
     expect(student).toHaveAttribute("value", "adult_student");
     expect(guardian).toHaveAttribute("value", "guardian");

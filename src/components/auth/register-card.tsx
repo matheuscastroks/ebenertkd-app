@@ -9,8 +9,8 @@ import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
 const ACCOUNT_TYPES = [
-  { value: "adult_student", label: "Vou treinar (Aluno)", hint: "Tenho 18 anos ou mais" },
-  { value: "guardian", label: "Acompanhar filho (Responsável)", hint: "Matricular menor de 18" }
+  { value: "adult_student", label: "Para mim", hint: "Vou treinar e tenho 18 anos ou mais." },
+  { value: "guardian", label: "Para meu filho ou filha", hint: "Sou responsável por um aluno menor de 18." }
 ] as const;
 
 /** Cadastro de aluno adulto ou responsável. Menores recebem acesso pelo professor. */
@@ -27,13 +27,13 @@ export function RegisterCard({ errorMessage }: { errorMessage?: string }) {
       ) : null}
 
       <form action={registerAdultAction} className="space-y-3" aria-describedby={errorMessage ? "register-error" : undefined}>
-        <fieldset className="space-y-1.5">
-          <legend className="mb-1.5 text-sm font-medium">Como você vai usar o portal?</legend>
-          <div className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
+        <fieldset className="space-y-2">
+          <legend className="mb-2 text-sm font-medium">Para quem é a conta?</legend>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {ACCOUNT_TYPES.map((option, index) => (
               <label
                 key={option.value}
-                className="flex min-h-11 cursor-pointer flex-col justify-center rounded-md px-2.5 py-1.5 text-left transition-[color,background-color,box-shadow] duration-(--duration-quick) ease-(--ease-smooth-out) text-muted-foreground hover:text-foreground has-checked:bg-card has-checked:text-foreground has-checked:shadow-xs has-focus-visible:ring-2 has-focus-visible:ring-ring motion-reduce:transition-none"
+                className="flex min-h-11 cursor-pointer flex-col justify-center gap-0.5 rounded-xl border border-input bg-card px-3.5 py-3 text-left transition-[background-color,border-color,box-shadow] duration-(--duration-quick) ease-(--ease-smooth-out) hover:bg-muted/60 has-checked:border-primary-border has-checked:ring-1 has-checked:ring-primary-border has-focus-visible:ring-2 has-focus-visible:ring-ring motion-reduce:transition-none"
               >
                 <input
                   type="radio"
@@ -42,13 +42,13 @@ export function RegisterCard({ errorMessage }: { errorMessage?: string }) {
                   defaultChecked={index === 0}
                   className="sr-only"
                 />
-                <span className="block text-sm font-medium leading-tight">{option.label}</span>
-                <span className="block text-xs leading-tight text-muted-foreground">{option.hint}</span>
+                <span className="block text-sm font-semibold leading-snug text-foreground">{option.label}</span>
+                <span className="block text-xs leading-snug text-muted-foreground">{option.hint}</span>
               </label>
             ))}
           </div>
           <p className="text-xs text-muted-foreground">
-            Treina e também tem filhos na academia? Crie como Aluno — você poderá adicionar dependentes no painel.
+            Você treina e seus filhos também? Escolha “Para mim” e adicione os filhos depois, pelo painel.
           </p>
         </fieldset>
 
