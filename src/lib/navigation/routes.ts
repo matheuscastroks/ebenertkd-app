@@ -27,6 +27,8 @@ export const ROUTES = {
   adminBilling: "/admin/financeiro",
   adminBillingClosing: "/admin/financeiro/fechamento",
   adminBillingSettings: "/admin/financeiro/configuracoes",
+  adminBillingCalculator: "/admin/financeiro/calculadora",
+  adminBillingAdjustment: "/admin/financeiro/reajuste",
   adminAnnualReport: "/admin/relatorios/anual",
   adminSystem: "/admin/sistema",
   student: "/aluno",
@@ -124,7 +126,9 @@ export function navigationForProfile(
         group: "Gestão",
         children: [
           { label: "Cobranças do mês", href: ROUTES.adminBilling, exact: true },
-          { label: "Fechamento mensal", href: ROUTES.adminBillingClosing }
+          { label: "Fechamento mensal", href: ROUTES.adminBillingClosing },
+          { label: "Calculadora de metas", href: ROUTES.adminBillingCalculator },
+          { label: "Reajuste de mensalidade", href: ROUTES.adminBillingAdjustment }
         ]
       },
       {

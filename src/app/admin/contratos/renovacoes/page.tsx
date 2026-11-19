@@ -183,6 +183,14 @@ async function RenewalsContent({ searchParams }: { searchParams: SearchParams })
                     <span className="font-medium text-foreground tabular-nums">
                       {formatBrl(item.monthlyFeeCents)}
                     </span>
+                    {item.pendingFeeCents !== null ? (
+                      <>
+                        {" "}
+                        <StatusBadge tone="info" className="tabular-nums">
+                          Reajuste: {formatBrl(item.monthlyFeeCents)} → {formatBrl(item.pendingFeeCents)}
+                        </StatusBadge>
+                      </>
+                    ) : null}
                     {item.guardianName ? ` · Responsável: ${item.guardianName}` : ""}
                   </p>
                 </div>

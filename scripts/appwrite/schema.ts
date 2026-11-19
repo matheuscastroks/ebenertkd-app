@@ -551,6 +551,67 @@ export const tables: TableDefinition[] = [
     indexes: []
   },
   {
+    id: APPWRITE_IDS.tables.financeScenarios,
+    name: "Finance scenarios",
+    columns: [
+      { key: "name", kind: "varchar", size: 64, required: true },
+      { key: "fixed_costs_json", kind: "text", required: true },
+      { key: "variable_cost_cents", kind: "integer", required: true, min: 0 },
+      { key: "payment_fee_bps", kind: "integer", required: true, min: 0, max: 10000 },
+      { key: "pro_labore_cents", kind: "integer", required: true, min: 0 },
+      { key: "reserve_cents", kind: "integer", required: true, min: 0 },
+      { key: "default_rate_bps", kind: "integer", required: true, min: 0, max: 10000 },
+      { key: "created_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [{ key: "updated_at_idx", type: "key", columns: ["updated_at"] }]
+  },
+  {
+    id: APPWRITE_IDS.tables.tuitionAdjustments,
+    name: "Tuition adjustments",
+    columns: [
+      { key: "status", kind: "enum", elements: ["draft", "applied", "cancelled"], required: true },
+      { key: "mode", kind: "enum", elements: ["percent", "fixed", "rounded"], required: true },
+      { key: "percent_bps", kind: "integer", required: false, min: 0, max: 100000 },
+      { key: "reference_index_label", kind: "varchar", size: 128, required: false },
+      { key: "effective_from", kind: "datetime", required: true },
+      { key: "message_template", kind: "text", required: true },
+      { key: "total_monthly_impact_cents", kind: "integer", required: true },
+      { key: "item_count", kind: "integer", required: true, min: 0 },
+      { key: "applied_at", kind: "datetime", required: false },
+      { key: "applied_by_account_id", kind: "varchar", size: 36, required: false },
+      { key: "notice_published_at", kind: "datetime", required: false },
+      { key: "created_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "status_idx", type: "key", columns: ["status"] },
+      { key: "created_at_idx", type: "key", columns: ["created_at"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.tuitionAdjustmentItems,
+    name: "Tuition adjustment items",
+    columns: [
+      { key: "adjustment_id", kind: "varchar", size: 36, required: true },
+      { key: "enrollment_id", kind: "varchar", size: 36, required: true },
+      { key: "student_id", kind: "varchar", size: 36, required: true },
+      { key: "previous_fee_cents", kind: "integer", required: true, min: 0 },
+      { key: "new_fee_cents", kind: "integer", required: true, min: 0 },
+      { key: "excluded", kind: "boolean", required: true },
+      { key: "applied_at", kind: "datetime", required: false },
+      { key: "notified_at", kind: "datetime", required: false }
+    ],
+    indexes: [
+      { key: "adjustment_idx", type: "key", columns: ["adjustment_id"] },
+      { key: "enrollment_idx", type: "key", columns: ["enrollment_id"] },
+      { key: "student_idx", type: "key", columns: ["student_id"] },
+      { key: "adjustment_enrollment_unique", type: "unique", columns: ["adjustment_id", "enrollment_id"] }
+    ]
+  },
+  {
     id: APPWRITE_IDS.tables.notifications,
     name: "Notifications",
     columns: [

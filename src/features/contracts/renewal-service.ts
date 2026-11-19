@@ -126,6 +126,8 @@ export type RenewalPipelineItem = {
   guardianName: string | null;
   enrollmentStatus: Enrollment["status"];
   monthlyFeeCents: number;
+  /** Mensalidade líquida já definida na matrícula (reajuste aplicado) e ainda não refletida no contrato vigente. */
+  pendingFeeCents: number | null;
   startsAt: string;
   endsAt: string;
   suggestedNextEnd: string;
@@ -203,6 +205,7 @@ export async function getContractRenewalPipeline(filters: {
     if (enrollment.status === "cancelled" || enrollment.status === "draft") continue;
 
     const { bucket, daysRemaining } = classifyContractRenewalBucket(contract.ends_at, referenceDate);
+    const pendingNetFee = Math.max(0, (enrollment.monthly_fee_cents ?? 0) - (enrollment.discount_cents ?? 0));
     const baseNextStart = contract.ends_at.slice(0, 10) >= referenceDate
       ? contract.ends_at.slice(0, 10)
       : referenceDate;
@@ -214,6 +217,7 @@ export async function getContractRenewalPipeline(filters: {
       guardianName: contract.guardian_name ?? null,
       enrollmentStatus: enrollment.status,
       monthlyFeeCents: contract.monthly_fee_cents,
+      pendingFeeCents: pendingNetFee > 0 && pendingNetFee !== contract.monthly_fee_cents ? pendingNetFee : null,
       startsAt: contract.starts_at,
       endsAt: contract.ends_at,
       suggestedNextEnd: addMonthsToIsoDay(baseNextStart, 12),

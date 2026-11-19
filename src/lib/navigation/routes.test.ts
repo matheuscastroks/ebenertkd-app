@@ -21,8 +21,10 @@ describe("navigationForProfile", () => {
     expect(items.find((item) => item.href === ROUTES.adminBilling)?.children?.map((item) => item.href)).toEqual([
       ROUTES.adminBilling,
       ROUTES.adminBillingClosing,
+      ROUTES.adminBillingCalculator,
+      ROUTES.adminBillingAdjustment,
     ]);
-    expect(items.find((item) => item.href === ROUTES.adminAnnualReport)).toMatchObject({ group: "Gestão", icon: "dashboard" });
+    expect(items.find((item) => item.href === ROUTES.adminAnnualReport)).toMatchObject({ group: "Gestão", icon: "reports" });
     expect(items.find((item) => item.href === ROUTES.adminSystem)).toMatchObject({ group: "Gestão", icon: "system" });
   });
 
@@ -53,10 +55,13 @@ describe("navigationForProfile", () => {
         ROUTES.adminCompliance,
         ROUTES.adminStudentAccess,
         ROUTES.adminClasses,
+        ROUTES.adminLocations,
         ROUTES.adminExams,
         ROUTES.adminExamEligibility,
         ROUTES.adminBilling,
         ROUTES.adminBillingClosing,
+        ROUTES.adminBillingCalculator,
+        ROUTES.adminBillingAdjustment,
         ROUTES.adminContracts,
         ROUTES.adminContractRenewals,
         ROUTES.adminContractTemplate,

@@ -8,6 +8,8 @@ export const CACHE_TAGS = {
   trainingClass: (id: string) => `training-class:${id}`,
   contractTemplate: "contract-template",
   billingSettings: "billing-settings",
+  financeScenarios: "finance-scenarios",
+  tuitionAdjustments: "tuition-adjustments",
   examEvents: "exam-events",
   examEvent: (id: string) => `exam-event:${id}`,
   // Perfis e sessão (autorização NUNCA vem do cache: só a linha do perfil)
