@@ -15,7 +15,7 @@ export function PasswordToggle({ visible, onToggle }: { visible: boolean; onTogg
     <button
       type="button"
       onClick={onToggle}
-      className="absolute right-0 top-0 flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
+      className="absolute right-0 top-0 flex size-11 items-center justify-center rounded-r-xl text-muted-foreground transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
       aria-label={visible ? "Ocultar senha" : "Ver senha"}
       aria-pressed={visible}
     >

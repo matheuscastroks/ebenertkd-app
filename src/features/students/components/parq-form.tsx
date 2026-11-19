@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import {
   PARQ_QUESTIONS,
@@ -720,14 +721,14 @@ export function ParqForm({
                     htmlFor="parq-typed-name"
                   >
                     Ou digite seu nome completo para assinar
-                    <input
+                    <Input
                       id="parq-typed-name"
                       value={typedName}
                       onChange={(event) => setTypedName(event.target.value)}
                       placeholder={defaultSignerName}
                       autoComplete="name"
                       maxLength={128}
-                      className="h-11 rounded-lg border border-input bg-background px-3 text-sm font-normal text-foreground"
+                      className="h-11 font-normal"
                     />
                   </label>
                 </div>
