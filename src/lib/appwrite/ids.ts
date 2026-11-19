@@ -35,7 +35,10 @@ export const APPWRITE_IDS = {
     pushSubscriptions: "push_subscriptions",
     notificationDeliveries: "notification_deliveries",
     auditEvents: "audit_events",
-    automationRuns: "automation_runs"
+    automationRuns: "automation_runs",
+    academySettings: "academy_settings",
+    academyPolicies: "academy_policies",
+    academyConfigRevisions: "academy_config_revisions"
   },
   functions: {
     dailyOperations: "daily-operations",

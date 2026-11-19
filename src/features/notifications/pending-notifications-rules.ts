@@ -122,7 +122,7 @@ export function buildPendingNotificationSpecs(input: {
         title: `${subjectPrefix}Acesso ao aplicativo pausado`,
         body: isGuardianView
           ? `O ciclo mensal de acesso de ${student.full_name} expirou. Envie o comprovante PIX no financeiro para liberar o app imediatamente.`
-          : "Seu ciclo de 30 dias após o último pagamento expirou. Envie o comprovante PIX no financeiro para liberar o aplicativo na hora.",
+          : `Seu ciclo de ${access.windowDays} dias após o último pagamento expirou. Envie o comprovante PIX no financeiro para liberar o aplicativo na hora.`,
         actionUrl: links.billing,
         dedupeKey: `pending:access-locked:${student.$id}:${access.accessValidUntil ?? referenceDay}`,
       });

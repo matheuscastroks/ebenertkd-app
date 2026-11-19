@@ -1,3 +1,4 @@
+import { getAcademyIdentity } from "@/features/academy/config-service";
 import Link from "next/link";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
@@ -15,7 +16,7 @@ import { ROUTES } from "@/lib/navigation/routes";
 import { ArrowRight, Clock, MapPin } from "@/components/ui/icons";
 
 async function StudentCalendarContent({ profile }: { profile: Profile }) {
-  const data = await getStudentCalendarData(profile);
+  const [data, identity] = await Promise.all([getStudentCalendarData(profile), getAcademyIdentity()]);
   const { trainingClass, upcomingSessions, upcomingExams } = data;
   const firstClassDate =
     trainingClass && trainingClass.weekdays.length > 0
@@ -62,7 +63,7 @@ async function StudentCalendarContent({ profile }: { profile: Profile }) {
                   startTime={trainingClass.start_time}
                   endTime={trainingClass.end_time}
                   location={trainingClass.location}
-                  description={`Treino semanal da turma ${trainingClass.name} (${trainingClass.weekdays.join(", ")}). Portal Ebener TKD.`}
+                  description={`Treino semanal da turma ${trainingClass.name} (${trainingClass.weekdays.join(", ")}). Portal ${identity.short_name}.`}
                   recurrenceWeekdays={trainingClass.weekdays}
                   fileName={`grade-${trainingClass.$id}`}
                   label="Salvar grade na agenda"
@@ -128,7 +129,7 @@ async function StudentCalendarContent({ profile }: { profile: Profile }) {
                     startTime={session.startTime}
                     endTime={session.endTime}
                     location={session.location}
-                    description="Treino agendado pelo portal Ebener TKD."
+                    description={`Treino agendado pelo portal ${identity.short_name}.`}
                     fileName={`treino-${session.date}`}
                     label="Adicionar à agenda"
                   />
@@ -181,7 +182,7 @@ async function StudentCalendarContent({ profile }: { profile: Profile }) {
                     title={exam.name}
                     date={exam.date}
                     location={exam.location}
-                    description="Exame de graduação Ebener TKD."
+                    description={`Exame de graduação ${identity.short_name}.`}
                     fileName={`exame-${exam.date}`}
                     label="Salvar exame na agenda"
                   />

@@ -1,17 +1,18 @@
+import { DEFAULT_ACADEMY_IDENTITY, type AcademyIdentity } from "@/features/academy/defaults";
+import { identityAddress, identityDocumentLabel } from "@/features/academy/identity-rules";
+import { formatBrazilianPhone } from "@/lib/phone";
+
 /**
- * Conteúdo da Política de Privacidade.
- * Itens do tipo `pending` dependem de decisão do professor (controlador)
- * e devem ser preenchidos/confirmados antes da publicação. O texto exige revisão jurídica.
+ * Conteúdo da Política de Privacidade (texto genérico e simples). O nome da academia e o canal de
+ * contato vêm da identidade; CNPJ/CPF, endereço e encarregado (DPO) só aparecem quando informados.
  */
-export const PRIVACY_PLACEHOLDER = "[A PREENCHER PELO PROFESSOR]";
 
 export const PRIVACY_EFFECTIVE_DATE = "17 de novembro de 2026";
 export const PRIVACY_EFFECTIVE_DATE_ISO = "2026-11-17";
 
 export type PrivacyBlock =
   | { type: "p"; text: string }
-  | { type: "ul"; items: string[] }
-  | { type: "pending"; text: string };
+  | { type: "ul"; items: string[] };
 
 export type PrivacySection = {
   id: string;
@@ -19,31 +20,28 @@ export type PrivacySection = {
   blocks: PrivacyBlock[];
 };
 
-export const PRIVACY_SECTIONS: PrivacySection[] = [
-  {
+function controllerSection(identity: AcademyIdentity): PrivacySection {
+  const contact = identity.privacy_contact || identity.contact_email || (identity.phone_whatsapp ? formatBrazilianPhone(identity.phone_whatsapp) : null);
+  const items = [
+    `Nome: ${identity.legal_name}`,
+    contact ? `Contato para assuntos de privacidade: ${contact}` : "Contato para assuntos de privacidade: fale diretamente com o professor na academia.",
+    identityDocumentLabel(identity) ? `Documento: ${identityDocumentLabel(identity)}` : null,
+    identityAddress(identity) ? `Endereço: ${identityAddress(identity)}` : null,
+    identity.dpo_name ? `Encarregado pelo tratamento de dados (DPO): ${identity.dpo_name}` : null
+  ].filter((item): item is string => Boolean(item));
+  return {
     id: "controlador",
     title: "1. Quem é o controlador dos dados",
     blocks: [
-      {
-        type: "p",
-        text: "O controlador dos seus dados pessoais é a Ebener Taekwondo, academia responsável por este portal. É a academia quem decide por que e como os dados são usados."
-      },
-      {
-        type: "ul",
-        items: [
-          `Nome/razão social completo: ${PRIVACY_PLACEHOLDER}`,
-          `CNPJ ou CPF do responsável: ${PRIVACY_PLACEHOLDER}`,
-          `Endereço: ${PRIVACY_PLACEHOLDER}`,
-          `Canal de contato para assuntos de privacidade (e-mail ou WhatsApp): ${PRIVACY_PLACEHOLDER}`,
-          `Encarregado pelo tratamento de dados (DPO), se houver: ${PRIVACY_PLACEHOLDER}`
-        ]
-      },
-      {
-        type: "pending",
-        text: "Decisão do professor: informar os dados do controlador e do canal de contato acima."
-      }
+      { type: "p", text: `O controlador dos seus dados pessoais é a ${identity.display_name}, academia responsável por este portal. É a academia quem decide por que e como os dados são usados.` },
+      { type: "ul", items }
     ]
-  },
+  };
+}
+
+export function buildPrivacySections(identity: AcademyIdentity = DEFAULT_ACADEMY_IDENTITY): PrivacySection[] {
+  return [
+  controllerSection(identity),
   {
     id: "dados",
     title: "2. Quais dados coletamos",
@@ -81,10 +79,6 @@ export const PRIVACY_SECTIONS: PrivacySection[] = [
           "Enviar avisos sobre aulas, exames, cobranças e contratos, inclusive por push. Base: execução de contrato; para push, consentimento dado ao permitir as notificações no navegador (art. 7º, I).",
           "Segurança, prevenção a fraudes, logs de auditoria e backup. Base: legítimo interesse e exercício regular de direitos (art. 7º, VI e IX)."
         ]
-      },
-      {
-        type: "pending",
-        text: "Decisão do professor com apoio jurídico: confirmar a base legal adotada para cada finalidade, em especial para dados de saúde."
       }
     ]
   },
@@ -124,10 +118,6 @@ export const PRIVACY_SECTIONS: PrivacySection[] = [
       {
         type: "p",
         text: "Dentro da academia, o acesso é limitado por perfil: o professor (administrador) acessa os dados necessários à gestão; alunos e responsáveis acessam apenas os próprios dados ou os de seus dependentes vinculados."
-      },
-      {
-        type: "pending",
-        text: "Decisão do professor: confirmar se há outros operadores (contador, gateway de pagamento, ferramenta de mensagens) e, se houver, listá-los aqui."
       }
     ]
   },
@@ -143,10 +133,6 @@ export const PRIVACY_SECTIONS: PrivacySection[] = [
           "Backups: o sistema mantém cópias diárias e semanais por um período limitado e rotativo; dados excluídos podem permanecer nas cópias de segurança até que elas sejam substituídas pela rotação.",
           "Registros de auditoria: pelo tempo necessário à segurança e à prestação de contas."
         ]
-      },
-      {
-        type: "pending",
-        text: `Decisão do professor: definir prazos exatos de retenção (por exemplo, quantos anos após o encerramento da matrícula) para contratos, dados financeiros, atestados e logs: ${PRIVACY_PLACEHOLDER}.`
       }
     ]
   },
@@ -175,10 +161,6 @@ export const PRIVACY_SECTIONS: PrivacySection[] = [
       {
         type: "p",
         text: "Ao excluir a conta, o acesso é encerrado imediatamente, o e-mail e o nome de usuário do perfil são anonimizados, os vínculos com responsáveis são revogados e os contatos (WhatsApp e telefone de emergência) da ficha do aluno são apagados, passando a ficha a constar como inativa. Alguns registros podem ser mantidos quando houver obrigação legal ou necessidade de exercício regular de direitos, como contratos e dados financeiros."
-      },
-      {
-        type: "pending",
-        text: "Decisão do professor: definir prazo de resposta aos pedidos e quais registros (contratos, financeiro, auditoria) serão mantidos ou anonimizados após a exclusão da conta, já que o procedimento atual não apaga todos os dados da ficha."
       },
       {
         type: "p",
@@ -237,4 +219,8 @@ export const PRIVACY_SECTIONS: PrivacySection[] = [
       }
     ]
   }
-];
+  ];
+}
+
+/** Versão com os dados padrão da academia (usada em testes e como referência de seções). */
+export const PRIVACY_SECTIONS: PrivacySection[] = buildPrivacySections();

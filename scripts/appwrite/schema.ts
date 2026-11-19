@@ -380,6 +380,9 @@ export const tables: TableDefinition[] = [
       { key: "status", kind: "enum", elements: ["pending_signature", "signed", "expired", "cancelled"], required: true },
       { key: "content_snapshot", kind: "text", required: true },
       { key: "content_hash", kind: "varchar", size: 64, required: true },
+      { key: "policy_snapshot_json", kind: "text", required: true },
+      { key: "academy_legal_name", kind: "varchar", size: 160, required: true },
+      { key: "academy_document", kind: "varchar", size: 32, required: false },
       { key: "student_name", kind: "varchar", size: 128, required: true },
       { key: "guardian_name", kind: "varchar", size: 128, required: false },
       { key: "monthly_fee_cents", kind: "integer", required: true, min: 0 },
@@ -737,6 +740,74 @@ export const tables: TableDefinition[] = [
       { key: "idempotency_key_unique", type: "unique", columns: ["idempotency_key"] },
       { key: "job_idx", type: "key", columns: ["job"] },
       { key: "created_at_idx", type: "key", columns: ["created_at"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.academySettings,
+    name: "Academy settings",
+    columns: [
+      { key: "legal_name", kind: "varchar", size: 160, required: true },
+      { key: "display_name", kind: "varchar", size: 96, required: true },
+      { key: "short_name", kind: "varchar", size: 24, required: true },
+      { key: "document_type", kind: "enum", elements: ["cnpj", "cpf"], required: false },
+      { key: "document_number", kind: "varchar", size: 14, required: false },
+      { key: "address_line", kind: "varchar", size: 160, required: false },
+      { key: "address_complement", kind: "varchar", size: 96, required: false },
+      { key: "address_district", kind: "varchar", size: 96, required: false },
+      { key: "address_city", kind: "varchar", size: 96, required: false },
+      { key: "address_state", kind: "varchar", size: 2, required: false },
+      { key: "address_zip", kind: "varchar", size: 8, required: false },
+      { key: "phone_whatsapp", kind: "varchar", size: 24, required: false },
+      { key: "contact_email", kind: "varchar", size: 320, required: false },
+      { key: "instagram_handle", kind: "varchar", size: 64, required: false },
+      { key: "professor_name", kind: "varchar", size: 128, required: false },
+      { key: "professor_title", kind: "varchar", size: 32, required: false },
+      { key: "professor_graduation", kind: "varchar", size: 64, required: false },
+      { key: "privacy_contact", kind: "varchar", size: 320, required: false },
+      { key: "dpo_name", kind: "varchar", size: 128, required: false },
+      { key: "logo_file_id", kind: "varchar", size: 36, required: false },
+      { key: "theme_color", kind: "varchar", size: 7, required: false },
+      { key: "federation", kind: "enum", elements: ["cbtkd", "itf", "kukkiwon", "custom"], required: false },
+      { key: "timezone", kind: "varchar", size: 64, required: false },
+      { key: "setup_completed_at", kind: "datetime", required: false },
+      { key: "revision", kind: "integer", required: true, min: 1 },
+      { key: "updated_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: []
+  },
+  {
+    id: APPWRITE_IDS.tables.academyPolicies,
+    name: "Academy policies",
+    columns: [
+      { key: "section", kind: "varchar", size: 32, required: true },
+      { key: "schema_version", kind: "integer", required: true, min: 1 },
+      { key: "data_json", kind: "text", required: true },
+      { key: "revision", kind: "integer", required: true, min: 1 },
+      { key: "updated_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [{ key: "section_unique", type: "unique", columns: ["section"] }]
+  },
+  {
+    id: APPWRITE_IDS.tables.academyConfigRevisions,
+    name: "Academy config revisions",
+    columns: [
+      { key: "scope", kind: "enum", elements: ["settings", "policy", "belt_ranks"], required: true },
+      { key: "section", kind: "varchar", size: 32, required: true },
+      { key: "entity_id", kind: "varchar", size: 36, required: true },
+      { key: "revision", kind: "integer", required: true, min: 1 },
+      { key: "before_json", kind: "text", required: false },
+      { key: "after_json", kind: "text", required: true },
+      { key: "reason", kind: "varchar", size: 500, required: false },
+      { key: "changed_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "changed_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "scope_section_revision_unique", type: "unique", columns: ["scope", "section", "revision"] },
+      { key: "changed_at_idx", type: "key", columns: ["changed_at"] }
     ]
   }
 ];

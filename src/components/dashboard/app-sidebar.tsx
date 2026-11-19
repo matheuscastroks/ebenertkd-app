@@ -1,5 +1,6 @@
 "use client";
 
+import { useAcademyBrand } from "@/components/academy-config-provider";
 import Link from "next/link";
 import Image from "next/image";
 import { useRef } from "react";
@@ -133,6 +134,7 @@ export function AppSidebar({
   role?: string;
   avatarUrl?: string;
 }) {
+  const { shortName } = useAcademyBrand();
   const sidebarItems = navItems.filter((item) => item.icon !== "notifications");
   const groups = Array.from(new Set(sidebarItems.map((item) => item.group ?? "Principal")));
   return (
@@ -141,7 +143,7 @@ export function AppSidebar({
         <div className="flex items-center gap-2.5">
           <Image src="/brand-icon.png" alt="" width={36} height={36} unoptimized className="size-9 shrink-0 object-contain" />
           <div className="min-w-0 flex-1">
-            <p className="font-display text-sm font-semibold leading-5">Ebener TKD</p>
+            <p className="font-display text-sm font-semibold leading-5">{shortName}</p>
             <p className="text-xs leading-4 text-muted-foreground">{badge}</p>
           </div>
         </div>

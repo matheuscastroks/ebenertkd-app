@@ -50,7 +50,10 @@ describe("Appwrite infrastructure schema", () => {
       "push_subscriptions",
       "notification_deliveries",
       "audit_events",
-      "automation_runs"
+      "automation_runs",
+      "academy_settings",
+      "academy_policies",
+      "academy_config_revisions"
     ]);
     expect(tables.find((table) => table.id === "profiles")?.indexes).toContainEqual({
       key: "account_id_unique",
@@ -127,6 +130,18 @@ describe("Appwrite infrastructure schema", () => {
       type: "unique",
       columns: ["endpoint_hash"]
     });
+  });
+
+  it("declares academy configuration tables with unique revisions and a mandatory contract snapshot", () => {
+    expect(tables.find((table) => table.id === "academy_policies")?.indexes).toContainEqual({ key: "section_unique", type: "unique", columns: ["section"] });
+    expect(tables.find((table) => table.id === "academy_config_revisions")?.indexes).toContainEqual({
+      key: "scope_section_revision_unique",
+      type: "unique",
+      columns: ["scope", "section", "revision"]
+    });
+    const contract = tables.find((table) => table.id === "contracts");
+    expect(contract?.columns.find((column) => column.key === "policy_snapshot_json")).toMatchObject({ kind: "text", required: true });
+    expect(contract?.columns.map((column) => column.key)).toEqual(expect.arrayContaining(["academy_legal_name", "academy_document"]));
   });
 
   it("keeps the private bucket within the phase-zero limits", () => {

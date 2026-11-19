@@ -1,3 +1,5 @@
+import { DEFAULT_BILLING_POLICY, DEFAULT_CONTRACT_POLICY } from "@/features/academy/defaults";
+
 export const GUB_BELT_OPTIONS = [
   { gub: 10, belt: "Branca", nameEn: "White", poomsae: "Introductory Poomsae" },
   { gub: 9, belt: "Ponta Amarela", nameEn: "Yellow Tip", poomsae: "Preliminary Poomsae" },
@@ -38,7 +40,7 @@ export const BELT_OPTIONS = [
   "Preta 2º Dan",
   "Preta 3º Dan"
 ] as const;
-export const DUE_DAY_OPTIONS = [5, 10, 15, 20, 25, 30] as const;
+export const DUE_DAY_OPTIONS: readonly number[] = DEFAULT_BILLING_POLICY.due_day_options;
 
 export function beltForGub(gub: number) {
   if (gub === 0) return "Preta";
@@ -234,7 +236,8 @@ export function calculateNextDueDate(dueDay: number, referenceDate: Date = new D
 export function calculateDefaultContractDates(
   existingStart?: string | null,
   existingEnd?: string | null,
-  referenceDate: Date = new Date()
+  referenceDate: Date = new Date(),
+  durationMonths: number = DEFAULT_CONTRACT_POLICY.default_duration_months
 ): { start: string; end: string } {
   const start =
     existingStart?.slice(0, 10) ||
@@ -243,6 +246,14 @@ export function calculateDefaultContractDates(
     return { start, end: existingEnd.slice(0, 10) };
   }
   const [year, month, day] = start.split("-").map(Number);
-  const end = `${year + 1}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-  return { start, end };
+  return { start, end: addMonthsClamped(year, month, day, durationMonths) };
+}
+
+/** Soma meses a uma data (AAAA, M, D) mantendo o dia, ou o último dia do mês quando ele não existe. */
+export function addMonthsClamped(year: number, month: number, day: number, months: number): string {
+  const index = year * 12 + (month - 1) + months;
+  const targetYear = Math.floor(index / 12);
+  const targetMonth = index % 12;
+  const lastDay = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate();
+  return `${targetYear}-${String(targetMonth + 1).padStart(2, "0")}-${String(Math.min(day, lastDay)).padStart(2, "0")}`;
 }

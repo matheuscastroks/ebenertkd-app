@@ -1,5 +1,6 @@
 "use client";
 
+import { useAcademyBrand } from "@/components/academy-config-provider";
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import { usePwaInstall } from "./use-pwa-install";
@@ -35,6 +36,7 @@ function getServerDismissedSnapshot() {
 }
 
 export function InstallGuide() {
+  const { shortName } = useAcademyBrand();
   const { isMounted, isStandalone, isIos, hasNativePrompt, promptInstall } = usePwaInstall();
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -68,7 +70,7 @@ export function InstallGuide() {
     if (!isMounted || wasDismissed || isStandalone) return;
     if (!hasNativePrompt && !isIos) return;
 
-    toast.info("Instale o Ebener TKD", {
+    toast.info(`Instale o ${shortName}`, {
       id: "pwa-install",
       description: isIos
         ? "No Safari, toque em Compartilhar e depois em Adicionar à Tela de Início."
@@ -83,7 +85,7 @@ export function InstallGuide() {
         onClick: dismiss,
       },
     });
-  }, [dismiss, handleInstallAction, hasNativePrompt, isIos, isMounted, isStandalone, wasDismissed]);
+  }, [dismiss, handleInstallAction, hasNativePrompt, isIos, isMounted, isStandalone, shortName, wasDismissed]);
 
   return <InstallModal open={modalOpen} onOpenChange={setModalOpen} />;
 }

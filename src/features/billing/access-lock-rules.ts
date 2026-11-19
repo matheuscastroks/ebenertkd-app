@@ -1,10 +1,11 @@
 import { effectiveChargeStatus } from "@/features/billing/rules";
 import type { Charge, Payment } from "@/features/billing/types";
 import type { Enrollment } from "@/features/students/types";
+import { DEFAULT_ACCESS_POLICY, type AccessPolicy } from "@/features/academy/defaults";
 import { daysBetweenIsoDates, saoPauloToday } from "@/lib/dates";
 
-export const MONTHLY_ACCESS_WINDOW_DAYS = 30;
-export const MONTHLY_ACCESS_WARNING_DAYS = 5;
+export const MONTHLY_ACCESS_WINDOW_DAYS = DEFAULT_ACCESS_POLICY.window_days;
+export const MONTHLY_ACCESS_WARNING_DAYS = DEFAULT_ACCESS_POLICY.warning_days;
 
 export type StudentAppAccessStatus =
   | "not_applicable"
@@ -28,6 +29,10 @@ export type StudentAppAccessState = {
   overrideUntil: string | null;
   daysRemaining: number | null;
   daysOverdue: number;
+  /** Janela de acesso aplicada (política da academia); usada nos textos. */
+  windowDays: number;
+  /** `false` quando o professor desligou o bloqueio por mensalidade. */
+  enabled: boolean;
 };
 
 function addDaysIso(isoDay: string, days: number): string {
@@ -52,9 +57,13 @@ export function evaluateStudentAppAccess(input: {
   charges: Charge[];
   payments: Payment[];
   referenceDate?: string;
+  policy?: AccessPolicy;
 }): StudentAppAccessState {
   const enrollment = input.enrollment;
-  if (!enrollment || (enrollment.status !== "active" && enrollment.status !== "awaiting_renewal")) {
+  const policy = input.policy ?? DEFAULT_ACCESS_POLICY;
+  const MONTHLY_ACCESS_WINDOW_DAYS = policy.window_days;
+  const MONTHLY_ACCESS_WARNING_DAYS = policy.warning_days;
+  if (!policy.enabled || !enrollment || (enrollment.status !== "active" && enrollment.status !== "awaiting_renewal")) {
     return {
       locked: false,
       status: "not_applicable",
@@ -64,6 +73,8 @@ export function evaluateStudentAppAccess(input: {
       overrideUntil: enrollment?.access_override_until?.slice(0, 10) ?? null,
       daysRemaining: null,
       daysOverdue: 0,
+      windowDays: policy.window_days,
+      enabled: policy.enabled,
     };
   }
 
@@ -99,6 +110,8 @@ export function evaluateStudentAppAccess(input: {
       overrideUntil: overrideDay,
       daysRemaining: daysBetweenIsoDates(referenceDay, overrideDay),
       daysOverdue: 0,
+      windowDays: policy.window_days,
+      enabled: policy.enabled,
     };
   }
 
@@ -117,6 +130,8 @@ export function evaluateStudentAppAccess(input: {
         ? daysBetweenIsoDates(referenceDay, addDaysIso(latestPaidAt, MONTHLY_ACCESS_WINDOW_DAYS))
         : null,
       daysOverdue: 0,
+      windowDays: policy.window_days,
+      enabled: policy.enabled,
     };
   }
 
@@ -134,6 +149,8 @@ export function evaluateStudentAppAccess(input: {
         overrideUntil: overrideDay,
         daysRemaining,
         daysOverdue: 0,
+        windowDays: policy.window_days,
+        enabled: policy.enabled,
       };
     }
 
@@ -146,6 +163,8 @@ export function evaluateStudentAppAccess(input: {
       overrideUntil: overrideDay,
       daysRemaining,
       daysOverdue: Math.abs(daysRemaining),
+      windowDays: policy.window_days,
+      enabled: policy.enabled,
     };
   }
 
@@ -165,6 +184,8 @@ export function evaluateStudentAppAccess(input: {
       overrideUntil: overrideDay,
       daysRemaining: -daysOverdue,
       daysOverdue,
+      windowDays: policy.window_days,
+      enabled: policy.enabled,
     };
   }
 
@@ -186,7 +207,21 @@ export function evaluateStudentAppAccess(input: {
     overrideUntil: overrideDay,
     daysRemaining,
     daysOverdue: 0,
+    windowDays: policy.window_days,
+    enabled: policy.enabled,
   };
+}
+
+/** Frase sobre o acesso liberado após um pagamento; vazia quando o bloqueio está desligado. */
+export function accessGrantedSentence(policy: Pick<AccessPolicy, "enabled" | "window_days">): string {
+  return policy.enabled ? ` Seu acesso ao aplicativo está liberado por ${policy.window_days} dias.` : "";
+}
+
+export function accessStatusLabel(access: Pick<StudentAppAccessState, "status" | "windowDays" | "enabled">): string {
+  if (!access.enabled) return "Bloqueio por mensalidade desativado";
+  if (access.status === "active") return `Ciclo ativo (${access.windowDays} dias)`;
+  if (access.status === "locked") return `Acesso bloqueado (> ${access.windowDays} dias)`;
+  return ACCESS_STATUS_LABELS[access.status];
 }
 
 export const ACCESS_STATUS_LABELS: Record<StudentAppAccessStatus, string> = {

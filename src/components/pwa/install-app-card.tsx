@@ -5,9 +5,11 @@ import Image from "next/image";
 import { CheckCircle2, Download, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePwaInstall } from "./use-pwa-install";
+import { useAcademyBrand } from "@/components/academy-config-provider";
 import { InstallModal } from "./install-modal";
 
 export function InstallAppCard() {
+  const { shortName } = useAcademyBrand();
   const { isMounted, isStandalone, hasNativePrompt, promptInstall } = usePwaInstall();
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -33,7 +35,7 @@ export function InstallAppCard() {
           <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-muted p-1 border border-border">
             <Image
               src="/brand-icon.png"
-              alt="Ebener TKD"
+              alt={shortName}
               width={32}
               height={32}
               className="size-8 object-contain"
@@ -43,7 +45,7 @@ export function InstallAppCard() {
           <div className="space-y-0.5">
             <div className="flex items-center gap-2">
               <p className="text-sm font-semibold text-foreground">
-                Instalar Ebener TKD no celular
+                Instalar {shortName} no celular
               </p>
               {isStandalone ? (
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">

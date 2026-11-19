@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useAcademyBrand } from "@/components/academy-config-provider";
 import { Download, Share, PlusSquare, CheckCircle2, Smartphone } from "lucide-react";
 import {
   Dialog,
@@ -18,6 +19,7 @@ type InstallModalProps = {
 };
 
 export function InstallModal({ open, onOpenChange }: InstallModalProps) {
+  const { shortName } = useAcademyBrand();
   const { isStandalone, isIos, hasNativePrompt, promptInstall } = usePwaInstall();
 
   const handleInstallClick = async () => {
@@ -34,7 +36,7 @@ export function InstallModal({ open, onOpenChange }: InstallModalProps) {
           <div className="relative mb-2 flex size-16 items-center justify-center rounded-2xl bg-muted/60 p-2 shadow-xs border border-border">
             <Image
               src="/brand-icon.png"
-              alt="Ebener TKD"
+              alt={shortName}
               width={56}
               height={56}
               className="size-14 object-contain"
@@ -42,7 +44,7 @@ export function InstallModal({ open, onOpenChange }: InstallModalProps) {
             />
           </div>
           <DialogTitle className="text-xl font-bold">
-            Instalar Ebener TKD
+            Instalar {shortName}
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
             Acesse seus treinos, graduações e avisos direto da tela inicial, com abertura rápida e em tela cheia.

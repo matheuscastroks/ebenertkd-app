@@ -1,3 +1,4 @@
+import { DEFAULT_ACADEMY_IDENTITY } from "@/features/academy/defaults";
 import { DAY_INDEX_TO_WEEKDAY } from "@/features/classes/schedule";
 import { WEEKDAYS, type Lesson, type TrainingClass, type Weekday } from "@/features/classes/types";
 import { saoPauloToday } from "@/lib/dates";
@@ -22,6 +23,8 @@ export type CalendarEventInput = {
   location?: string | null;
   description?: string;
   recurrenceWeekdays?: Weekday[];
+  /** Nome curto da academia no PRODID do arquivo .ics. */
+  productName?: string;
 };
 
 const WEEKDAY_TO_ICS_BYDAY: Record<Weekday, string> = {
@@ -215,7 +218,7 @@ export function buildIcsContent(event: CalendarEventInput): string {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Ebener TKD//Portal do Aluno//PT-BR",
+    `PRODID:-//${escapeIcsText(event.productName ?? DEFAULT_ACADEMY_IDENTITY.short_name)}//Portal do Aluno//PT-BR`,
     "CALSCALE:GREGORIAN",
     "BEGIN:VEVENT",
     `UID:${escapeIcsText(event.uid)}@ebenertkd`,

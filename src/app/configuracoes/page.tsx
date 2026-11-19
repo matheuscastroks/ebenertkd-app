@@ -1,3 +1,4 @@
+import { getAcademyIdentity } from "@/features/academy/config-service";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { Bell, ChevronRight, Palette, Shield, User } from "@/components/ui/icons";
@@ -49,9 +50,10 @@ export default async function SettingsPage({
   searchParams: Promise<{ tab?: string; saved?: string; error?: string }>;
 }) {
   const [profile, query] = await Promise.all([requireProfile(), searchParams]);
-  const [preferences, pushActive] = await Promise.all([
+  const [preferences, pushActive, identity] = await Promise.all([
     getNotificationPreferences(profile.account_id),
     hasActivePushSubscription(profile).catch(() => false),
+    getAcademyIdentity(),
   ]);
   const pushConfigured = isPushConfigured();
   const minor = profile.role === "minor_student";
@@ -149,7 +151,7 @@ export default async function SettingsPage({
             <SettingsGroup
               id="settings-app"
               title="Aplicativo no Celular"
-              description="Instale o Ebener TKD no seu smartphone para acessar treinos e avisos direto da tela de início."
+              description={`Instale o ${identity.short_name} no seu smartphone para acessar treinos e avisos direto da tela de início.`}
             >
               <InstallAppCard />
             </SettingsGroup>

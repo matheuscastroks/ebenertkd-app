@@ -1,5 +1,6 @@
 "use client";
 
+import { useAcademyBrand } from "@/components/academy-config-provider";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -42,6 +43,7 @@ export function StudentAccessGate({
   children: ReactNode;
 }) {
   const pathname = usePathname();
+  const { displayName } = useAcademyBrand();
 
   if (locked) {
     // Isolamento total para menores: nunca mostrar valores, PIX ou cobranças.
@@ -57,7 +59,7 @@ export function StudentAccessGate({
                 Acesso temporariamente pausado
               </h1>
               <p className="text-sm leading-relaxed text-muted-foreground">
-                Seu acesso ao aplicativo da Ebener Taekwondo está pausado no momento. Peça ao seu responsável para verificar a situação da matrícula no portal da família.
+                Seu acesso ao aplicativo da {displayName} está pausado no momento. Peça ao seu responsável para verificar a situação da matrícula no portal da família.
               </p>
             </div>
             <p className="border-t border-border pt-4 text-xs text-muted-foreground">

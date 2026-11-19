@@ -12,6 +12,7 @@ import { safeErrorMessage } from "@/lib/security/safe-error";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { invalidateTags } from "@/lib/cache/invalidate";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { getAcademyIdentity } from "@/features/academy/config-service";
 import { buildPushPayload } from "@/features/notifications/push-payload";
 import { getNotificationPreferences, pushAllowed } from "@/features/notifications/preferences-service";
 
@@ -64,6 +65,7 @@ export async function deliverNotificationPush(notification: AppNotification, rec
   const { tables, config } = createAppwriteAdminClient();
   const subscriptions = await tables.listRows<PushSubscriptionRecord>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.pushSubscriptions, queries: [Query.equal("profile_id", [recipient.profile_id]), Query.equal("status", ["active"]), Query.limit(50)] });
   const now = new Date().toISOString();
+  const pushTitle = (await getAcademyIdentity()).short_name;
 
   await Promise.all(subscriptions.rows.map(async (subscription) => {
     const rowId = stableId(recipient.$id, subscription.$id);
@@ -77,7 +79,7 @@ export async function deliverNotificationPush(notification: AppNotification, rec
 
     try {
       const target = decryptSubscription(subscription.subscription_ciphertext);
-      await webpush.sendNotification(target, JSON.stringify(buildPushPayload(notification)));
+      await webpush.sendNotification(target, JSON.stringify(buildPushPayload(notification, pushTitle)));
       await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationDeliveries, rowId, data: { status: "sent", attempts: delivery.attempts + 1, delivered_at: new Date().toISOString(), last_error: null, updated_at: new Date().toISOString() } });
     } catch (error) {
       const statusCode = typeof error === "object" && error && "statusCode" in error ? Number(error.statusCode) : 0;

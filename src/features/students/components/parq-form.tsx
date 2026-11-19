@@ -1,5 +1,6 @@
 "use client";
 
+import { useAcademyBrand } from "@/components/academy-config-provider";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { submitParqAction } from "@/app/actions/parq";
@@ -70,6 +71,7 @@ export function ParqForm({
   enrollmentHref: string;
   todayBr: string;
 }) {
+  const { displayName } = useAcademyBrand();
   const needsFill = assessment.status === "missing" || assessment.status === "expired";
   const [isFilling, setIsFilling] = useState(needsFill && canSign);
   const [stepIndex, setStepIndex] = useState(0);
@@ -210,7 +212,7 @@ export function ParqForm({
         >
           <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
             <div className="flex items-center gap-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-primary-text">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                 <HeartPulse className="size-5" aria-hidden="true" />
               </span>
               <div>
@@ -546,7 +548,7 @@ export function ParqForm({
                       className={cn(
                         "flex size-6 shrink-0 items-center justify-center rounded-full border",
                         currentAnswer === "no"
-                          ? "border-success bg-success text-success-foreground"
+                          ? "border-success bg-success text-white dark:text-black"
                           : "border-border"
                       )}
                       aria-hidden="true"
@@ -577,7 +579,7 @@ export function ParqForm({
                       className={cn(
                         "flex size-6 shrink-0 items-center justify-center rounded-full border",
                         currentAnswer === "yes"
-                          ? "border-warning bg-warning text-warning-foreground"
+                          ? "border-warning bg-warning text-black"
                           : "border-border"
                       )}
                       aria-hidden="true"
@@ -668,7 +670,7 @@ export function ParqForm({
                       Termo de responsabilidade
                     </h3>
                     <p className="text-xs text-muted-foreground">
-                      Ebener Taekwondo · Questionário de prontidão física (PAR-Q) · {todayBr}
+                      {displayName} · Questionário de prontidão física (PAR-Q) · {todayBr}
                     </p>
                   </div>
                   <blockquote className="rounded-xl border border-border bg-muted/20 p-4 text-sm leading-relaxed text-foreground">
@@ -680,7 +682,7 @@ export function ParqForm({
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-                      <FileSignature className="size-4 text-primary-text" aria-hidden="true" />
+                      <FileSignature className="size-4 text-muted-foreground" aria-hidden="true" />
                       Assine com o dedo ou mouse
                     </span>
                     <Button
@@ -695,7 +697,7 @@ export function ParqForm({
                     </Button>
                   </div>
 
-                  <div className="relative overflow-hidden rounded-xl border border-dashed border-border bg-white">
+                  <div className="relative overflow-hidden rounded-xl border border-dashed border-border bg-white dark:brightness-90">
                     <canvas
                       ref={canvasRef}
                       aria-label="Área para desenhar sua assinatura"

@@ -1,10 +1,11 @@
 /** Modelos de mensagem do reajuste e montagem segura do link wa.me. Funções puras. */
 
+import { DEFAULT_ACADEMY_IDENTITY } from "@/features/academy/defaults";
 import { netFeeCents } from "@/features/billing/adjustment-rules";
 import { formatBusinessDateBr } from "@/lib/dates";
 import { formatBrl } from "@/lib/money";
 
-export const ACADEMY_NAME = "Ebener TKD";
+export const ACADEMY_NAME = DEFAULT_ACADEMY_IDENTITY.short_name;
 
 export const MESSAGE_VARIABLES = [
   "nome",

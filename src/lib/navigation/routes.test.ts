@@ -24,6 +24,13 @@ describe("navigationForProfile", () => {
       ROUTES.adminBillingCalculator,
       ROUTES.adminBillingAdjustment,
     ]);
+    expect(items.find((item) => item.href === ROUTES.adminAcademy)).toMatchObject({ group: "Gestão", icon: "system" });
+    expect(items.find((item) => item.href === ROUTES.adminAcademy)?.children?.map((item) => item.href)).toEqual([
+      ROUTES.adminAcademy,
+      ROUTES.adminAcademyIdentity,
+      ROUTES.adminAcademyFinance,
+      ROUTES.adminAcademyContracts,
+    ]);
     expect(items.find((item) => item.href === ROUTES.adminAnnualReport)).toMatchObject({ group: "Gestão", icon: "reports" });
     expect(items.find((item) => item.href === ROUTES.adminSystem)).toMatchObject({ group: "Gestão", icon: "system" });
   });
@@ -66,6 +73,10 @@ describe("navigationForProfile", () => {
         ROUTES.adminContractRenewals,
         ROUTES.adminContractTemplate,
         ROUTES.adminCancellations,
+        ROUTES.adminAcademy,
+        ROUTES.adminAcademyIdentity,
+        ROUTES.adminAcademyFinance,
+        ROUTES.adminAcademyContracts,
         ROUTES.adminAnnualReport,
         ROUTES.adminSystem,
       ],

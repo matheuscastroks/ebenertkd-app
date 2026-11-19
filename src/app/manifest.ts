@@ -1,17 +1,19 @@
 import type { MetadataRoute } from "next";
+import { getAcademyIdentity } from "@/features/academy/config-service";
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const identity = await getAcademyIdentity();
   return {
     id: "/",
-    name: "Ebener TKD",
-    short_name: "Ebener TKD",
+    name: identity.short_name,
+    short_name: identity.short_name,
     description: "PWA de gestão para academia de taekwondo com área do aluno e painel admin.",
     start_url: "/",
     scope: "/",
     display: "standalone",
     orientation: "portrait-primary",
-    background_color: "#f2f5f7",
-    theme_color: "#f59300",
+    background_color: "#f2f2f7",
+    theme_color: identity.theme_color,
     lang: "pt-BR",
     icons: [
       {

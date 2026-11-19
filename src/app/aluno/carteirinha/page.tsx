@@ -1,3 +1,4 @@
+import { getAcademyIdentity } from "@/features/academy/config-service";
 import Link from "next/link";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
@@ -42,7 +43,7 @@ const PARQ_TONES: Record<ParqStatus, StatusTone> = {
 };
 
 async function StudentCardContent({ profile }: { profile: Profile }) {
-  const snapshot = await getStudentJourneySnapshot(profile);
+  const [snapshot, identity] = await Promise.all([getStudentJourneySnapshot(profile), getAcademyIdentity()]);
 
   if (!snapshot.student || !snapshot.compliance) {
     return (
@@ -130,9 +131,9 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
         >
           <div className="flex items-center justify-between gap-3 bg-muted/40 px-5 py-3.5">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="size-4 text-primary-text" aria-hidden="true" />
+              <ShieldCheck className="size-4 text-muted-foreground" aria-hidden="true" />
               <h2 id="digital-passport-heading" className="text-sm font-semibold text-foreground">
-                Ebener Taekwondo · Passaporte do Aluno
+                {identity.display_name} · Passaporte do Aluno
               </h2>
             </div>
             <StatusBadge tone={isActive ? "success" : "warning"}>

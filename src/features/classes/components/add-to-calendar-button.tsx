@@ -1,5 +1,6 @@
 "use client";
 
+import { useAcademyBrand } from "@/components/academy-config-provider";
 import { Calendar, CalendarPlus, ChevronDown, ExternalLink } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,7 +39,9 @@ export function AddToCalendarButton({
   variant = "outline",
   align = "end",
 }: AddToCalendarButtonProps) {
+  const { shortName } = useAcademyBrand();
   const event: CalendarEventInput = {
+    productName: shortName,
     uid,
     title,
     date,

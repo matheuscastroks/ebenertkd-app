@@ -4,6 +4,7 @@ import { AppwriteException, ID, Permission, Query, Role } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
 import type { Profile } from "@/features/auth/types";
 import { writeAuditEvent } from "@/features/auth/service";
+import { getAcademyIdentity } from "@/features/academy/config-service";
 import { createFirstMonthlyCharge } from "@/features/billing/charge-service";
 import { ensureActiveClassEnrollment } from "@/features/classes/class-enrollment-service";
 import { buildSignedContractPdf } from "@/features/contracts/pdf";
@@ -55,7 +56,8 @@ export async function signContract(actor: Profile, raw: unknown, context: Signat
   const existing = await tables.listRows<ContractSignature>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contractSignatures, queries: [Query.equal("contract_id", [contract.$id]), Query.limit(1)] });
   const now = new Date().toISOString();
   const signature = existing.rows[0] ?? await tables.createRow<ContractSignature>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contractSignatures, rowId: ID.unique(), data: { contract_id: contract.$id, signer_profile_id: actor.$id, signer_account_id: actor.account_id, signer_name: actor.full_name, signature_data_url: input.signatureDataUrl, content_hash: contract.content_hash, ip_fingerprint: privacyIpFingerprint(context.ip), user_agent: context.userAgent?.slice(0, 512), accepted_at: now, created_at: now }, permissions: [] });
-  const pdf = await buildSignedContractPdf(contract, signature.signer_name, signature.signature_data_url, signature.accepted_at);
+  const identity = await getAcademyIdentity();
+  const pdf = await buildSignedContractPdf(contract, signature.signer_name, signature.signature_data_url, signature.accepted_at, identity.short_name);
   const result = await reconcileSignedContract(contract, signature, pdf);
   invalidateTags(
     CACHE_TAGS.contracts,
@@ -82,7 +84,7 @@ export async function signContract(actor: Profile, raw: unknown, context: Signat
       studentId: bundle.student.$id,
       audience: "family",
       title: "Matrícula confirmada! Tudo pronto para treinar",
-      body: "Seu contrato foi assinado e sua matrícula na Ebener Taekwondo está ativa.",
+      body: `Seu contrato foi assinado e sua matrícula na ${identity.display_name} está ativa.`,
       dedupeKey: `enrollment-activated:${contract.$id}`,
       studentActionUrl: ROUTES.student,
       guardianActionUrl: ROUTES.guardian,

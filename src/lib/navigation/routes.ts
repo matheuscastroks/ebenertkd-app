@@ -29,6 +29,10 @@ export const ROUTES = {
   adminBillingSettings: "/admin/financeiro/configuracoes",
   adminBillingCalculator: "/admin/financeiro/calculadora",
   adminBillingAdjustment: "/admin/financeiro/reajuste",
+  adminAcademy: "/admin/academia",
+  adminAcademyIdentity: "/admin/academia/identidade",
+  adminAcademyFinance: "/admin/academia/financeiro",
+  adminAcademyContracts: "/admin/academia/contratos",
   adminAnnualReport: "/admin/relatorios/anual",
   adminSystem: "/admin/sistema",
   student: "/aluno",
@@ -141,6 +145,19 @@ export function navigationForProfile(
           { label: "Renovações", href: ROUTES.adminContractRenewals },
           { label: "Modelo de contrato", href: ROUTES.adminContractTemplate },
           { label: "Pedidos de rescisão", href: ROUTES.adminCancellations }
+        ]
+      },
+      {
+        label: "Configurações da academia",
+        shortLabel: "Academia",
+        href: ROUTES.adminAcademy,
+        icon: "system",
+        group: "Gestão",
+        children: [
+          { label: "Visão geral", href: ROUTES.adminAcademy, exact: true },
+          { label: "Identidade", href: ROUTES.adminAcademyIdentity },
+          { label: "Financeiro", href: ROUTES.adminAcademyFinance },
+          { label: "Contratos", href: ROUTES.adminAcademyContracts }
         ]
       },
       { label: "Balanço anual", shortLabel: "Anual", href: ROUTES.adminAnnualReport, icon: "reports", group: "Gestão" },

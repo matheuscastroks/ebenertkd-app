@@ -1,4 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { DEFAULT_ACADEMY_IDENTITY } from "@/features/academy/defaults";
 import type { Contract } from "@/features/contracts/types";
 
 const pdfSafe = (value: string) => value
@@ -24,7 +25,7 @@ function wrapText(text: string, maxCharacters = 92) {
   return lines;
 }
 
-export async function buildSignedContractPdf(contract: Contract, signerName: string, signatureDataUrl: string, signedAt: string) {
+export async function buildSignedContractPdf(contract: Contract, signerName: string, signatureDataUrl: string, signedAt: string, academyName: string = DEFAULT_ACADEMY_IDENTITY.short_name) {
   const pdf = await PDFDocument.create();
   const regular = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
@@ -43,7 +44,7 @@ export async function buildSignedContractPdf(contract: Contract, signerName: str
     y = 790;
   };
 
-  page.drawText("EBENERT KD", { x: 48, y, size: 11, font: bold, color: rgb(0.73, 0.08, 0.08) });
+  page.drawText(pdfSafe(academyName).toUpperCase(), { x: 48, y, size: 11, font: bold, color: rgb(0.73, 0.08, 0.08) });
   y -= 28;
   page.drawText("CONTRATO DE PRESTAÇÃO DE SERVIÇOS", { x: 48, y, size: 16, font: bold });
   y -= 34;

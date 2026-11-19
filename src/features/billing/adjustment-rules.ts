@@ -16,6 +16,8 @@ export type AdjustmentConfig = {
   roundToCents: number;
 };
 
+import { DEFAULT_BILLING_POLICY } from "@/features/academy/defaults";
+
 export type AdjustmentStudent = {
   enrollmentId: string;
   studentId: string;
@@ -38,7 +40,7 @@ export type AdjustmentRow = AdjustmentStudent & {
   appliedFrom: string;
 };
 
-export const MIN_NOTICE_DAYS = 30;
+export const MIN_NOTICE_DAYS = DEFAULT_BILLING_POLICY.adjustment_min_notice_days;
 
 const DAY_MS = 86_400_000;
 

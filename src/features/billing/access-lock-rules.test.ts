@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { evaluateStudentAppAccess } from "@/features/billing/access-lock-rules";
+import { accessGrantedSentence, accessStatusLabel, evaluateStudentAppAccess } from "@/features/billing/access-lock-rules";
 import type { Charge, Payment } from "@/features/billing/types";
 import type { Enrollment } from "@/features/students/types";
 
@@ -191,5 +191,45 @@ describe("access-lock-rules (ciclo de 30 dias após pagamento)", () => {
       referenceDate: "2026-11-18",
     });
     expect(result.locked).toBe(true);
+  });
+
+  describe("política da academia", () => {
+    const paidLongAgo = () => ({
+      charges: [makeCharge({ status: "paid" })],
+      payments: [makePayment({ charge_id: "chg-1", status: "confirmed", paid_at: "2026-10-10T12:00:00.000Z" })],
+    });
+
+    it("sem política usa o padrão atual: 30 dias de acesso", () => {
+      const state = evaluateStudentAppAccess({ enrollment: baseEnrollment(), ...paidLongAgo(), referenceDate: "2026-11-18" });
+      expect(state).toMatchObject({ locked: true, windowDays: 30, enabled: true });
+    });
+
+    it("janela maior mantém o acesso", () => {
+      const state = evaluateStudentAppAccess({
+        enrollment: baseEnrollment(),
+        ...paidLongAgo(),
+        referenceDate: "2026-11-18",
+        policy: { enabled: true, window_days: 45, warning_days: 5 },
+      });
+      expect(state).toMatchObject({ locked: false, windowDays: 45 });
+    });
+
+    it("bloqueio desligado nunca bloqueia, mesmo com mensalidade em atraso", () => {
+      const state = evaluateStudentAppAccess({
+        enrollment: baseEnrollment(),
+        charges: [makeCharge({ status: "pending", due_date: "2026-09-10T12:00:00.000Z" })],
+        payments: [],
+        referenceDate: "2026-11-18",
+        policy: { enabled: false, window_days: 30, warning_days: 5 },
+      });
+      expect(state).toMatchObject({ locked: false, status: "not_applicable", enabled: false });
+      expect(accessStatusLabel(state)).toBe("Bloqueio por mensalidade desativado");
+    });
+
+    it("os textos acompanham a janela configurada", () => {
+      expect(accessStatusLabel({ status: "active", windowDays: 45, enabled: true })).toBe("Ciclo ativo (45 dias)");
+      expect(accessGrantedSentence({ enabled: true, window_days: 45 })).toBe(" Seu acesso ao aplicativo está liberado por 45 dias.");
+      expect(accessGrantedSentence({ enabled: false, window_days: 45 })).toBe("");
+    });
   });
 });

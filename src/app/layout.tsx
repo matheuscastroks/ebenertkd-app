@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import localFont from "next/font/local";
+import { AcademyConfigProvider } from "@/components/academy-config-provider";
+import { getAcademyIdentity, getPolicy } from "@/features/academy/config-service";
+import { professorLabel, toBrand } from "@/features/academy/identity-rules";
 import { RegisterServiceWorker } from "@/components/pwa/register-sw";
 import { InstallGuide } from "@/components/pwa/install-guide";
 import "./globals.css";
@@ -19,19 +22,25 @@ const poppins = localFont({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#f59300",
+  // A barra do navegador acompanha o canvas de cada aparência (HIG: a marca defere ao conteúdo).
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f2f2f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
   width: "device-width",
   initialScale: 1,
 };
 
-export const metadata: Metadata = {
-  title: "Ebener TKD",
+export async function generateMetadata(): Promise<Metadata> {
+  const identity = await getAcademyIdentity();
+  return {
+  title: identity.short_name,
   description: "Treinos, frequência e vida na academia em um só lugar.",
-  applicationName: "Ebener TKD",
+  applicationName: identity.short_name,
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Ebener TKD",
+    title: identity.short_name,
   },
   icons: {
     icon: [
@@ -43,23 +52,28 @@ export const metadata: Metadata = {
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
   },
-};
+  };
+}
 
 type RootLayoutProps = {
   children: ReactNode;
 };
 
-export default function RootLayout({ children }: RootLayoutProps) {
+export default async function RootLayout({ children }: RootLayoutProps) {
+  const [identity, billingPolicy] = await Promise.all([getAcademyIdentity(), getPolicy("billing")]);
+  const config = { ...toBrand(identity), dueDayOptions: billingPolicy.due_day_options, professorLabel: professorLabel(identity) };
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={poppins.variable}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <TooltipProvider>
-            <RegisterServiceWorker />
-            <InstallGuide />
-            {children}
-            <Toaster closeButton position="top-right" />
-          </TooltipProvider>
+          <AcademyConfigProvider value={config}>
+            <TooltipProvider>
+              <RegisterServiceWorker />
+              <InstallGuide />
+              {children}
+              <Toaster closeButton position="top-right" />
+            </TooltipProvider>
+          </AcademyConfigProvider>
         </ThemeProvider>
       </body>
     </html>

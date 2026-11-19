@@ -9,6 +9,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useAcademyBrand, useProfessorLabel } from "@/components/academy-config-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ import {
 } from "@/app/actions/onboarding";
 import {
   ONBOARDING_CONFIGS,
+  personalizeOnboardingConfig,
   type OnboardingPreferences,
   type OnboardingRole,
 } from "../types";
@@ -37,7 +39,9 @@ export function OnboardingModal({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const config = ONBOARDING_CONFIGS[role] ?? ONBOARDING_CONFIGS.adult_student;
+  const brand = useAcademyBrand();
+  const professor = useProfessorLabel();
+  const config = personalizeOnboardingConfig(ONBOARDING_CONFIGS[role] ?? ONBOARDING_CONFIGS.adult_student, { shortName: brand.shortName, professorLabel: professor });
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [preferences, setPreferences] = useState<OnboardingPreferences>({});
@@ -95,7 +99,7 @@ export function OnboardingModal({
         className="max-w-xl gap-0 overflow-hidden rounded-2xl border border-border p-0 shadow-md"
         showCloseButton={false}
       >
-        <DialogTitle className="sr-only">Introdução ao aplicativo Ebener TKD</DialogTitle>
+        <DialogTitle className="sr-only">Introdução ao aplicativo {brand.shortName}</DialogTitle>
         <DialogDescription className="sr-only">
           Guia de primeiros passos para configurar sua experiência de treino e gestão.
         </DialogDescription>

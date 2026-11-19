@@ -1,9 +1,13 @@
+"use client";
+
+import { useAcademyBrand } from "@/components/academy-config-provider";
 import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 function BrandMark({ className }: { className?: string }) {
+  const { shortName } = useAcademyBrand();
   return (
     <div className={cn("flex items-center gap-2.5 lg:gap-3", className)}>
       <Image
@@ -16,7 +20,7 @@ function BrandMark({ className }: { className?: string }) {
         className="size-9 shrink-0 object-contain lg:size-11"
       />
       <div className="leading-tight">
-        <p className="text-sm font-semibold lg:text-base">Ebener TKD</p>
+        <p className="text-sm font-semibold lg:text-base">{shortName}</p>
         <p className="text-xs text-muted-foreground lg:text-sm">Portal da academia</p>
       </div>
     </div>
@@ -39,10 +43,11 @@ export function AuthShell({
   children: ReactNode;
   footer?: ReactNode;
 }) {
+  const { shortName } = useAcademyBrand();
   return (
     <div className="min-h-dvh lg:h-dvh lg:overflow-hidden bg-background lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
       <section
-        aria-label="Ebener TKD"
+        aria-label={shortName}
         className="hidden border-r border-border bg-card lg:flex lg:flex-col lg:justify-between lg:p-10"
       >
         <BrandMark />
