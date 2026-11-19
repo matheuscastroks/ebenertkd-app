@@ -138,6 +138,7 @@ export function SetupWizard(props: SetupWizardProps) {
         <p className="mt-2 text-sm text-muted-foreground sm:hidden">Passo {step + 1} de {SETUP_STEPS.length}: {current.label}</p>
       </nav>
 
+      <div key={current.id} className="t-text-reveal-headers contents">
       {current.id === "academy" ? <IdentityForm identity={props.identity} revision={props.identityRevision} /> : null}
 
       {current.id === "grades" ? (
@@ -209,6 +210,7 @@ export function SetupWizard(props: SetupWizardProps) {
           </CardContent>
         </Card>
       ) : null}
+      </div>
 
       <div className="flex justify-between gap-3">
         <Button type="button" variant="outline" className="min-h-11" onClick={() => goTo(step - 1)} disabled={step === 0}>Voltar</Button>

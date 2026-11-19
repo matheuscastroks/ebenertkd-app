@@ -112,7 +112,7 @@ function ResultCard({
   help?: ReactNode;
 }) {
   return (
-    <div className="p-4 sm:px-5">
+    <div className="t-text-reveal p-4 sm:px-5">
       <dt className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
         {label}
         {help ? <InfoTip label={`Sobre ${label.toLowerCase()}`}>{help}</InfoTip> : null}
