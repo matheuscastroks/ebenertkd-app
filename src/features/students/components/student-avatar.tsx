@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { studentPhotoUrl } from "@/features/students/photo-url";
 import { cn } from "@/lib/utils";
 
 const sizes = {
@@ -20,7 +21,7 @@ export function StudentAvatar({ name, photoDocumentId, size = "md", className }:
   const fallbackClass = size === "lg" ? "text-lg font-semibold" : size === "md" ? "text-sm font-medium" : "text-xs font-medium";
   return (
     <Avatar className={cn("shrink-0", sizes[size], className)} aria-label={`Foto de ${name}`}>
-      {photoDocumentId ? <AvatarImage src={`/api/student-documents/${photoDocumentId}`} alt={name} loading="lazy" decoding="async" /> : null}
+      {photoDocumentId ? <AvatarImage src={studentPhotoUrl(photoDocumentId)} alt={name} loading="lazy" decoding="async" /> : null}
       <AvatarFallback className={fallbackClass}>{initials(name)}</AvatarFallback>
     </Avatar>
   );
