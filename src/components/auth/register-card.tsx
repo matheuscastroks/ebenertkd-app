@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { registerAdultAction } from "@/app/actions/auth";
 import { PasswordToggle } from "@/components/auth/login-card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { FormErrorMessage, ShakeOnError } from "@/components/shared/form-error";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -17,16 +17,18 @@ const ACCOUNT_TYPES = [
 export function RegisterCard({ errorMessage }: { errorMessage?: string }) {
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
+  // Guarda qual erro a pessoa já dispensou ao voltar a digitar; um erro novo aparece de novo.
+  const [dismissedError, setDismissedError] = useState<string>();
+  const invalid = Boolean(errorMessage) && dismissedError !== errorMessage;
 
   return (
     <div className="space-y-3.5">
-      {errorMessage ? (
-        <Alert role="alert" variant="destructive" id="register-error">
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
-      ) : null}
-
-      <form action={registerAdultAction} className="space-y-3" aria-describedby={errorMessage ? "register-error" : undefined}>
+      <form
+        action={registerAdultAction}
+        className="space-y-3"
+        aria-describedby={invalid ? "register-error" : undefined}
+        onInput={() => setDismissedError(errorMessage)}
+      >
         <fieldset className="space-y-2">
           <legend className="mb-2 text-sm font-medium">Para quem é a conta?</legend>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -52,6 +54,7 @@ export function RegisterCard({ errorMessage }: { errorMessage?: string }) {
           </p>
         </fieldset>
 
+        <ShakeOnError errorKey={errorMessage} className="space-y-3">
         <Field>
           <FieldLabel htmlFor="register-name">Nome completo</FieldLabel>
           <Input id="register-name" name="full_name" autoComplete="name" className="h-11" required />
@@ -109,6 +112,8 @@ export function RegisterCard({ errorMessage }: { errorMessage?: string }) {
             />
           </Field>
         </div>
+        {invalid ? <FormErrorMessage id="register-error">{errorMessage}</FormErrorMessage> : null}
+        </ShakeOnError>
 
         <FormSubmitButton className="h-11 w-full touch-manipulation" pendingLabel="Criando conta…">
           Criar conta

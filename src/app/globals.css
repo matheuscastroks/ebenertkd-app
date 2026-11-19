@@ -369,6 +369,112 @@
   }
 }
 
+/* Transição lado a lado entre telas (PageTransition): sai para a esquerda, entra pela direita. */
+:root {
+  --page-slide-distance: 8px;
+}
+::view-transition {
+  /* Cliques durante a animação chegam à tela nova. */
+  pointer-events: none;
+}
+::view-transition-old(.t-page-side) {
+  animation: t-page-side-out var(--duration-fast) var(--ease-smooth-out) both;
+}
+::view-transition-new(.t-page-side) {
+  animation: t-page-side-in var(--duration-fast) var(--ease-smooth-out) both;
+}
+@keyframes t-page-side-out {
+  to {
+    opacity: 0;
+    translate: calc(var(--page-slide-distance) * -1) 0;
+    filter: blur(var(--blur-medium));
+  }
+}
+@keyframes t-page-side-in {
+  from {
+    opacity: 0;
+    translate: var(--page-slide-distance) 0;
+    filter: blur(var(--blur-medium));
+  }
+}
+
+/* Erro de formulário: tremor curto nos campos e mensagem que entra com fade. */
+.t-shake {
+  animation: t-shake 280ms var(--ease-smooth-out);
+}
+@keyframes t-shake {
+  0% { translate: 0; }
+  28% { translate: -6px 0; }
+  50% { translate: 4px 0; }
+  72% { translate: -2px 0; }
+  100% { translate: 0; }
+}
+.t-error-msg {
+  animation: t-error-msg-in var(--duration-quick) var(--ease-smooth-out) backwards;
+}
+@keyframes t-error-msg-in {
+  from {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+}
+
+/* Dropdown morph: o menu nasce do ponto do botão como um círculo e se abre até o painel;
+   o conteúdo entra com fade e leve desfoque. Fecha mais rápido, no sentido inverso. */
+.t-morph-menu[data-state="open"] {
+  animation:
+    t-morph-reveal var(--duration-medium) var(--ease-smooth-out) both,
+    t-morph-content var(--duration-fast) var(--ease-smooth-out) both;
+}
+.t-morph-menu[data-state="closed"] {
+  animation:
+    t-morph-reveal var(--duration-quick) var(--ease-out) reverse both,
+    t-morph-content var(--duration-quick) var(--ease-out) reverse both;
+}
+@keyframes t-morph-reveal {
+  from {
+    clip-path: circle(20px at var(--radix-dropdown-menu-content-transform-origin, 50% 0%));
+  }
+  to {
+    clip-path: circle(150% at var(--radix-dropdown-menu-content-transform-origin, 50% 0%));
+  }
+}
+@keyframes t-morph-content {
+  from {
+    opacity: 0;
+    scale: 0.97;
+    filter: blur(var(--blur-small));
+  }
+}
+
+/* Tooltip: entra com atraso curto e escala, sai na hora; entre gatilhos vizinhos só desliza. */
+.t-tooltip[data-state="delayed-open"] {
+  animation: t-tooltip-in var(--duration-quick) var(--ease-out) 80ms backwards;
+}
+.t-tooltip[data-state="instant-open"] {
+  animation: t-tooltip-travel 160ms var(--ease-smooth-out) backwards;
+}
+.t-tooltip[data-state="closed"] {
+  animation: t-tooltip-out 50ms var(--ease-out) forwards;
+}
+@keyframes t-tooltip-in {
+  from {
+    opacity: 0;
+    scale: 0.98;
+  }
+}
+@keyframes t-tooltip-travel {
+  from {
+    opacity: 0.4;
+  }
+}
+@keyframes t-tooltip-out {
+  to {
+    opacity: 0;
+    scale: 0.98;
+  }
+}
+
 .t-page-enter {
   animation: t-enter var(--duration-fast) var(--ease-smooth-out) backwards;
 }
@@ -476,6 +582,11 @@
 
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+  ::view-transition-old(.t-page-side), ::view-transition-new(.t-page-side) { animation: none; }
+  .t-shake,
+  .t-error-msg,
+  .t-tooltip[data-state],
+  .t-morph-menu[data-state] { animation: none !important; }
   .t-page-enter,
   .t-panel-enter,
   .t-stagger > *,

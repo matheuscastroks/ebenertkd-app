@@ -11,6 +11,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 
 import { MobileBottomNav } from "@/components/dashboard/mobile-bottom-nav";
 import { MobileGestureDetector } from "@/components/dashboard/mobile-gesture-detector";
+import { PageTransition } from "@/components/dashboard/page-transition";
 
 type DashboardShellProps = {
   title: string;
@@ -56,9 +57,7 @@ export function DashboardFrame({
           role={role}
           avatarUrl={avatarUrl}
         />
-        <div className="flex min-h-svh min-w-0 flex-1 flex-col bg-sidebar md:h-full md:min-h-0 md:overflow-hidden">
-          {children}
-        </div>
+        <PageTransition>{children}</PageTransition>
         <MobileBottomNav navItems={navItems} />
         <MobileGestureDetector />
       </NotificationCountProvider>
@@ -114,7 +113,7 @@ export function DashboardShell({
         className="relative flex min-h-0 flex-1 flex-col border-t border-border/60 bg-background md:mb-2 md:mr-2 md:overflow-y-auto md:rounded-xl md:border md:border-border/60 md:shadow-sm"
       >
         <div className="min-w-0 flex-1 p-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:p-6 md:pb-8">
-          <div className="t-page-enter flex w-full min-w-0 flex-col gap-6">
+          <div className="flex w-full min-w-0 flex-col gap-6">
             {children}
           </div>
         </div>

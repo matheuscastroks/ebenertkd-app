@@ -213,7 +213,7 @@ export function NotificationHeaderButton({
           data-open={hasUnread ? "true" : "false"}
           aria-hidden="true"
         >
-          <span className="t-badge-dot flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold leading-none text-primary-foreground tabular-nums shadow-xs ring-2 ring-sidebar select-none text-center">
+          <span className="t-badge-dot flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold leading-none text-primary-foreground tabular-nums shadow-xs ring-2 ring-sidebar select-none text-center">
             {formattedCount}
           </span>
         </span>

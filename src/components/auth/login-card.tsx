@@ -5,7 +5,7 @@ import Link from "next/link";
 import { EyeIcon } from "@/components/ui/eye";
 import { EyeOffIcon } from "@/components/ui/eye-off";
 import { loginAdultAction, loginMinorAction } from "@/app/actions/auth";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { FormErrorMessage, ShakeOnError } from "@/components/shared/form-error";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -39,7 +39,10 @@ export function LoginCard({
   const isMinor = type === "minor";
   const action = isMinor ? loginMinorAction : loginAdultAction;
   const errorId = `login-error-${type}`;
-  const describedBy = errorMessage ? errorId : undefined;
+  // Guarda qual erro a pessoa já dispensou ao voltar a digitar; um erro novo aparece de novo.
+  const [dismissedError, setDismissedError] = useState<string>();
+  const invalid = Boolean(errorMessage) && dismissedError !== errorMessage;
+  const describedBy = invalid ? errorId : undefined;
 
   return (
     <div className="space-y-3.5">
@@ -50,13 +53,8 @@ export function LoginCard({
         </div>
       ) : null}
 
-      {errorMessage ? (
-        <Alert variant="destructive" role="alert" id={errorId}>
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
-      ) : null}
-
-      <form action={action} className="space-y-3">
+      <form action={action} className="space-y-3" onInput={() => setDismissedError(errorMessage)}>
+        <ShakeOnError errorKey={errorMessage} className="space-y-3">
         {isMinor ? (
           <Field>
             <FieldLabel htmlFor="login-username">Nome de usuário</FieldLabel>
@@ -68,7 +66,7 @@ export function LoginCard({
               spellCheck={false}
               placeholder="ex.: joao.silva"
               className="h-11"
-              aria-invalid={Boolean(errorMessage)}
+              aria-invalid={invalid}
               aria-describedby={describedBy}
               required
             />
@@ -83,7 +81,7 @@ export function LoginCard({
               autoComplete="email"
               placeholder="voce@exemplo.com"
               className="h-11"
-              aria-invalid={Boolean(errorMessage)}
+              aria-invalid={invalid}
               aria-describedby={describedBy}
               required
             />
@@ -109,14 +107,16 @@ export function LoginCard({
               type={showPassword ? "text" : "password"}
               autoComplete="current-password"
               className="h-11 pr-12"
-              aria-invalid={Boolean(errorMessage)}
+              aria-invalid={invalid}
               aria-describedby={describedBy}
               required
             />
             <PasswordToggle visible={showPassword} onToggle={() => setShowPassword((prev) => !prev)} />
           </div>
+          {invalid ? <FormErrorMessage id={errorId}>{errorMessage}</FormErrorMessage> : null}
           {isMinor ? <FieldDescription>Esqueceu a senha? Peça uma nova ao professor.</FieldDescription> : null}
         </Field>
+        </ShakeOnError>
 
         <FormSubmitButton className="h-11 w-full touch-manipulation" pendingLabel="Entrando…">
           Entrar
