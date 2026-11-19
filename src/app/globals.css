@@ -6,60 +6,76 @@
 
 :root {
   --radius: 0.625rem;
-  /* Layering: L0 Canvas Base (Soft crisp modern canvas) */
-  --background: oklch(0.968 0.004 240);
-  --foreground: oklch(0.145 0 0);
-  /* Layering: L1 Surface Cards (Pure white, contrasting with L0) */
+  /*
+   * Paleta alinhada ao Apple HIG (Color, Dark Mode, Branding):
+   * - superfícies seguem a hierarquia agrupada do iOS: canvas (base) → cartão → elevado;
+   * - preenchimentos (secondary/muted/accent) são translúcidos, como os system fills,
+   *   para continuarem visíveis sobre qualquer camada;
+   * - texto mira 7:1 e nunca fica abaixo de 4.5:1; a cor da marca fica reservada para
+   *   ações primárias, links e indicadores de estado.
+   * Contraste validado em light, dark e prefers-contrast: more.
+   */
+  /* Camadas — L0 canvas agrupado, L1 cartões, L2 popovers/sheets/modais */
+  --background: oklch(0.963 0.007 286);
+  --foreground: oklch(0.18 0.006 286);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  /* Layering: L2 Elevated Panels, Popovers & Modals */
+  --card-foreground: oklch(0.18 0.006 286);
   --card-elevated: oklch(1 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  /* Layering: Negative depth surface for recessed inputs & controls */
-  --surface-recessed: oklch(0.985 0.002 240);
-  --primary: oklch(0.75 0.17 65);
-  --primary-foreground: oklch(0.18 0.01 260);
-  --secondary: oklch(0.94 0.003 240);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.945 0.003 240);
-  --muted-foreground: oklch(0.48 0 0);
-  --accent: oklch(0.94 0.004 240);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.89 0.005 240);
-  --input: oklch(0.91 0.005 240);
-  --ring: oklch(0.58 0.14 62);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0.003 240);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.75 0.17 65);
-  --sidebar-primary-foreground: oklch(0.18 0.01 260);
-  --sidebar-accent: oklch(0.94 0.003 240);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.89 0.005 240);
-  --sidebar-ring: oklch(0.708 0 0);
-  /* Compatibility for existing button variants and domain status indicators */
-  --primary-hover: oklch(0.7 0.17 65);
-  --primary-text: oklch(0.46 0.1 60);
-  --primary-border: oklch(0.58 0.14 62);
-  --destructive-hover: oklch(0.52 0.22 27.325);
+  --popover-foreground: oklch(0.18 0.006 286);
+  /* Profundidade negativa: campos e áreas rebaixadas dentro de cartões */
+  --surface-recessed: oklch(0.963 0.007 286);
+  /* Marca — Ebener âmbar (#F59300). Só em ações primárias e estado. */
+  --primary: oklch(0.749 0.169 64.7);
+  --primary-foreground: oklch(0.18 0.006 286);
+  /* System fills translúcidos (base #787880) */
+  --secondary: oklch(0.575 0.012 286 / 16%);
+  --secondary-foreground: oklch(0.18 0.006 286);
+  --muted: oklch(0.575 0.012 286 / 12%);
+  --muted-foreground: oklch(0.46 0.01 286);
+  --accent: oklch(0.575 0.012 286 / 12%);
+  --accent-foreground: oklch(0.18 0.006 286);
+  --destructive: oklch(0.553 0.225 27.3);
+  /* Separadores translúcidos (base #3C3C43) */
+  --border: oklch(0.359 0.012 286 / 17%);
+  --input: oklch(0.359 0.012 286 / 34%);
+  --ring: oklch(0.6 0.15 58);
+  /* Gráficos — matizes do sistema, distintos de status e da marca */
+  --chart-1: oklch(0.749 0.169 64.7);
+  --chart-2: oklch(0.7 0.111 212.7);
+  --chart-3: oklch(0.529 0.191 278.3);
+  --chart-4: oklch(0.615 0.213 312.4);
+  --chart-5: oklch(0.65 0.238 17.9);
+  --sidebar: oklch(0.985 0.002 286);
+  --sidebar-foreground: oklch(0.18 0.006 286);
+  --sidebar-primary: oklch(0.749 0.169 64.7);
+  --sidebar-primary-foreground: oklch(0.18 0.006 286);
+  --sidebar-accent: oklch(0.575 0.012 286 / 12%);
+  --sidebar-accent-foreground: oklch(0.18 0.006 286);
+  --sidebar-border: oklch(0.359 0.012 286 / 17%);
+  --sidebar-ring: oklch(0.6 0.15 58);
+  /* Variações da marca e estados (texto de marca escurecido para 4.5:1+) */
+  --primary-hover: oklch(0.7 0.165 62);
+  --primary-text: oklch(0.52 0.13 55);
+  --primary-border: oklch(0.6 0.15 58);
+  --destructive-hover: oklch(0.5 0.21 27.3);
   --destructive-foreground: oklch(1 0 0);
-  --success-soft: rgb(225 244 234);
-  --warning-soft: rgb(255 243 214);
-  --info-soft: rgb(225 239 255);
-  --danger-soft: rgb(255 232 232);
-  --danger-text: rgb(155 25 35);
-  --success: hsl(151 55% 38%);
-  --success-foreground: hsl(151 60% 23%);
-  --warning: hsl(38 92% 50%);
-  --warning-foreground: hsl(30 75% 25%);
-  --info: hsl(210 85% 48%);
-  --info-foreground: hsl(216 78% 30%);
+  /*
+   * Status: `--x` é a cor viva (pontos, barras, bordas);
+   * `--x-foreground` é o texto legível sobre cartão ou `--x-soft`.
+   * Aviso usa amarelo (não âmbar) para não se confundir com a marca.
+   */
+  --success: oklch(0.65 0.175 147);
+  --success-foreground: oklch(0.47 0.125 148);
+  --success-soft: oklch(0.65 0.175 147 / 12%);
+  --warning: oklch(0.76 0.16 84);
+  --warning-foreground: oklch(0.5 0.105 78);
+  --warning-soft: oklch(0.76 0.16 84 / 18%);
+  --info: oklch(0.603 0.218 257.4);
+  --info-foreground: oklch(0.48 0.2 262);
+  --info-soft: oklch(0.603 0.218 257.4 / 10%);
+  --danger-soft: oklch(0.553 0.225 27.3 / 10%);
+  --danger-text: oklch(0.5 0.2 27.3);
   /* Motion tokens — escala compartilhada (transitions.dev) */
   --duration-stagger: 40ms;
   --duration-micro: 80ms;
@@ -102,59 +118,96 @@
 
 .dark {
   color-scheme: dark;
-  /* Layering: L0 Canvas Base (Deep nocturnal canvas) */
-  --background: oklch(0.125 0.012 260);
-  --foreground: oklch(0.985 0 0);
-  /* Layering: L1 Surface Cards (+8% lightness above canvas) */
-  --card: oklch(0.185 0.012 260);
-  --card-foreground: oklch(0.985 0 0);
-  /* Layering: L2 Elevated Panels, Popovers & Modals (+8% above card) */
-  --card-elevated: oklch(0.245 0.015 260);
-  --popover: oklch(0.245 0.015 260);
-  --popover-foreground: oklch(0.985 0 0);
-  /* Layering: Negative depth surface for recessed inputs & controls */
-  --surface-recessed: oklch(0.145 0.01 260);
-  --primary: oklch(0.75 0.17 65);
-  --primary-foreground: oklch(0.18 0.01 260);
-  --secondary: oklch(0.245 0.012 260);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.235 0.012 260);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.245 0.012 260);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 9%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.75 0.17 65);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.155 0.012 260);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.75 0.17 65);
-  --sidebar-primary-foreground: oklch(0.18 0.01 260);
-  --sidebar-accent: oklch(0.235 0.012 260);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 9%);
-  --sidebar-ring: oklch(0.556 0 0);
-  --primary-hover: oklch(0.8 0.16 65);
-  --primary-text: oklch(0.8 0.15 65);
-  --primary-border: oklch(0.75 0.17 65);
-  --destructive-hover: oklch(0.76 0.17 22.216);
+  /*
+   * Dark Mode: fundos mais escuros e primeiro plano mais claro, sem inverter o claro.
+   * Base preta e camadas elevadas (#1C1C1E → #2C2C2E) dão profundidade sem sombra;
+   * cores de marca/status sobem de luminosidade, como as variantes dark do sistema.
+   */
+  --background: oklch(0 0 0);
+  --foreground: oklch(0.975 0.002 286);
+  --card: oklch(0.227 0.004 286);
+  --card-foreground: oklch(0.975 0.002 286);
+  --card-elevated: oklch(0.294 0.004 286);
+  --popover: oklch(0.294 0.004 286);
+  --popover-foreground: oklch(0.975 0.002 286);
+  --surface-recessed: oklch(0.175 0.004 286);
+  --primary: oklch(0.782 0.165 67);
+  --primary-foreground: oklch(0.18 0.006 286);
+  --secondary: oklch(0.575 0.012 286 / 32%);
+  --secondary-foreground: oklch(0.975 0.002 286);
+  --muted: oklch(0.575 0.012 286 / 24%);
+  --muted-foreground: oklch(0.74 0.008 286);
+  --accent: oklch(0.575 0.012 286 / 24%);
+  --accent-foreground: oklch(0.975 0.002 286);
+  --destructive: oklch(0.663 0.224 28.3);
+  --border: oklch(0.6 0.006 286 / 30%);
+  --input: oklch(0.65 0.006 286 / 45%);
+  --ring: oklch(0.782 0.165 67);
+  --chart-1: oklch(0.782 0.165 67);
+  --chart-2: oklch(0.771 0.118 212);
+  --chart-3: oklch(0.6 0.19 278.1);
+  --chart-4: oklch(0.68 0.2 312.4);
+  --chart-5: oklch(0.68 0.21 16);
+  --sidebar: oklch(0.205 0.004 286);
+  --sidebar-foreground: oklch(0.975 0.002 286);
+  --sidebar-primary: oklch(0.782 0.165 67);
+  --sidebar-primary-foreground: oklch(0.18 0.006 286);
+  --sidebar-accent: oklch(0.575 0.012 286 / 24%);
+  --sidebar-accent-foreground: oklch(0.975 0.002 286);
+  --sidebar-border: oklch(0.6 0.006 286 / 24%);
+  --sidebar-ring: oklch(0.782 0.165 67);
+  --primary-hover: oklch(0.82 0.15 70);
+  --primary-text: oklch(0.82 0.14 70);
+  --primary-border: oklch(0.782 0.165 67);
+  --destructive-hover: oklch(0.71 0.19 26);
   --destructive-foreground: oklch(0.145 0 0);
-  --success-soft: rgb(20 52 38);
-  --warning-soft: rgb(58 44 20);
-  --info-soft: rgb(22 43 66);
-  --danger-soft: rgb(65 25 30);
-  --danger-text: rgb(255 175 180);
-  --success: hsl(151 48% 55%);
-  --success-foreground: hsl(151 52% 74%);
-  --warning: hsl(38 92% 60%);
-  --warning-foreground: hsl(38 92% 76%);
-  --info: hsl(210 70% 65%);
-  --info-foreground: hsl(210 75% 80%);
+  --success: oklch(0.756 0.19 147);
+  --success-foreground: oklch(0.82 0.15 148);
+  --success-soft: oklch(0.756 0.19 147 / 16%);
+  --warning: oklch(0.885 0.17 94);
+  --warning-foreground: oklch(0.88 0.14 92);
+  --warning-soft: oklch(0.885 0.17 94 / 14%);
+  --info: oklch(0.624 0.206 255.5);
+  --info-foreground: oklch(0.78 0.12 252);
+  --info-soft: oklch(0.624 0.206 255.5 / 20%);
+  --danger-soft: oklch(0.663 0.224 28.3 / 18%);
+  --danger-text: oklch(0.78 0.13 24);
+}
+
+/*
+ * Increase Contrast (HIG: toda cor customizada precisa de variante de alto contraste).
+ * `:root:not(.dark)` evita que a variante clara vaze para o tema escuro.
+ */
+@media (prefers-contrast: more) {
+  :root:not(.dark) {
+    --foreground: oklch(0.1 0.004 286);
+    --card-foreground: oklch(0.1 0.004 286);
+    --popover-foreground: oklch(0.1 0.004 286);
+    --muted-foreground: oklch(0.36 0.01 286);
+    --border: oklch(0.359 0.012 286 / 34%);
+    --input: oklch(0.359 0.012 286 / 62%);
+    --primary-text: oklch(0.44 0.12 50);
+    --ring: oklch(0.5 0.14 52);
+    --destructive: oklch(0.48 0.2 27.3);
+    --danger-text: oklch(0.42 0.17 27.3);
+    --success-foreground: oklch(0.38 0.1 148);
+    --warning-foreground: oklch(0.4 0.085 75);
+    --info-foreground: oklch(0.4 0.2 263);
+  }
+
+  .dark {
+    --foreground: oklch(1 0 0);
+    --card-foreground: oklch(1 0 0);
+    --popover-foreground: oklch(1 0 0);
+    --muted-foreground: oklch(0.85 0.006 286);
+    --border: oklch(0.7 0.006 286 / 50%);
+    --input: oklch(0.75 0.006 286 / 70%);
+    --primary-text: oklch(0.87 0.12 74);
+    --danger-text: oklch(0.85 0.1 22);
+    --success-foreground: oklch(0.88 0.13 148);
+    --warning-foreground: oklch(0.92 0.12 95);
+    --info-foreground: oklch(0.85 0.1 252);
+  }
 }
 
 @theme inline {
