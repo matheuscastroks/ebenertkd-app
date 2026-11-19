@@ -156,7 +156,7 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
                   Código do aluno: #{studentCode}
                 </p>
               </div>
-              <BeltBadge belt={student.current_belt} gub={student.gub} size="md" />
+              <BeltBadge rankKey={student.rank_key} size="md" />
             </div>
           </div>
 

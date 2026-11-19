@@ -96,7 +96,7 @@ export async function StudentDashboardDynamic({ profile, minor, aside }: { profi
       </section>
     </div>
     <div className="min-w-0 space-y-6">
-      <GraduationCard currentBelt={student?.current_belt} gub={student?.gub} startedAtTkd={student?.started_at_tkd} />
+      <GraduationCard rankKey={student?.rank_key} startedAtTkd={student?.started_at_tkd} />
       {aside}
     </div>
   </div>;

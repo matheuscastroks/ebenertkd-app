@@ -4,6 +4,9 @@ import { useState } from "react";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useBeltLabels, useBeltRanks } from "@/components/academy-config-provider";
+import { beltNameOf, findRank } from "@/features/academy/belt-rules";
+import type { RankKey } from "@/features/academy/ranks";
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import {
   KOREAN_COMMANDS,
@@ -15,18 +18,22 @@ import { CheckCircle2, RotateCcw, XCircle } from "@/components/ui/icons";
 
 export function StudyGuideView({
   modules,
-  currentGub,
+  currentRankKey,
 }: {
   modules: AnnotatedStudyModule[];
-  currentGub: number;
+  currentRankKey: RankKey;
 }) {
-  const [selectedGub, setSelectedGub] = useState(currentGub);
+  const ranks = useBeltRanks();
+  const { formLabel } = useBeltLabels();
+  const [selectedKey, setSelectedKey] = useState<RankKey>(currentRankKey);
   const [answers, setAnswers] = useState<Record<string, number>>({});
 
   const activeModule =
-    modules.find((item) => item.gub === selectedGub) ??
-    modules.find((item) => item.gub === currentGub) ??
+    modules.find((item) => item.rankKey === selectedKey) ??
+    modules.find((item) => item.accessState === "current") ??
+    [...modules].reverse().find((item) => item.accessState === "review") ??
     modules[0];
+  const configuredForm = findRank(ranks, activeModule.rankKey)?.form_name;
 
   const quizQuestions = activeModule.quiz;
   const answeredCount = quizQuestions.filter((q) => answers[q.id] !== undefined).length;
@@ -36,7 +43,7 @@ export function StudyGuideView({
     <Tabs defaultValue="poomsae" className="space-y-6">
       <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-muted/60 p-1">
         <TabsTrigger value="poomsae" className="min-h-10">
-          Poomsae e técnicas
+          {formLabel} e técnicas
         </TabsTrigger>
         <TabsTrigger value="vocabulary" className="min-h-10">
           Vocabulário coreano
@@ -56,17 +63,17 @@ export function StudyGuideView({
           </p>
           <div className="flex flex-wrap gap-2">
             {modules.map((mod) => {
-              const isSelected = mod.gub === activeModule.gub;
+              const isSelected = mod.rankKey === activeModule.rankKey;
               return (
                 <Button
-                  key={mod.gub}
+                  key={mod.rankKey}
                   type="button"
                   size="sm"
                   variant={isSelected ? "default" : "outline"}
                   className="min-h-9"
-                  onClick={() => setSelectedGub(mod.gub)}
+                  onClick={() => setSelectedKey(mod.rankKey)}
                 >
-                  {mod.belt}
+                  {beltNameOf(ranks, mod.rankKey)}
                   {mod.accessState === "current" ? " (Atual)" : ""}
                 </Button>
               );
@@ -78,7 +85,7 @@ export function StudyGuideView({
           <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1.5">
               <div className="flex flex-wrap items-center gap-2">
-                <BeltBadge belt={activeModule.belt} gub={activeModule.gub} size="md" />
+                <BeltBadge rankKey={activeModule.rankKey} size="md" />
                 <StatusBadge
                   tone={
                     activeModule.accessState === "current"
@@ -98,6 +105,9 @@ export function StudyGuideView({
               <h2 className="text-xl font-semibold tracking-tight text-foreground">
                 {activeModule.poomsae}
               </h2>
+              {configuredForm && configuredForm !== activeModule.poomsae ? (
+                <p className="text-sm text-muted-foreground">{formLabel} exigido na academia: {configuredForm}</p>
+              ) : null}
               <p className="text-sm text-muted-foreground">
                 {activeModule.trigram} ·{" "}
                 <span className="tabular-nums">{activeModule.movements} movimentos</span>
@@ -207,7 +217,7 @@ export function StudyGuideView({
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 shadow-xs sm:px-5">
           <div className="space-y-1">
             <h2 className="text-base font-semibold">
-              Revisão teórica · Faixa {activeModule.belt}
+              Revisão teórica · Faixa {beltNameOf(ranks, activeModule.rankKey)}
             </h2>
             <p className="text-xs text-muted-foreground">
               Teste seus conhecimentos antes do exame. Esta prática é livre e não altera sua nota oficial.

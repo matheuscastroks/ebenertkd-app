@@ -83,7 +83,7 @@ export function countEnrollmentsRequiringReview() {
   );
 }
 
-export function listEnrollmentsForReview(filters: { search?: string; status?: string; belt?: string; trainingClass?: string; page?: number } = {}) {
+export function listEnrollmentsForReview(filters: { search?: string; status?: string; rank?: string; trainingClass?: string; page?: number } = {}) {
   return cachedRead(
     { name: "list-enrollments-for-review", key: [filters], tags: [CACHE_TAGS.enrollments], revalidate: 60 },
     async () => {
@@ -101,7 +101,7 @@ export function listEnrollmentsForReview(filters: { search?: string; status?: st
         queries.push(Query.equal("$id", studentIds));
       }
       if (filters.search?.trim()) queries.push(Query.contains("full_name", [filters.search.trim()]));
-      if (filters.belt?.trim()) queries.push(Query.equal("current_belt", [filters.belt.trim()]));
+      if (filters.rank?.trim()) queries.push(Query.equal("rank_key", [filters.rank.trim()]));
       if (filters.trainingClass?.trim()) queries.push(Query.equal("training_class", [filters.trainingClass.trim()]));
       let students = await tables.listRows<Student>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, queries: [...queries, Query.limit(ENROLLMENTS_PAGE_SIZE), Query.offset((requestedPage - 1) * ENROLLMENTS_PAGE_SIZE)] });
       const totalPages = Math.ceil(students.total / ENROLLMENTS_PAGE_SIZE);

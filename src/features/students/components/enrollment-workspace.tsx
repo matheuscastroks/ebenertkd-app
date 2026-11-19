@@ -1,6 +1,7 @@
 import { DependentContext } from "@/features/families/components/dependent-context";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BeltBadge } from "@/features/students/components/belt-badge";
 import type { Profile } from "@/features/auth/types";
 import { listTrainingClasses } from "@/features/classes/service";
 import { EnrollmentForm } from "@/features/students/components/enrollment-form";
@@ -57,7 +58,7 @@ export async function EnrollmentWorkspace({
                 <strong>Status:</strong> {bundle.enrollment.status.replaceAll("_", " ")}
               </p>
               <p>
-                <strong>Faixa:</strong> {bundle.student.current_belt ?? "Ainda não informada"}
+                <strong>Faixa:</strong> <BeltBadge rankKey={bundle.student.rank_key} size="sm" />
               </p>
               <p className="text-sm text-muted-foreground">
                 Seu responsável administra dados de saúde, documentos e informações financeiras.

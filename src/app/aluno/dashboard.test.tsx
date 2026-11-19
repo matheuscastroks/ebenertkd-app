@@ -15,7 +15,7 @@ import { listChargesForStudent } from "@/features/billing/charge-service";
 import { listStudentContracts } from "@/features/contracts/contract-service";
 import { StudentDashboardDynamic } from "@/features/students/components/student-dashboard";
 const profile = { $id: "student", role: "adult_student", full_name: "Ana", capabilities: ["student"] } as Profile;
-const activeStudent = { status: "active", current_belt: "Amarela", gub: 8 };
+const activeStudent = { status: "active", rank_key: "gub-8" };
 beforeEach(() => {
   vi.mocked(getAttendanceHistory).mockResolvedValue({ profile, student: null, entries: [], summary: { total: 0, attended: 0, rate: 0 } });
   vi.mocked(listChargesForStudent).mockReset().mockResolvedValue([]);

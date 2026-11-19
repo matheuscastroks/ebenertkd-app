@@ -16,8 +16,7 @@ export type StudentComplianceAssessment = {
   studentId: string;
   profileId: string;
   fullName: string;
-  currentBelt: string | null;
-  gub: number | null;
+  rankKey: string | null;
   trainingClassId: string | null;
   trainingClassName: string;
   photoDocumentId: string | null;
@@ -111,8 +110,7 @@ export function evaluateStudentCompliance(input: {
     studentId: input.student.$id,
     profileId: input.student.profile_id,
     fullName: input.student.full_name,
-    currentBelt: input.student.current_belt ?? null,
-    gub: input.student.gub ?? null,
+    rankKey: input.student.rank_key ?? null,
     trainingClassId: input.student.training_class_id ?? null,
     trainingClassName: input.trainingClassName?.trim() || input.student.training_class || "Sem turma vinculada",
     photoDocumentId: photo && photo.status !== "rejected" ? photo.$id : null,

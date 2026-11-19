@@ -22,6 +22,8 @@ import {
 import { Button } from "@/components/ui/button";
 import type { TrainingClass } from "@/features/classes/types";
 import type { EnrollmentBundle, EnrollmentStatus } from "@/features/students/types";
+import { useBeltLabels, useBeltRanks } from "@/components/academy-config-provider";
+import { rankFullLabel } from "@/features/academy/belt-rules";
 import { formatAddress, parseAddress } from "@/lib/address";
 import { formatBusinessDateBr } from "@/lib/dates";
 import { cn } from "@/lib/utils";
@@ -167,6 +169,8 @@ export function EnrollmentStatusView({
   contractsHref?: string;
   onEdit: (initialStep?: number) => void;
 }) {
+  const ranks = useBeltRanks();
+  const { levelLabel } = useBeltLabels();
   const { student, enrollment, documents } = bundle;
   const status = enrollment.status === "draft" ? "submitted" : enrollment.status;
   const meta = STATUS_META[status];
@@ -181,11 +185,7 @@ export function EnrollmentStatusView({
     ? `${trainingClass.name} · ${trainingClass.start_time}–${trainingClass.end_time}`
     : student.training_class || "Definida na aprovação";
 
-  const beltSummary = student.current_belt
-    ? student.gub != null
-      ? `${student.current_belt} (${student.gub}º GUB)`
-      : student.current_belt
-    : "Não informada";
+  const beltSummary = student.rank_key ? rankFullLabel(ranks, student.rank_key, levelLabel) : "Não informada";
 
   const dueDay = enrollment.approved_due_day ?? enrollment.requested_due_day;
   const parsedAddress = parseAddress(student.address);

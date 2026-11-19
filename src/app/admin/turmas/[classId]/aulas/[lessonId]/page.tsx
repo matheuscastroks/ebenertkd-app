@@ -62,8 +62,7 @@ export default async function LessonAttendancePage({
           rows={sheet.rows.map((row) => ({
             classEnrollmentId: row.classEnrollment.$id,
             studentName: row.student!.full_name,
-            belt: row.student!.current_belt,
-            gub: row.student!.gub,
+            rankKey: row.student!.rank_key,
             photoDocumentId: row.photoDocumentId,
             status: row.attendance?.status
           }))}

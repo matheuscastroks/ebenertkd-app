@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { isValidCpf, normalizeCpf } from "@/lib/auth/auth-utils";
 import { DUE_DAY_MAX, DUE_DAY_MIN } from "@/features/academy/defaults";
-import { BELT_OPTIONS, graduationMatches } from "@/features/students/options";
+import { isRankKey } from "@/features/academy/ranks";
+
+const rankKeySchema = z.string().trim().refine(isRankKey, "Graduação inválida");
 
 const optionalText = z.string().trim().max(2000).optional().transform((value) => value || undefined);
 const requiredText = (min = 2, max = 255) => z.string().trim().min(min).max(max);
@@ -16,9 +18,8 @@ const studentDraftObject = z.object({
   emergencyContactRelationship: z.string().trim().max(64).optional(),
   emergencyContactPhone: z.string().trim().max(24).optional(),
   startedAtTkd: z.string().optional(),
-  currentBelt: z.enum(BELT_OPTIONS).optional(),
+  rankKey: rankKeySchema.optional(),
   trainingClassId: z.string().trim().max(36).optional(),
-  gub: z.coerce.number().int().min(0).max(10).optional(),
   healthCondition: z.enum(["yes", "no"]).optional(),
   healthDetails: optionalText,
   medications: optionalText,
@@ -28,14 +29,7 @@ const studentDraftObject = z.object({
   requestedDueDay: z.coerce.number().int().min(DUE_DAY_MIN).max(DUE_DAY_MAX).optional()
 });
 
-function validateGraduation(value: { gub?: number; currentBelt?: string }, context: z.RefinementCtx) {
-  if (!graduationMatches(value.gub, value.currentBelt)) {
-    context.addIssue({ code: "custom", path: ["gub"], message: "GUB e faixa não correspondem" });
-    context.addIssue({ code: "custom", path: ["currentBelt"], message: "GUB e faixa não correspondem" });
-  }
-}
-
-export const studentDraftSchema = studentDraftObject.superRefine(validateGraduation);
+export const studentDraftSchema = studentDraftObject;
 
 export const studentSubmissionSchema = studentDraftObject.extend({
   cpf: z.string().transform(normalizeCpf).refine(isValidCpf, "CPF inválido"),
@@ -46,12 +40,11 @@ export const studentSubmissionSchema = studentDraftObject.extend({
   emergencyContactRelationship: requiredText(2, 64),
   emergencyContactPhone: requiredText(8, 24),
   startedAtTkd: requiredText(10, 10),
-  currentBelt: z.enum(BELT_OPTIONS),
+  rankKey: rankKeySchema,
   trainingClassId: requiredText(1, 36),
-  gub: z.coerce.number().int().min(0).max(10),
   healthCondition: z.enum(["yes", "no"]),
   requestedDueDay: z.coerce.number().int().min(DUE_DAY_MIN).max(DUE_DAY_MAX)
-}).superRefine(validateGraduation);
+});
 
 export const financialReviewSchema = z.object({
   monthlyFeeCents: z.coerce.number().int().min(0),

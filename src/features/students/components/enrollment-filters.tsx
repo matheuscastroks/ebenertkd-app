@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BELT_OPTIONS } from "@/features/students/options";
+import { useBeltRanks } from "@/components/academy-config-provider";
+import { beltNameOf } from "@/features/academy/belt-rules";
+import { RankSelect } from "@/features/students/components/rank-select";
 import type { TrainingClass } from "@/features/classes/types";
 import { ROUTES } from "@/lib/navigation/routes";
 
@@ -20,13 +22,14 @@ const STATUS_OPTIONS = [
   { value: "active", label: "Ativa" },
 ] as const;
 
-type EnrollmentFilterKey = "q" | "status" | "belt" | "turma";
+type EnrollmentFilterKey = "q" | "status" | "rank" | "turma";
 type EnrollmentFilterState = Record<EnrollmentFilterKey, string>;
 
 const isSet = (value: string) => Boolean(value && value !== "all");
 
 export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
   const router = useRouter();
+  const ranks = useBeltRanks();
   const [expanded, setExpanded] = useState(false);
   const [pending, startTransition] = useTransition();
   const pathname = usePathname();
@@ -37,7 +40,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
   const currentFilters: EnrollmentFilterState = {
     q: searchParams.get("q") ?? "",
     status: searchParams.get("status") ?? "",
-    belt: searchParams.get("belt") ?? "",
+    rank: searchParams.get("rank") ?? "",
     turma: searchParams.get("turma") ?? "",
   };
   const [optimisticFilters, setOptimisticFilters] = useOptimistic(
@@ -85,7 +88,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
     if (timer.current) clearTimeout(timer.current);
     if (searchInput.current) searchInput.current.value = "";
     startTransition(() => {
-      setOptimisticFilters({ q: "", status: "", belt: "", turma: "" });
+      setOptimisticFilters({ q: "", status: "", rank: "", turma: "" });
       router.replace(ROUTES.adminEnrollments, { scroll: false });
     });
   };
@@ -93,11 +96,11 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
   const hasActiveFilters = Boolean(
     optimisticFilters.q ||
     isSet(optimisticFilters.status) ||
-    isSet(optimisticFilters.belt) ||
+    isSet(optimisticFilters.rank) ||
     isSet(optimisticFilters.turma)
   );
 
-  const activeCount = (["status", "belt", "turma"] as const).filter((key) => isSet(optimisticFilters[key])).length;
+  const activeCount = (["status", "rank", "turma"] as const).filter((key) => isSet(optimisticFilters[key])).length;
   return (
     <div aria-busy={pending} className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-xs transition-opacity duration-(--duration-quick) motion-reduce:transition-none aria-busy:opacity-80">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -139,23 +142,14 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="enrollment-belt">Faixa</FieldLabel>
-          <Select
-            value={optimisticFilters.belt || "all"}
-            onValueChange={(val) => update("belt", val)}
-          >
-            <SelectTrigger id="enrollment-belt" className="w-full h-11">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas as faixas</SelectItem>
-              {BELT_OPTIONS.map((belt) => (
-                <SelectItem key={belt} value={belt}>
-                  {belt}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <FieldLabel htmlFor="enrollment-rank">Graduação</FieldLabel>
+          <RankSelect
+            id="enrollment-rank"
+            value={optimisticFilters.rank || "all"}
+            onValueChange={(val) => update("rank", val)}
+            allLabel="Todas as graduações"
+            keep={optimisticFilters.rank}
+          />
         </Field>
 
         <Field>
@@ -179,7 +173,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
         </Field>
         </div>
       </div>
-      <div className="flex flex-wrap gap-2">{(["status", "belt", "turma"] as const).filter((key) => isSet(optimisticFilters[key])).map((key) => <Button key={key} type="button" variant="outline" className="min-h-11" onClick={() => update(key, "all")}>Remover {key === "status" ? STATUS_OPTIONS.find((option) => option.value === optimisticFilters.status)?.label : optimisticFilters[key]}</Button>)}</div>
+      <div className="flex flex-wrap gap-2">{(["status", "rank", "turma"] as const).filter((key) => isSet(optimisticFilters[key])).map((key) => <Button key={key} type="button" variant="outline" className="min-h-11" onClick={() => update(key, "all")}>Remover {key === "status" ? STATUS_OPTIONS.find((option) => option.value === optimisticFilters.status)?.label : key === "rank" ? beltNameOf(ranks, optimisticFilters.rank) : optimisticFilters[key]}</Button>)}</div>
       {hasActiveFilters && (
         <div className="flex justify-end pt-1">
           <Button type="button" variant="ghost" size="sm" onClick={handleClear}>

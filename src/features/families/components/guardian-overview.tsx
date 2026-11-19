@@ -38,7 +38,7 @@ export async function GuardianMinorsOverview({ guardian, minors }: { guardian: P
               <Link href={dependentSummaryPath(minor.$id)} className="underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring">{minor.full_name}</Link>
             </h2>
             <div className="flex flex-wrap items-center gap-2">
-              <BeltBadge belt={student?.current_belt} gub={student?.gub} />
+              <BeltBadge rankKey={student?.rank_key} />
               <StatusBadge tone={studentStatusTone(student?.status)}>{studentStatusLabel(student?.status)}</StatusBadge>
             </div>
           </div>

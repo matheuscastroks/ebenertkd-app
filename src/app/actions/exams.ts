@@ -2,9 +2,8 @@
 
 import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
-import { addExamParticipant, cancelExamEvent, cancelExamParticipant, createExamEvent, getExamEvent, recordExamResult } from "@/features/exams/service";
+import { addExamParticipant, cancelExamEvent, cancelExamParticipant, createExamEvent, recordExamResult } from "@/features/exams/service";
 import type { PaidChargeDecision } from "@/features/exams/rules";
-import { beltForGub } from "@/features/students/options";
 import { requireProfile } from "@/lib/auth/session";
 import { reaisToCents } from "@/lib/money";
 import { adminExamPath, ROUTES } from "@/lib/navigation/routes";
@@ -27,17 +26,11 @@ export async function createExamEventAction(formData: FormData) {
 export async function addExamParticipantAction(formData: FormData) {
   const admin = await requireProfile("admin");
   const eventId = String(formData.get("event_id") ?? "");
-  const rawTargetGub = formData.get("target_gub");
-  const targetGub = rawTargetGub !== null && String(rawTargetGub).trim() !== "" ? Number(rawTargetGub) : Number.NaN;
-  const resolvedBelt = Number.isInteger(targetGub)
-    ? beltForGub(targetGub) ?? String(formData.get("target_belt") ?? "")
-    : String(formData.get("target_belt") ?? "");
   try {
     await addExamParticipant(admin, {
       eventId,
       studentId: formData.get("student_id"),
-      targetBelt: resolvedBelt,
-      targetGub,
+      targetRankKey: String(formData.get("target_rank_key") ?? ""),
       feeCents: reaisToCents(formData.get("fee_reais"))
     });
   } catch {
@@ -94,18 +87,12 @@ export async function enrollEligibleStudentAction(formData: FormData) {
   const admin = await requireProfile("admin");
   const eventId = String(formData.get("event_id") ?? "");
   const studentId = String(formData.get("student_id") ?? "");
-  const targetGub = Number(formData.get("target_gub"));
-  const targetBelt = Number.isInteger(targetGub)
-    ? beltForGub(targetGub) ?? String(formData.get("target_belt") ?? "")
-    : String(formData.get("target_belt") ?? "");
   try {
-    const event = await getExamEvent(eventId);
+    // Sem taxa informada: o serviço usa a taxa da graduação alvo ou a padrão da banca.
     await addExamParticipant(admin, {
       eventId,
       studentId,
-      targetBelt,
-      targetGub,
-      feeCents: event.default_fee_cents,
+      targetRankKey: String(formData.get("target_rank_key") ?? ""),
     });
   } catch {
     redirect(`${ROUTES.adminExamEligibility}?error=enroll`);

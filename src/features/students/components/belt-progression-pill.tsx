@@ -1,109 +1,56 @@
-import * as React from "react";
-import { cn } from "@/lib/utils";
+"use client";
+
 import { ArrowRight } from "@/components/ui/icons";
+import { useBeltLabels, useBeltRanks } from "@/components/academy-config-provider";
+import { beltNameOf } from "@/features/academy/belt-rules";
+import { rankShortLabel, isRankKey } from "@/features/academy/ranks";
 import { BeltBadge } from "@/features/students/components/belt-badge";
-import { getBeltTheme } from "@/features/students/options";
+import { cn } from "@/lib/utils";
 
 export type BeltProgressionPillProps = {
-  fromBelt?: string | null;
-  fromGub?: number | null;
-  toBelt?: string | null;
-  toGub?: number | null;
-  belt?: string | null;
-  gub?: number | null;
+  /** Graduação de origem. Com ela, mostra "Atual → Alvo". */
+  fromRankKey?: string | null;
+  /** Graduação de destino (ou a única, quando não há origem). */
+  toRankKey?: string | null;
+  /** Nomes gravados no histórico (snapshot da época). Sem eles, valem os nomes configurados hoje. */
+  fromName?: string | null;
+  toName?: string | null;
   size?: "sm" | "md" | "lg";
-  showGub?: boolean;
+  showRank?: boolean;
   className?: string;
 };
 
-export function BeltProgressionPill({
-  fromBelt,
-  fromGub,
-  toBelt,
-  toGub,
-  belt,
-  gub,
-  size = "md",
-  showGub = true,
-  className,
-}: BeltProgressionPillProps) {
-  const targetBelt = toBelt ?? belt;
-  const targetGub = toGub ?? gub;
-  const hasProgression = Boolean(fromBelt || fromGub != null);
+export function BeltProgressionPill({ fromRankKey, toRankKey, fromName, toName, size = "md", showRank = true, className }: BeltProgressionPillProps) {
+  const ranks = useBeltRanks();
+  const { levelLabel } = useBeltLabels();
+  const badgeSize = size === "lg" ? "md" : "sm";
 
-  if (hasProgression) {
-    const targetTheme = getBeltTheme(targetBelt, targetGub);
-
-    return (
-      <div
-        className={cn(
-          "inline-flex max-w-full flex-wrap items-center gap-1.5 rounded-lg border border-border bg-background px-2 py-1 shadow-xs transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none",
-          size === "sm" && "text-xs py-0.5 px-1.5",
-          size === "lg" && "text-sm py-1.5 px-3",
-          className
-        )}
-        aria-label={`Progressão de faixa: ${fromBelt ?? `${fromGub}º GUB`} para ${targetBelt ?? `${targetGub}º GUB`}`}
-      >
-        <div className="flex items-center gap-1 text-muted-foreground">
-          <span className="text-xs font-medium text-muted-foreground/80 hidden sm:inline">
-            Atual:
-          </span>
-          <BeltBadge
-            belt={fromBelt}
-            gub={fromGub}
-            size={size === "lg" ? "md" : "sm"}
-            showGub={showGub}
-          />
-        </div>
-
-        <ArrowRight
-          className={cn(
-            "text-muted-foreground/70 shrink-0",
-            size === "sm" ? "size-3" : "size-3.5"
-          )}
-          aria-hidden="true"
-        />
-
-        <div className="flex items-center gap-1">
-          <span className="text-xs font-medium text-primary-text/80 hidden sm:inline">
-            Alvo:
-          </span>
-          <BeltBadge
-            belt={targetBelt}
-            gub={targetGub}
-            size={size === "lg" ? "md" : "sm"}
-            showGub={showGub}
-            className={cn(
-              "ring-1 ring-primary/20 font-semibold",
-              targetTheme.isBlackBelt && "ring-primary"
-            )}
-          />
-        </div>
-      </div>
-    );
+  if (!fromRankKey) {
+    return <BeltBadge rankKey={toRankKey} nameOverride={toName} size={size} showRank={showRank} className={className} />;
   }
 
-  // Single belt presentation with high-contrast semantic theme
-  const theme = getBeltTheme(targetBelt, targetGub);
+  const label = (key: string | null | undefined, name?: string | null) =>
+    `${name ?? beltNameOf(ranks, key)}${isRankKey(key) ? `, ${rankShortLabel(key, levelLabel)}` : ""}`;
 
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 font-medium shadow-xs transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none",
-        theme.pillClass,
-        size === "sm" && "text-xs py-0.5 px-2",
-        size === "lg" && "text-sm py-1.5 px-3",
+        "inline-flex max-w-full flex-wrap items-center gap-1.5 rounded-lg border border-border bg-background px-2 py-1 shadow-xs",
+        size === "sm" && "px-1.5 py-0.5 text-xs",
+        size === "lg" && "px-3 py-1.5 text-sm",
         className
       )}
-      aria-label={`Faixa ${theme.name}${targetGub ? `, ${targetGub}º GUB` : ""}`}
+      aria-label={`Progressão de faixa: ${label(fromRankKey, fromName)} para ${label(toRankKey, toName)}`}
     >
-      <BeltBadge
-        belt={targetBelt}
-        gub={targetGub}
-        size={size}
-        showGub={showGub}
-        className="border-none bg-transparent shadow-none px-0 h-auto"
-      />
+      <div className="flex items-center gap-1 text-muted-foreground">
+        <span className="hidden text-xs font-medium text-muted-foreground sm:inline">Atual:</span>
+        <BeltBadge rankKey={fromRankKey} nameOverride={fromName} size={badgeSize} showRank={showRank} />
+      </div>
+      <ArrowRight className={cn("shrink-0 text-muted-foreground", size === "sm" ? "size-3" : "size-3.5")} aria-hidden="true" />
+      <div className="flex items-center gap-1">
+        <span className="hidden text-xs font-medium text-primary-text sm:inline">Alvo:</span>
+        <BeltBadge rankKey={toRankKey} nameOverride={toName} size={badgeSize} showRank={showRank} className="ring-1 ring-primary/20" />
+      </div>
     </div>
   );
 }

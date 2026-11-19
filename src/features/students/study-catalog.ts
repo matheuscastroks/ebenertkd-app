@@ -1,3 +1,5 @@
+import { rankOrder, type RankKey } from "@/features/academy/ranks";
+
 export type StudyQuizQuestion = {
   id: string;
   question: string;
@@ -7,8 +9,9 @@ export type StudyQuizQuestion = {
 };
 
 export type BeltStudyModule = {
-  gub: number;
-  belt: string;
+  /** Graduação à qual o conteúdo pertence. O nome e a cor da faixa vêm da configuração da academia. */
+  rankKey: RankKey;
+  /** Nome da forma do conteúdo deste guia (Taegeuk, Koryo…). */
   poomsae: string;
   trigram: string;
   meaning: string;
@@ -20,8 +23,7 @@ export type BeltStudyModule = {
 
 export const BELT_STUDY_MODULES: readonly BeltStudyModule[] = [
   {
-    gub: 10,
-    belt: "Branca",
+    rankKey: "gub-10",
     poomsae: "Introductory Poomsae",
     trigram: "Fundamentos (Início)",
     meaning: "Pureza e início da jornada: mente aberta para aprender disciplina, postura e equilíbrio.",
@@ -55,8 +57,7 @@ export const BELT_STUDY_MODULES: readonly BeltStudyModule[] = [
     ],
   },
   {
-    gub: 9,
-    belt: "Ponta Amarela",
+    rankKey: "gub-9",
     poomsae: "Preliminary Poomsae",
     trigram: "Semente da Técnica",
     meaning: "Transição para as primeiras combinações de defesa, avanço e chutes controlados.",
@@ -85,8 +86,7 @@ export const BELT_STUDY_MODULES: readonly BeltStudyModule[] = [
     ],
   },
   {
-    gub: 8,
-    belt: "Amarela",
+    rankKey: "gub-8",
     poomsae: "Taegeuk Il Jang",
     trigram: "Geon (Céu e Luz)",
     meaning: "Simboliza o céu e a luz — a origem da criação e o início da série oficial Taegeuk.",
@@ -115,8 +115,7 @@ export const BELT_STUDY_MODULES: readonly BeltStudyModule[] = [
     ],
   },
   {
-    gub: 7,
-    belt: "Ponta Verde",
+    rankKey: "gub-7",
     poomsae: "Taegeuk Ee Jang",
     trigram: "Tae (Alegria / Lago)",
     meaning: "Serenidade externa com firmeza interna, como a superfície calma de um lago.",
@@ -138,8 +137,7 @@ export const BELT_STUDY_MODULES: readonly BeltStudyModule[] = [
     ],
   },
   {
-    gub: 6,
-    belt: "Verde",
+    rankKey: "gub-6",
     poomsae: "Taegeuk Sam Jang",
     trigram: "Ri (Fogo e Sol)",
     meaning: "Calor, energia e crescimento contínuo: a técnica ganha variedade e velocidade.",
@@ -161,8 +159,7 @@ export const BELT_STUDY_MODULES: readonly BeltStudyModule[] = [
     ],
   },
   {
-    gub: 5,
-    belt: "Ponta Azul",
+    rankKey: "gub-5",
     poomsae: "Taegeuk Sa Jang",
     trigram: "Jin (Trovão)",
     meaning: "Força e coragem frente ao desafio: movimentos decididos e firmes como o trovão.",
@@ -184,8 +181,7 @@ export const BELT_STUDY_MODULES: readonly BeltStudyModule[] = [
     ],
   },
   {
-    gub: 4,
-    belt: "Azul",
+    rankKey: "gub-4",
     poomsae: "Taegeuk Oh Jang",
     trigram: "Seon (Vento)",
     meaning: "Alternância entre suavidade e intensidade, como o vento que ora é brisa, ora tempestade.",
@@ -212,8 +208,7 @@ export const BELT_STUDY_MODULES: readonly BeltStudyModule[] = [
     ],
   },
   {
-    gub: 3,
-    belt: "Ponta Vermelha",
+    rankKey: "gub-3",
     poomsae: "Taegeuk Yuk Jang",
     trigram: "Gam (Água)",
     meaning: "Fluidez contínua e adaptação: contornar obstáculos sem perder a direção.",
@@ -235,8 +230,7 @@ export const BELT_STUDY_MODULES: readonly BeltStudyModule[] = [
     ],
   },
   {
-    gub: 2,
-    belt: "Vermelha",
+    rankKey: "gub-2",
     poomsae: "Taegeuk Chil Jang",
     trigram: "Gan (Montanha)",
     meaning: "Estabilidade e autocontrole: saber avançar com força e parar com firmeza.",
@@ -258,8 +252,7 @@ export const BELT_STUDY_MODULES: readonly BeltStudyModule[] = [
     ],
   },
   {
-    gub: 1,
-    belt: "Ponta Preta",
+    rankKey: "gub-1",
     poomsae: "Taegeuk Pal Jang",
     trigram: "Gon (Terra)",
     meaning: "Maturidade dos fundamentos coloridos: a terra que sustenta tudo antes do novo começo na Faixa Preta.",
@@ -281,8 +274,7 @@ export const BELT_STUDY_MODULES: readonly BeltStudyModule[] = [
     ],
   },
   {
-    gub: 0,
-    belt: "Preta",
+    rankKey: "dan-1",
     poomsae: "Koryo",
     trigram: "Seonbae (Espírito do Mestre / Dinastia Koryo)",
     meaning: "Novo começo em nível superior: foco em refinamento técnico, espírito indomável e exemplo para o dojang.",
@@ -368,14 +360,12 @@ export type AnnotatedStudyModule = BeltStudyModule & {
   accessState: StudyModuleAccessState;
 };
 
-export function getStudyModulesForGub(currentGub: number): AnnotatedStudyModule[] {
+/** Estado de cada módulo conforme a graduação atual: a atual, as anteriores (revisão) e as seguintes (prévia). */
+export function getStudyModulesForRank(currentRankKey: RankKey): AnnotatedStudyModule[] {
+  const currentOrder = rankOrder(currentRankKey);
   return BELT_STUDY_MODULES.map((mod) => {
-    let accessState: StudyModuleAccessState = "preview";
-    if (mod.gub === currentGub) {
-      accessState = "current";
-    } else if (mod.gub > currentGub) {
-      accessState = "review";
-    }
+    const order = rankOrder(mod.rankKey);
+    const accessState: StudyModuleAccessState = order === currentOrder ? "current" : order < currentOrder ? "review" : "preview";
     return { ...mod, accessState };
   });
 }

@@ -12,10 +12,11 @@ import { invalidateTags } from "@/lib/cache/invalidate";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { getTrainingClass } from "@/features/classes/service";
 import { createEnrollmentFeeCharge } from "@/features/billing/charge-service";
-import { getPolicy } from "@/features/academy/config-service";
+import { getBeltContext, getPolicy } from "@/features/academy/config-service";
 import { isDueDayAllowed } from "@/features/academy/policy-rules";
 import { issueContractForEnrollment } from "@/features/contracts/contract-service";
-import { beltForGub, type GubOption } from "@/features/students/options";
+import { beltNameOf } from "@/features/academy/belt-rules";
+import { assertSelectableRank } from "@/features/academy/rank-guard";
 import { notifyAdmins, notifyStudentEvent } from "@/features/notifications/notification-service";
 import {
   guardianContractPath,
@@ -33,6 +34,7 @@ export async function saveEnrollmentDraft(target: Profile, actor: Profile, input
   // Depois do rascunho a graduação só muda por exame (ou pelo professor): aluno e responsável não editam a faixa.
   const keepGraduation = !isDraft && actor.role !== "admin";
   if (isDraft && submit && !hasRequiredSubmissionPhoto(bundle.documents)) throw new Error("profile_photo_required");
+  if (!keepGraduation) await assertSelectableRank(parsed.rankKey, bundle.student.rank_key);
   if (parsed.requestedDueDay != null && !isDueDayAllowed(parsed.requestedDueDay, (await getPolicy("billing")).due_day_options, bundle.enrollment.requested_due_day)) throw new Error("due_day_not_allowed");
   const trainingClass = parsed.trainingClassId ? await getTrainingClass(parsed.trainingClassId) : null;
   if (trainingClass && trainingClass.status !== "active") throw new Error("training_class_inactive");
@@ -60,10 +62,9 @@ export async function saveEnrollmentDraft(target: Profile, actor: Profile, input
       emergency_contact_relationship: parsed.emergencyContactRelationship,
       emergency_contact_phone: parsed.emergencyContactPhone,
       started_at_tkd: isoDate(parsed.startedAtTkd),
-      current_belt: keepGraduation ? bundle.student.current_belt : parsed.currentBelt ?? (parsed.gub != null ? beltForGub(parsed.gub as GubOption) : undefined),
+      rank_key: keepGraduation ? bundle.student.rank_key : parsed.rankKey,
       training_class_id: trainingClass?.$id ?? bundle.student.training_class_id,
       training_class: trainingClass?.name ?? bundle.student.training_class,
-      gub: keepGraduation ? bundle.student.gub : parsed.gub,
       health_condition: parsed.healthCondition,
       health_details: parsed.healthDetails,
       medications: parsed.medications,
@@ -119,6 +120,7 @@ export async function adminUpdateStudent(actor: Profile, studentId: string, inpu
   if (!actor.capabilities.includes("admin")) throw new Error("unauthorized");
   const parsed = studentDraftSchema.parse(input);
   const bundle = await getEnrollmentBundleByStudentId(studentId);
+  await assertSelectableRank(parsed.rankKey, bundle.student.rank_key);
   const { tables, config } = createAppwriteAdminClient();
   const now = new Date().toISOString();
 
@@ -150,10 +152,9 @@ export async function adminUpdateStudent(actor: Profile, studentId: string, inpu
       emergency_contact_relationship: parsed.emergencyContactRelationship,
       emergency_contact_phone: parsed.emergencyContactPhone,
       started_at_tkd: isoDate(parsed.startedAtTkd),
-      current_belt: parsed.currentBelt ?? (parsed.gub != null ? beltForGub(parsed.gub as GubOption) : undefined),
+      rank_key: parsed.rankKey ?? bundle.student.rank_key,
       training_class_id: trainingClass?.$id ?? bundle.student.training_class_id,
       training_class: trainingClass?.name ?? bundle.student.training_class,
-      gub: parsed.gub,
       health_condition: parsed.healthCondition,
       health_details: parsed.healthDetails,
       medications: parsed.medications,
@@ -168,11 +169,11 @@ export async function adminUpdateStudent(actor: Profile, studentId: string, inpu
   invalidateTags(CACHE_TAGS.enrollments, CACHE_TAGS.studentsAll, CACHE_TAGS.student(studentId), CACHE_TAGS.studentProfile(bundle.student.profile_id));
   await writeAuditEvent("student.updated_by_admin", actor.account_id, "student", studentId, { changes: input });
   const classChanged = trainingClass && trainingClass.$id !== bundle.student.training_class_id;
-  const beltChanged = parsed.gub != null && parsed.gub !== bundle.student.gub;
+  const beltChanged = parsed.rankKey != null && parsed.rankKey !== bundle.student.rank_key;
   const updateSummary = classChanged
     ? `O professor atualizou sua ficha e definiu sua turma como ${trainingClass.name}.`
     : beltChanged
-      ? `O professor atualizou sua graduação na ficha para Faixa ${updatedStudent.current_belt || "atualizada"}.`
+      ? `O professor atualizou sua graduação na ficha para Faixa ${beltNameOf((await getBeltContext()).ranks, updatedStudent.rank_key, "atualizada")}.`
       : "O professor atualizou informações da sua ficha de matrícula.";
   await notifyStudentEvent({
     studentId,
@@ -232,7 +233,7 @@ export async function advanceToSignature(actor: Profile, studentId: string) {
     fullName: bundle.student.full_name, cpf: bundle.student.cpf ?? "", birthDate: bundle.student.birth_date?.slice(0, 10) ?? "",
     whatsapp: bundle.student.whatsapp ?? "", address: bundle.student.address ?? "", emergencyContactName: bundle.student.emergency_contact_name ?? "",
     emergencyContactRelationship: bundle.student.emergency_contact_relationship ?? "", emergencyContactPhone: bundle.student.emergency_contact_phone ?? "",
-    startedAtTkd: bundle.student.started_at_tkd?.slice(0, 10) ?? "", currentBelt: bundle.student.current_belt ?? (bundle.student.gub != null ? beltForGub(bundle.student.gub as GubOption) : "") ?? "", trainingClassId: bundle.student.training_class_id ?? undefined, gub: bundle.student.gub,
+    startedAtTkd: bundle.student.started_at_tkd?.slice(0, 10) ?? "", rankKey: bundle.student.rank_key ?? "", trainingClassId: bundle.student.training_class_id ?? undefined,
     healthCondition: bundle.student.health_condition, healthDetails: bundle.student.health_details ?? undefined, medications: bundle.student.medications ?? undefined,
     allergies: bundle.student.allergies ?? undefined, injuries: bundle.student.injuries ?? undefined, guardianContact: bundle.student.guardian_contact ?? undefined,
     requestedDueDay: bundle.enrollment.requested_due_day

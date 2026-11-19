@@ -4,11 +4,11 @@ import {
   KOREAN_COMMANDS,
   KOREAN_NUMBERS,
   TAEKWONDO_TENETS,
-  getStudyModulesForGub,
+  getStudyModulesForRank,
 } from "@/features/students/study-catalog";
 
 describe("study-catalog", () => {
-  it("cobre todos os 11 níveis do 10º GUB até a Faixa Preta com quizzes íntegros", () => {
+  it("cobre as dez graduações coloridas e o 1º Dan com quizzes íntegros", () => {
     expect(BELT_STUDY_MODULES).toHaveLength(11);
     for (const mod of BELT_STUDY_MODULES) {
       expect(mod.quiz.length).toBeGreaterThanOrEqual(1);
@@ -22,11 +22,20 @@ describe("study-catalog", () => {
   });
 
   it("classifica módulos em revisão (anteriores), atual e prévia (futuros)", () => {
-    const modules = getStudyModulesForGub(8);
-    expect(modules.find((m) => m.gub === 10)?.accessState).toBe("review");
-    expect(modules.find((m) => m.gub === 9)?.accessState).toBe("review");
-    expect(modules.find((m) => m.gub === 8)?.accessState).toBe("current");
-    expect(modules.find((m) => m.gub === 7)?.accessState).toBe("preview");
-    expect(modules.find((m) => m.gub === 0)?.accessState).toBe("preview");
+    const modules = getStudyModulesForRank("gub-8");
+    expect(modules.find((m) => m.rankKey === "gub-10")?.accessState).toBe("review");
+    expect(modules.find((m) => m.rankKey === "gub-9")?.accessState).toBe("review");
+    expect(modules.find((m) => m.rankKey === "gub-8")?.accessState).toBe("current");
+    expect(modules.find((m) => m.rankKey === "gub-7")?.accessState).toBe("preview");
+    expect(modules.find((m) => m.rankKey === "dan-1")?.accessState).toBe("preview");
+  });
+
+  it("o conteúdo é amarrado à graduação, não ao nome da faixa", () => {
+    expect(BELT_STUDY_MODULES.map((mod) => mod.rankKey)).toEqual(["gub-10", "gub-9", "gub-8", "gub-7", "gub-6", "gub-5", "gub-4", "gub-3", "gub-2", "gub-1", "dan-1"]);
+  });
+
+  it("para uma graduação sem módulo próprio (2º Dan) tudo o que veio antes fica em revisão", () => {
+    const modules = getStudyModulesForRank("dan-2");
+    expect(modules.every((m) => m.accessState === "review")).toBe(true);
   });
 });

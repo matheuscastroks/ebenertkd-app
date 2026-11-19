@@ -8,7 +8,9 @@ import { SortableTableHead } from "@/components/shared/sortable-table-head";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { rankOrder } from "@/features/academy/ranks";
 import { BeltBadge } from "@/features/students/components/belt-badge";
+import { resolveStudentRank } from "@/features/students/journey-rules";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
 import type { Enrollment, Student } from "@/features/students/types";
 import { useTableSort } from "@/hooks/use-table-sort";
@@ -48,10 +50,8 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
     comparators: {
       student: (a, b) =>
         a.student.full_name.localeCompare(b.student.full_name, "pt-BR"),
-      // GUB 10 = Branca (iniciante) até 0 = Preta/Dan (avançado)
-      // asc: iniciante -> graduado (10 -> 0)
-      // desc: graduado -> iniciante (0 -> 10)
-      belt: (a, b) => (b.student.gub ?? 10) - (a.student.gub ?? 10),
+      // Ordem de progressão do catálogo: asc = iniciante -> graduado; sem graduação conta como iniciante.
+      belt: (a, b) => rankOrder(resolveStudentRank(a.student.rank_key)) - rankOrder(resolveStudentRank(b.student.rank_key)),
       class: (a, b) =>
         (a.student.training_class ?? "").localeCompare(
           b.student.training_class ?? "",
@@ -135,7 +135,7 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
                     </div>
                   </TableCell>
                   <TableCell className="px-3">
-                    <BeltBadge belt={student.current_belt} gub={student.gub} size="sm" />
+                    <BeltBadge rankKey={student.rank_key} size="sm" />
                   </TableCell>
                   <TableCell className="max-w-36 whitespace-normal px-3 text-sm text-muted-foreground">
                     <span className="block max-w-28 whitespace-normal">
@@ -173,7 +173,7 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
                     <div className="space-y-1">
                       <p className="font-semibold text-foreground text-sm">{student.full_name}</p>
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <BeltBadge belt={student.current_belt} gub={student.gub} size="sm" />
+                        <BeltBadge rankKey={student.rank_key} size="sm" />
                         {student.training_class && (
                           <span className="text-sm text-muted-foreground">· {student.training_class}</span>
                         )}

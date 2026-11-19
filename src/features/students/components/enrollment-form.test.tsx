@@ -26,8 +26,7 @@ describe("EnrollmentForm", () => {
     emergency_contact_relationship: "Mãe",
     emergency_contact_phone: "11988888888",
     started_at_tkd: "2020-01-10",
-    current_belt: "Amarela",
-    gub: 8,
+    rank_key: "gub-8",
     status: "draft"
   } as Student;
 

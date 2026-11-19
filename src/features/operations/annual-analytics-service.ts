@@ -1,5 +1,7 @@
 import "server-only";
 
+import { toPublicRank } from "@/features/academy/belt-rules";
+import { getBeltRanks } from "@/features/academy/config-service";
 import type { Charge, Payment } from "@/features/billing/types";
 import type { CancellationRequest } from "@/features/contracts/types";
 import type { BeltHistory } from "@/features/exams/types";
@@ -45,8 +47,10 @@ function loadAnnualDataset() {
 }
 
 export async function getAnnualExecutiveOverview(requestedYear?: number) {
-  const { students, enrollments, cancellations, charges, payments, beltHistory } =
-    await loadAnnualDataset();
+  const [{ students, enrollments, cancellations, charges, payments, beltHistory }, ranks] = await Promise.all([
+    loadAnnualDataset(),
+    getBeltRanks(),
+  ]);
 
   const currentYear = saoPauloCurrentYear();
   const years = availableAnalyticsYears(charges, enrollments, currentYear);
@@ -63,6 +67,7 @@ export async function getAnnualExecutiveOverview(requestedYear?: number) {
     charges,
     payments,
     beltHistory,
+    ranks: ranks.map(toPublicRank),
     referenceDate: saoPauloToday(),
   });
 

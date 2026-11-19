@@ -3,6 +3,7 @@ import { loadEnvConfig } from "@next/env";
 import { AppwriteException, Client, ID, Permission, Query, Role, Storage, TablesDB, Users, type Models } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
 import { DEFAULT_ACADEMY_IDENTITY, DEFAULT_CONTRACT_POLICY } from "../../src/features/academy/defaults";
+import { DEFAULT_RANK_SETTINGS } from "../../src/features/academy/rank-defaults";
 import { APPWRITE_IDS } from "../../src/lib/appwrite/ids";
 import { readServerAppwriteConfig } from "../../src/lib/appwrite/config";
 import { testPersonas } from "./test-personas";
@@ -451,10 +452,9 @@ async function main() {
         emergency_contact_relationship: scenario.role === "minor_student" ? "Responsável Legal" : "Familiar",
         emergency_contact_phone: scenario.guardianPhone ?? scenario.phone,
         started_at_tkd: dateTime(`${scenario.startMonth ?? "2025-01"}-01`),
-        current_belt: scenario.belt,
+        rank_key: scenario.rankKey,
         training_class_id: primaryClass.$id,
         training_class: primaryClass.name,
-        gub: scenario.gub,
         health_condition: scenario.healthCondition ?? "no",
         health_details: scenario.healthDetails ?? null,
         medications: scenario.medications ?? null,
@@ -827,7 +827,7 @@ async function main() {
           amount_cents: ep.feeCents,
           due_date: eventRow.event_date as string,
           status: ep.chargeStatus === "paid" ? "paid" : ep.chargeStatus,
-          description: `Taxa do exame de graduação - Faixa ${ep.targetBelt}`,
+          description: `Taxa do exame de graduação - Faixa ${DEFAULT_RANK_SETTINGS[ep.targetRankKey].display_name}`,
           created_at: eventRow.created_at as string,
           updated_at: now
         });
@@ -869,8 +869,7 @@ async function main() {
         event_id: eventRow.$id,
         enrollment_id: enrollment.$id,
         student_id: student.$id,
-        target_belt: ep.targetBelt,
-        target_gub: ep.targetGub,
+        target_rank_key: ep.targetRankKey,
         fee_cents: ep.feeCents,
         charge_id: examChargeId,
         status: ep.status,
@@ -894,10 +893,10 @@ async function main() {
         student_id: student.$id,
         event_id: eventRow.$id,
         exam_participant_id: participantId,
-        previous_belt: pr.previousBelt,
-        previous_gub: pr.previousGub,
-        new_belt: pr.newBelt,
-        new_gub: pr.newGub,
+        previous_rank_key: pr.previousRankKey,
+        new_rank_key: pr.newRankKey,
+        previous_belt_name: DEFAULT_RANK_SETTINGS[pr.previousRankKey].display_name,
+        new_belt_name: DEFAULT_RANK_SETTINGS[pr.newRankKey].display_name,
         achieved_at: pr.achievedAt,
         created_at: pr.achievedAt
       });

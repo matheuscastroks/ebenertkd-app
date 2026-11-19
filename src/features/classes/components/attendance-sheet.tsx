@@ -18,8 +18,7 @@ import { cn } from "@/lib/utils";
 type AttendanceRow = {
   classEnrollmentId: string;
   studentName: string;
-  belt?: string | null;
-  gub?: number | null;
+  rankKey?: string | null;
   photoDocumentId?: string | null;
   status?: AttendanceStatus;
 };
@@ -77,7 +76,7 @@ export function AttendanceSheet({ classId, lessonId, lessonCompleted, rows, noti
               <div className="min-w-0 flex-1">
                 <p className="truncate text-base font-medium text-foreground">{row.studentName}</p>
                 <div className="mt-0.5">
-                  <BeltBadge belt={row.belt} gub={row.gub} size="sm" />
+                  <BeltBadge rankKey={row.rankKey} size="sm" />
                 </div>
               </div>
             </div>

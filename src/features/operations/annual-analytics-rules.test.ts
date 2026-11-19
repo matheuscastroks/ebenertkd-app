@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { DEFAULT_PUBLIC_RANKS } from "@/features/academy/belt-rules";
 import type { Charge, Payment } from "@/features/billing/types";
 import type { CancellationRequest } from "@/features/contracts/types";
 import type { BeltHistory } from "@/features/exams/types";
@@ -22,8 +23,8 @@ const rowBase = {
 describe("annual-analytics-rules", () => {
   it("consolida série de 12 meses, trimestres, LTV médio, ticket médio e funil de faixas", () => {
     const students: Student[] = [
-      { ...rowBase, $id: "s1", profile_id: "p1", full_name: "Aluno 1", current_belt: "Amarela", gub: 8, status: "active" },
-      { ...rowBase, $id: "s2", profile_id: "p2", full_name: "Aluno 2", current_belt: "Branca", gub: 10, status: "inactive" },
+      { ...rowBase, $id: "s1", profile_id: "p1", full_name: "Aluno 1", rank_key: "gub-8", status: "active" },
+      { ...rowBase, $id: "s2", profile_id: "p2", full_name: "Aluno 2", rank_key: "gub-10", status: "inactive" },
     ];
     const enrollments: Enrollment[] = [
       {
@@ -95,10 +96,10 @@ describe("annual-analytics-rules", () => {
         student_id: "s1",
         event_id: "ev1",
         exam_participant_id: "ep1",
-        previous_belt: "Ponta Amarela",
-        previous_gub: 9,
-        new_belt: "Amarela",
-        new_gub: 8,
+        previous_rank_key: "gub-9",
+        new_rank_key: "gub-8",
+        previous_belt_name: "Ponta Amarela",
+        new_belt_name: "Amarela",
         achieved_at: "2026-06-20T12:00:00Z",
       },
     ];
@@ -111,6 +112,7 @@ describe("annual-analytics-rules", () => {
       charges,
       payments,
       beltHistory,
+      ranks: DEFAULT_PUBLIC_RANKS,
       referenceDate: "2026-11-18",
     });
 
@@ -125,13 +127,33 @@ describe("annual-analytics-rules", () => {
     expect(report.averageTicketCents).toBe(18000);
     expect(report.averageTenureMonths).toBeGreaterThan(5);
     expect(report.totalGraduationsInYear).toBe(1);
-    expect(report.beltDistribution.find((b) => b.gub === 8)).toMatchObject({
+    expect(report.beltDistribution.find((b) => b.rankKey === "gub-8")).toMatchObject({
       activeCount: 1,
       graduationsInYear: 1,
     });
-    expect(report.beltDistribution.find((b) => b.gub === 10)).toMatchObject({
+    expect(report.beltDistribution.find((b) => b.rankKey === "gub-10")).toMatchObject({
       inactiveCount: 1,
     });
+    // Funil: só graduações habilitadas (e as que ainda têm alunos). Poom e Dan 4-9 começam desativados.
+    expect(report.beltDistribution.map((b) => b.rankKey)).not.toContain("poom-1");
+    expect(report.beltDistribution).toHaveLength(13);
     expect(availableAnalyticsYears(charges, enrollments, 2026)).toEqual([2026]);
+  });
+
+  it("o funil usa os nomes configurados e inclui uma graduação desativada que ainda tem alunos", () => {
+    const ranks = DEFAULT_PUBLIC_RANKS.map((rank) => (rank.rank_key === "gub-9" ? { ...rank, display_name: "Laranja" } : rank.rank_key === "poom-1" ? { ...rank, enabled: false } : rank));
+    const report = buildAnnualExecutiveReport({
+      year: 2026,
+      students: [{ ...rowBase, $id: "s9", profile_id: "p9", full_name: "Aluno", rank_key: "poom-1", status: "active" } as Student],
+      enrollments: [],
+      cancellations: [],
+      charges: [],
+      payments: [],
+      beltHistory: [],
+      ranks,
+      referenceDate: "2026-11-18",
+    });
+    expect(report.beltDistribution.find((b) => b.rankKey === "gub-9")?.belt).toBe("Laranja");
+    expect(report.beltDistribution.find((b) => b.rankKey === "poom-1")).toMatchObject({ activeCount: 1 });
   });
 });

@@ -1,16 +1,46 @@
 import { describe, expect, it } from "vitest";
-import { assertNextGraduation, examChargeCancellation, groupStudentExams, sortBeltHistoryNewestFirst, type StudentExamEntry } from "@/features/exams/rules";
+import { DEFAULT_PUBLIC_RANKS, type PublicRank } from "@/features/academy/belt-rules";
+import { assertNextGraduation, assertPromotion, examChargeCancellation, examFeeCents, groupStudentExams, sortBeltHistoryNewestFirst, type StudentExamEntry } from "@/features/exams/rules";
 import type { BeltHistory, ExamEvent, ExamParticipant } from "@/features/exams/types";
 
 describe("exam rules", () => {
-  it("accepts any higher coherent GUB and belt, including skipping belts", () => {
-    expect(() => assertNextGraduation(6, 5, "Ponta Azul")).not.toThrow();
-    expect(() => assertNextGraduation(6, 4, "Azul")).not.toThrow();
-    expect(() => assertNextGraduation(10, 8, "Amarela")).not.toThrow();
-    expect(() => assertNextGraduation(1, 0, "Preta")).not.toThrow();
-    expect(() => assertNextGraduation(6, 6, "Verde")).toThrow("exam_graduation_must_be_next");
-    expect(() => assertNextGraduation(6, 7, "Ponta Verde")).toThrow("exam_graduation_must_be_next");
-    expect(() => assertNextGraduation(6, 5, "Azul")).toThrow("exam_graduation_mismatch");
+  const ranks: readonly PublicRank[] = DEFAULT_PUBLIC_RANKS;
+
+  it("accepts any enabled higher graduation, including skipping, when the policy allows", () => {
+    expect(() => assertNextGraduation(ranks, "gub-6", "gub-5", true)).not.toThrow();
+    expect(() => assertNextGraduation(ranks, "gub-6", "gub-4", true)).not.toThrow();
+    expect(() => assertNextGraduation(ranks, "gub-10", "gub-8", true)).not.toThrow();
+    // Poom desativado por padrão: o 1º gub vai direto ao 1º Dan.
+    expect(() => assertNextGraduation(ranks, "gub-1", "dan-1", true)).not.toThrow();
+    expect(() => assertNextGraduation(ranks, "gub-1", "poom-1", true)).toThrow("exam_graduation_must_be_next");
+    expect(() => assertNextGraduation(ranks, "gub-6", "gub-6", true)).toThrow("exam_graduation_must_be_next");
+    expect(() => assertNextGraduation(ranks, "gub-6", "gub-7", true)).toThrow("exam_graduation_must_be_next");
+    expect(() => assertNextGraduation(ranks, "gub-6", "gub-99", true)).toThrow("exam_graduation_mismatch");
+  });
+
+  it("only accepts the next graduation when skipping is not allowed", () => {
+    expect(() => assertNextGraduation(ranks, "gub-6", "gub-5", false)).not.toThrow();
+    expect(() => assertNextGraduation(ranks, "gub-6", "gub-4", false)).toThrow("exam_graduation_must_be_next");
+  });
+
+  it("includes Poom in the progression once the academy enables it", () => {
+    const withPoom = ranks.map((rank) => (rank.rank_key.startsWith("poom-") ? { ...rank, enabled: true } : rank));
+    expect(() => assertNextGraduation(withPoom, "gub-1", "poom-1", false)).not.toThrow();
+    expect(() => assertNextGraduation(withPoom, "gub-1", "dan-1", false)).toThrow("exam_graduation_must_be_next");
+    expect(() => assertNextGraduation(withPoom, "poom-4", "dan-1", false)).not.toThrow();
+  });
+
+  it("accepts a result for a promotion even if the target was disabled later, but never a demotion", () => {
+    expect(() => assertPromotion("gub-6", "gub-5")).not.toThrow();
+    expect(() => assertPromotion("gub-6", "gub-6")).toThrow("exam_graduation_must_be_next");
+    expect(() => assertPromotion("gub-6", "gub-7")).toThrow("exam_graduation_must_be_next");
+    expect(() => assertPromotion(null, "gub-5")).toThrow("exam_graduation_must_be_next");
+  });
+
+  it("prefers the graduation fee over the event fee", () => {
+    expect(examFeeCents(12000, 15000)).toBe(12000);
+    expect(examFeeCents(0, 15000)).toBe(0);
+    expect(examFeeCents(null, 15000)).toBe(15000);
   });
 
   it("cancels unpaid charges and preserves paid charges with an explicit decision", () => {

@@ -1,11 +1,11 @@
 "use server";
 
+import type { RankKey } from "@/features/academy/ranks";
 import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { setStudentAccessOverride } from "@/features/billing/access-lock-service";
 import { reviewStudentDocument } from "@/features/students/document-service";
 import { advanceToSignature, adminUpdateStudent, saveFinancialReview } from "@/features/students/enrollment-service";
-import type { BeltOption } from "@/features/students/options";
 import { requireProfile } from "@/lib/auth/session";
 import { reaisToCents } from "@/lib/money";
 import { adminEnrollmentPath } from "@/lib/navigation/routes";
@@ -95,8 +95,7 @@ export async function adminUpdateStudentAction(formData: FormData) {
       emergencyContactRelationship: String(formData.get("emergency_contact_relationship") ?? "") || undefined,
       emergencyContactPhone: String(formData.get("emergency_contact_phone") ?? "") || undefined,
       startedAtTkd: String(formData.get("started_at_tkd") ?? "") || undefined,
-      currentBelt: (String(formData.get("current_belt") ?? "") || undefined) as BeltOption | undefined,
-      gub: formData.get("gub") !== null && formData.get("gub") !== "" ? Number(formData.get("gub")) : undefined,
+      rankKey: (String(formData.get("rank_key") ?? "") || undefined) as RankKey | undefined,
       trainingClassId: String(formData.get("training_class_id") ?? "") || undefined,
       healthCondition: (String(formData.get("health_condition") ?? "") || undefined) as "yes" | "no" | undefined,
       healthDetails: String(formData.get("health_details") ?? "") || undefined,

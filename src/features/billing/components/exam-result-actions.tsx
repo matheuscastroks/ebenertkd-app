@@ -12,15 +12,15 @@ export function ExamResultActions({
   participantId,
   eventId,
   name,
-  currentBelt,
-  targetBelt,
+  currentName,
+  targetName,
   feeCents,
 }: {
   participantId: string;
   eventId: string;
   name: string;
-  currentBelt: string;
-  targetBelt: string;
+  currentName: string;
+  targetName: string;
   feeCents: number;
 }) {
   return (
@@ -32,7 +32,7 @@ export function ExamResultActions({
             label: "Aprovar",
             className:
               "bg-success-soft text-success-foreground hover:bg-success-soft hover:text-success-foreground",
-            effect: `Muda a faixa de ${currentBelt} para ${targetBelt}. O resultado será publicado no portal do aluno.`,
+            effect: `Muda a faixa de ${currentName} para ${targetName}. O resultado será publicado no portal do aluno.`,
           },
           {
             result: "failed",
@@ -75,11 +75,11 @@ export function ExamResultActions({
             </div>
             <div className="flex flex-wrap justify-between gap-2">
               <dt className="text-muted-foreground">Faixa atual</dt>
-              <dd className="font-medium text-foreground">{currentBelt}</dd>
+              <dd className="font-medium text-foreground">{currentName}</dd>
             </div>
             <div className="flex flex-wrap justify-between gap-2">
               <dt className="text-muted-foreground">Faixa pretendida</dt>
-              <dd className="font-medium text-foreground">{targetBelt}</dd>
+              <dd className="font-medium text-foreground">{targetName}</dd>
             </div>
             <div className="flex flex-wrap justify-between gap-2">
               <dt className="text-muted-foreground">Taxa do exame</dt>

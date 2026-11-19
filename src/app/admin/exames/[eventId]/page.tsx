@@ -42,6 +42,9 @@ import {
   examParticipantTones,
   formatExamDate,
 } from "@/features/exams/labels";
+import { beltNameOf, examTargetRanks, toPublicRank } from "@/features/academy/belt-rules";
+import { getBeltRanks, getPolicy } from "@/features/academy/config-service";
+import { isRankKey, rankOrder } from "@/features/academy/ranks";
 import { getExamEvent, getExamEventBundle } from "@/features/exams/service";
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
@@ -50,7 +53,15 @@ import { centsToReaisInput, formatBrl } from "@/lib/money";
 import { ROUTES } from "@/lib/navigation/routes";
 
 async function ExamBundleSections({ eventId }: { eventId: string }) {
-  const bundle = await getExamEventBundle(eventId);
+  const [bundle, ranks, examPolicy] = await Promise.all([getExamEventBundle(eventId), getBeltRanks(), getPolicy("exam")]);
+  const publicRanks = ranks.map(toPublicRank);
+  // Só entra na lista quem ainda tem alguma graduação habilitada acima da atual.
+  const eligibleStudents = bundle.eligibleStudents.filter(
+    ({ student }) => examTargetRanks(publicRanks, student?.rank_key, examPolicy.allow_skip_grades).length > 0
+  );
+  const rankFees = Object.fromEntries(
+    ranks.flatMap((rank) => (rank.exam_fee_cents != null ? [[rank.rank_key, centsToReaisInput(rank.exam_fee_cents)]] : []))
+  );
 
   const activeParticipants = bundle.participants.filter(
     (row) => row.participant.status !== "cancelled"
@@ -59,30 +70,26 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
     (row) => row.participant.status === "cancelled"
   );
 
-  // Group active participants by target belt (10º GUB down to 1º GUB / 1º Dan)
+  // Agrupa os candidatos pela graduação pretendida, na ordem de progressão do catálogo.
   const groupsMap = new Map<
-    number,
+    string,
     {
-      targetBelt: string;
-      targetGub: number;
+      targetRankKey: string;
       participants: typeof activeParticipants;
     }
   >();
 
   for (const row of activeParticipants) {
-    const gub = row.participant.target_gub ?? 0;
-    if (!groupsMap.has(gub)) {
-      groupsMap.set(gub, {
-        targetBelt: row.participant.target_belt,
-        targetGub: gub,
-        participants: [],
-      });
+    const key = row.participant.target_rank_key;
+    if (!groupsMap.has(key)) {
+      groupsMap.set(key, { targetRankKey: key, participants: [] });
     }
-    groupsMap.get(gub)!.participants.push(row);
+    groupsMap.get(key)!.participants.push(row);
   }
 
+  const orderOf = (key: string) => (isRankKey(key) ? rankOrder(key) : Number.MAX_SAFE_INTEGER);
   const sortedGroups = Array.from(groupsMap.values())
-    .sort((a, b) => b.targetGub - a.targetGub)
+    .sort((a, b) => orderOf(a.targetRankKey) - orderOf(b.targetRankKey))
     .map((group) => ({
       ...group,
       participants: [...group.participants].sort((a, b) => {
@@ -178,11 +185,11 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
           ) : (
             <div className="space-y-6">
               {sortedGroups.map((group) => (
-                <section key={group.targetGub} className="space-y-2.5">
+                <section key={group.targetRankKey} className="space-y-2.5">
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
                       <span>Para</span>
-                      <BeltBadge belt={group.targetBelt} gub={group.targetGub} size="sm" />
+                      <BeltBadge rankKey={group.targetRankKey} size="sm" />
                     </h3>
                     <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
                       {group.participants.length}{" "}
@@ -234,7 +241,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                                 </div>
                                 <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
                                   <span className="shrink-0">Atual:</span>
-                                  <BeltBadge belt={student!.current_belt} gub={student!.gub} size="sm" />
+                                  <BeltBadge rankKey={student!.rank_key} size="sm" />
                                 </div>
                                 {participant.result_notes ? (
                                   <p className="text-sm text-muted-foreground">
@@ -251,8 +258,8 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                                     participantId={participant.$id}
                                     eventId={eventId}
                                     name={student!.full_name}
-                                    currentBelt={student!.current_belt ?? "Sem faixa"}
-                                    targetBelt={participant.target_belt}
+                                    currentName={beltNameOf(publicRanks, student!.rank_key, "Sem faixa")}
+                                    targetName={beltNameOf(publicRanks, participant.target_rank_key)}
                                     feeCents={
                                       charge?.amount_cents ?? bundle.event.default_fee_cents
                                     }
@@ -305,7 +312,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                                             Faixa pretendida
                                           </dt>
                                           <dd className="font-medium text-foreground">
-                                            {participant.target_belt}
+                                            {beltNameOf(publicRanks, participant.target_rank_key)}
                                           </dd>
                                         </div>
                                         <div className="flex flex-wrap justify-between gap-2">
@@ -324,7 +331,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                                         </FieldLabel>
                                         <Select
                                           name="financial_decision"
-                                          defaultValue="keep_charge"
+                                          defaultValue={examPolicy.absent_default_decision ?? "keep_charge"}
                                         >
                                           <SelectTrigger
                                             id={`financial-decision-${participant.$id}`}
@@ -456,7 +463,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                           {student!.full_name}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          Para faixa {participant.target_belt}
+                          Para faixa {beltNameOf(publicRanks, participant.target_rank_key)}
                           {participant.financial_decision === "future_credit"
                             ? " · Crédito para próximo exame"
                             : participant.financial_decision === "keep_charge"
@@ -478,18 +485,18 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-semibold">Alunos elegíveis</CardTitle>
               <CardDescription>
-                {bundle.eligibleStudents.length} com matrícula ativa e graduação superior disponível.
+                {eligibleStudents.length} com matrícula ativa e graduação superior disponível.
               </CardDescription>
             </CardHeader>
 
             <CardContent className="pt-0">
-              {bundle.eligibleStudents.length === 0 ? (
+              {eligibleStudents.length === 0 ? (
                 <p className="py-2 text-sm text-muted-foreground">
                   Nenhum aluno elegível fora da banca. Todos os aptos já estão inscritos.
                 </p>
               ) : (
                 <ul className="max-h-96 divide-y divide-border overflow-y-auto">
-                  {bundle.eligibleStudents.map(({ student, photoDocumentId }) => (
+                  {eligibleStudents.map(({ student, photoDocumentId }) => (
                     <li key={student!.$id} className="py-2.5">
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex min-w-0 items-center gap-2.5">
@@ -504,9 +511,7 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                             </p>
                             <p className="line-clamp-2 text-sm text-muted-foreground">
                               Atual:{" "}
-                              {student!.current_belt
-                                ? `${student!.current_belt} (${student!.gub}º GUB)`
-                                : `${student!.gub}º GUB`}
+                              {beltNameOf(publicRanks, student!.rank_key)}
                             </p>
                           </div>
                         </div>
@@ -529,11 +534,12 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
                           <EnrollParticipantForm
                             eventId={eventId}
                             studentId={student!.$id}
-                            currentBelt={student!.current_belt}
-                            currentGub={student!.gub!}
+                            currentRankKey={student!.rank_key}
+                            allowSkipGrades={examPolicy.allow_skip_grades}
                             defaultFeeReais={centsToReaisInput(
                               bundle.event.default_fee_cents
                             )}
+                            rankFeesReais={rankFees}
                           />
                         </ResponsiveDialog>
                       </div>

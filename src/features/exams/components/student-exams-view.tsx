@@ -20,8 +20,7 @@ import { formatBrl } from "@/lib/money";
 
 type StudentExamsViewProps = {
   hasStudent: boolean;
-  currentBelt?: string | null;
-  currentGub?: number | null;
+  currentRankKey?: string | null;
   upcoming: StudentExamEntry[];
   past: StudentExamEntry[];
   showFinancial: boolean;
@@ -30,8 +29,7 @@ type StudentExamsViewProps = {
 
 export function StudentExamsView({
   hasStudent,
-  currentBelt,
-  currentGub,
+  currentRankKey,
   upcoming,
   past,
   showFinancial,
@@ -69,8 +67,7 @@ export function StudentExamsView({
               <UpcomingExamCard
                 key={entry.participant.$id}
                 entry={entry}
-                currentBelt={currentBelt}
-                currentGub={currentGub}
+                currentRankKey={currentRankKey}
                 showFinancial={showFinancial}
                 billingHref={billingHref}
               />
@@ -97,14 +94,12 @@ export function StudentExamsView({
 
 function UpcomingExamCard({
   entry,
-  currentBelt,
-  currentGub,
+  currentRankKey,
   showFinancial,
   billingHref,
 }: {
   entry: StudentExamEntry;
-  currentBelt?: string | null;
-  currentGub?: number | null;
+  currentRankKey?: string | null;
   showFinancial: boolean;
   billingHref?: string;
 }) {
@@ -144,10 +139,8 @@ function UpcomingExamCard({
       </CardHeader>
       <CardContent className="space-y-4">
         <BeltProgressionPill
-          fromBelt={currentBelt}
-          fromGub={currentGub}
-          toBelt={participant.target_belt}
-          toGub={participant.target_gub}
+          fromRankKey={currentRankKey}
+          toRankKey={participant.target_rank_key}
         />
         {showFinancial ? (
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3 text-sm">
@@ -202,7 +195,7 @@ function PastExamRow({ entry }: { entry: StudentExamEntry }) {
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
-        <BeltBadge belt={participant.target_belt} gub={participant.target_gub} size="sm" />
+        <BeltBadge rankKey={participant.target_rank_key} size="sm" />
         {eventCancelled ? (
           <StatusBadge tone="neutral">Exame cancelado</StatusBadge>
         ) : (

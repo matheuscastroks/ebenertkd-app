@@ -13,7 +13,7 @@ export async function DependentContext({ guardian, profileId, section }: { guard
   const [history, photos] = await Promise.all([
     getAttendanceHistory(guardian, profileId), listProfilePhotoDocumentIds([profileId])
   ]);
-  return <DependentHeader name={minor.full_name} belt={history.student?.current_belt} gub={history.student?.gub}
+  return <DependentHeader name={minor.full_name} rankKey={history.student?.rank_key}
     photoDocumentId={photos.get(profileId)} currentProfileId={profileId} section={section}
     siblings={minors.map((item) => ({ profileId: item.$id, name: item.full_name }))} />;
 }

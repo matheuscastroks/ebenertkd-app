@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import type { RankKey } from "../../src/features/academy/ranks";
 
 export type DemoStudentKey =
   | "adult"
@@ -56,8 +57,7 @@ export type DemoStudentScenario = {
   guardianPhone?: string;
   classKey: DemoClassKey;
   classKeys?: DemoClassKey[];
-  belt: string;
-  gub: number;
+  rankKey: RankKey;
   birthDate: string;
   phone: string;
   cpf: string;
@@ -89,8 +89,7 @@ export type DemoStudentScenario = {
   };
   examParticipations?: Array<{
     eventIdKey: "exam-2025-1" | "exam-2025-2" | "exam-2026-1" | "upcoming-exam";
-    targetBelt: string;
-    targetGub: number;
+    targetRankKey: RankKey;
     feeCents: number;
     status: "approved" | "failed" | "absent" | "registered" | "cancelled";
     chargeStatus?: "paid" | "pending" | "proof_under_review";
@@ -99,17 +98,14 @@ export type DemoStudentScenario = {
   }>;
   pastExamRecords?: Array<{
     eventIdKey: "exam-2025-1" | "exam-2025-2" | "exam-2026-1";
-    previousBelt: string;
-    previousGub: number;
-    newBelt: string;
-    newGub: number;
+    previousRankKey: RankKey;
+    newRankKey: RankKey;
     achievedAt: string;
   }>;
   // Campos retrocompatíveis
   examParticipation?: {
     eventIdKey: "past-exam" | "upcoming-exam" | "exam-2025-1" | "exam-2025-2" | "exam-2026-1";
-    targetBelt: string;
-    targetGub: number;
+    targetRankKey: RankKey;
     feeCents: number;
     status: "approved" | "failed" | "absent" | "registered";
     chargeStatus?: "paid" | "pending" | "proof_under_review";
@@ -117,10 +113,8 @@ export type DemoStudentScenario = {
     gradedAt?: string;
   };
   pastExamRecord?: {
-    previousBelt: string;
-    previousGub: number;
-    newBelt: string;
-    newGub: number;
+    previousRankKey: RankKey;
+    newRankKey: RankKey;
     achievedAt: string;
   };
 };
@@ -211,8 +205,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "adult-night",
       classKeys: ["adult-night", "competition-team"],
-      belt: "Azul",
-      gub: 4,
+      rankKey: "gub-4",
       birthDate: "1994-04-12",
       phone: "21984567231",
       cpf: "90000000001",
@@ -232,8 +225,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       examParticipations: [
         {
           eventIdKey: "exam-2025-2",
-          targetBelt: "Azul",
-          targetGub: 4,
+          targetRankKey: "gub-4",
           feeCents: 15000,
           status: "approved",
           chargeStatus: "paid",
@@ -242,8 +234,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         },
         {
           eventIdKey: "upcoming-exam",
-          targetBelt: "Ponta Vermelha",
-          targetGub: 3,
+          targetRankKey: "gub-3",
           feeCents: 15000,
           status: "registered",
           chargeStatus: "paid"
@@ -252,17 +243,14 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       pastExamRecords: [
         {
           eventIdKey: "exam-2025-2",
-          previousBelt: "Ponta Azul",
-          previousGub: 5,
-          newBelt: "Azul",
-          newGub: 4,
+          previousRankKey: "gub-5",
+          newRankKey: "gub-4",
           achievedAt: "2025-12-13T16:00:00.000Z"
         }
       ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
-        targetBelt: "Ponta Vermelha",
-        targetGub: 3,
+        targetRankKey: "gub-3",
         feeCents: 15000,
         status: "registered",
         chargeStatus: "paid"
@@ -281,8 +269,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       guardianPhone: "21973452681",
       classKey: "children-morning",
       classKeys: ["children-morning"],
-      belt: "Amarela",
-      gub: 8,
+      rankKey: "gub-8",
       birthDate: "2014-08-03",
       phone: "21976341852",
       cpf: "90000000002",
@@ -304,8 +291,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       examParticipations: [
         {
           eventIdKey: "exam-2025-1",
-          targetBelt: "Ponta Amarela",
-          targetGub: 9,
+          targetRankKey: "gub-9",
           feeCents: 15000,
           status: "approved",
           chargeStatus: "paid",
@@ -314,8 +300,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         },
         {
           eventIdKey: "exam-2025-2",
-          targetBelt: "Amarela",
-          targetGub: 8,
+          targetRankKey: "gub-8",
           feeCents: 15000,
           status: "approved",
           chargeStatus: "paid",
@@ -324,8 +309,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         },
         {
           eventIdKey: "upcoming-exam",
-          targetBelt: "Ponta Verde",
-          targetGub: 7,
+          targetRankKey: "gub-7",
           feeCents: 15000,
           status: "registered",
           chargeStatus: "proof_under_review"
@@ -334,25 +318,20 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       pastExamRecords: [
         {
           eventIdKey: "exam-2025-1",
-          previousBelt: "Branca",
-          previousGub: 10,
-          newBelt: "Ponta Amarela",
-          newGub: 9,
+          previousRankKey: "gub-10",
+          newRankKey: "gub-9",
           achievedAt: "2025-06-21T15:00:00.000Z"
         },
         {
           eventIdKey: "exam-2025-2",
-          previousBelt: "Ponta Amarela",
-          previousGub: 9,
-          newBelt: "Amarela",
-          newGub: 8,
+          previousRankKey: "gub-9",
+          newRankKey: "gub-8",
           achievedAt: "2025-12-13T15:00:00.000Z"
         }
       ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
-        targetBelt: "Ponta Verde",
-        targetGub: 7,
+        targetRankKey: "gub-7",
         feeCents: 15000,
         status: "registered",
         chargeStatus: "proof_under_review"
@@ -371,8 +350,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       guardianPhone: "21984567231",
       classKey: "youth-afternoon",
       classKeys: ["youth-afternoon"],
-      belt: "Ponta Verde",
-      gub: 7,
+      rankKey: "gub-7",
       birthDate: "2012-11-19",
       phone: "21991236478",
       cpf: "90000000003",
@@ -392,8 +370,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       examParticipations: [
         {
           eventIdKey: "exam-2025-2",
-          targetBelt: "Ponta Verde",
-          targetGub: 7,
+          targetRankKey: "gub-7",
           feeCents: 15000,
           status: "approved",
           chargeStatus: "paid",
@@ -401,8 +378,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         },
         {
           eventIdKey: "upcoming-exam",
-          targetBelt: "Verde",
-          targetGub: 6,
+          targetRankKey: "gub-6",
           feeCents: 15000,
           status: "registered",
           chargeStatus: "paid"
@@ -411,10 +387,8 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       pastExamRecords: [
         {
           eventIdKey: "exam-2025-2",
-          previousBelt: "Amarela",
-          previousGub: 8,
-          newBelt: "Ponta Verde",
-          newGub: 7,
+          previousRankKey: "gub-8",
+          newRankKey: "gub-7",
           achievedAt: "2025-12-13T16:00:00.000Z"
         }
       ]
@@ -432,8 +406,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       guardianPhone: "21973452681",
       classKey: "children-morning",
       classKeys: ["children-morning"],
-      belt: "Ponta Amarela",
-      gub: 9,
+      rankKey: "gub-9",
       birthDate: "2016-03-22",
       phone: "21987123456",
       cpf: "90000000004",
@@ -452,8 +425,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       examParticipations: [
         {
           eventIdKey: "exam-2026-1",
-          targetBelt: "Ponta Amarela",
-          targetGub: 9,
+          targetRankKey: "gub-9",
           feeCents: 15000,
           status: "approved",
           chargeStatus: "paid",
@@ -464,24 +436,19 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       pastExamRecords: [
         {
           eventIdKey: "exam-2026-1",
-          previousBelt: "Branca",
-          previousGub: 10,
-          newBelt: "Ponta Amarela",
-          newGub: 9,
+          previousRankKey: "gub-10",
+          newRankKey: "gub-9",
           achievedAt: "2026-06-20T14:30:00.000Z"
         }
       ],
       pastExamRecord: {
-        previousBelt: "Branca",
-        previousGub: 10,
-        newBelt: "Ponta Amarela",
-        newGub: 9,
+        previousRankKey: "gub-10",
+        newRankKey: "gub-9",
         achievedAt: "2026-06-20T14:30:00.000Z"
       },
       examParticipation: {
         eventIdKey: "exam-2026-1",
-        targetBelt: "Ponta Amarela",
-        targetGub: 9,
+        targetRankKey: "gub-9",
         feeCents: 15000,
         status: "approved",
         notes: "Excelente execução dos chutes básicos e disciplina exemplar."
@@ -496,8 +463,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "adult-night",
       classKeys: ["adult-night", "competition-team"],
-      belt: "Vermelha",
-      gub: 2,
+      rankKey: "gub-2",
       birthDate: "1999-07-15",
       phone: "21998765432",
       cpf: "90000000005",
@@ -516,8 +482,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       examParticipations: [
         {
           eventIdKey: "exam-2025-1",
-          targetBelt: "Ponta Vermelha",
-          targetGub: 3,
+          targetRankKey: "gub-3",
           feeCents: 15000,
           status: "approved",
           chargeStatus: "paid",
@@ -525,8 +490,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         },
         {
           eventIdKey: "exam-2026-1",
-          targetBelt: "Vermelha",
-          targetGub: 2,
+          targetRankKey: "gub-2",
           feeCents: 15000,
           status: "approved",
           chargeStatus: "paid",
@@ -534,8 +498,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         },
         {
           eventIdKey: "upcoming-exam",
-          targetBelt: "Ponta Preta",
-          targetGub: 1,
+          targetRankKey: "gub-1",
           feeCents: 15000,
           status: "registered",
           chargeStatus: "paid"
@@ -544,25 +507,20 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       pastExamRecords: [
         {
           eventIdKey: "exam-2025-1",
-          previousBelt: "Azul",
-          previousGub: 4,
-          newBelt: "Ponta Vermelha",
-          newGub: 3,
+          previousRankKey: "gub-4",
+          newRankKey: "gub-3",
           achievedAt: "2025-06-21T17:00:00.000Z"
         },
         {
           eventIdKey: "exam-2026-1",
-          previousBelt: "Ponta Vermelha",
-          previousGub: 3,
-          newBelt: "Vermelha",
-          newGub: 2,
+          previousRankKey: "gub-3",
+          newRankKey: "gub-2",
           achievedAt: "2026-06-20T17:00:00.000Z"
         }
       ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
-        targetBelt: "Ponta Preta",
-        targetGub: 1,
+        targetRankKey: "gub-1",
         feeCents: 15000,
         status: "registered",
         chargeStatus: "paid"
@@ -577,8 +535,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "adult-night",
       classKeys: ["adult-night"],
-      belt: "Verde",
-      gub: 6,
+      rankKey: "gub-6",
       birthDate: "2002-09-08",
       phone: "21981234567",
       cpf: "90000000006",
@@ -597,8 +554,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       examParticipations: [
         {
           eventIdKey: "upcoming-exam",
-          targetBelt: "Ponta Azul",
-          targetGub: 5,
+          targetRankKey: "gub-5",
           feeCents: 15000,
           status: "registered",
           chargeStatus: "pending"
@@ -606,8 +562,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
-        targetBelt: "Ponta Azul",
-        targetGub: 5,
+        targetRankKey: "gub-5",
         feeCents: 15000,
         status: "registered",
         chargeStatus: "pending"
@@ -622,8 +577,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "masters-morning",
       classKeys: ["masters-morning"],
-      belt: "Ponta Vermelha",
-      gub: 3,
+      rankKey: "gub-3",
       birthDate: "1994-01-30",
       phone: "21974561234",
       cpf: "90000000007",
@@ -642,8 +596,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       examParticipations: [
         {
           eventIdKey: "exam-2026-1",
-          targetBelt: "Vermelha",
-          targetGub: 2,
+          targetRankKey: "gub-2",
           feeCents: 15000,
           status: "failed",
           gradedAt: "2026-06-20T17:00:00.000Z",
@@ -651,8 +604,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         },
         {
           eventIdKey: "upcoming-exam",
-          targetBelt: "Vermelha",
-          targetGub: 2,
+          targetRankKey: "gub-2",
           feeCents: 15000,
           status: "registered",
           chargeStatus: "paid"
@@ -660,8 +612,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       ],
       examParticipation: {
         eventIdKey: "exam-2026-1",
-        targetBelt: "Vermelha",
-        targetGub: 2,
+        targetRankKey: "gub-2",
         feeCents: 15000,
         status: "failed",
         notes: "Necessário maior controle de base no Poomsae Taeguk Chil Jang e equilíbrio nos chutes giratórios."
@@ -676,8 +627,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "adult-night",
       classKeys: ["adult-night"],
-      belt: "Amarela",
-      gub: 8,
+      rankKey: "gub-8",
       birthDate: "1997-12-05",
       phone: "21989012345",
       cpf: "90000000008",
@@ -696,16 +646,14 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       examParticipations: [
         {
           eventIdKey: "exam-2026-1",
-          targetBelt: "Ponta Verde",
-          targetGub: 7,
+          targetRankKey: "gub-7",
           feeCents: 15000,
           status: "absent"
         }
       ],
       examParticipation: {
         eventIdKey: "exam-2026-1",
-        targetBelt: "Ponta Verde",
-        targetGub: 7,
+        targetRankKey: "gub-7",
         feeCents: 15000,
         status: "absent"
       }
@@ -719,8 +667,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "adult-night",
       classKeys: ["adult-night", "masters-morning", "competition-team"],
-      belt: "Ponta Preta",
-      gub: 1,
+      rankKey: "gub-1",
       birthDate: "2003-05-18",
       phone: "21995678901",
       cpf: "90000000009",
@@ -739,8 +686,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       examParticipations: [
         {
           eventIdKey: "exam-2025-2",
-          targetBelt: "Ponta Preta",
-          targetGub: 1,
+          targetRankKey: "gub-1",
           feeCents: 15000,
           status: "approved",
           chargeStatus: "paid",
@@ -748,8 +694,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
         },
         {
           eventIdKey: "upcoming-exam",
-          targetBelt: "Preta",
-          targetGub: 0,
+          targetRankKey: "dan-1",
           feeCents: 25000,
           status: "registered",
           chargeStatus: "paid"
@@ -758,17 +703,14 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       pastExamRecords: [
         {
           eventIdKey: "exam-2025-2",
-          previousBelt: "Vermelha",
-          previousGub: 2,
-          newBelt: "Ponta Preta",
-          newGub: 1,
+          previousRankKey: "gub-2",
+          newRankKey: "gub-1",
           achievedAt: "2025-12-13T17:30:00.000Z"
         }
       ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
-        targetBelt: "Preta",
-        targetGub: 0,
+        targetRankKey: "dan-1",
         feeCents: 25000,
         status: "registered",
         chargeStatus: "paid"
@@ -786,8 +728,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       guardianPhone: "21986543210",
       classKey: "youth-afternoon",
       classKeys: ["youth-afternoon"],
-      belt: "Ponta Azul",
-      gub: 5,
+      rankKey: "gub-5",
       birthDate: "2013-02-14",
       phone: "21983456789",
       cpf: "90000000010",
@@ -813,8 +754,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "adult-night",
       classKeys: ["adult-night"],
-      belt: "Branca",
-      gub: 10,
+      rankKey: "gub-10",
       birthDate: "1991-08-25",
       phone: "21972345678",
       cpf: "90000000011",
@@ -839,8 +779,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "masters-morning",
       classKeys: ["masters-morning"],
-      belt: "Verde",
-      gub: 6,
+      rankKey: "gub-6",
       birthDate: "1984-10-11",
       phone: "21996781234",
       cpf: "90000000012",
@@ -859,8 +798,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       examParticipations: [
         {
           eventIdKey: "exam-2026-1",
-          targetBelt: "Verde",
-          targetGub: 6,
+          targetRankKey: "gub-6",
           feeCents: 15000,
           status: "approved",
           chargeStatus: "paid",
@@ -870,24 +808,19 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       pastExamRecords: [
         {
           eventIdKey: "exam-2026-1",
-          previousBelt: "Ponta Verde",
-          previousGub: 7,
-          newBelt: "Verde",
-          newGub: 6,
+          previousRankKey: "gub-7",
+          newRankKey: "gub-6",
           achievedAt: "2026-06-20T16:00:00.000Z"
         }
       ],
       pastExamRecord: {
-        previousBelt: "Ponta Verde",
-        previousGub: 7,
-        newBelt: "Verde",
-        newGub: 6,
+        previousRankKey: "gub-7",
+        newRankKey: "gub-6",
         achievedAt: "2026-06-20T16:00:00.000Z"
       },
       examParticipation: {
         eventIdKey: "exam-2026-1",
-        targetBelt: "Verde",
-        targetGub: 6,
+        targetRankKey: "gub-6",
         feeCents: 15000,
         status: "approved",
         notes: "Muito seguro nas defesas e contra-ataques."
@@ -902,8 +835,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "adult-night",
       classKeys: ["adult-night"],
-      belt: "Ponta Amarela",
-      gub: 9,
+      rankKey: "gub-9",
       birthDate: "1998-04-03",
       phone: "21988901234",
       cpf: "90000000013",
@@ -922,8 +854,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       examParticipations: [
         {
           eventIdKey: "upcoming-exam",
-          targetBelt: "Amarela",
-          targetGub: 8,
+          targetRankKey: "gub-8",
           feeCents: 15000,
           status: "registered",
           chargeStatus: "paid"
@@ -931,8 +862,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
-        targetBelt: "Amarela",
-        targetGub: 8,
+        targetRankKey: "gub-8",
         feeCents: 15000,
         status: "registered",
         chargeStatus: "paid"
@@ -950,8 +880,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       guardianPhone: "21971239876",
       classKey: "children-morning",
       classKeys: ["children-morning"],
-      belt: "Branca",
-      gub: 10,
+      rankKey: "gub-10",
       birthDate: "2015-06-17",
       phone: "21975432109",
       cpf: "90000000014",
@@ -969,8 +898,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       examParticipations: [
         {
           eventIdKey: "upcoming-exam",
-          targetBelt: "Ponta Amarela",
-          targetGub: 9,
+          targetRankKey: "gub-9",
           feeCents: 15000,
           status: "registered",
           chargeStatus: "paid"
@@ -978,8 +906,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
-        targetBelt: "Ponta Amarela",
-        targetGub: 9,
+        targetRankKey: "gub-9",
         feeCents: 15000,
         status: "registered",
         chargeStatus: "paid"
@@ -994,8 +921,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "adult-night",
       classKeys: ["adult-night", "competition-team"],
-      belt: "Azul",
-      gub: 4,
+      rankKey: "gub-4",
       birthDate: "2001-11-20",
       phone: "21992345671",
       cpf: "90000000015",
@@ -1013,8 +939,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       examParticipations: [
         {
           eventIdKey: "upcoming-exam",
-          targetBelt: "Ponta Vermelha",
-          targetGub: 3,
+          targetRankKey: "gub-3",
           feeCents: 15000,
           status: "registered",
           chargeStatus: "paid"
@@ -1022,8 +947,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
-        targetBelt: "Ponta Vermelha",
-        targetGub: 3,
+        targetRankKey: "gub-3",
         feeCents: 15000,
         status: "registered",
         chargeStatus: "paid"
@@ -1038,8 +962,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "adult-night",
       classKeys: ["adult-night"],
-      belt: "Ponta Verde",
-      gub: 7,
+      rankKey: "gub-7",
       birthDate: "1993-03-12",
       phone: "21986712349",
       cpf: "90000000016",
@@ -1064,8 +987,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "adult-night",
       classKeys: ["adult-night"],
-      belt: "Vermelha",
-      gub: 2,
+      rankKey: "gub-2",
       birthDate: "1996-06-29",
       phone: "21993456782",
       cpf: "90000000017",
@@ -1083,8 +1005,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       examParticipations: [
         {
           eventIdKey: "exam-2025-2",
-          targetBelt: "Vermelha",
-          targetGub: 2,
+          targetRankKey: "gub-2",
           feeCents: 15000,
           status: "approved",
           chargeStatus: "paid",
@@ -1094,24 +1015,19 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       pastExamRecords: [
         {
           eventIdKey: "exam-2025-2",
-          previousBelt: "Ponta Vermelha",
-          previousGub: 3,
-          newBelt: "Vermelha",
-          newGub: 2,
+          previousRankKey: "gub-3",
+          newRankKey: "gub-2",
           achievedAt: "2025-12-13T17:00:00.000Z"
         }
       ],
       pastExamRecord: {
-        previousBelt: "Ponta Vermelha",
-        previousGub: 3,
-        newBelt: "Vermelha",
-        newGub: 2,
+        previousRankKey: "gub-3",
+        newRankKey: "gub-2",
         achievedAt: "2025-12-13T17:00:00.000Z"
       },
       examParticipation: {
         eventIdKey: "exam-2025-2",
-        targetBelt: "Vermelha",
-        targetGub: 2,
+        targetRankKey: "gub-2",
         feeCents: 15000,
         status: "approved",
         notes: "Ótima potência nos socos e chutes na linha de cintura."
@@ -1129,8 +1045,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       guardianPhone: "21981239988",
       classKey: "youth-afternoon",
       classKeys: ["youth-afternoon"],
-      belt: "Ponta Verde",
-      gub: 7,
+      rankKey: "gub-7",
       birthDate: "2012-08-05",
       phone: "21977654321",
       cpf: "90000000018",
@@ -1148,8 +1063,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       examParticipations: [
         {
           eventIdKey: "upcoming-exam",
-          targetBelt: "Verde",
-          targetGub: 6,
+          targetRankKey: "gub-6",
           feeCents: 15000,
           status: "registered",
           chargeStatus: "proof_under_review"
@@ -1157,8 +1071,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
-        targetBelt: "Verde",
-        targetGub: 6,
+        targetRankKey: "gub-6",
         feeCents: 15000,
         status: "registered",
         chargeStatus: "proof_under_review"
@@ -1173,8 +1086,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "adult-night",
       classKeys: ["adult-night"],
-      belt: "Branca",
-      gub: 10,
+      rankKey: "gub-10",
       birthDate: "2002-12-14",
       phone: "21994567123",
       cpf: "90000000019",
@@ -1198,8 +1110,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "masters-morning",
       classKeys: ["masters-morning"],
-      belt: "Amarela",
-      gub: 8,
+      rankKey: "gub-8",
       birthDate: "1986-07-21",
       phone: "21989014567",
       cpf: "90000000020",
@@ -1227,8 +1138,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       guardianPhone: "21976541230",
       classKey: "children-morning",
       classKeys: ["children-morning"],
-      belt: "Branca",
-      gub: 10,
+      rankKey: "gub-10",
       birthDate: "2017-09-02",
       phone: "21981230987",
       cpf: "90000000021",
@@ -1246,8 +1156,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       examParticipations: [
         {
           eventIdKey: "upcoming-exam",
-          targetBelt: "Ponta Amarela",
-          targetGub: 9,
+          targetRankKey: "gub-9",
           feeCents: 15000,
           status: "registered",
           chargeStatus: "pending"
@@ -1255,8 +1164,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       ],
       examParticipation: {
         eventIdKey: "upcoming-exam",
-        targetBelt: "Ponta Amarela",
-        targetGub: 9,
+        targetRankKey: "gub-9",
         feeCents: 15000,
         status: "registered",
         chargeStatus: "pending"
@@ -1271,8 +1179,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "adult-night",
       classKeys: ["adult-night", "masters-morning"],
-      belt: "Ponta Azul",
-      gub: 5,
+      rankKey: "gub-5",
       birthDate: "1990-02-18",
       phone: "21998761234",
       cpf: "90000000022",
@@ -1297,8 +1204,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "adult-night",
       classKeys: ["adult-night"],
-      belt: "Branca",
-      gub: 10,
+      rankKey: "gub-10",
       birthDate: "2000-05-10",
       phone: "21991238877",
       cpf: "90000000023",
@@ -1322,8 +1228,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "adult-night",
       classKeys: ["adult-night"],
-      belt: "Branca",
-      gub: 10,
+      rankKey: "gub-10",
       birthDate: "1995-10-24",
       phone: "21983451122",
       cpf: "90000000024",
@@ -1347,8 +1252,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "adult-night",
       classKeys: ["adult-night"],
-      belt: "Amarela",
-      gub: 8,
+      rankKey: "gub-8",
       birthDate: "1988-12-03",
       phone: "21997654433",
       cpf: "90000000025",
@@ -1384,8 +1288,7 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
       role: "adult_student",
       classKey: "masters-morning",
       classKeys: ["masters-morning"],
-      belt: "Branca",
-      gub: 10,
+      rankKey: "gub-10",
       birthDate: "1992-04-18",
       phone: "21981237766",
       cpf: "90000000026",

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { Query } from "node-appwrite";
+import { getBeltRanks, getPolicy } from "@/features/academy/config-service";
 import { effectiveChargeStatus } from "@/features/billing/rules";
 import type { Charge } from "@/features/billing/types";
 import type { AttendanceRecord, Lesson, TrainingClass } from "@/features/classes/types";
@@ -8,7 +9,9 @@ import {
   evaluateExamEligibility,
   sortEligibilityAssessments,
   summarizeEligibility,
+  type EligibilityContext,
   type ExamEligibilityStatus,
+  type StudentEligibilityAssessment,
 } from "@/features/exams/eligibility-rules";
 import type { BeltHistory, ExamEvent, ExamParticipant } from "@/features/exams/types";
 import type { Enrollment, Student, StudentDocument } from "@/features/students/types";
@@ -21,11 +24,11 @@ import { saoPauloToday } from "@/lib/dates";
 export type EligibilityFilters = {
   status?: ExamEligibilityStatus;
   classId?: string;
-  gub?: number;
+  rankKey?: string;
   search?: string;
 };
 
-function loadEligibilityDataset() {
+export function loadEligibilityDataset() {
   return cachedRead(
     {
       name: "admin-exam-eligibility-dataset",
@@ -87,7 +90,10 @@ function loadEligibilityDataset() {
   );
 }
 
-export async function getExamEligibilityOverview(filters: EligibilityFilters = {}) {
+export type EligibilityDataset = Awaited<ReturnType<typeof loadEligibilityDataset>>;
+
+/** Avalia todos os alunos ativos sob uma configuração de graduações e uma política de exame (a atual ou uma proposta). */
+export function buildEligibilityAssessments(dataset: EligibilityDataset, context: EligibilityContext, referenceDate: string) {
   const {
     students,
     enrollments,
@@ -99,9 +105,8 @@ export async function getExamEligibilityOverview(filters: EligibilityFilters = {
     examEvents,
     examParticipants,
     photos,
-  } = await loadEligibilityDataset();
+  } = dataset;
 
-  const referenceDate = saoPauloToday();
   const classById = new Map(classes.map((item) => [item.$id, item]));
   const lessonById = new Map(lessons.map((item) => [item.$id, item]));
   const enrollmentByStudent = new Map(enrollments.map((item) => [item.student_id, item]));
@@ -176,32 +181,42 @@ export async function getExamEligibilityOverview(filters: EligibilityFilters = {
         : undefined;
       const registeredEvent = registrationByStudent.get(student.$id);
 
-      return evaluateExamEligibility({
-        studentId: student.$id,
-        fullName: student.full_name,
-        currentBelt: student.current_belt,
-        currentGub: student.gub,
-        trainingClassId: student.training_class_id,
-        trainingClassName: classObj?.name ?? student.training_class,
-        photoDocumentId: photoByStudent.get(student.$id),
-        beltStartDate,
-        presencesSinceLastBelt,
-        hasOverdueCharges: overdueStudents.has(student.$id),
-        registeredEventId: registeredEvent?.$id ?? null,
-        registeredEventName: registeredEvent?.name ?? null,
-        referenceDate,
-      });
+      return evaluateExamEligibility(
+        {
+          studentId: student.$id,
+          fullName: student.full_name,
+          currentRankKey: student.rank_key,
+          trainingClassId: student.training_class_id,
+          trainingClassName: classObj?.name ?? student.training_class,
+          photoDocumentId: photoByStudent.get(student.$id),
+          beltStartDate,
+          birthDate: student.birth_date,
+          presencesSinceLastBelt,
+          hasOverdueCharges: overdueStudents.has(student.$id),
+          registeredEventId: registeredEvent?.$id ?? null,
+          registeredEventName: registeredEvent?.name ?? null,
+          referenceDate,
+        },
+        context
+      );
     })
   );
+
+  return { assessments, openEvents, classes: classes.filter((item) => item.status === "active") };
+}
+
+export async function getExamEligibilityOverview(filters: EligibilityFilters = {}) {
+  const [dataset, ranks, exam] = await Promise.all([loadEligibilityDataset(), getBeltRanks(), getPolicy("exam")]);
+  const { assessments, openEvents, classes } = buildEligibilityAssessments(dataset, { ranks, exam }, saoPauloToday());
 
   const summary = summarizeEligibility(assessments);
 
   const normalizedSearch = filters.search?.trim().toLocaleLowerCase("pt-BR");
-  const filteredRows = assessments.filter((row) => {
+  const filteredRows = assessments.filter((row: StudentEligibilityAssessment) => {
     if (row.status === "black_belt" && !filters.status) return false;
     if (filters.status && row.status !== filters.status) return false;
     if (filters.classId && row.trainingClassId !== filters.classId) return false;
-    if (filters.gub !== undefined && row.currentGub !== filters.gub) return false;
+    if (filters.rankKey && row.currentRankKey !== filters.rankKey) return false;
     if (normalizedSearch && !row.fullName.toLocaleLowerCase("pt-BR").includes(normalizedSearch)) {
       return false;
     }
@@ -212,6 +227,6 @@ export async function getExamEligibilityOverview(filters: EligibilityFilters = {
     rows: filteredRows,
     summary,
     openEvents,
-    classes: classes.filter((item) => item.status === "active"),
+    classes,
   };
 }

@@ -6,7 +6,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 import { DependentHeader, DependentSwitcher } from "./dependent-header";
 const siblings = [{ profileId: "ana", name: "Ana" }, { profileId: "bia", name: "Bia" }];
 it("identifica o filho e troca mantendo a seção", async () => {
-  render(<DependentHeader name="Ana" belt="Branca" currentProfileId="ana" siblings={siblings} section="financeiro" />);
+  render(<DependentHeader name="Ana" rankKey="gub-10" currentProfileId="ana" siblings={siblings} section="financeiro" />);
   expect(screen.getByRole("region", { name: "Financeiro de Ana" })).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "Ana" })).toHaveAttribute("href", "/responsavel/dependentes/ana");
   expect(screen.getByText(/Branca/)).toBeInTheDocument();

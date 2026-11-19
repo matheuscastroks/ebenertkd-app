@@ -42,7 +42,7 @@ async function DependentSummary({ guardian, minor }: { guardian: Profile; minor:
       </section>
     </div>
     <div className="min-w-0 space-y-6">
-      <GraduationCard title="Faixa" currentBelt={student?.current_belt} gub={student?.gub} startedAtTkd={student?.started_at_tkd} />
+      <GraduationCard title="Faixa" rankKey={student?.rank_key} startedAtTkd={student?.started_at_tkd} />
       <section aria-labelledby="dependent-areas-title" className="space-y-2.5">
         <h2 id="dependent-areas-title" className="text-base font-semibold">Áreas de {firstName}</h2>
         <nav aria-label={`Áreas de ${minor.full_name}`} className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card px-4 shadow-xs">

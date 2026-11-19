@@ -28,8 +28,7 @@ describe("ReviewPanel", () => {
     emergency_contact_relationship: "Pai",
     emergency_contact_phone: "11977776666",
     started_at_tkd: "2023-02-01",
-    current_belt: "Verde",
-    gub: 6,
+    rank_key: "gub-6",
     training_class: "Adulto Noite",
     health_condition: "no",
     status: "submitted"

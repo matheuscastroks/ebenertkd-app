@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import localFont from "next/font/local";
 import { AcademyConfigProvider } from "@/components/academy-config-provider";
-import { getAcademyIdentity, getPolicy } from "@/features/academy/config-service";
+import { getAcademyIdentity, getBeltContext, getPolicy } from "@/features/academy/config-service";
 import { professorLabel, toBrand } from "@/features/academy/identity-rules";
 import { RegisterServiceWorker } from "@/components/pwa/register-sw";
 import { InstallGuide } from "@/components/pwa/install-guide";
@@ -59,8 +59,8 @@ type RootLayoutProps = {
 };
 
 export default async function RootLayout({ children }: RootLayoutProps) {
-  const [identity, billingPolicy] = await Promise.all([getAcademyIdentity(), getPolicy("billing")]);
-  const config = { ...toBrand(identity), dueDayOptions: billingPolicy.due_day_options, professorLabel: professorLabel(identity) };
+  const [identity, billingPolicy, belts] = await Promise.all([getAcademyIdentity(), getPolicy("billing"), getBeltContext()]);
+  const config = { ...toBrand(identity), dueDayOptions: billingPolicy.due_day_options, professorLabel: professorLabel(identity), ...belts };
   return (
     <html lang="pt-BR">
       <body className={poppins.variable}>

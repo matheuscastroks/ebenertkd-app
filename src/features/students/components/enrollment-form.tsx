@@ -85,9 +85,6 @@ export function EnrollmentForm({
     student: {
       ...bundle.student,
       ...stored,
-      ...(stored.gub !== undefined
-        ? { gub: stored.gub === "" ? null : Number(stored.gub) }
-        : {}),
       ...(stored.address_street !== undefined
         ? {
             address: formatAddress({

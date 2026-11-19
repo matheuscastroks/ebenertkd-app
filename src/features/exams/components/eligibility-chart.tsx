@@ -9,6 +9,8 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { useBeltRanks } from "@/components/academy-config-provider";
+import { beltNameOf } from "@/features/academy/belt-rules";
 import type { EligibilitySummary } from "@/features/exams/eligibility-rules";
 
 const chartConfig = {
@@ -18,7 +20,8 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function EligibilityChart({ summary }: { summary: EligibilitySummary }) {
-  if (summary.byBelt.length === 0) {
+  const ranks = useBeltRanks();
+  if (summary.byRank.length === 0) {
     return (
       <p className="py-6 text-center text-sm text-muted-foreground">
         Sem alunos ativos em faixas coloridas para exibir a distribuição.
@@ -26,10 +29,10 @@ export function EligibilityChart({ summary }: { summary: EligibilitySummary }) {
     );
   }
 
-  const data = summary.byBelt.map((item) => ({
-    ...item,
-    shortBelt: item.belt.replace("Ponta ", "P. "),
-  }));
+  const data = summary.byRank.map((item) => {
+    const belt = beltNameOf(ranks, item.rankKey);
+    return { ...item, belt, shortBelt: belt.replace("Ponta ", "P. ") };
+  });
 
   return (
     <div className="space-y-2 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
@@ -63,9 +66,9 @@ export function EligibilityChart({ summary }: { summary: EligibilitySummary }) {
               <ChartTooltipContent
                 labelFormatter={(_label, payload) => {
                   const row = payload?.[0]?.payload as
-                    | { belt?: string; gub?: number }
+                    | { belt?: string }
                     | undefined;
-                  return row ? `Faixa ${row.belt} (${row.gub}º GUB)` : "";
+                  return row ? `Faixa ${row.belt}` : "";
                 }}
               />
             }

@@ -17,7 +17,7 @@ import { TableRowsSkeleton } from "@/components/skeletons";
 type SearchParamsType = Promise<{
   q?: string;
   status?: string;
-  belt?: string;
+  rank?: string;
   turma?: string;
   page?: string;
 }>;
@@ -25,14 +25,14 @@ type SearchParamsType = Promise<{
 async function EnrollmentListContent({ searchParams }: { searchParams: SearchParamsType }) {
   const filters = await searchParams;
   const status = filters.status === "all" ? undefined : filters.status;
-  const belt = filters.belt === "all" ? undefined : filters.belt;
+  const rank = filters.rank === "all" ? undefined : filters.rank;
   const trainingClass = filters.turma === "all" ? undefined : filters.turma;
   const page = /^\d+$/.test(filters.page ?? "") ? Math.max(1, Number(filters.page)) : 1;
 
   const result = await listEnrollmentsForReview({
     search: filters.q,
     status,
-    belt,
+    rank,
     trainingClass,
     page,
   });
@@ -56,7 +56,7 @@ async function EnrollmentListContent({ searchParams }: { searchParams: SearchPar
       <EnrollmentTable rows={toClientData(result.rows)} />
       <ListPagination
         basePath={ROUTES.adminEnrollments}
-        params={{ q: filters.q, status: filters.status, belt: filters.belt, turma: filters.turma }}
+        params={{ q: filters.q, status: filters.status, rank: filters.rank, turma: filters.turma }}
         page={result.page}
         total={result.total}
         pageSize={result.pageSize}

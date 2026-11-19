@@ -6,6 +6,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { CardGridSkeleton, MetricCardsSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { getBeltContext } from "@/features/academy/config-service";
 import type { Profile } from "@/features/auth/types";
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import { BeltProgressionPill } from "@/features/students/components/belt-progression-pill";
@@ -17,7 +18,7 @@ import { ROUTES } from "@/lib/navigation/routes";
 import { ArrowRight, BookOpen, CheckCircle2 } from "@/components/ui/icons";
 
 async function StudentEvolutionContent({ profile }: { profile: Profile }) {
-  const snapshot = await getStudentJourneySnapshot(profile);
+  const [snapshot, { formLabel }] = await Promise.all([getStudentJourneySnapshot(profile), getBeltContext()]);
 
   if (!snapshot.student) {
     return (
@@ -46,16 +47,14 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
             <p id="readiness-heading" className="text-sm font-medium text-muted-foreground">
               Seu momento no Caminho da Faixa
             </p>
-            {readiness.targetBelt && readiness.targetGub != null ? (
+            {readiness.targetRankKey ? (
               <BeltProgressionPill
-                fromBelt={readiness.currentBelt}
-                fromGub={readiness.currentGub}
-                toBelt={readiness.targetBelt}
-                toGub={readiness.targetGub}
+                fromRankKey={readiness.currentRankKey}
+                toRankKey={readiness.targetRankKey}
                 size="lg"
               />
             ) : (
-              <BeltBadge belt={readiness.currentBelt} gub={readiness.currentGub} size="lg" />
+              <BeltBadge rankKey={readiness.currentRankKey} size="lg" />
             )}
           </div>
 
@@ -70,7 +69,7 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
             <Button asChild variant="outline" size="sm" className="min-h-10">
               <Link href={ROUTES.studentStudies}>
                 <BookOpen className="size-4" aria-hidden="true" />
-                Estudar {readiness.currentPoomsae}
+                Estudar {readiness.currentForm ?? formLabel}
               </Link>
             </Button>
           </div>
@@ -112,13 +111,13 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
 
         <div className="grid gap-4 bg-muted/30 p-5 text-sm sm:grid-cols-3">
           <div>
-            <p className="text-xs font-medium text-muted-foreground">Poomsae atual</p>
-            <p className="mt-0.5 font-semibold text-foreground">{readiness.currentPoomsae}</p>
+            <p className="text-xs font-medium text-muted-foreground">{formLabel} atual</p>
+            <p className="mt-0.5 font-semibold text-foreground">{readiness.currentForm ?? "Não definido"}</p>
           </div>
           <div>
-            <p className="text-xs font-medium text-muted-foreground">Próximo Poomsae</p>
+            <p className="text-xs font-medium text-muted-foreground">Próximo {formLabel}</p>
             <p className="mt-0.5 font-semibold text-foreground">
-              {readiness.nextPoomsae ?? "Aperfeiçoamento Dan"}
+              {readiness.nextForm ?? "Aperfeiçoamento"}
             </p>
           </div>
           <div>
@@ -139,18 +138,18 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
             <h2 id="roadmap-heading" className="text-base font-semibold">
               Trilha completa das faixas
             </h2>
-            <span className="text-xs text-muted-foreground">10º GUB ao 1º Dan</span>
+            <span className="text-xs text-muted-foreground">Da primeira graduação à mais alta da academia</span>
           </div>
 
           <ol className="t-stagger divide-y divide-border">
             {roadmap.map((step) => (
               <li
-                key={step.gub}
+                key={step.rankKey}
                 className="flex flex-wrap items-center justify-between gap-3 py-3"
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <BeltBadge belt={step.belt} gub={step.gub} size="sm" />
-                  <span className="truncate text-xs text-muted-foreground">{step.poomsae}</span>
+                  <BeltBadge rankKey={step.rankKey} nameOverride={step.achievedName} size="sm" />
+                  {step.formName ? <span className="truncate text-xs text-muted-foreground">{step.formName}</span> : null}
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -216,10 +215,10 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
                     className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm"
                   >
                     <BeltProgressionPill
-                      fromBelt={item.previous_belt}
-                      fromGub={item.previous_gub}
-                      toBelt={item.new_belt}
-                      toGub={item.new_gub}
+                      fromRankKey={item.previous_rank_key}
+                      toRankKey={item.new_rank_key}
+                      fromName={item.previous_belt_name}
+                      toName={item.new_belt_name}
                       size="sm"
                     />
                     <span className="text-xs text-muted-foreground tabular-nums">

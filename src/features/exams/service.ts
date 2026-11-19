@@ -6,11 +6,13 @@ import type { Profile } from "@/features/auth/types";
 import { writeAuditEvent } from "@/features/auth/service";
 import { cancelUnpaidExamCharge, createExamCharge } from "@/features/billing/charge-service";
 import type { Charge } from "@/features/billing/types";
-import { assertNextGraduation, examChargeCancellation, type PaidChargeDecision } from "@/features/exams/rules";
+import { beltNameOf, findRank, toPublicRank } from "@/features/academy/belt-rules";
+import { getBeltRanks, getPolicy } from "@/features/academy/config-service";
+import { isRankKey } from "@/features/academy/ranks";
+import { assertNextGraduation, assertPromotion, examChargeCancellation, examFeeCents, type PaidChargeDecision } from "@/features/exams/rules";
 import { examEventSchema, examParticipantSchema, examResultSchema } from "@/features/exams/schemas";
 import type { BeltHistory, ExamEvent, ExamParticipant } from "@/features/exams/types";
 import { notifyStudentEvent } from "@/features/notifications/notification-service";
-import type { BeltOption, GubOption } from "@/features/students/options";
 import type { Enrollment, Student, StudentDocument } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
@@ -178,7 +180,7 @@ export function getExamEventBundle(eventId: string) {
       return {
         event,
         participants: participants.map((participant) => ({ participant, student: studentById.get(participant.student_id), photoDocumentId: photoByStudent.get(participant.student_id), charge: participant.charge_id ? chargeById.get(participant.charge_id) : undefined })).filter((row) => row.student),
-        eligibleStudents: activeEnrollments.map((enrollment) => ({ enrollment, student: studentById.get(enrollment.student_id), photoDocumentId: photoByStudent.get(enrollment.student_id) })).filter((row) => row.student && !participantIds.has(row.enrollment.student_id) && row.student.gub != null && row.student.gub >= 1)
+        eligibleStudents: activeEnrollments.map((enrollment) => ({ enrollment, student: studentById.get(enrollment.student_id), photoDocumentId: photoByStudent.get(enrollment.student_id) })).filter((row) => row.student && !participantIds.has(row.enrollment.student_id) && Boolean(row.student.rank_key))
       };
     }
   );
@@ -187,10 +189,10 @@ export function getExamEventBundle(eventId: string) {
 export async function addExamParticipant(actor: Profile, raw: unknown) {
   if (actor.role !== "admin") throw new Error("admin_required");
   const input = examParticipantSchema.parse(raw);
-  const targetGub = input.targetGub as GubOption;
-  const targetBelt = input.targetBelt as BeltOption;
   const { tables, config } = createAppwriteAdminClient();
-  const [event, student, enrollments] = await Promise.all([
+  const [ranks, examPolicy, event, student, enrollments] = await Promise.all([
+    getBeltRanks(),
+    getPolicy("exam"),
     tables.getRow<ExamEvent>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examEvents, rowId: input.eventId }),
     tables.getRow<Student>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, rowId: input.studentId }),
     tables.listRows<Enrollment>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, queries: [Query.equal("student_id", [input.studentId]), Query.equal("status", ["active"]), Query.limit(1)] })
@@ -198,12 +200,14 @@ export async function addExamParticipant(actor: Profile, raw: unknown) {
   if (["completed", "cancelled"].includes(event.status)) throw new Error("exam_event_closed");
   const enrollment = enrollments.rows[0];
   if (!enrollment) throw new Error("active_enrollment_required");
-  assertNextGraduation(student.gub, targetGub, targetBelt);
+  assertNextGraduation(ranks.map(toPublicRank), student.rank_key, input.targetRankKey, examPolicy.allow_skip_grades);
+  const targetRank = findRank(ranks, input.targetRankKey)!;
+  const feeCents = input.feeCents ?? examFeeCents(targetRank.exam_fee_cents, event.default_fee_cents);
   const participantId = stableId(event.$id, student.$id);
   const now = new Date().toISOString();
   let participant: ExamParticipant;
   try {
-    participant = await tables.createRow<ExamParticipant>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examParticipants, rowId: participantId, permissions: [], data: { event_id: event.$id, enrollment_id: enrollment.$id, student_id: student.$id, target_belt: targetBelt, target_gub: targetGub, fee_cents: input.feeCents, status: "registered", created_at: now, updated_at: now } });
+    participant = await tables.createRow<ExamParticipant>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examParticipants, rowId: participantId, permissions: [], data: { event_id: event.$id, enrollment_id: enrollment.$id, student_id: student.$id, target_rank_key: input.targetRankKey, fee_cents: feeCents, status: "registered", created_at: now, updated_at: now } });
   } catch (error) {
     if (!(error instanceof AppwriteException) || error.code !== 409) throw error;
     participant = await tables.getRow<ExamParticipant>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examParticipants, rowId: participantId });
@@ -218,7 +222,7 @@ export async function addExamParticipant(actor: Profile, raw: unknown) {
     studentId: student.$id,
     audience: "family",
     title: `Inscrição confirmada: ${event.name}`,
-    body: `O professor inscreveu ${student.full_name} no exame para Faixa ${targetBelt} em ${formatBusinessDateBr(event.event_date)}.`,
+    body: `O professor inscreveu ${student.full_name} no exame para Faixa ${targetRank.display_name} em ${formatBusinessDateBr(event.event_date)}.`,
     dedupeKey: `exam-registered:${participant.$id}`,
     studentActionUrl: ROUTES.studentExams,
     guardianActionUrl: guardianExamsPath,
@@ -256,7 +260,8 @@ export async function recordExamResult(actor: Profile, raw: unknown) {
   const participant = await tables.getRow<ExamParticipant>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examParticipants, rowId: input.participantId });
   if (["approved", "failed", "absent"].includes(participant.status)) return participant;
   if (participant.status !== "registered") throw new Error("exam_participant_not_gradable");
-  const [student, event, openParticipants] = await Promise.all([
+  const [ranks, student, event, openParticipants] = await Promise.all([
+    getBeltRanks(),
     tables.getRow<Student>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, rowId: participant.student_id }),
     tables.getRow<ExamEvent>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examEvents, rowId: participant.event_id }),
     tables.listRows<ExamParticipant>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examParticipants, queries: [Query.equal("event_id", [participant.event_id]), Query.equal("status", ["registered"]), Query.limit(500)] })
@@ -266,9 +271,10 @@ export async function recordExamResult(actor: Profile, raw: unknown) {
   const transaction = await tables.createTransaction({ ttl: 60 });
   try {
     if (input.result === "approved") {
-      assertNextGraduation(student.gub, participant.target_gub, participant.target_belt);
-      await tables.createRow<BeltHistory>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.beltHistory, rowId: stableId("belt-history", participant.$id), permissions: [], transactionId: transaction.$id, data: { student_id: student.$id, event_id: event.$id, exam_participant_id: participant.$id, previous_belt: student.current_belt!, previous_gub: student.gub!, new_belt: participant.target_belt, new_gub: participant.target_gub, achieved_at: event.event_date, created_at: now } });
-      await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, rowId: student.$id, transactionId: transaction.$id, data: { current_belt: participant.target_belt, gub: participant.target_gub, updated_at: now } });
+      if (!isRankKey(participant.target_rank_key)) throw new Error("exam_graduation_mismatch");
+      assertPromotion(student.rank_key, participant.target_rank_key);
+      await tables.createRow<BeltHistory>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.beltHistory, rowId: stableId("belt-history", participant.$id), permissions: [], transactionId: transaction.$id, data: { student_id: student.$id, event_id: event.$id, exam_participant_id: participant.$id, previous_rank_key: student.rank_key!, new_rank_key: participant.target_rank_key, previous_belt_name: beltNameOf(ranks.map(toPublicRank), student.rank_key), new_belt_name: beltNameOf(ranks.map(toPublicRank), participant.target_rank_key), achieved_at: event.event_date, created_at: now } });
+      await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, rowId: student.$id, transactionId: transaction.$id, data: { rank_key: participant.target_rank_key, updated_at: now } });
     }
     await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examParticipants, rowId: participant.$id, transactionId: transaction.$id, data: { status: input.result, result_notes: input.notes, graded_at: now, updated_at: now } });
     if (openParticipants.total === 1) await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examEvents, rowId: event.$id, transactionId: transaction.$id, data: { status: "completed", updated_at: now } });
@@ -285,14 +291,15 @@ export async function recordExamResult(actor: Profile, raw: unknown) {
     CACHE_TAGS.studentsAll,
     CACHE_TAGS.enrollments
   );
-  await writeAuditEvent("exam.result.recorded", actor.account_id, "exam_participant", participant.$id, { result: input.result, target_gub: participant.target_gub });
+  await writeAuditEvent("exam.result.recorded", actor.account_id, "exam_participant", participant.$id, { result: input.result, target_rank_key: participant.target_rank_key });
+  const targetName = beltNameOf(ranks.map(toPublicRank), participant.target_rank_key);
   const resultTitle =
     input.result === "approved"
-      ? `Parabéns! Aprovado para Faixa ${participant.target_belt}`
+      ? `Parabéns! Aprovado para Faixa ${targetName}`
       : `Resultado disponível: ${event.name}`;
   const resultBody =
     input.result === "approved"
-      ? `O professor registrou sua aprovação no exame ${event.name} para a Faixa ${participant.target_belt}.${input.notes ? ` Observação: ${input.notes}` : ""}`
+      ? `O professor registrou sua aprovação no exame ${event.name} para a Faixa ${targetName}.${input.notes ? ` Observação: ${input.notes}` : ""}`
       : input.result === "absent"
         ? `Sua presença não foi registrada no exame ${event.name}.${input.notes ? ` Observação: ${input.notes}` : ""}`
         : `O professor publicou o resultado do exame ${event.name}. Confira os detalhes no aplicativo.${input.notes ? ` Observação: ${input.notes}` : ""}`;

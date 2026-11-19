@@ -11,8 +11,7 @@ export type EvaluateStudentRetentionInput = {
   studentId: string;
   profileId: string;
   fullName: string;
-  currentBelt?: string | null;
-  gub?: number | null;
+  rankKey?: string | null;
   trainingClassId?: string | null;
   trainingClassName?: string | null;
   whatsapp?: string | null;
@@ -27,8 +26,7 @@ export type StudentRetentionAssessment = {
   studentId: string;
   profileId: string;
   fullName: string;
-  currentBelt: string | null;
-  gub: number | null;
+  rankKey: string | null;
   trainingClassId: string | null;
   trainingClassName: string;
   whatsapp: string | null;
@@ -136,8 +134,7 @@ export function evaluateStudentRetention(
     studentId: input.studentId,
     profileId: input.profileId,
     fullName: input.fullName,
-    currentBelt: input.currentBelt ?? null,
-    gub: input.gub ?? null,
+    rankKey: input.rankKey ?? null,
     trainingClassId: input.trainingClassId ?? null,
     trainingClassName: input.trainingClassName?.trim() || "Sem turma vinculada",
     whatsapp: input.whatsapp ?? null,

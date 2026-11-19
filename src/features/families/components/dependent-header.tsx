@@ -23,8 +23,8 @@ const pathFor = (profileId: string, section: DependentSection) =>
  * Identifica o filho em todas as telas do dependente (foto, nome e faixa) e permite trocar
  * de filho mantendo a mesma área — evita agir no filho errado.
  */
-export function DependentHeader({ name, belt, gub, photoDocumentId, siblings, currentProfileId, section }: {
-  name: string; belt?: string | null; gub?: number | null; photoDocumentId?: string | null;
+export function DependentHeader({ name, rankKey, photoDocumentId, siblings, currentProfileId, section }: {
+  name: string; rankKey?: string | null; photoDocumentId?: string | null;
   siblings: Array<{ profileId: string; name: string }>; currentProfileId: string; section: DependentSection;
 }) {
   return <section aria-label={`${sections[section]} de ${name}`} className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-4">
@@ -34,7 +34,7 @@ export function DependentHeader({ name, belt, gub, photoDocumentId, siblings, cu
         <h2 className="truncate text-base font-semibold">
           {section === "resumo" ? name : <Link href={pathFor(currentProfileId, "resumo")} className="underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring">{name}</Link>}
         </h2>
-        {belt ? <BeltBadge belt={belt} gub={gub} /> : null}
+        {rankKey ? <BeltBadge rankKey={rankKey} /> : null}
       </div>
     </div>
     <DependentSwitcher siblings={siblings} currentProfileId={currentProfileId} section={section} />

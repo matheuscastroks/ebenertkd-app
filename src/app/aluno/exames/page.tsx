@@ -13,8 +13,7 @@ async function StudentExamsContent({ profile }: { profile: Profile }) {
   return (
     <StudentExamsView
       hasStudent={Boolean(exams.student)}
-      currentBelt={exams.student?.current_belt}
-      currentGub={exams.student?.gub}
+      currentRankKey={exams.student?.rank_key}
       upcoming={toClientData(exams.upcoming)}
       past={toClientData(exams.past)}
       showFinancial={exams.showFinancial}

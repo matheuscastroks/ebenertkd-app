@@ -1,12 +1,12 @@
 "use server";
 
+import type { RankKey } from "@/features/academy/ranks";
 import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { resolveStudentProfile } from "@/features/students/access";
 import { uploadStudentDocument } from "@/features/students/document-service";
 import { saveEnrollmentDraft } from "@/features/students/enrollment-service";
 import { requireProfile } from "@/lib/auth/session";
-import type { BeltOption } from "@/features/students/options";
 import { formatAddress } from "@/lib/address";
 import type { Profile } from "@/features/auth/types";
 import { guardianEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
@@ -42,9 +42,8 @@ function enrollmentInput(formData: FormData) {
     emergencyContactRelationship: value("emergency_contact_relationship"),
     emergencyContactPhone: value("emergency_contact_phone"),
     startedAtTkd: value("started_at_tkd"),
-    currentBelt: (value("current_belt") || undefined) as BeltOption | undefined,
+    rankKey: (value("rank_key") || undefined) as RankKey | undefined,
     trainingClassId: value("training_class_id"),
-    gub: value("gub") !== "" ? Number(value("gub")) : undefined,
     healthCondition: (value("health_condition") || undefined) as "yes" | "no" | undefined,
     healthDetails: value("health_details") || undefined,
     medications: value("medications") || undefined,

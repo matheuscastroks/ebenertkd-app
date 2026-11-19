@@ -15,10 +15,10 @@ export type Student = Models.Row & {
   emergency_contact_relationship?: string | null;
   emergency_contact_phone?: string | null;
   started_at_tkd?: string | null;
-  current_belt?: string | null;
+  /** Graduação (`rank_key`, p. ex. "gub-9"). Nome e cor da faixa vêm sempre da configuração. */
+  rank_key?: string | null;
   training_class_id?: string | null;
   training_class?: string | null;
-  gub?: number | null;
   health_condition?: "yes" | "no" | null;
   health_details?: string | null;
   medications?: string | null;

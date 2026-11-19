@@ -9,6 +9,9 @@ import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";
 import { MetricCardsSkeleton, TableRowsSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { getBeltRanks, getPolicy } from "@/features/academy/config-service";
+import { findRank } from "@/features/academy/belt-rules";
+import { isRankKey } from "@/features/academy/ranks";
 import { listTrainingClasses } from "@/features/classes/service";
 import { EligibilityChart } from "@/features/exams/components/eligibility-chart";
 import { EligibilityFilters } from "@/features/exams/components/eligibility-filters";
@@ -54,7 +57,7 @@ type SearchParams = Promise<{
   q?: string;
   status?: string;
   turma?: string;
-  gub?: string;
+  rank?: string;
   enrolled?: string;
   error?: string;
 }>;
@@ -65,15 +68,13 @@ async function EligibilityContent({ searchParams }: { searchParams: SearchParams
     ? (params.status as ExamEligibilityStatus)
     : undefined;
   const classId = params.turma && params.turma !== "all" ? params.turma : undefined;
-  const gub =
-    params.gub && /^\d+$/.test(params.gub) ? Number(params.gub) : undefined;
+  const rankKey = isRankKey(params.rank) ? params.rank : undefined;
 
-  const data = await getExamEligibilityOverview({
-    status,
-    classId,
-    gub,
-    search: params.q,
-  });
+  const [data, ranks, examPolicy] = await Promise.all([
+    getExamEligibilityOverview({ status, classId, rankKey, search: params.q }),
+    getBeltRanks(),
+    getPolicy("exam"),
+  ]);
 
   const { summary, rows, openEvents } = data;
   const nextOpenEvent = openEvents[0] ?? null;
@@ -109,7 +110,7 @@ async function EligibilityContent({ searchParams }: { searchParams: SearchParams
           <dd className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-foreground">
             {summary.almostReadyCount}
           </dd>
-          <p className="text-xs text-muted-foreground">atingiram 75% ou mais da meta</p>
+          <p className="text-xs text-muted-foreground">atingiram {examPolicy.almost_ready_pct}% ou mais da meta</p>
         </Link>
 
         <Link
@@ -168,7 +169,7 @@ async function EligibilityContent({ searchParams }: { searchParams: SearchParams
               Avaliação por aluno ({rows.length})
             </h2>
             <p className="text-xs text-muted-foreground">
-              Critérios padrão: carência mínima na faixa atual e presença acumulada.
+              Critérios da academia: carência mínima na graduação atual e presença acumulada (configurados em Graduações).
             </p>
           </div>
 
@@ -195,17 +196,14 @@ async function EligibilityContent({ searchParams }: { searchParams: SearchParams
                       <span className="text-xs text-muted-foreground">{row.trainingClassName}</span>
                     </div>
 
-                    {row.targetBelt && row.targetGub != null ? (
-                      <BeltProgressionPill
-                        fromBelt={row.currentBelt}
-                        fromGub={row.currentGub}
-                        toBelt={row.targetBelt}
-                        toGub={row.targetGub}
-                        size="sm"
-                      />
+                    {row.targetRankKey ? (
+                      <BeltProgressionPill fromRankKey={row.currentRankKey} toRankKey={row.targetRankKey} size="sm" />
                     ) : (
-                      <BeltBadge belt={row.currentBelt} gub={row.currentGub} size="sm" />
+                      <BeltBadge rankKey={row.currentRankKey} size="sm" />
                     )}
+                    {row.ageBlocked && row.minAgeRequired != null ? (
+                      <p className="text-xs text-muted-foreground">Idade mínima para esta graduação: {row.minAgeRequired} anos.</p>
+                    ) : null}
 
                     {row.minPresencesRequired > 0 ? (
                       <div className="grid gap-3 pt-1 sm:grid-cols-2">
@@ -234,19 +232,18 @@ async function EligibilityContent({ searchParams }: { searchParams: SearchParams
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 xl:shrink-0">
-                  {row.status === "eligible" && nextOpenEvent && row.targetGub != null ? (
+                  {row.status === "eligible" && nextOpenEvent && row.targetRankKey ? (
                     <form action={enrollEligibleStudentAction}>
                       <input type="hidden" name="event_id" value={nextOpenEvent.$id} />
                       <input type="hidden" name="student_id" value={row.studentId} />
-                      <input type="hidden" name="target_gub" value={String(row.targetGub)} />
-                      <input type="hidden" name="target_belt" value={row.targetBelt ?? ""} />
+                      <input type="hidden" name="target_rank_key" value={row.targetRankKey} />
                       <FormSubmitButton
                         size="sm"
                         className="min-h-10"
                         pendingLabel="Inscrevendo…"
                       >
                         <CheckCircle2 className="size-3.5" aria-hidden="true" />
-                        Inscrever ({formatBrl(nextOpenEvent.default_fee_cents)})
+                        Inscrever ({formatBrl(findRank(ranks, row.targetRankKey)?.exam_fee_cents ?? nextOpenEvent.default_fee_cents)})
                       </FormSubmitButton>
                     </form>
                   ) : null}
@@ -287,8 +284,8 @@ async function EligibilityContent({ searchParams }: { searchParams: SearchParams
 }
 
 async function EligibilityFiltersLoader() {
-  const classes = await listTrainingClasses(true);
-  return <EligibilityFilters classes={toClientData(classes)} />;
+  const [classes, examPolicy] = await Promise.all([listTrainingClasses(true), getPolicy("exam")]);
+  return <EligibilityFilters classes={toClientData(classes)} almostReadyPct={examPolicy.almost_ready_pct} />;
 }
 
 export default async function AdminExamEligibilityPage({

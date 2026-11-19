@@ -19,8 +19,7 @@ describe("EnrollmentTable", () => {
     const student = {
       $id: "student-1",
       full_name: "Camila Ferreira",
-      current_belt: "Azul",
-      gub: 4,
+      rank_key: "gub-4",
       training_class: "Adulto noite",
     } as Student;
     const enrollment = {
@@ -41,14 +40,12 @@ describe("EnrollmentTable", () => {
     const studentA = {
       $id: "student-1",
       full_name: "Carlos Eduardo",
-      current_belt: "Branca",
-      gub: 10,
+      rank_key: "gub-10",
     } as Student;
     const studentB = {
       $id: "student-2",
       full_name: "Ana Clara",
-      current_belt: "Azul",
-      gub: 4,
+      rank_key: "gub-4",
     } as Student;
 
     render(

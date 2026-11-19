@@ -300,7 +300,7 @@ export function TrainingEnrollmentStep({ bundle, classes, onValueChange }: StepP
             </div>
           </div>
 
-          <GraduationFields defaultBelt={student.current_belt} defaultGub={student.gub} />
+          <GraduationFields defaultRankKey={student.rank_key} />
         </div>
       </Section>
     </div>

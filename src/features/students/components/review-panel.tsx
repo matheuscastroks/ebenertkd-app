@@ -46,7 +46,7 @@ import { Separator } from "@/components/ui/separator";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { EditStudentDialog } from "@/features/students/components/edit-student-dialog";
 import type { TrainingClass } from "@/features/classes/types";
-import { useDueDayOptions } from "@/components/academy-config-provider";
+import { useBeltLabels, useBeltRanks, useDueDayOptions } from "@/components/academy-config-provider";
 import { DEFAULT_BILLING_POLICY, DEFAULT_CONTRACT_POLICY } from "@/features/academy/defaults";
 import {
   accessStatusLabel,
@@ -59,12 +59,8 @@ import {
   type ParqStatus
 } from "@/features/students/parq-rules";
 import { formatBusinessDateBr } from "@/lib/dates";
-import {
-  beltForGub,
-  calculateDefaultContractDates,
-  calculateNextDueDate,
-  type GubOption
-} from "@/features/students/options";
+import { calculateDefaultContractDates, calculateNextDueDate } from "@/features/students/options";
+import { rankFullLabel } from "@/features/academy/belt-rules";
 import type { EnrollmentBundle } from "@/features/students/types";
 import { centsToReaisInput } from "@/lib/money";
 import { formatBrazilianPhone } from "@/lib/phone";
@@ -133,8 +129,10 @@ export function ReviewPanel({
   contractDurationMonths?: number;
 }) {
   const dueDayOptions = useDueDayOptions();
+  const ranks = useBeltRanks();
+  const { levelLabel } = useBeltLabels();
   const { student, enrollment, documents } = bundle;
-  const currentBelt = student.current_belt || (student.gub != null ? beltForGub(student.gub as GubOption) : undefined);
+  const rankLabel = rankFullLabel(ranks, student.rank_key, levelLabel);
   const profilePhoto = documents.find((doc) => doc.document_type === "profile_photo");
   const medicalCertificate = documents.find((doc) => doc.document_type === "medical_certificate");
 
@@ -167,7 +165,7 @@ export function ReviewPanel({
               {student.full_name}
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              CPF {student.cpf || "não informado"} · {currentBelt ? `Faixa ${currentBelt}` : "Faixa não informada"} {student.gub ? `(${student.gub}º GUB)` : (student.gub === 0 ? "(Dan)" : "")}
+              CPF {student.cpf || "não informado"} · {rankLabel}
             </p>
           </div>
         </div>
@@ -423,8 +421,7 @@ export function ReviewPanel({
                 <div className="space-y-0.5">
                   <span className="text-xs text-muted-foreground block">Graduação Atual</span>
                   <span className="font-medium text-foreground">
-                    {currentBelt ? `Faixa ${currentBelt}` : "—"}{" "}
-                    {student.gub ? `(${student.gub}º GUB)` : (student.gub === 0 ? "(Dan)" : "")}
+                    {student.rank_key ? rankLabel : "—"}
                   </span>
                 </div>
                 <div className="space-y-0.5">

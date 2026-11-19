@@ -1,7 +1,8 @@
 import type { Charge, Payment } from "@/features/billing/types";
 import type { CancellationRequest } from "@/features/contracts/types";
 import type { BeltHistory } from "@/features/exams/types";
-import { GUB_BELT_OPTIONS, gubForBelt } from "@/features/students/options";
+import type { PublicRank } from "@/features/academy/belt-rules";
+import { rankOrder, type RankKey } from "@/features/academy/ranks";
 import type { Enrollment, Student } from "@/features/students/types";
 import { daysBetweenIsoDates, saoPauloToday } from "@/lib/dates";
 
@@ -28,7 +29,7 @@ export type AnnualQuarterRow = {
 };
 
 export type BeltFunnelPoint = {
-  gub: number;
+  rankKey: RankKey;
   belt: string;
   shortBelt: string;
   activeCount: number;
@@ -68,6 +69,8 @@ export function buildAnnualExecutiveReport(input: {
   charges: Charge[];
   payments: Payment[];
   beltHistory: BeltHistory[];
+  /** Graduações configuradas: o funil usa as habilitadas (e as que ainda têm alunos). */
+  ranks: readonly PublicRank[];
   referenceDate?: string;
 }): AnnualExecutiveReport {
   const referenceDay = (input.referenceDate ?? saoPauloToday()).slice(0, 10);
@@ -175,17 +178,14 @@ export function buildAnnualExecutiveReport(input: {
       : 0;
 
   const graduationsInYear = input.beltHistory.filter((b) => b.achieved_at.startsWith(yearPrefix));
-  const beltMeta: Array<{ gub: number; belt: string }> = [
-    ...GUB_BELT_OPTIONS.map((item) => ({ gub: item.gub, belt: item.belt })),
-    { gub: 0, belt: "Preta" },
-  ];
+  const studentRanks = new Set(input.students.map((student) => student.rank_key));
+  const beltMeta = [...input.ranks]
+    .filter((rank) => rank.enabled || studentRanks.has(rank.rank_key))
+    .sort((a, b) => rankOrder(a.rank_key) - rankOrder(b.rank_key))
+    .map((rank) => ({ rankKey: rank.rank_key, belt: rank.display_name }));
 
-  const beltDistribution: BeltFunnelPoint[] = beltMeta.map(({ gub, belt }) => {
-    const inBelt = input.students.filter((student) => {
-      const resolvedGub =
-        student.gub ?? (student.current_belt ? gubForBelt(student.current_belt) : undefined);
-      return resolvedGub === gub;
-    });
+  const beltDistribution: BeltFunnelPoint[] = beltMeta.map(({ rankKey, belt }) => {
+    const inBelt = input.students.filter((student) => student.rank_key === rankKey);
 
     let activeCount = 0;
     let inactiveCount = 0;
@@ -202,10 +202,10 @@ export function buildAnnualExecutiveReport(input: {
       }
     }
 
-    const grads = graduationsInYear.filter((row) => row.new_gub === gub).length;
+    const grads = graduationsInYear.filter((row) => row.new_rank_key === rankKey).length;
 
     return {
-      gub,
+      rankKey,
       belt,
       shortBelt: belt.replace("Ponta ", "P. "),
       activeCount,

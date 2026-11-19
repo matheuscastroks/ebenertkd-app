@@ -9,22 +9,24 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { TrainingClass } from "@/features/classes/types";
-import { GUB_BELT_OPTIONS } from "@/features/students/options";
+import { RankSelect } from "@/features/students/components/rank-select";
 import { ROUTES } from "@/lib/navigation/routes";
 
-const STATUS_OPTIONS = [
-  { value: "all", label: "Todos os status" },
-  { value: "eligible", label: "Aptos para exame" },
-  { value: "almost_ready", label: "Quase prontos (≥ 75%)" },
-  { value: "financial_hold", label: "Pendência financeira" },
-  { value: "already_registered", label: "Já inscritos" },
-  { value: "in_progress", label: "Em carência" },
-] as const;
+const statusOptions = (almostReadyPct: number) =>
+  [
+    { value: "all", label: "Todos os status" },
+    { value: "eligible", label: "Aptos para exame" },
+    { value: "almost_ready", label: `Quase prontos (≥ ${almostReadyPct}%)` },
+    { value: "financial_hold", label: "Pendência financeira" },
+    { value: "already_registered", label: "Já inscritos" },
+    { value: "in_progress", label: "Em carência" },
+  ] as const;
 
-type FilterKey = "q" | "status" | "turma" | "gub";
+type FilterKey = "q" | "status" | "turma" | "rank";
 type FilterState = Record<FilterKey, string>;
 
-export function EligibilityFilters({ classes }: { classes: TrainingClass[] }) {
+export function EligibilityFilters({ classes, almostReadyPct = 75 }: { classes: TrainingClass[]; almostReadyPct?: number }) {
+  const STATUS_OPTIONS = statusOptions(almostReadyPct);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -36,7 +38,7 @@ export function EligibilityFilters({ classes }: { classes: TrainingClass[] }) {
     q: searchParams.get("q") ?? "",
     status: searchParams.get("status") ?? "",
     turma: searchParams.get("turma") ?? "",
-    gub: searchParams.get("gub") ?? "",
+    rank: searchParams.get("rank") ?? "",
   };
 
   const [optimistic, setOptimistic] = useOptimistic(
@@ -72,13 +74,13 @@ export function EligibilityFilters({ classes }: { classes: TrainingClass[] }) {
     if (timer.current) clearTimeout(timer.current);
     if (inputRef.current) inputRef.current.value = "";
     startTransition(() => {
-      setOptimistic({ q: "", status: "", turma: "", gub: "" });
+      setOptimistic({ q: "", status: "", turma: "", rank: "" });
       router.replace(ROUTES.adminExamEligibility, { scroll: false });
     });
   };
 
   const hasFilters = Boolean(
-    optimistic.q || optimistic.status || optimistic.turma || optimistic.gub
+    optimistic.q || optimistic.status || optimistic.turma || optimistic.rank
   );
 
   const statusLabel =
@@ -86,9 +88,6 @@ export function EligibilityFilters({ classes }: { classes: TrainingClass[] }) {
     "Todos os status";
   const classLabel =
     classes.find((item) => item.$id === optimistic.turma)?.name ?? "Todas as turmas";
-  const gubLabel =
-    GUB_BELT_OPTIONS.find((item) => String(item.gub) === optimistic.gub)?.belt ??
-    "Todas as faixas";
 
   return (
     <div
@@ -135,20 +134,14 @@ export function EligibilityFilters({ classes }: { classes: TrainingClass[] }) {
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="eligibility-belt">Faixa atual</FieldLabel>
-          <Select value={optimistic.gub || "all"} onValueChange={(value) => update("gub", value)}>
-            <SelectTrigger id="eligibility-belt" className="h-11 w-full">
-              <SelectValue>{gubLabel}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas as faixas</SelectItem>
-              {GUB_BELT_OPTIONS.map((item) => (
-                <SelectItem key={item.gub} value={String(item.gub)}>
-                  {item.belt} ({item.gub}º GUB)
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <FieldLabel htmlFor="eligibility-rank">Graduação atual</FieldLabel>
+          <RankSelect
+            id="eligibility-rank"
+            value={optimistic.rank || "all"}
+            onValueChange={(value) => update("rank", value)}
+            allLabel="Todas as graduações"
+            keep={optimistic.rank}
+          />
         </Field>
 
         <Field>

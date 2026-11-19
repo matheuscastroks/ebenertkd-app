@@ -138,10 +138,7 @@ export function EditStudentDialog({
               Graduação Marcial
             </h4>
             <div className="grid items-start gap-3 sm:grid-cols-2">
-              <GraduationFields
-                defaultBelt={student.current_belt}
-                defaultGub={student.gub}
-              />
+              <GraduationFields defaultRankKey={student.rank_key} />
             </div>
           </div>
 

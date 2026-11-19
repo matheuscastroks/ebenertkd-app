@@ -1,6 +1,8 @@
 import "server-only";
 
 import { Query } from "node-appwrite";
+import { toPublicRank } from "@/features/academy/belt-rules";
+import { getBeltRanks, getPolicy } from "@/features/academy/config-service";
 import type { Profile } from "@/features/auth/types";
 import { getAttendanceHistory } from "@/features/classes/attendance-history-service";
 import { getTrainingClass } from "@/features/classes/service";
@@ -27,6 +29,8 @@ export async function getStudentJourneySnapshot(actor: Profile, requestedProfile
   const targetProfile = await resolveStudentProfile(actor, requestedProfileId);
   const attendance = await getAttendanceHistory(actor, targetProfile.$id);
   const student = attendance.student;
+  const [ranks, exam] = await Promise.all([getBeltRanks(), getPolicy("exam")]);
+  const publicRanks = ranks.map(toPublicRank);
 
   if (!student) {
     return {
@@ -37,12 +41,8 @@ export async function getStudentJourneySnapshot(actor: Profile, requestedProfile
       beltHistory: [] as BeltHistory[],
       documents: [] as StudentDocument[],
       attendanceEntries: [] as Array<{ lessonDate: string; status: "present" | "absent" | "excused" }>,
-      roadmap: buildBeltRoadmap({ currentGub: 10, currentBelt: "Branca", beltHistory: [] }),
-      readiness: buildStudentReadiness({
-        currentGub: 10,
-        currentBelt: "Branca",
-        presencesSinceLastBelt: 0,
-      }),
+      roadmap: buildBeltRoadmap({ currentRankKey: null, beltHistory: [], ranks: publicRanks }),
+      readiness: buildStudentReadiness({ currentRankKey: null, presencesSinceLastBelt: 0 }, { ranks, exam }),
       monthlySeries: buildMonthlyAttendanceSeries([], 6),
       compliance: null,
     };
@@ -95,18 +95,21 @@ export async function getStudentJourneySnapshot(actor: Profile, requestedProfile
   ).length;
 
   const roadmap = buildBeltRoadmap({
-    currentGub: student.gub,
-    currentBelt: student.current_belt,
+    currentRankKey: student.rank_key,
     beltHistory,
+    ranks: publicRanks,
   });
 
-  const readiness = buildStudentReadiness({
-    currentGub: student.gub,
-    currentBelt: student.current_belt,
-    beltStartDate,
-    presencesSinceLastBelt,
-    referenceDate,
-  });
+  const readiness = buildStudentReadiness(
+    {
+      currentRankKey: student.rank_key,
+      beltStartDate,
+      birthDate: student.birth_date,
+      presencesSinceLastBelt,
+      referenceDate,
+    },
+    { ranks, exam }
+  );
 
   const monthlySeries = buildMonthlyAttendanceSeries(attendanceEntries, 6, referenceDate);
 

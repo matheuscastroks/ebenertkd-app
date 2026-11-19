@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BELT_OPTIONS, GUB_OPTIONS } from "@/features/students/options";
+import { isRankKey } from "@/features/academy/ranks";
 
 export const examEventSchema = z.object({
   name: z.string().trim().min(3).max(128),
@@ -11,9 +11,9 @@ export const examEventSchema = z.object({
 export const examParticipantSchema = z.object({
   eventId: z.string().min(1).max(36),
   studentId: z.string().min(1).max(36),
-  targetBelt: z.enum(BELT_OPTIONS),
-  targetGub: z.coerce.number().refine((value) => GUB_OPTIONS.includes(value as (typeof GUB_OPTIONS)[number])),
-  feeCents: z.coerce.number().int().min(0)
+  targetRankKey: z.string().refine(isRankKey, "Graduação inválida"),
+  /** Sem valor: usa a taxa da graduação alvo ou, na falta dela, a taxa padrão da banca. */
+  feeCents: z.coerce.number().int().min(0).optional()
 });
 
 export const examResultSchema = z.object({

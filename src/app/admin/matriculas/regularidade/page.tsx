@@ -242,7 +242,7 @@ async function ComplianceContent({ searchParams }: { searchParams: SearchParams 
                       {row.parqHasYesAnswer ? (
                         <StatusBadge tone="warning">PAR-Q com &quot;Sim&quot;</StatusBadge>
                       ) : null}
-                      <BeltBadge belt={row.currentBelt} gub={row.gub} size="sm" />
+                      <BeltBadge rankKey={row.rankKey} size="sm" />
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {row.trainingClassName}

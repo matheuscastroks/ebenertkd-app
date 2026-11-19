@@ -172,7 +172,7 @@ async function RetentionContent({ searchParams }: { searchParams: SearchParams }
                         <StatusBadge tone={RISK_TONES[row.riskLevel]}>
                           {RISK_LABELS[row.riskLevel]}
                         </StatusBadge>
-                        <BeltBadge belt={row.currentBelt} gub={row.gub} size="sm" />
+                        <BeltBadge rankKey={row.rankKey} size="sm" />
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {row.trainingClassName}

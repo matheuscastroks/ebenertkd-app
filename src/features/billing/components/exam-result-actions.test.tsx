@@ -5,7 +5,7 @@ import { ExamResultActions } from "./exam-result-actions";
 vi.mock("@/app/actions/exams", () => ({ recordExamResultAction: vi.fn() }));
 
 it("mostra ações com alvo de 44px e confirma a mudança de faixa e a taxa", () => {
-  render(<ExamResultActions participantId="p1" eventId="e1" name="Ana Souza" currentBelt="Branca" targetBelt="Amarela" feeCents={15000} />);
+  render(<ExamResultActions participantId="p1" eventId="e1" name="Ana Souza" currentName="Branca" targetName="Amarela" feeCents={15000} />);
   expect(screen.getByRole("button", { name: "Aprovar" })).toHaveClass("h-11");
   expect(screen.getByRole("button", { name: "Reprovar" })).toHaveClass("h-11");
   expect(screen.getByRole("button", { name: "Ausente" })).toHaveClass("h-11");
