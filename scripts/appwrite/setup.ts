@@ -18,7 +18,7 @@ loadEnvConfig(process.cwd());
 
 const mode = process.argv[2];
 if (mode !== "plan" && mode !== "apply") {
-  throw new Error("Use: tsx scripts/appwrite/setup.ts <plan|apply>");
+  throw new Error("Use: tsx scripts/appwrite/setup.ts <plan|apply> [--skip-functions]");
 }
 
 let config: ServerAppwriteConfig;
@@ -192,7 +192,7 @@ async function reconcile() {
     }
   }
 
-  for (const fn of functions) {
+  for (const fn of process.argv.includes("--skip-functions") ? [] : functions) {
     const remoteFunction = await getOrNull(() => functionsApi.get({ functionId: fn.id }));
     if (remoteFunction) continue;
     changes.push(`create function ${fn.id} (${fn.schedule})`);

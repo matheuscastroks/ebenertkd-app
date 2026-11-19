@@ -14,6 +14,7 @@
     "test:e2e:auth": "playwright test --grep @authenticated",
     "infra:plan": "tsx scripts/appwrite/setup.ts plan",
     "infra:apply": "tsx scripts/appwrite/setup.ts apply",
+    "infra:reset": "tsx scripts/appwrite/reset.ts",
     "infra:smoke": "tsx scripts/appwrite/smoke.ts",
     "appwrite:ping": "tsx scripts/appwrite/ping.ts",
     "appwrite:create-admin": "tsx scripts/appwrite/create-admin.ts",

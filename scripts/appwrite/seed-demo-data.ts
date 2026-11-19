@@ -422,7 +422,17 @@ async function main() {
       }
 
       if (guardianProfile) {
-        const linkId = demoId("link", `${guardianProfile.$id}:${profile.$id}`);
+        // O seed de usuários de teste já pode ter criado este vínculo com outro ID (índice único guardian+student).
+        const existingLink = await tables.listRows({
+          databaseId: config.databaseId,
+          tableId: APPWRITE_IDS.tables.guardianStudentLinks,
+          queries: [
+            Query.equal("guardian_profile_id", [guardianProfile.$id]),
+            Query.equal("student_profile_id", [profile.$id]),
+            Query.limit(1)
+          ]
+        });
+        const linkId = existingLink.rows[0]?.$id ?? demoId("link", `${guardianProfile.$id}:${profile.$id}`);
         await upsertRow(APPWRITE_IDS.tables.guardianStudentLinks, linkId, {
           guardian_profile_id: guardianProfile.$id,
           student_profile_id: profile.$id,
@@ -1105,6 +1115,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(error instanceof Error ? error.message : error);
+  console.error(error instanceof Error ? (process.env.SEED_DEBUG ? error.stack : error.message) : error);
   process.exitCode = 1;
 });
