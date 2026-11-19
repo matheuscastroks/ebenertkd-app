@@ -1,10 +1,24 @@
 import "server-only";
 
-import { AppwriteException, ID, type Models } from "node-appwrite";
+import { AppwriteException, ID, Query, type Models } from "node-appwrite";
 import { writeAuditEvent } from "@/features/auth/service";
 import type { Profile } from "@/features/auth/types";
 import { DEFAULT_ACADEMY_IDENTITY, POLICY_SCHEMA_VERSION, type AcademyPolicies, type PolicySection } from "@/features/academy/defaults";
+import { resolveRankConfigs, type RankRow } from "@/features/academy/belt-rules";
+import { findBeltPreset } from "@/features/academy/presets";
+import { presetToPatches } from "@/features/academy/preset-rules";
+import {
+  countStudentsByRank,
+  disabledRanksInUse,
+  planRankChanges,
+  RankInUseError,
+  type RankChange,
+  type RankPatch
+} from "@/features/academy/rank-changes";
+import { RankValidationError } from "@/features/academy/rank-schemas";
 import { academyIdentitySchema, isPolicySection, parsePolicyData, parsePolicyInput } from "@/features/academy/schemas";
+import type { Student } from "@/features/students/types";
+import { listAllRows } from "@/lib/appwrite/all-rows";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { invalidateTags } from "@/lib/cache/invalidate";
@@ -14,6 +28,7 @@ import { safeErrorMessage } from "@/lib/security/safe-error";
 /** Linha única da identidade e uma linha por seção de política: ids determinísticos evitam duplicatas. */
 export const ACADEMY_SETTINGS_ROW_ID = "academy-settings";
 export const policyRowId = (section: PolicySection) => `policy-${section}`;
+export const rankRowId = (rankKey: string) => `rank-${rankKey}`;
 
 type StoredRow = Models.Row & Record<string, unknown> & { revision: number };
 
@@ -129,4 +144,74 @@ function safeJson(value: unknown) {
 
 function pickFields(row: Record<string, unknown>, keys: string[]) {
   return Object.fromEntries(keys.map((key) => [key, row[key] ?? null]));
+}
+
+/* ------------------------------------------------------------------ graduações (belt_rank_settings) */
+
+async function readRankRows(): Promise<StoredRow[]> {
+  const { tables, config } = createAppwriteAdminClient();
+  const result = await tables.listRows<StoredRow>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.beltRankSettings, queries: [Query.limit(50)] });
+  return result.rows;
+}
+
+/** Grava as alterações já validadas: concorrência por revisão em cada linha, revisão append-only e auditoria sem dado pessoal. */
+async function persistRankChanges(actor: Profile, changes: RankChange[], rows: StoredRow[], reason: string | undefined, event: "belt_ranks.updated" | "belt_ranks.preset_applied", extra: Record<string, unknown> = {}) {
+  const rowByKey = new Map(rows.map((row) => [String(row.rank_key), row]));
+  const saved: Array<{ rank_key: string; revision: number }> = [];
+  for (const change of changes) {
+    const current = rowByKey.get(change.rank_key) ?? null;
+    const data = { ...change.after, rank_key: change.rank_key, updated_by_account_id: actor.account_id };
+    const row = await writeVersionedRow(APPWRITE_IDS.tables.beltRankSettings, rankRowId(change.rank_key), current, change.revision, data, {});
+    saved.push({ rank_key: change.rank_key, revision: row.revision });
+    await appendRevision({ scope: "belt_ranks", section: change.rank_key, entityId: row.$id, revision: row.revision, before: current ? change.before : null, after: change.after, reason, actor });
+  }
+  if (saved.length > 0) invalidateTags(CACHE_TAGS.beltRanks);
+  await writeAuditEvent(event, actor.account_id, "belt_rank_settings", "belt-ranks", {
+    ranks: changes.map((change) => ({ rank_key: change.rank_key, changed_fields: change.changedFields })),
+    ...extra
+  });
+  return saved;
+}
+
+/**
+ * Salva as alterações de graduações (nome, cores, tempos, taxa, habilitação…). Nunca toca alunos nem histórico:
+ * renomear ou recolorir muda só a exibição daqui em diante. Uma graduação com alunos não pode ser desativada.
+ */
+export async function saveBeltRanks(actor: Profile, patches: RankPatch[], reason?: string) {
+  requireAdmin(actor);
+  const rows = await readRankRows();
+  const { changes, issues } = planRankChanges(resolveRankConfigs(rows as unknown as RankRow[]), patches);
+  if (issues.length > 0) throw new RankValidationError(issues);
+  if (changes.length === 0) return { changed: 0 };
+  if (changes.some((change) => change.before.enabled && !change.after.enabled)) {
+    const students = await listAllRows<Student>(APPWRITE_IDS.tables.students);
+    const blocked = disabledRanksInUse(changes, countStudentsByRank(students));
+    if (blocked.length > 0) throw new RankInUseError(blocked);
+  }
+  const saved = await persistRankChanges(actor, changes, rows, reason, "belt_ranks.updated");
+  return { changed: saved.length };
+}
+
+/** Aplica um modelo (CBTKD, ITF, Kukkiwon): só nomes, cores e formas, mais os termos "Poomsae/Tul" e "Gub/Gup/Geup". */
+export async function applyBeltPreset(actor: Profile, presetId: string, reason?: string) {
+  requireAdmin(actor);
+  const preset = findBeltPreset(presetId);
+  if (!preset) throw new Error("invalid_preset");
+  const rows = await readRankRows();
+  const current = resolveRankConfigs(rows as unknown as RankRow[]);
+  const { changes, issues } = planRankChanges(current, presetToPatches(current, preset));
+  if (issues.length > 0) throw new RankValidationError(issues);
+  await persistRankChanges(actor, changes, rows, reason ?? `Modelo ${preset.label}`, "belt_ranks.preset_applied", { preset: preset.id, preset_version: preset.version });
+
+  const policyRow = await readRow(APPWRITE_IDS.tables.academyPolicies, policyRowId("belts"));
+  await savePolicySection(actor, "belts", { form_label: preset.formLabel, level_label: preset.levelLabel }, policyRow?.revision ?? 0, `Modelo ${preset.label}`);
+
+  // Informativo: lembra qual modelo foi aplicado por último. Só se a identidade já foi salva.
+  const identity = await readRow(APPWRITE_IDS.tables.academySettings, ACADEMY_SETTINGS_ROW_ID);
+  if (identity) {
+    const saved = await writeVersionedRow(APPWRITE_IDS.tables.academySettings, ACADEMY_SETTINGS_ROW_ID, identity, identity.revision, { federation: preset.id, updated_by_account_id: actor.account_id }, {});
+    invalidateTags(CACHE_TAGS.academySettings);
+    await appendRevision({ scope: "settings", section: "identity", entityId: saved.$id, revision: saved.revision, before: { federation: identity.federation ?? null }, after: { federation: preset.id }, reason: `Modelo ${preset.label}`, actor });
+  }
+  return { changed: changes.length, preset: preset.id };
 }

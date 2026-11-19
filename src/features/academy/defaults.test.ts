@@ -60,7 +60,17 @@ describe("defaults = valores atuais do código", () => {
         exit_fee_cents: 0,
         rematriculation_after_months: 6,
         renewal_reminder_days: [30, 7]
-      }
+      },
+      exam: {
+        default_fee_cents: null,
+        block_on_overdue: true,
+        almost_ready_pct: 75,
+        fallback_min_days: 90,
+        fallback_min_presences: 24,
+        allow_skip_grades: true,
+        absent_default_decision: null
+      },
+      belts: { form_label: "Poomsae", level_label: "Gub" }
     });
   });
 

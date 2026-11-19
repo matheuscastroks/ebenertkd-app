@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  ABSENT_DECISIONS,
   DEFAULT_ACADEMY_IDENTITY,
   DEFAULT_POLICIES,
   DUE_DAY_MAX,
@@ -86,6 +87,13 @@ const dayList = (min: number, max: number, maxLength: number) =>
     .max(maxLength)
     .refine((list) => new Set(list).size === list.length, "Dias repetidos");
 
+/** Inteiro opcional: vazio vira `null` (usa o padrão do sistema). */
+export const nullableInt = (min: number, max: number) =>
+  z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? null : Number(value)),
+    z.number().int().min(min).max(max).nullable()
+  );
+
 /** Campo a campo: cada chave tem o seu schema, para a leitura aproveitar os campos válidos. */
 export const POLICY_FIELD_SCHEMAS = {
   billing: {
@@ -110,6 +118,19 @@ export const POLICY_FIELD_SCHEMAS = {
     exit_fee_cents: z.coerce.number().int().min(0).max(1_000_000),
     rematriculation_after_months: z.coerce.number().int().min(1).max(60),
     renewal_reminder_days: dayList(1, 365, 6)
+  },
+  exam: {
+    default_fee_cents: nullableInt(0, 1_000_000),
+    block_on_overdue: z.boolean(),
+    almost_ready_pct: z.coerce.number().int().min(1).max(100),
+    fallback_min_days: z.coerce.number().int().min(0).max(1825),
+    fallback_min_presences: z.coerce.number().int().min(0).max(1000),
+    allow_skip_grades: z.boolean(),
+    absent_default_decision: z.preprocess((value) => (value === "" ? null : (value ?? null)), z.enum(ABSENT_DECISIONS).nullable())
+  },
+  belts: {
+    form_label: z.string().trim().min(2, "Informe o termo da forma").max(24),
+    level_label: z.string().trim().min(2, "Informe o termo do nível").max(16)
   }
 } as const satisfies Record<PolicySection, Record<string, z.ZodType>>;
 

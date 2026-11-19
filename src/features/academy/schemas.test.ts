@@ -108,3 +108,43 @@ describe("gravação estrita das políticas", () => {
     expect(parsePolicyInput("contract", { exit_fee_mode: "fixed", exit_fee_cents: 5000 }).exit_fee_cents).toBe(5000);
   });
 });
+
+describe("seção de exame", () => {
+  it("nasce com os valores que estavam fixos no código", () => {
+    expect(parsePolicyData("exam", null)).toEqual({
+      default_fee_cents: null,
+      block_on_overdue: true,
+      almost_ready_pct: 75,
+      fallback_min_days: 90,
+      fallback_min_presences: 24,
+      allow_skip_grades: true,
+      absent_default_decision: null
+    });
+  });
+
+  it("aceita taxa vazia (null), decisão padrão e números como texto", () => {
+    const parsed = parsePolicyInput("exam", { default_fee_cents: "", absent_default_decision: "future_credit", almost_ready_pct: "80", fallback_min_days: "60" });
+    expect(parsed).toMatchObject({ default_fee_cents: null, absent_default_decision: "future_credit", almost_ready_pct: 80, fallback_min_days: 60 });
+    expect(parsePolicyInput("exam", { default_fee_cents: 15000 }).default_fee_cents).toBe(15000);
+  });
+
+  it("rejeita percentual fora de 1 a 100, decisão desconhecida e taxa negativa", () => {
+    expect(() => parsePolicyInput("exam", { almost_ready_pct: 0 })).toThrow(PolicyValidationError);
+    expect(() => parsePolicyInput("exam", { almost_ready_pct: 101 })).toThrow(PolicyValidationError);
+    expect(() => parsePolicyInput("exam", { absent_default_decision: "talvez" })).toThrow(PolicyValidationError);
+    expect(() => parsePolicyInput("exam", { default_fee_cents: -1 })).toThrow(PolicyValidationError);
+  });
+
+  it("na leitura, campo inválido volta ao padrão e os válidos ficam", () => {
+    const parsed = parsePolicyData("exam", JSON.stringify({ almost_ready_pct: 500, block_on_overdue: false, default_fee_cents: 12000 }));
+    expect(parsed).toMatchObject({ almost_ready_pct: 75, block_on_overdue: false, default_fee_cents: 12000 });
+  });
+});
+
+describe("seção de termos das faixas", () => {
+  it("nasce com Poomsae e Gub e aceita os termos de outras federações", () => {
+    expect(parsePolicyData("belts", null)).toEqual({ form_label: "Poomsae", level_label: "Gub" });
+    expect(parsePolicyInput("belts", { form_label: " Tul ", level_label: "Gup" })).toEqual({ form_label: "Tul", level_label: "Gup" });
+    expect(() => parsePolicyInput("belts", { form_label: "" })).toThrow(PolicyValidationError);
+  });
+});

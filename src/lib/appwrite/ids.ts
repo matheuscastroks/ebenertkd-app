@@ -38,7 +38,8 @@ export const APPWRITE_IDS = {
     automationRuns: "automation_runs",
     academySettings: "academy_settings",
     academyPolicies: "academy_policies",
-    academyConfigRevisions: "academy_config_revisions"
+    academyConfigRevisions: "academy_config_revisions",
+    beltRankSettings: "belt_rank_settings"
   },
   functions: {
     dailyOperations: "daily-operations",

@@ -1,7 +1,8 @@
 import "server-only";
 
 import { Query, type Models } from "node-appwrite";
-import { DEFAULT_POLICIES, type AcademyPolicies, type PolicySection } from "@/features/academy/defaults";
+import { resolveRankConfigs, toPublicRank, type PublicRank, type RankConfig, type RankRow } from "@/features/academy/belt-rules";
+import { DEFAULT_POLICIES, type AcademyPolicies, type BeltsPolicy, type PolicySection } from "@/features/academy/defaults";
 import { resolveAcademyIdentity, type AcademyIdentityRow, type ResolvedAcademyIdentity } from "@/features/academy/identity-rules";
 import { policyRevision, resolvePolicies, type PolicyRow } from "@/features/academy/policy-rules";
 import { defaultPolicySection } from "@/features/academy/schemas";
@@ -40,6 +41,56 @@ function readPolicyRows() {
   });
 }
 
+function readRankRows() {
+  return cachedRead({ name: "belt-ranks", key: [], tags: [CACHE_TAGS.beltRanks], revalidate: 3600 }, async () => {
+    const { tables, config } = createAppwriteAdminClient();
+    const result = await tables.listRows<Models.Row & RankRow>({
+      databaseId: config.databaseId,
+      tableId: APPWRITE_IDS.tables.beltRankSettings,
+      queries: [Query.limit(50)]
+    });
+    return result.rows.map((row) => ({
+      rank_key: row.rank_key,
+      display_name: row.display_name,
+      aliases: row.aliases,
+      color_primary: row.color_primary,
+      color_secondary: row.color_secondary,
+      color_style: row.color_style,
+      form_name: row.form_name,
+      min_days: row.min_days,
+      min_presences: row.min_presences,
+      min_age_years: row.min_age_years,
+      exam_fee_cents: row.exam_fee_cents,
+      enabled: row.enabled,
+      revision: row.revision
+    })) as RankRow[];
+  });
+}
+
+/** As 23 graduações com a configuração salva (ou o padrão do código). Nunca lança. */
+export async function getBeltRanks(): Promise<RankConfig[]> {
+  try {
+    return resolveRankConfigs(await readRankRows());
+  } catch (error) {
+    logConfigFailure("belt-ranks", error);
+    return resolveRankConfigs(null);
+  }
+}
+
+/** Contexto de faixas para telas e componentes de cliente: graduações públicas + termos da federação. */
+export type BeltContext = { ranks: PublicRank[]; formLabel: string; levelLabel: string };
+
+export async function getBeltContext(): Promise<BeltContext> {
+  const [ranks, belts] = await Promise.all([getBeltRanks(), getPolicy("belts")]);
+  return { ranks: ranks.map(toPublicRank), formLabel: belts.form_label, levelLabel: belts.level_label };
+}
+
+/** Graduações completas + termos gerais + revisão da seção, para a tela de edição. */
+export async function getBeltRanksForEdit(): Promise<{ ranks: RankConfig[]; belts: BeltsPolicy; beltsRevision: number }> {
+  const [ranks, belts] = await Promise.all([getBeltRanks(), getPolicyForEdit("belts")]);
+  return { ranks, belts: belts.policy, beltsRevision: belts.revision };
+}
+
 /** Identidade da academia. Nunca lança: sem linha ou com falha de rede devolve os defaults atuais. */
 export async function getAcademyIdentity(): Promise<ResolvedAcademyIdentity> {
   try {
@@ -50,7 +101,7 @@ export async function getAcademyIdentity(): Promise<ResolvedAcademyIdentity> {
   }
 }
 
-/** Políticas resolvidas (billing, access, contract). Nunca lança. */
+/** Políticas resolvidas (billing, access, contract, exam, belts). Nunca lança. */
 export async function getAcademyPolicies(): Promise<AcademyPolicies> {
   try {
     return resolvePolicies(await readPolicyRows());
@@ -90,5 +141,6 @@ export async function getAcademyConfigOverview() {
   } catch (error) {
     logConfigFailure("overview", error);
   }
-  return { identity, customized };
+  const ranks = await getBeltRanks();
+  return { identity, customized, customizedRanks: ranks.filter((rank) => rank.configured).length };
 }

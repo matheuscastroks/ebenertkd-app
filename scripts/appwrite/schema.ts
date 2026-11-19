@@ -176,8 +176,7 @@ export const tables: TableDefinition[] = [
       { key: "event_id", kind: "varchar", size: 36, required: true },
       { key: "enrollment_id", kind: "varchar", size: 36, required: true },
       { key: "student_id", kind: "varchar", size: 36, required: true },
-      { key: "target_belt", kind: "varchar", size: 64, required: true },
-      { key: "target_gub", kind: "integer", required: true, min: 0, max: 10 },
+      { key: "target_rank_key", kind: "varchar", size: 16, required: true },
       { key: "fee_cents", kind: "integer", required: true, min: 0 },
       { key: "charge_id", kind: "varchar", size: 36, required: false },
       { key: "status", kind: "enum", elements: ["registered", "approved", "failed", "absent", "cancelled"], required: true },
@@ -200,10 +199,11 @@ export const tables: TableDefinition[] = [
       { key: "student_id", kind: "varchar", size: 36, required: true },
       { key: "event_id", kind: "varchar", size: 36, required: true },
       { key: "exam_participant_id", kind: "varchar", size: 36, required: true },
-      { key: "previous_belt", kind: "varchar", size: 64, required: true },
-      { key: "previous_gub", kind: "integer", required: true, min: 0, max: 10 },
-      { key: "new_belt", kind: "varchar", size: 64, required: true },
-      { key: "new_gub", kind: "integer", required: true, min: 0, max: 10 },
+      { key: "previous_rank_key", kind: "varchar", size: 16, required: true },
+      { key: "new_rank_key", kind: "varchar", size: 16, required: true },
+      // Nome da faixa NA ÉPOCA: renomear uma graduação depois não reescreve o histórico (plano §2.5).
+      { key: "previous_belt_name", kind: "varchar", size: 64, required: true },
+      { key: "new_belt_name", kind: "varchar", size: 64, required: true },
       { key: "achieved_at", kind: "datetime", required: true },
       { key: "created_at", kind: "datetime", required: true }
     ],
@@ -226,10 +226,9 @@ export const tables: TableDefinition[] = [
       { key: "emergency_contact_relationship", kind: "varchar", size: 64, required: false },
       { key: "emergency_contact_phone", kind: "varchar", size: 24, required: false },
       { key: "started_at_tkd", kind: "datetime", required: false },
-      { key: "current_belt", kind: "varchar", size: 64, required: false },
+      { key: "rank_key", kind: "varchar", size: 16, required: false },
       { key: "training_class_id", kind: "varchar", size: 36, required: false },
       { key: "training_class", kind: "varchar", size: 64, required: false },
-      { key: "gub", kind: "integer", required: false, min: 0, max: 10 },
       { key: "health_condition", kind: "enum", elements: ["yes", "no"], required: false },
       { key: "health_details", kind: "text", required: false },
       { key: "medications", kind: "text", required: false },
@@ -246,7 +245,8 @@ export const tables: TableDefinition[] = [
       { key: "status_idx", type: "key", columns: ["status"] },
       { key: "name_idx", type: "key", columns: ["full_name"] },
       { key: "class_id_idx", type: "key", columns: ["training_class_id"] },
-      { key: "class_idx", type: "key", columns: ["training_class"] }
+      { key: "class_idx", type: "key", columns: ["training_class"] },
+      { key: "rank_key_idx", type: "key", columns: ["rank_key"] }
     ]
   },
   {
@@ -809,6 +809,29 @@ export const tables: TableDefinition[] = [
       { key: "scope_section_revision_unique", type: "unique", columns: ["scope", "section", "revision"] },
       { key: "changed_at_idx", type: "key", columns: ["changed_at"] }
     ]
+  },
+  {
+    id: APPWRITE_IDS.tables.beltRankSettings,
+    name: "Belt rank settings",
+    columns: [
+      { key: "rank_key", kind: "varchar", size: 16, required: true },
+      { key: "display_name", kind: "varchar", size: 64, required: true },
+      { key: "aliases", kind: "varchar", size: 64, required: false, array: true },
+      { key: "color_primary", kind: "varchar", size: 7, required: true },
+      { key: "color_secondary", kind: "varchar", size: 7, required: true },
+      { key: "color_style", kind: "enum", elements: ["solid", "tip", "stripe", "half"], required: true },
+      { key: "form_name", kind: "varchar", size: 96, required: false },
+      { key: "min_days", kind: "integer", required: false, min: 0 },
+      { key: "min_presences", kind: "integer", required: false, min: 0 },
+      { key: "min_age_years", kind: "integer", required: false, min: 0 },
+      { key: "exam_fee_cents", kind: "integer", required: false, min: 0 },
+      { key: "enabled", kind: "boolean", required: true },
+      { key: "revision", kind: "integer", required: true, min: 1 },
+      { key: "updated_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [{ key: "rank_key_unique", type: "unique", columns: ["rank_key"] }]
   }
 ];
 

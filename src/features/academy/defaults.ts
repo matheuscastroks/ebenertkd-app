@@ -98,10 +98,32 @@ export const DEFAULT_CONTRACT_POLICY = {
   renewal_reminder_days: [30, 7] as number[]
 };
 
+export const ABSENT_DECISIONS = ["future_credit", "keep_charge"] as const;
+export type AbsentDecision = (typeof ABSENT_DECISIONS)[number];
+
+/** Regras de exame. Tempos e presenças por graduação ficam em `belt_rank_settings` (`rank-defaults.ts`). */
+export const DEFAULT_EXAM_POLICY = {
+  default_fee_cents: null as number | null,
+  block_on_overdue: true,
+  almost_ready_pct: 75,
+  fallback_min_days: 90,
+  fallback_min_presences: 24,
+  allow_skip_grades: true,
+  absent_default_decision: null as AbsentDecision | null
+};
+
+/** Termos gerais do sistema de faixas: "Poomsae"/"Tul" e "Gub"/"Gup"/"Geup". */
+export const DEFAULT_BELTS_POLICY = {
+  form_label: "Poomsae",
+  level_label: "Gub"
+};
+
 export const DEFAULT_POLICIES = {
   billing: DEFAULT_BILLING_POLICY,
   access: DEFAULT_ACCESS_POLICY,
-  contract: DEFAULT_CONTRACT_POLICY
+  contract: DEFAULT_CONTRACT_POLICY,
+  exam: DEFAULT_EXAM_POLICY,
+  belts: DEFAULT_BELTS_POLICY
 };
 
 export type PolicySection = keyof typeof DEFAULT_POLICIES;
@@ -110,5 +132,13 @@ export const POLICY_SECTIONS = Object.keys(DEFAULT_POLICIES) as PolicySection[];
 export type BillingPolicy = typeof DEFAULT_BILLING_POLICY;
 export type AccessPolicy = typeof DEFAULT_ACCESS_POLICY;
 export type ContractPolicy = typeof DEFAULT_CONTRACT_POLICY;
-export type AcademyPolicies = { billing: BillingPolicy; access: AccessPolicy; contract: ContractPolicy };
+export type ExamPolicy = typeof DEFAULT_EXAM_POLICY;
+export type BeltsPolicy = typeof DEFAULT_BELTS_POLICY;
+export type AcademyPolicies = {
+  billing: BillingPolicy;
+  access: AccessPolicy;
+  contract: ContractPolicy;
+  exam: ExamPolicy;
+  belts: BeltsPolicy;
+};
 export type PolicyOf<S extends PolicySection> = AcademyPolicies[S];
