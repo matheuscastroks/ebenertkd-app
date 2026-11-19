@@ -43,7 +43,7 @@ export default async function StudentAttendancePage({
       subtitle="Acompanhe sua assiduidade e o histórico das aulas mês a mês."
     >
       <div className="w-full min-w-0">
-        <Suspense key={month} fallback={<AttendanceCalendarSkeleton />}>
+        <Suspense fallback={<AttendanceCalendarSkeleton />}>
           <StudentAttendanceContent profile={profile} month={month} />
         </Suspense>
       </div>

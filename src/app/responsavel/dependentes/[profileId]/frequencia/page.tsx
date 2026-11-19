@@ -55,7 +55,7 @@ export default async function DependentAttendancePage({
     >
       <div className="w-full min-w-0 space-y-6">
         <DependentContext guardian={guardian} profileId={profileId} section="frequencia" />
-        <Suspense key={month} fallback={<AttendanceCalendarSkeleton />}>
+        <Suspense fallback={<AttendanceCalendarSkeleton />}>
           <DependentAttendanceContent
             guardian={guardian}
             profileId={profileId}

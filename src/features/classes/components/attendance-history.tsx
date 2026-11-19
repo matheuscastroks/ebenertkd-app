@@ -100,7 +100,11 @@ export function AttendanceHistory({
   const [pending, startTransition] = useTransition();
   const [optimisticMonth, setOptimisticMonth] = useOptimistic(month);
   const firstDate = entries[0]?.lesson.lesson_date.slice(0, 10) ?? `${month}-01`;
-  const [selected, setSelected] = useState<Date | undefined>(new Date(`${firstDate}T12:00:00`));
+  // A seleção vale só para o mês em que foi feita; ao chegar outro mês, volta para o primeiro dia com aula.
+  const [selection, setSelection] = useState<{ month: string; date?: Date }>({ month });
+  const selected =
+    selection.month === month ? selection.date : new Date(`${firstDate}T12:00:00`);
+  const setSelected = (date?: Date) => setSelection({ month, date });
   const visibleMonth = useMemo(() => new Date(`${optimisticMonth}-01T12:00:00`), [optimisticMonth]);
 
   const dayKey = (date: Date) =>
@@ -128,7 +132,6 @@ export function AttendanceHistory({
 
   const changeMonth = (next: Date) => {
     const key = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}`;
-    setSelected(undefined);
     startTransition(() => {
       setOptimisticMonth(key);
       router.replace(`${basePath}?month=${key}`, { scroll: false });
