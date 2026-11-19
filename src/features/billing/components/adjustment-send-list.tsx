@@ -23,7 +23,7 @@ import { MessageCircle } from "@/components/ui/icons";
 const STATUS_LABELS = { draft: "Rascunho", applied: "Reajuste confirmado", cancelled: "Cancelada" } as const;
 const STATUS_TONES = { draft: "warning", applied: "success", cancelled: "neutral" } as const;
 
-export function AdjustmentSendList({ data, professorName }: { data: SendList; professorName: string }) {
+export function AdjustmentSendList({ data, professorName, academyName }: { data: SendList; professorName: string; academyName?: string }) {
   const router = useRouter();
   const { adjustment, rows } = data;
   const [notified, setNotified] = useState<Record<string, boolean>>(() => Object.fromEntries(rows.map((row) => [row.enrollmentId, Boolean(row.notifiedAt)])));
@@ -45,7 +45,8 @@ export function AdjustmentSendList({ data, professorName }: { data: SendList; pr
         discountCents: row.discountCents,
         effectiveFrom: adjustment.effectiveFrom,
         indexLabel: adjustment.referenceIndexLabel,
-        professor: professorName
+        professor: professorName,
+        academy: academyName
       })
     );
   }

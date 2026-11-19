@@ -8,6 +8,7 @@ import { getContractForActor } from "@/features/contracts/contract-service";
 import { cancellationDecisionSchema, cancellationRequestSchema } from "@/features/contracts/schemas";
 import type { CancellationRequest } from "@/features/contracts/types";
 import { notifyAdmins, notifyStudentEvent } from "@/features/notifications/notification-service";
+import { parseContractPolicySnapshot } from "@/features/academy/contract-policy";
 import { calculateExitFee } from "@/lib/domain/billing-rules";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
@@ -30,7 +31,7 @@ export async function requestCancellation(actor: Profile, raw: unknown) {
   const pending = await tables.listRows<CancellationRequest>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.cancellationRequests, queries: [Query.equal("contract_id", [contract.$id]), Query.equal("status", ["pending"]), Query.limit(1)] });
   if (pending.rows[0]) return pending.rows[0];
   const noticeDate = saoPauloDate();
-  const fee = calculateExitFee({ targetExitMonth: `${input.targetExitMonth}-01`, noticeDate, monthlyFeeInCents: contract.monthly_fee_cents });
+  const fee = calculateExitFee({ targetExitMonth: `${input.targetExitMonth}-01`, noticeDate, monthlyFeeInCents: contract.monthly_fee_cents, policy: parseContractPolicySnapshot(contract.policy_snapshot_json) });
   const now = new Date().toISOString();
   const request = await tables.createRow<CancellationRequest>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.cancellationRequests, rowId: ID.unique(), data: { contract_id: contract.$id, enrollment_id: contract.enrollment_id, student_id: contract.student_id, requested_by_profile_id: actor.$id, target_exit_month: new Date(`${input.targetExitMonth}-01T12:00:00Z`).toISOString(), notice_date: new Date(`${noticeDate}T12:00:00Z`).toISOString(), suggested_fee_cents: fee, status: "pending", reason: input.reason, created_at: now, updated_at: now }, permissions: [] });
   invalidateTags(CACHE_TAGS.cancellations);

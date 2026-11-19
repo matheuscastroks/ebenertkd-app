@@ -4,6 +4,8 @@ import { AppwriteException, Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import { writeAuditEvent } from "@/features/auth/service";
 import { chargeAdjustmentSchema } from "@/features/billing/schemas";
+import { getPolicy } from "@/features/academy/config-service";
+import { enrollmentFeeToCharge } from "@/features/academy/policy-rules";
 import { chargeRowId, competenceFromDate, effectiveChargeStatus, resolveDueDate } from "@/features/billing/rules";
 import type { Charge, ChargeType } from "@/features/billing/types";
 import type { CancellationRequest, Contract } from "@/features/contracts/types";
@@ -61,6 +63,22 @@ export async function createFirstMonthlyCharge(contract: Contract, enrollment: E
     type: "monthly_fee", competence: competenceFromDate(enrollment.first_due_date), originId: contract.$id,
     amountCents: contract.monthly_fee_cents, dueDate: enrollment.first_due_date,
     description: `Mensalidade ${competenceFromDate(enrollment.first_due_date)}`
+  });
+}
+
+/**
+ * Taxa de matrícula (B3): gerada na aprovação só quando a política a habilita. Idempotente: o id da
+ * cobrança é derivado de matrícula + tipo + competência + origem, então repetir não duplica.
+ */
+export async function createEnrollmentFeeCharge(enrollment: Enrollment) {
+  const amountCents = enrollmentFeeToCharge(await getPolicy("billing"));
+  if (amountCents == null) return null;
+  if (!enrollment.first_due_date) throw new Error("first_due_date_required");
+  return createCharge({
+    enrollmentId: enrollment.$id, studentId: enrollment.student_id,
+    type: "enrollment_fee", competence: competenceFromDate(enrollment.first_due_date), originId: enrollment.$id,
+    amountCents, dueDate: enrollment.first_due_date,
+    description: "Taxa de matrícula"
   });
 }
 

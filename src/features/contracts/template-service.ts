@@ -18,7 +18,7 @@ A academia {{ academia.nome }} prestará aulas de taekwondo ao aluno {{ aluno.no
 
 A mensalidade é de {{ mensalidade.valor }}, com vencimento todo dia {{ mensalidade.dia_vencimento }}. A vigência inicia em {{ contrato.data_inicio }} e termina em {{ contrato.data_termino }}.
 
-O cancelamento sem ônus deve ser comunicado até o dia 20 do mês anterior à saída. Após esse prazo será devida uma mensalidade. Após mais de seis meses afastado, uma nova matrícula poderá ser exigida.
+O cancelamento sem ônus deve ser comunicado até o dia {{ contrato.dia_limite_cancelamento }} do mês anterior à saída. Após esse prazo, o encargo de saída será de {{ contrato.encargo_saida }}. Após mais de {{ contrato.meses_rematricula }} meses afastado, uma nova matrícula poderá ser exigida.
 
 O aluno ou responsável declara que as informações de saúde fornecidas são verdadeiras e autoriza a participação nas atividades, observadas as orientações médicas apresentadas.`;
 

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { Query } from "node-appwrite";
+import { getPolicy } from "@/features/academy/config-service";
 import type { Profile } from "@/features/auth/types";
 import { writeAuditEvent } from "@/features/auth/service";
 import { issueContractForEnrollment } from "@/features/contracts/contract-service";
@@ -184,6 +185,7 @@ export async function getContractRenewalPipeline(filters: {
 } = {}) {
   const { contracts, enrollments, students } = await loadRenewalPipelineDataset();
   const referenceDate = saoPauloToday();
+  const renewalMonths = (await getPolicy("contract")).default_duration_months;
 
   const studentById = new Map(students.map((student) => [student.$id, student]));
   const enrollmentById = new Map(enrollments.map((enrollment) => [enrollment.$id, enrollment]));
@@ -220,7 +222,7 @@ export async function getContractRenewalPipeline(filters: {
       pendingFeeCents: pendingNetFee > 0 && pendingNetFee !== contract.monthly_fee_cents ? pendingNetFee : null,
       startsAt: contract.starts_at,
       endsAt: contract.ends_at,
-      suggestedNextEnd: addMonthsToIsoDay(baseNextStart, 12),
+      suggestedNextEnd: addMonthsToIsoDay(baseNextStart, renewalMonths),
       daysRemaining,
       bucket,
     });

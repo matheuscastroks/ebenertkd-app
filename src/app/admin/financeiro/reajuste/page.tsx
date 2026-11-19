@@ -4,6 +4,8 @@ import { PortalShell } from "@/components/dashboard/portal-shell";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { MetricCardsSkeleton, TableRowsSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
+import { getAcademyIdentity, getPolicy } from "@/features/academy/config-service";
+import { professorSignature } from "@/features/academy/identity-rules";
 import { listAdjustmentCandidates, listTuitionAdjustments } from "@/features/billing/adjustment-service";
 import { AdjustmentWizard } from "@/features/billing/components/adjustment-wizard";
 import { listFinanceScenarios } from "@/features/billing/planning-service";
@@ -17,8 +19,8 @@ import { ArrowRight } from "@/components/ui/icons";
 const STATUS_LABELS = { draft: "Rascunho", applied: "Confirmado", cancelled: "Cancelada" } as const;
 const STATUS_TONES = { draft: "warning", applied: "success", cancelled: "neutral" } as const;
 
-async function AdjustmentContent({ professorName }: { professorName: string }) {
-  const [candidates, scenarios, campaigns] = await Promise.all([listAdjustmentCandidates(), listFinanceScenarios(), listTuitionAdjustments()]);
+async function AdjustmentContent({ adminName }: { adminName: string }) {
+  const [candidates, scenarios, campaigns, identity, billingPolicy] = await Promise.all([listAdjustmentCandidates(), listFinanceScenarios(), listTuitionAdjustments(), getAcademyIdentity(), getPolicy("billing")]);
 
   return (
     <div className="space-y-8">
@@ -55,7 +57,9 @@ async function AdjustmentContent({ professorName }: { professorName: string }) {
           candidates={toClientData(candidates)}
           scenarios={toClientData(scenarios)}
           today={saoPauloToday()}
-          professorName={professorName}
+          professorName={professorSignature(identity, adminName)}
+          academyName={identity.short_name}
+          minNoticeDays={billingPolicy.adjustment_min_notice_days}
         />
       </section>
     </div>
@@ -90,7 +94,7 @@ export default async function AdminBillingAdjustmentPage() {
             </div>
           }
         >
-          <AdjustmentContent professorName={admin.full_name} />
+          <AdjustmentContent adminName={admin.full_name} />
         </Suspense>
       </div>
     </PortalShell>

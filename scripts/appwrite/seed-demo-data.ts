@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { loadEnvConfig } from "@next/env";
 import { AppwriteException, Client, ID, Permission, Query, Role, Storage, TablesDB, Users, type Models } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
+import { DEFAULT_ACADEMY_IDENTITY, DEFAULT_CONTRACT_POLICY } from "../../src/features/academy/defaults";
 import { APPWRITE_IDS } from "../../src/lib/appwrite/ids";
 import { readServerAppwriteConfig } from "../../src/lib/appwrite/config";
 import { testPersonas } from "./test-personas";
@@ -667,6 +668,8 @@ async function main() {
       status: contractScenario,
       content_snapshot: snapshot,
       content_hash: snapshotHash,
+      policy_snapshot_json: JSON.stringify({ schema_version: 1, cancellation_notice_day: DEFAULT_CONTRACT_POLICY.cancellation_notice_day, exit_fee_mode: DEFAULT_CONTRACT_POLICY.exit_fee_mode, exit_fee_cents: DEFAULT_CONTRACT_POLICY.exit_fee_cents, rematriculation_after_months: DEFAULT_CONTRACT_POLICY.rematriculation_after_months }),
+      academy_legal_name: DEFAULT_ACADEMY_IDENTITY.legal_name,
       student_name: scenario.fullName,
       guardian_name: scenario.role === "minor_student" ? signer.full_name : null,
       monthly_fee_cents: scenario.monthlyFeeCents - scenario.discountCents,

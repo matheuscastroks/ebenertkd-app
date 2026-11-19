@@ -44,6 +44,7 @@ export async function loadDependentSnapshots(guardian: Profile, minors: Profile[
       parqStatus: parqAssessment?.status,
       parqExpiresAt: parqAssessment?.expiresAt,
       accessLocked: accessState?.locked ?? false,
+      accessWindowDays: accessState?.windowDays,
       canSign: true,
       links: {
         enrollment: guardianEnrollmentPath(minor.$id),

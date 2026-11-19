@@ -19,6 +19,7 @@ import {
   computeAdjustmentImpact,
   daysBetween,
   defaultEffectiveFrom,
+  MIN_NOTICE_DAYS,
   gainAfterDepartures,
   goalCoveragePercent,
   netFeeCents,
@@ -62,12 +63,18 @@ export function AdjustmentWizard({
   scenarios,
   today,
   professorName,
+  academyName,
+  minNoticeDays = MIN_NOTICE_DAYS,
   initialEffectiveFrom
 }: {
   candidates: AdjustmentCandidate[];
   scenarios: SavedScenario[];
   today: string;
   professorName: string;
+  /** Nome da academia nas mensagens (identidade); sem ele vale o nome padrão. */
+  academyName?: string;
+  /** Aviso mínimo em dias (política financeira); padrão 30. */
+  minNoticeDays?: number;
   /** Permite abrir com outra vigência (testes e atalhos). Padrão: primeiro dia de mês com 30 dias de aviso. */
   initialEffectiveFrom?: string;
 }) {
@@ -78,7 +85,7 @@ export function AdjustmentWizard({
   const [fixed, setFixed] = useState("");
   const [roundTo, setRoundTo] = useState("500");
   const [indexLabel, setIndexLabel] = useState("");
-  const [effectiveFrom, setEffectiveFrom] = useState(initialEffectiveFrom ?? defaultEffectiveFrom(today));
+  const [effectiveFrom, setEffectiveFrom] = useState(initialEffectiveFrom ?? defaultEffectiveFrom(today, minNoticeDays));
   const [scenarioId, setScenarioId] = useState("");
   const [calculatorHint, setCalculatorHint] = useState<string | null>(null);
 
@@ -114,7 +121,7 @@ export function AdjustmentWizard({
     [candidates, mode, percent, fixed, roundTo, effectiveFrom, excluded, manualFeeCents]
   );
   const impact = useMemo(() => computeAdjustmentImpact(rows, today), [rows, today]);
-  const notice = checkNotice(today, effectiveFrom);
+  const notice = checkNotice(today, effectiveFrom, minNoticeDays);
 
   const classes = useMemo(() => {
     const map = new Map<string, string>();
@@ -156,7 +163,8 @@ export function AdjustmentWizard({
           discountCents: previewRow.discountCents,
           effectiveFrom,
           indexLabel,
-          professor
+          professor,
+          academy: academyName
         })
       )
     : "";
@@ -320,7 +328,7 @@ export function AdjustmentWizard({
                 label="Vigência (data do aviso)"
                 defaultValue={effectiveFrom}
                 onValueChange={(value) => value && setEffectiveFrom(value)}
-                description="Padrão: primeiro dia de um mês com pelo menos 30 dias de aviso."
+                description={`Padrão: primeiro dia de um mês com pelo menos ${minNoticeDays} dias de aviso.`}
               />
             </div>
 

@@ -8,7 +8,15 @@ export const CONTRACT_VARIABLES = [
   "financial.monthly_fee",
   "financial.due_day",
   "contract.starts_at",
-  "contract.ends_at"
+  "contract.ends_at",
+  "academy.document",
+  "academy.address",
+  "academy.city",
+  "professor.name",
+  "contract.cancellation_notice_day",
+  "contract.exit_fee",
+  "contract.rematriculation_months",
+  "fee.enrollment"
 ] as const;
 
 export type ContractVariableKey = (typeof CONTRACT_VARIABLES)[number];
@@ -22,6 +30,14 @@ export const CONTRACT_VARIABLE_ALIASES: Record<string, ContractVariableKey> = {
   "financial.due_day": "financial.due_day",
   "contract.starts_at": "contract.starts_at",
   "contract.ends_at": "contract.ends_at",
+  "academy.document": "academy.document",
+  "academy.address": "academy.address",
+  "academy.city": "academy.city",
+  "professor.name": "professor.name",
+  "contract.cancellation_notice_day": "contract.cancellation_notice_day",
+  "contract.exit_fee": "contract.exit_fee",
+  "contract.rematriculation_months": "contract.rematriculation_months",
+  "fee.enrollment": "fee.enrollment",
   // Nomes amigáveis em português:
   "aluno.nome_completo": "student.full_name",
   "aluno.nome": "student.full_name",
@@ -33,6 +49,14 @@ export const CONTRACT_VARIABLE_ALIASES: Record<string, ContractVariableKey> = {
   "mensalidade.dia_vencimento": "financial.due_day",
   "contrato.data_inicio": "contract.starts_at",
   "contrato.data_termino": "contract.ends_at",
+  "academia.documento": "academy.document",
+  "academia.endereco": "academy.address",
+  "academia.cidade": "academy.city",
+  "professor.nome": "professor.name",
+  "contrato.dia_limite_cancelamento": "contract.cancellation_notice_day",
+  "contrato.encargo_saida": "contract.exit_fee",
+  "contrato.meses_rematricula": "contract.rematriculation_months",
+  "taxa.matricula": "fee.enrollment",
 };
 
 export interface FriendlyContractVariable {
@@ -99,6 +123,62 @@ export const FRIENDLY_CONTRACT_VARIABLES: FriendlyContractVariable[] = [
     label: "Término do Contrato",
     description: "Data final de vigência ou renovação",
     example: "01/01/2027",
+  },
+  {
+    ptKey: "academia.documento",
+    enKey: "academy.document",
+    label: "Documento da Academia",
+    description: "CNPJ ou CPF informado em Academia > Identidade",
+    example: "CNPJ 00.000.000/0001-00",
+  },
+  {
+    ptKey: "academia.endereco",
+    enKey: "academy.address",
+    label: "Endereço da Academia",
+    description: "Endereço completo informado em Academia > Identidade",
+    example: "Rua das Artes, 100, Centro, Niterói/RJ",
+  },
+  {
+    ptKey: "academia.cidade",
+    enKey: "academy.city",
+    label: "Cidade da Academia",
+    description: "Cidade e estado da academia",
+    example: "Niterói/RJ",
+  },
+  {
+    ptKey: "professor.nome",
+    enKey: "professor.name",
+    label: "Professor",
+    description: "Título e nome do professor responsável",
+    example: "Mestre Ebener Santos",
+  },
+  {
+    ptKey: "contrato.dia_limite_cancelamento",
+    enKey: "contract.cancellation_notice_day",
+    label: "Dia limite do cancelamento",
+    description: "Dia do mês anterior até o qual o cancelamento é sem encargo",
+    example: "20",
+  },
+  {
+    ptKey: "contrato.encargo_saida",
+    enKey: "contract.exit_fee",
+    label: "Encargo de saída",
+    description: "Valor cobrado quando o aviso passa do prazo (uma mensalidade, valor fixo ou nenhum)",
+    example: "uma mensalidade",
+  },
+  {
+    ptKey: "contrato.meses_rematricula",
+    enKey: "contract.rematriculation_months",
+    label: "Meses para rematrícula",
+    description: "Afastamento a partir do qual uma nova matrícula pode ser exigida",
+    example: "6",
+  },
+  {
+    ptKey: "taxa.matricula",
+    enKey: "fee.enrollment",
+    label: "Taxa de matrícula",
+    description: "Valor da taxa de matrícula, ou \"isenta\" quando não há cobrança",
+    example: "R$ 50,00",
   },
 ];
 

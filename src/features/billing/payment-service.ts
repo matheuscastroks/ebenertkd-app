@@ -10,6 +10,8 @@ import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { cachedRead } from "@/lib/cache/cached-read";
 import { invalidateTags } from "@/lib/cache/invalidate";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { getPolicy } from "@/features/academy/config-service";
+import { accessGrantedSentence } from "@/features/billing/access-lock-rules";
 import { notifyStudentFinancial } from "@/features/notifications/notification-service";
 
 async function confirmedPayment(chargeId: string) {
@@ -66,11 +68,12 @@ export async function decidePaymentProof(actor: Profile, raw: unknown) {
     return row;
   });
   invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(charge.student_id));
+  const accessPolicy = await getPolicy("access");
   await notifyStudentFinancial({
     studentId: charge.student_id,
     title: `Pagamento confirmado · ${charge.description}`,
     body: charge.charge_type === "monthly_fee"
-      ? `O professor confirmou seu comprovante de ${charge.description}. Seu acesso ao aplicativo está liberado por 30 dias.`
+      ? `O professor confirmou seu comprovante de ${charge.description}.${accessGrantedSentence(accessPolicy)}`
       : `O professor confirmou o pagamento de ${charge.description}.`,
     dedupeKey: `payment-confirmed:${payment.$id}`
   }).catch(() => undefined);
@@ -101,11 +104,12 @@ export async function recordManualPayment(actor: Profile, raw: unknown) {
     return row;
   });
   invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(charge.student_id));
+  const accessPolicy = await getPolicy("access");
   await notifyStudentFinancial({
     studentId: charge.student_id,
     title: `Pagamento confirmado · ${charge.description}`,
     body: charge.charge_type === "monthly_fee"
-      ? `O professor registrou seu pagamento de ${charge.description}. Seu acesso ao aplicativo está liberado por 30 dias.`
+      ? `O professor registrou seu pagamento de ${charge.description}.${accessGrantedSentence(accessPolicy)}`
       : `O professor registrou o pagamento de ${charge.description}.`,
     dedupeKey: `payment-confirmed:${payment.$id}`
   }).catch(() => undefined);

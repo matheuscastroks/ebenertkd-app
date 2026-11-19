@@ -1,6 +1,7 @@
 import "server-only";
 
 import { Query } from "node-appwrite";
+import { getPolicy } from "@/features/academy/config-service";
 import { writeAuditEvent } from "@/features/auth/service";
 import type { Profile } from "@/features/auth/types";
 import {
@@ -68,6 +69,7 @@ export async function getStudentAppAccessByStudentId(
     charges,
     payments,
     referenceDate: saoPauloToday(),
+    policy: await getPolicy("access"),
   });
 }
 
@@ -84,7 +86,7 @@ export async function getStudentAppAccessByProfileId(
   if (!student) {
     return {
       studentId: null,
-      access: evaluateStudentAppAccess({ enrollment: null, charges: [], payments: [] }),
+      access: evaluateStudentAppAccess({ enrollment: null, charges: [], payments: [], policy: await getPolicy("access") }),
     };
   }
   const access = await getStudentAppAccessByStudentId(student.$id);

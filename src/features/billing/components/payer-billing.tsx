@@ -1,7 +1,7 @@
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";
 import type { Profile } from "@/features/auth/types";
 import {
-  ACCESS_STATUS_LABELS,
+  accessStatusLabel,
   type StudentAppAccessStatus,
 } from "@/features/billing/access-lock-rules";
 import { getStudentAppAccessByProfileId } from "@/features/billing/access-lock-service";
@@ -52,7 +52,7 @@ export async function PayerBilling({
                 Ciclo de acesso ao app (30 dias após pagamento)
               </p>
               <StatusBadge tone={ACCESS_TONES[access.status]}>
-                {ACCESS_STATUS_LABELS[access.status]}
+                {accessStatusLabel(access)}
               </StatusBadge>
             </div>
             <p className="text-xs text-muted-foreground tabular-nums">

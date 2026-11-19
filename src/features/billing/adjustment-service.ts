@@ -4,7 +4,8 @@ import { createHash } from "node:crypto";
 import { AppwriteException, ID, Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import { writeAuditEvent } from "@/features/auth/service";
-import { ACADEMY_NAME, buildGenericNotice } from "@/features/billing/adjustment-message";
+import { getAcademyIdentity } from "@/features/academy/config-service";
+import { buildGenericNotice } from "@/features/billing/adjustment-message";
 import { pickPayerPhone } from "@/features/billing/adjustment-payer";
 import { netFeeCents, type AdjustmentMode } from "@/features/billing/adjustment-rules";
 import { adjustmentIdSchema, adjustmentInputSchema, markNotifiedSchema } from "@/features/billing/planning-schemas";
@@ -295,7 +296,7 @@ export async function publishAdjustmentNotice(actor: Profile, raw: unknown) {
   if (adjustment.status === "cancelled") throw new Error("adjustment_cancelled");
   if (adjustment.notice_published_at) throw new Error("notice_already_published");
   const notice = buildGenericNotice({
-    academy: ACADEMY_NAME,
+    academy: (await getAcademyIdentity()).short_name,
     effectiveFromLabel: formatBusinessDateBr(adjustment.effective_from),
     indexLabel: adjustment.reference_index_label ?? undefined
   });

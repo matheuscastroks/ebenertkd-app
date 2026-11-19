@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { DUE_DAY_OPTIONS } from "@/features/students/options";
+import { useDueDayOptions } from "@/components/academy-config-provider";
 import { GraduationFields } from "./graduation-fields";
 import { StudentAvatar } from "./student-avatar";
 import { Field, Section } from "./enrollment-form-fields";
@@ -216,6 +216,9 @@ export function HealthEnrollmentStep({ bundle }: StepProps) {
 }
 
 export function TrainingEnrollmentStep({ bundle, classes, onValueChange }: StepProps) {
+  const dueDayOptions = useDueDayOptions();
+  const currentDueDay = bundle.enrollment.requested_due_day;
+  const dueDayChoices = currentDueDay && !dueDayOptions.includes(currentDueDay) ? [...dueDayOptions, currentDueDay].sort((a, b) => a - b) : dueDayOptions;
   const { student, enrollment } = bundle;
   const today = new Date().toLocaleDateString("sv-SE", {
     timeZone: "America/Sao_Paulo",
@@ -286,7 +289,7 @@ export function TrainingEnrollmentStep({ bundle, classes, onValueChange }: StepP
                     <SelectValue placeholder="Selecione o dia" />
                   </SelectTrigger>
                   <SelectContent>
-                    {DUE_DAY_OPTIONS.map((day) => (
+                    {dueDayChoices.map((day) => (
                       <SelectItem key={day} value={String(day)}>
                         Dia {day} de cada mês
                       </SelectItem>

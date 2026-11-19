@@ -33,6 +33,8 @@ export type PendencyInput = {
   parqStatus?: ParqStatus | null;
   parqExpiresAt?: string | null;
   accessLocked?: boolean;
+  /** Janela de acesso da política da academia (padrão 30). */
+  accessWindowDays?: number;
   links: { enrollment: string; billing: string; contracts: string; contract: (contractId: string) => string; parq?: string };
   /** Quem assina: o aluno adulto ou o responsável. O menor só lê. */
   canSign: boolean;
@@ -40,14 +42,14 @@ export type PendencyInput = {
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "UTC" });
 
-export function buildPendencies({ studentStatus, charges, contracts, parqStatus, parqExpiresAt, accessLocked, links, canSign }: PendencyInput): Pendency[] {
+export function buildPendencies({ studentStatus, charges, contracts, parqStatus, parqExpiresAt, accessLocked, accessWindowDays = 30, links, canSign }: PendencyInput): Pendency[] {
   const items: Pendency[] = [];
 
   if (accessLocked && charges !== "hidden") {
     items.push({
       id: "access_locked",
       title: "Acesso ao aplicativo pausado",
-      status: "Ciclo de 30 dias expirado",
+      status: `Ciclo de ${accessWindowDays} dias expirado`,
       tone: "danger",
       detail: "Regularize a mensalidade no financeiro para reabrir todas as áreas do aplicativo.",
       href: links.billing,

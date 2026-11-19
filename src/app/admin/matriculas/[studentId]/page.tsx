@@ -1,4 +1,5 @@
 import { PortalShell } from "@/components/dashboard/portal-shell";
+import { getAcademyPolicies } from "@/features/academy/config-service";
 import { getStudentAppAccessByStudentId } from "@/features/billing/access-lock-service";
 import { listTrainingClasses } from "@/features/classes/service";
 import { ReviewPanel } from "@/features/students/components/review-panel";
@@ -30,6 +31,7 @@ export default async function EnrollmentReviewPage({ params, searchParams }: { p
     getLatestParqForStudent(studentId).catch(() => null),
     getStudentAppAccessByStudentId(studentId).catch(() => null),
   ]);
+  const policies = await getAcademyPolicies();
   const parqAssessment = evaluateParqStatus(latestParq, saoPauloToday());
   const notice = query.updated === "student"
     ? "Dados cadastrais do aluno atualizados com sucesso."
@@ -60,6 +62,8 @@ export default async function EnrollmentReviewPage({ params, searchParams }: { p
           parqAssessment={toClientData(parqAssessment)}
           accessState={accessState ? toClientData(accessState) : undefined}
           notice={notice}
+          defaultMonthlyFeeCents={policies.billing.default_monthly_fee_cents}
+          contractDurationMonths={policies.contract.default_duration_months}
         />
       </div>
     </PortalShell>

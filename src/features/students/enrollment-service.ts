@@ -11,6 +11,9 @@ import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { invalidateTags } from "@/lib/cache/invalidate";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { getTrainingClass } from "@/features/classes/service";
+import { createEnrollmentFeeCharge } from "@/features/billing/charge-service";
+import { getPolicy } from "@/features/academy/config-service";
+import { isDueDayAllowed } from "@/features/academy/policy-rules";
 import { issueContractForEnrollment } from "@/features/contracts/contract-service";
 import { beltForGub, type GubOption } from "@/features/students/options";
 import { notifyAdmins, notifyStudentEvent } from "@/features/notifications/notification-service";
@@ -30,6 +33,7 @@ export async function saveEnrollmentDraft(target: Profile, actor: Profile, input
   // Depois do rascunho a graduação só muda por exame (ou pelo professor): aluno e responsável não editam a faixa.
   const keepGraduation = !isDraft && actor.role !== "admin";
   if (isDraft && submit && !hasRequiredSubmissionPhoto(bundle.documents)) throw new Error("profile_photo_required");
+  if (parsed.requestedDueDay != null && !isDueDayAllowed(parsed.requestedDueDay, (await getPolicy("billing")).due_day_options, bundle.enrollment.requested_due_day)) throw new Error("due_day_not_allowed");
   const trainingClass = parsed.trainingClassId ? await getTrainingClass(parsed.trainingClassId) : null;
   if (trainingClass && trainingClass.status !== "active") throw new Error("training_class_inactive");
   const { tables, config } = createAppwriteAdminClient();
@@ -199,6 +203,7 @@ export async function saveFinancialReview(actor: Profile, studentId: string, raw
   const input = financialReviewSchema.parse(raw);
   const bundle = await getEnrollmentBundleByStudentId(studentId);
   if (!["submitted", "under_review"].includes(bundle.enrollment.status)) throw new Error("enrollment_not_reviewable");
+  if (!isDueDayAllowed(input.approvedDueDay, (await getPolicy("billing")).due_day_options, bundle.enrollment.approved_due_day)) throw new Error("due_day_not_allowed");
   const { tables, config } = createAppwriteAdminClient();
   const status = bundle.enrollment.status === "submitted" ? "under_review" : bundle.enrollment.status;
   const enrollment = await tables.updateRow({
@@ -238,6 +243,7 @@ export async function advanceToSignature(actor: Profile, studentId: string) {
   if (!canTransitionEnrollment(bundle.enrollment.status, "awaiting_signature")) throw new Error("invalid_enrollment_transition");
   const contract = await issueContractForEnrollment(actor, studentId);
   if (bundle.enrollment.status === "awaiting_signature") return contract;
+  await createEnrollmentFeeCharge(bundle.enrollment);
   const { tables, config } = createAppwriteAdminClient();
   await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, rowId: bundle.enrollment.$id, data: { status: "awaiting_signature", revision: bundle.enrollment.revision + 1, updated_at: new Date().toISOString() } });
   await recordReview(actor, studentId, bundle.enrollment.$id, "awaiting_signature");

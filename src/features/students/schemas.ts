@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { isValidCpf, normalizeCpf } from "@/lib/auth/auth-utils";
-import { BELT_OPTIONS, DUE_DAY_OPTIONS, graduationMatches } from "@/features/students/options";
+import { DUE_DAY_MAX, DUE_DAY_MIN } from "@/features/academy/defaults";
+import { BELT_OPTIONS, graduationMatches } from "@/features/students/options";
 
 const optionalText = z.string().trim().max(2000).optional().transform((value) => value || undefined);
 const requiredText = (min = 2, max = 255) => z.string().trim().min(min).max(max);
@@ -24,7 +25,7 @@ const studentDraftObject = z.object({
   allergies: optionalText,
   injuries: optionalText,
   guardianContact: z.string().trim().max(160).optional(),
-  requestedDueDay: z.coerce.number().int().refine((value) => DUE_DAY_OPTIONS.includes(value as (typeof DUE_DAY_OPTIONS)[number])).optional()
+  requestedDueDay: z.coerce.number().int().min(DUE_DAY_MIN).max(DUE_DAY_MAX).optional()
 });
 
 function validateGraduation(value: { gub?: number; currentBelt?: string }, context: z.RefinementCtx) {
@@ -49,13 +50,13 @@ export const studentSubmissionSchema = studentDraftObject.extend({
   trainingClassId: requiredText(1, 36),
   gub: z.coerce.number().int().min(0).max(10),
   healthCondition: z.enum(["yes", "no"]),
-  requestedDueDay: z.coerce.number().int().refine((value) => DUE_DAY_OPTIONS.includes(value as (typeof DUE_DAY_OPTIONS)[number]))
+  requestedDueDay: z.coerce.number().int().min(DUE_DAY_MIN).max(DUE_DAY_MAX)
 }).superRefine(validateGraduation);
 
 export const financialReviewSchema = z.object({
   monthlyFeeCents: z.coerce.number().int().min(0),
   discountCents: z.coerce.number().int().min(0).default(0),
-  approvedDueDay: z.coerce.number().int().refine((value) => DUE_DAY_OPTIONS.includes(value as (typeof DUE_DAY_OPTIONS)[number])),
+  approvedDueDay: z.coerce.number().int().min(DUE_DAY_MIN).max(DUE_DAY_MAX),
   firstDueDate: requiredText(10, 10),
   contractStart: requiredText(10, 10),
   contractEnd: requiredText(10, 10)

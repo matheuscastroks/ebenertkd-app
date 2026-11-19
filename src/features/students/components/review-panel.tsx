@@ -46,8 +46,10 @@ import { Separator } from "@/components/ui/separator";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { EditStudentDialog } from "@/features/students/components/edit-student-dialog";
 import type { TrainingClass } from "@/features/classes/types";
+import { useDueDayOptions } from "@/components/academy-config-provider";
+import { DEFAULT_BILLING_POLICY, DEFAULT_CONTRACT_POLICY } from "@/features/academy/defaults";
 import {
-  ACCESS_STATUS_LABELS,
+  accessStatusLabel,
   type StudentAppAccessState,
   type StudentAppAccessStatus
 } from "@/features/billing/access-lock-rules";
@@ -61,7 +63,6 @@ import {
   beltForGub,
   calculateDefaultContractDates,
   calculateNextDueDate,
-  DUE_DAY_OPTIONS,
   type GubOption
 } from "@/features/students/options";
 import type { EnrollmentBundle } from "@/features/students/types";
@@ -116,7 +117,9 @@ export function ReviewPanel({
   classes = [],
   parqAssessment,
   accessState,
-  notice
+  notice,
+  defaultMonthlyFeeCents = DEFAULT_BILLING_POLICY.default_monthly_fee_cents,
+  contractDurationMonths = DEFAULT_CONTRACT_POLICY.default_duration_months
 }: {
   bundle: EnrollmentBundle;
   reviews: Array<Record<string, unknown>>;
@@ -124,7 +127,12 @@ export function ReviewPanel({
   parqAssessment?: ParqAssessment;
   accessState?: StudentAppAccessState;
   notice?: string;
+  /** Mensalidade sugerida na aprovação (política da academia). */
+  defaultMonthlyFeeCents?: number;
+  /** Duração sugerida do contrato, em meses (política da academia). */
+  contractDurationMonths?: number;
 }) {
+  const dueDayOptions = useDueDayOptions();
   const { student, enrollment, documents } = bundle;
   const currentBelt = student.current_belt || (student.gub != null ? beltForGub(student.gub as GubOption) : undefined);
   const profilePhoto = documents.find((doc) => doc.document_type === "profile_photo");
@@ -136,7 +144,9 @@ export function ReviewPanel({
     : calculateNextDueDate(dueDay);
   const contractDates = calculateDefaultContractDates(
     enrollment.contract_start,
-    enrollment.contract_end
+    enrollment.contract_end,
+    undefined,
+    contractDurationMonths
   );
 
   const isPhotoUploaded = Boolean(profilePhoto);
@@ -439,7 +449,7 @@ export function ReviewPanel({
                     </p>
                   </div>
                   <StatusBadge tone={accessToneMap[accessState.status]}>
-                    {ACCESS_STATUS_LABELS[accessState.status]}
+                    {accessStatusLabel(accessState)}
                   </StatusBadge>
                 </div>
 
@@ -702,7 +712,7 @@ export function ReviewPanel({
                         min="0"
                         step="0.01"
                         placeholder="Ex.: 150,00"
-                        defaultValue={centsToReaisInput(enrollment.monthly_fee_cents ?? 15000)}
+                        defaultValue={centsToReaisInput(enrollment.monthly_fee_cents ?? defaultMonthlyFeeCents)}
                         required
                       />
                     </Field>
@@ -729,7 +739,7 @@ export function ReviewPanel({
                         <SelectValue placeholder="Selecione o dia" />
                       </SelectTrigger>
                       <SelectContent>
-                        {DUE_DAY_OPTIONS.map((day) => (
+                        {(dueDayOptions.includes(dueDay) ? dueDayOptions : [...dueDayOptions, dueDay].sort((a, b) => a - b)).map((day) => (
                           <SelectItem key={day} value={String(day)}>
                             Dia {day} de cada mês
                           </SelectItem>
