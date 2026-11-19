@@ -228,6 +228,8 @@ Somente primitives instaladas (Tabs, Card, Table, Badge, Dialog, Form, Select, C
 
 ## 6. Migração dos exames existentes (sem perda)
 
+> **Revisão do dono (2026-11-19): esta seção está cancelada.** Não há usuários reais e o banco será apagado antes do lançamento. Exames nascem direto como `events` com `event_type = belt_exam`. Não há script de migração, `legacy_exam_event_id` nem período com as duas tabelas. `exam_events` é substituída e sai do schema. As rotas `/admin/exames` podem ser removidas em vez de redirecionadas. O texto abaixo fica só como histórico.
+
 1. Declarar `events` e demais tabelas novas; `infra:plan` → `infra:apply`.
 2. Script `scripts/appwrite/migrate-exam-events-to-events.ts` (idempotente, com `--dry-run`): para cada `exam_events`, cria um `events` **com o mesmo `$id`**, `event_type = belt_exam`, `legacy_exam_event_id = id`, status mapeado (`planned`→`published`, `confirmed`→`registration_closed`, `completed`, `cancelled`). Mantendo o mesmo ID, `exam_participants.event_id` e `belt_history.event_id` continuam válidos sem reescrever linhas.
 3. `createExamEvent` passa a criar as duas linhas (evento + extensão de exame) na mesma operação, com compensação em caso de falha.
