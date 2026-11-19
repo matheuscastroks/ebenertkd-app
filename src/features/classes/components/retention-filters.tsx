@@ -2,8 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useOptimistic, useRef, useTransition } from "react";
-import { SearchIcon } from "@/components/ui/search";
-import { XIcon } from "@/components/ui/x";
+import { AlertTriangle, SearchIcon, UsersRound, XIcon } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
@@ -111,7 +110,7 @@ export function RetentionFilters({ classes }: { classes: TrainingClass[] }) {
         <Field>
           <FieldLabel htmlFor="retention-risk">Nível de risco</FieldLabel>
           <Select value={optimistic.risk || "all"} onValueChange={(value) => update("risk", value)}>
-            <SelectTrigger id="retention-risk" className="h-11 w-full">
+            <SelectTrigger id="retention-risk" className="h-11 w-full" leadingIcon={<AlertTriangle className="size-4" />}>
               <SelectValue>{riskLabel}</SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -127,7 +126,7 @@ export function RetentionFilters({ classes }: { classes: TrainingClass[] }) {
         <Field>
           <FieldLabel htmlFor="retention-class">Turma</FieldLabel>
           <Select value={optimistic.turma || "all"} onValueChange={(value) => update("turma", value)}>
-            <SelectTrigger id="retention-class" className="h-11 w-full">
+            <SelectTrigger id="retention-class" className="h-11 w-full" leadingIcon={<UsersRound className="size-4" />}>
               <SelectValue>{classLabel}</SelectValue>
             </SelectTrigger>
             <SelectContent>

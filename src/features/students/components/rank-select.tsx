@@ -35,7 +35,8 @@ export function RankSelect({
   allLabel,
   required,
   disabled,
-  className
+  className,
+  leadingIcon,
 }: {
   id?: string;
   name?: string;
@@ -51,13 +52,14 @@ export function RankSelect({
   required?: boolean;
   disabled?: boolean;
   className?: string;
+  leadingIcon?: React.ReactNode;
 }) {
   const ranks = useBeltRanks();
   const { levelLabel } = useBeltLabels();
   const list = options ?? selectableRanks(ranks, keep ?? value ?? defaultValue);
   return (
     <Select name={name} value={value} defaultValue={defaultValue} onValueChange={onValueChange} required={required} disabled={disabled}>
-      <SelectTrigger id={id} className={cn("h-11 w-full", className)}>
+      <SelectTrigger id={id} className={cn("h-11 w-full", className)} leadingIcon={leadingIcon}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

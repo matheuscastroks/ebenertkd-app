@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useOptimistic, useRef, useState, useTransition } from "react";
-import { Search } from "@/components/ui/icons";
+import { Award, Search, SlidersHorizontal, UsersRound } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
@@ -128,7 +128,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
             value={optimisticFilters.status || "all"}
             onValueChange={(val) => update("status", val)}
           >
-            <SelectTrigger id="enrollment-status" className="w-full h-11">
+            <SelectTrigger id="enrollment-status" className="w-full h-11" leadingIcon={<SlidersHorizontal className="size-4" />}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -149,6 +149,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
             onValueChange={(val) => update("rank", val)}
             allLabel="Todas as graduações"
             keep={optimisticFilters.rank}
+            leadingIcon={<Award className="size-4" />}
           />
         </Field>
 
@@ -158,7 +159,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
             value={optimisticFilters.turma || "all"}
             onValueChange={(val) => update("turma", val)}
           >
-            <SelectTrigger id="enrollment-class" className="w-full h-11">
+            <SelectTrigger id="enrollment-class" className="w-full h-11" leadingIcon={<UsersRound className="size-4" />}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

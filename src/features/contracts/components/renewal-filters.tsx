@@ -2,8 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useOptimistic, useRef, useTransition } from "react";
-import { SearchIcon } from "@/components/ui/search";
-import { XIcon } from "@/components/ui/x";
+import { CalendarDays, SearchIcon, XIcon } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
@@ -112,7 +111,7 @@ export function RenewalFilters() {
             value={optimistic.bucket || "all"}
             onValueChange={(value) => update("bucket", value)}
           >
-            <SelectTrigger id="renewal-bucket" className="h-11 w-full">
+            <SelectTrigger id="renewal-bucket" className="h-11 w-full" leadingIcon={<CalendarDays className="size-4" />}>
               <SelectValue>{bucketLabel}</SelectValue>
             </SelectTrigger>
             <SelectContent>

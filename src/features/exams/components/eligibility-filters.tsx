@@ -2,8 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useOptimistic, useRef, useTransition } from "react";
-import { SearchIcon } from "@/components/ui/search";
-import { XIcon } from "@/components/ui/x";
+import { Award, SearchIcon, SlidersHorizontal, UsersRound, XIcon } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
@@ -120,7 +119,7 @@ export function EligibilityFilters({ classes, almostReadyPct = 75 }: { classes: 
         <Field>
           <FieldLabel htmlFor="eligibility-status">Aptidão</FieldLabel>
           <Select value={optimistic.status || "all"} onValueChange={(value) => update("status", value)}>
-            <SelectTrigger id="eligibility-status" className="h-11 w-full">
+            <SelectTrigger id="eligibility-status" className="h-11 w-full" leadingIcon={<SlidersHorizontal className="size-4" />}>
               <SelectValue>{statusLabel}</SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -141,13 +140,14 @@ export function EligibilityFilters({ classes, almostReadyPct = 75 }: { classes: 
             onValueChange={(value) => update("rank", value)}
             allLabel="Todas as graduações"
             keep={optimistic.rank}
+            leadingIcon={<Award className="size-4" />}
           />
         </Field>
 
         <Field>
           <FieldLabel htmlFor="eligibility-class">Turma</FieldLabel>
           <Select value={optimistic.turma || "all"} onValueChange={(value) => update("turma", value)}>
-            <SelectTrigger id="eligibility-class" className="h-11 w-full">
+            <SelectTrigger id="eligibility-class" className="h-11 w-full" leadingIcon={<UsersRound className="size-4" />}>
               <SelectValue>{classLabel}</SelectValue>
             </SelectTrigger>
             <SelectContent>
