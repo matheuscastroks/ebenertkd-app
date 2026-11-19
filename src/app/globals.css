@@ -416,7 +416,10 @@
 }
 
 .t-badge-dot {
-  display: block;
+  /* flex (não block): o número precisa ficar centrado na bolinha. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transform-origin: center;
   transform: scale(1);
   opacity: 1;
