@@ -1,7 +1,9 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { sendDeadlineRemindersAction } from "@/app/actions/championships";
 import { completeEventAction, setEventStatusAction } from "@/app/actions/events";
 import { PortalShell } from "@/components/dashboard/portal-shell";
+import { AvatarGroup } from "@/components/shared/avatar-group";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
@@ -15,17 +17,19 @@ import { paymentLabel } from "@/features/events/components/registration-table";
 import { EventStatusBadge, EventTypeBadge } from "@/features/events/components/status-badges";
 import { formatEventDay, formatEventTime } from "@/features/events/dates";
 import { effectiveRegistrationState, isEventTerminal } from "@/features/events/rules/status-rules";
+import { studentPhotoUrl } from "@/features/students/photo-url";
 import { toClientData } from "@/lib/client-data";
 import { formatBrl } from "@/lib/money";
 import { adminEventPath, ROUTES } from "@/lib/navigation/routes";
 
-function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function Stat({ label, value, hint, extra }: { label: string; value: string; hint?: string; extra?: ReactNode }) {
   return (
     <div className="p-4 sm:px-5">
       <dt className="text-sm font-medium text-muted-foreground">{label}</dt>
       <dd className="mt-1 space-y-0.5">
         <p className="text-xl font-semibold tracking-tight tabular-nums text-foreground">{value}</p>
         {hint ? <p className="text-sm text-muted-foreground">{hint}</p> : null}
+        {extra ? <div className="pt-1.5">{extra}</div> : null}
       </dd>
     </div>
   );
@@ -63,7 +67,7 @@ export function ChampionshipDetail({ admin, bundle, tab, ok, erro }: { admin: Pr
   const overview = (
     <div className="space-y-4">
       <dl className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
-        <Stat label="Na equipe" value={String(confirmed.length)} hint={`${interested} aguardando confirmação`} />
+        <Stat label="Na equipe" value={String(confirmed.length)} hint={`${interested} aguardando confirmação`} extra={<AvatarGroup people={confirmed.map((row) => ({ name: row.name, imageUrl: studentPhotoUrl(row.photoDocumentId) }))} max={5} size="sm" surface="card" label="Equipe confirmada" />} />
         <Stat label="Enviados à federação" value={`${submitted}/${confirmed.length}`} hint={pendingDocs ? `${pendingDocs} documento(s) para revisar` : "sem documentos pendentes"} />
         <Stat label="Medalhas" value={String(medals)} hint="registradas em Resultados" />
         <Stat label="Receita" value={formatBrl(receivedCents)} hint={`${formatBrl(expectedCents)} previstos (academia + federação)`} />

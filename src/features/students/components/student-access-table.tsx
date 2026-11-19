@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { Profile } from "@/features/auth/types";
+import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { PromoteMinorDialog } from "@/features/students/components/promote-minor-dialog";
 import { AdminDeleteStudentDialog } from "@/features/students/components/AdminDeleteStudentDialog";
 import { useTableSort } from "@/hooks/use-table-sort";
@@ -22,8 +23,11 @@ type StudentAccessSortKey = "student" | "role" | "login" | "status";
 export function StudentAccessTable({
   profiles,
   currentQuery,
+  photoIds,
 }: {
   profiles: Profile[];
+  /** Documento da foto de perfil por id de perfil. */
+  photoIds?: Record<string, string>;
   currentQuery: { q?: string; page?: string };
 }) {
   const {
@@ -91,7 +95,10 @@ export function StudentAccessTable({
                   className="t-interactive-row hover:bg-muted/20"
                 >
                   <TableCell className="font-semibold text-sm text-foreground">
-                    {student.full_name}
+                    <div className="flex items-center gap-3">
+                      <StudentAvatar name={student.full_name} photoDocumentId={photoIds?.[student.$id]} size="sm" />
+                      <span>{student.full_name}</span>
+                    </div>
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     {student.role === "minor_student"
@@ -153,7 +160,8 @@ export function StudentAccessTable({
               <Card key={student.$id}>
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 space-y-1">
+                    <StudentAvatar name={student.full_name} photoDocumentId={photoIds?.[student.$id]} size="sm" />
+                    <div className="min-w-0 flex-1 space-y-1">
                       <p className="font-semibold text-foreground text-sm">
                         {student.full_name}
                       </p>

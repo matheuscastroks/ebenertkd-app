@@ -5,6 +5,7 @@ import {
   cancelExamParticipantAction,
 } from "@/app/actions/exams";
 import { PortalShell } from "@/components/dashboard/portal-shell";
+import { AvatarGroup } from "@/components/shared/avatar-group";
 import { EmptyState } from "@/components/shared/empty-state";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { OperationToast } from "@/components/shared/operation-toast";
@@ -47,6 +48,7 @@ import { getBeltRanks, getPolicy } from "@/features/academy/config-service";
 import { isRankKey, rankOrder } from "@/features/academy/ranks";
 import { getExamEvent, getExamEventBundle } from "@/features/exams/service";
 import { BeltBadge } from "@/features/students/components/belt-badge";
+import { studentPhotoUrl } from "@/features/students/photo-url";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { requireProfile } from "@/lib/auth/session";
 import { centsToReaisInput, formatBrl } from "@/lib/money";
@@ -128,6 +130,15 @@ async function ExamBundleSections({ eventId }: { eventId: string }) {
           <dd className="mt-1 text-xl font-semibold tracking-tight tabular-nums text-foreground">
             {activeParticipants.length}
           </dd>
+          <div className="mt-1.5">
+            <AvatarGroup
+              people={activeParticipants.map(({ student, photoDocumentId }) => ({ name: student!.full_name, imageUrl: studentPhotoUrl(photoDocumentId) }))}
+              max={5}
+              size="sm"
+              surface="card"
+              label="Candidatos inscritos"
+            />
+          </div>
         </div>
         <div className="border-l border-border p-4 sm:px-5">
           <dt className="text-sm font-medium text-muted-foreground">Aguardando nota</dt>

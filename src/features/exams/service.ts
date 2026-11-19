@@ -14,6 +14,8 @@ import type { Event } from "@/features/events/types";
 import { examEventSchema, examParticipantSchema, examResultSchema } from "@/features/exams/schemas";
 import { toExamEvent, type BeltHistory, type ExamEvent, type ExamParticipant } from "@/features/exams/types";
 import { notifyStudentEvent } from "@/features/notifications/notification-service";
+import { getStudentPreviews } from "@/features/students/people-preview";
+import type { PersonPreview } from "@/features/students/photo-url";
 import { badgeForExamApproval } from "@/features/students/badge-rules";
 import { awardBadges } from "@/features/students/badge-service";
 import type { Enrollment, Student, StudentDocument } from "@/features/students/types";
@@ -59,6 +61,8 @@ export function listExamEvents() {
 export type ExamEventWithStats = ExamEvent & {
   participantCount: number;
   totalFeesCents: number;
+  /** Amostra de candidatos para o grupo de avatares do cartão. */
+  candidates: PersonPreview[];
 };
 
 export type ExamsOverview = {
@@ -114,6 +118,9 @@ export function getExamsOverview(): Promise<ExamsOverview> {
         daysUntilNext = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
       }
 
+      const previews = await getStudentPreviews(
+        [...participantsByEvent.values()].flatMap((list) => list.slice(0, 6).map((participant) => participant.student_id))
+      );
       const eventsWithStats: ExamEventWithStats[] = events.map((event) => {
         const eventParticipants = participantsByEvent.get(event.$id) ?? [];
         const totalFeesCents = eventParticipants.reduce((sum, p) => sum + (p.fee_cents || 0), 0);
@@ -121,6 +128,7 @@ export function getExamsOverview(): Promise<ExamsOverview> {
           ...event,
           participantCount: eventParticipants.length,
           totalFeesCents,
+          candidates: eventParticipants.slice(0, 6).map((p) => previews.get(p.student_id) ?? { name: "Aluno" }),
         };
       });
 

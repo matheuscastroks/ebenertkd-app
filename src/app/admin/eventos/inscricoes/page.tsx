@@ -28,8 +28,8 @@ async function HubContent() {
         const items = hub.queues[queue];
         const rows: HubRow[] =
           queue === "documents"
-            ? items.flatMap((item) => item.pendingDocuments.map((document) => ({ value: document.id, eventId: item.eventId, eventTitle: item.eventTitle, name: item.name, detail: `${document.kindLabel} · ${item.optionLabel}` })))
-            : items.map((item) => ({ value: item.registrationId, eventId: item.eventId, eventTitle: item.eventTitle, name: item.name, detail: [item.optionLabel, REGISTRATION_STATUS_LABEL[item.status], item.detail].filter(Boolean).join(" · ") }));
+            ? items.flatMap((item) => item.pendingDocuments.map((document) => ({ value: document.id, eventId: item.eventId, eventTitle: item.eventTitle, name: item.name, photoDocumentId: item.photoDocumentId, detail: `${document.kindLabel} · ${item.optionLabel}` })))
+            : items.map((item) => ({ value: item.registrationId, eventId: item.eventId, eventTitle: item.eventTitle, name: item.name, photoDocumentId: item.photoDocumentId, detail: [item.optionLabel, REGISTRATION_STATUS_LABEL[item.status], item.detail].filter(Boolean).join(" · ") }));
         const config = ACTIONS[queue];
         return <HubQueue key={queue} title={HUB_QUEUE_LABEL[queue].title} hint={HUB_QUEUE_LABEL[queue].hint} rows={rows} action={config?.action} fieldName={config?.field} actionLabel={config?.label} hiddenFields={config?.hidden} returnTo={ROUTES.adminEventHub} />;
       })}

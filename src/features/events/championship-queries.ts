@@ -17,6 +17,7 @@ import type { Student } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { cachedRead } from "@/lib/cache/cached-read";
+import { getStudentPreviews } from "@/features/students/people-preview";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 
 const OPEN_CHARGE = ["pending", "overdue", "proof_under_review"];
@@ -26,6 +27,8 @@ export type ChampionshipRow = {
   option?: EventOption;
   name: string;
   studentId?: string;
+  /** Documento da foto de perfil (rota autorizada), quando houver. */
+  photoDocumentId?: string;
   birthDate?: string | null;
   sex?: "feminino" | "masculino" | null;
   beltName?: string | null;
@@ -76,7 +79,7 @@ export function getChampionshipBundle(eventId: string) {
       ]);
       const regs = registrations.rows;
       const students = await listByIds<Student>(APPWRITE_IDS.tables.students, regs.flatMap((row) => (row.student_id ? [row.student_id] : [])));
-      const [profiles, charges, documents] = await Promise.all([
+      const [profiles, charges, documents, previews] = await Promise.all([
         listByIds<Profile>(APPWRITE_IDS.tables.profiles, students.map((student) => student.profile_id)),
         listByIds<Charge>(APPWRITE_IDS.tables.charges, regs.flatMap((row) => [row.charge_id, row.federation_charge_id].filter((id): id is string => Boolean(id)))),
         regs.length
@@ -87,7 +90,8 @@ export function getChampionshipBundle(eventId: string) {
               }
               return found;
             })()
-          : Promise.resolve([] as EventRegistrationDocument[])
+          : Promise.resolve([] as EventRegistrationDocument[]),
+        getStudentPreviews(students.map((student) => student.$id))
       ]);
       const publicRanks = ranks.map(toPublicRank);
       const studentById = new Map(students.map((student) => [student.$id, student]));
@@ -104,6 +108,7 @@ export function getChampionshipBundle(eventId: string) {
           option: optionById.get(registration.option_id),
           name: student?.full_name ?? registration.guest_name ?? "Aluno",
           studentId: student?.$id,
+          photoDocumentId: student ? previews.get(student.$id)?.photoDocumentId : undefined,
           birthDate: student?.birth_date,
           sex: student?.sex,
           beltName: student?.rank_key ? beltNameOf(publicRanks, student.rank_key) : null,
@@ -150,6 +155,7 @@ export type HubItem = {
   eventTitle: string;
   eventType: EventType;
   name: string;
+  photoDocumentId?: string;
   optionLabel: string;
   status: EventRegistration["status"];
   /** Documentos pendentes de revisão (para a fila de documentos). */
@@ -179,9 +185,10 @@ export function getRegistrationHub() {
       const live = registrations.filter((row) => isActiveRegistration(row.status) && !["completed", "no_show"].includes(row.status));
       const options = await listByIds<EventOption>(APPWRITE_IDS.tables.eventOptions, live.map((row) => row.option_id));
       const students = await listByIds<Student>(APPWRITE_IDS.tables.students, live.flatMap((row) => (row.student_id ? [row.student_id] : [])));
-      const [profiles, charges] = await Promise.all([
+      const [profiles, charges, previews] = await Promise.all([
         listByIds<Profile>(APPWRITE_IDS.tables.profiles, students.map((student) => student.profile_id)),
-        listByIds<Charge>(APPWRITE_IDS.tables.charges, live.flatMap((row) => [row.charge_id, row.federation_charge_id].filter((id): id is string => Boolean(id))))
+        listByIds<Charge>(APPWRITE_IDS.tables.charges, live.flatMap((row) => [row.charge_id, row.federation_charge_id].filter((id): id is string => Boolean(id)))),
+        getStudentPreviews(students.map((student) => student.$id))
       ]);
       const documents: EventRegistrationDocument[] = [];
       for (let index = 0; index < live.length; index += 100) {
@@ -212,6 +219,7 @@ export function getRegistrationHub() {
             eventTitle: event.title,
             eventType: event.event_type,
             name: student?.full_name ?? registration.guest_name ?? "Convidado",
+            photoDocumentId: student ? previews.get(student.$id)?.photoDocumentId : undefined,
             optionLabel: optionById.get(registration.option_id)?.label ?? "—",
             status: registration.status,
             pendingDocuments: docs.filter((document) => document.status === "pending").map((document) => ({ id: document.$id, kindLabel: DOCUMENT_KIND_LABEL[document.kind] })),

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { adminEventPath } from "@/lib/navigation/routes";
 
 export type HubRow = {
@@ -13,6 +14,8 @@ export type HubRow = {
   eventId: string;
   eventTitle: string;
   name: string;
+  /** Documento da foto de perfil, quando o inscrito é aluno com foto. */
+  photoDocumentId?: string;
   detail: string;
 };
 
@@ -44,6 +47,7 @@ export function HubQueue({ title, hint, rows, action, fieldName = "registration_
       {rows.map((row) => (
         <li key={row.value} className="flex items-center gap-3 px-4 py-3 sm:px-5">
           {selectable ? <Checkbox name={fieldName} value={row.value} checked={selected.includes(row.value)} onCheckedChange={(checked) => toggle(row.value, checked === true)} aria-label={`Selecionar ${row.name}`} /> : null}
+          <StudentAvatar name={row.name} photoDocumentId={row.photoDocumentId} size="sm" />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium">{row.name}</p>
             <p className="truncate text-sm text-muted-foreground">{row.detail}</p>

@@ -15,6 +15,8 @@ import type { Event, EventDeadline, EventOption, EventRegistration, EventStatus,
 import type { ExamParticipant } from "@/features/exams/types";
 import { badgeForSeminarAttendance } from "@/features/students/badge-rules";
 import { awardBadges } from "@/features/students/badge-service";
+import { getStudentPreviews } from "@/features/students/people-preview";
+import type { PersonPreview } from "@/features/students/photo-url";
 import type { Student } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
@@ -122,7 +124,13 @@ export type EventCardData = {
   pendingApproval: number;
   /** Exames: candidatos inscritos (a banca não usa lista de espera). */
   examParticipants: number;
+  /** Amostra de quem se inscreveu (alunos e convidados) para o grupo de avatares. */
+  people: PersonPreview[];
+  /** Total de pessoas representadas pela amostra. */
+  peopleTotal: number;
 };
+
+const PEOPLE_SAMPLE = 6;
 
 /** Agenda: todos os eventos com ocupação. Aberta ao professor; alunos usam `getStudentEvents`. */
 export function getEventsOverview() {
@@ -140,9 +148,25 @@ export function getEventsOverview() {
       for (const registration of registrations.rows) byEvent.set(registration.event_id, [...(byEvent.get(registration.event_id) ?? []), registration]);
       const examsByEvent = new Map<string, number>();
       for (const participant of participants.rows) examsByEvent.set(participant.event_id, (examsByEvent.get(participant.event_id) ?? 0) + 1);
+      const examParticipantsByEvent = new Map<string, ExamParticipant[]>();
+      for (const participant of participants.rows) examParticipantsByEvent.set(participant.event_id, [...(examParticipantsByEvent.get(participant.event_id) ?? []), participant]);
+      // Amostra por evento: inscrições vivas (ou candidatos, nos exames), na ordem de chegada.
+      const sampleByEvent = new Map<string, { studentId?: string; guestName?: string }[]>();
+      for (const event of events.rows) {
+        const entries =
+          event.event_type === "belt_exam"
+            ? (examParticipantsByEvent.get(event.$id) ?? []).map((item) => ({ studentId: item.student_id }))
+            : (byEvent.get(event.$id) ?? []).filter((item) => isActiveRegistration(item.status)).map((item) => (item.student_id ? { studentId: item.student_id } : { guestName: item.guest_name ?? "Convidado" }));
+        sampleByEvent.set(event.$id, entries);
+      }
+      const previews = await getStudentPreviews([...sampleByEvent.values()].flatMap((entries) => entries.slice(0, PEOPLE_SAMPLE).flatMap((entry) => (entry.studentId ? [entry.studentId] : []))));
       return events.rows.map((event) => {
         const list = byEvent.get(event.$id) ?? [];
+        const sample = sampleByEvent.get(event.$id) ?? [];
+        const people = sample.slice(0, PEOPLE_SAMPLE).map((entry): PersonPreview => (entry.studentId ? (previews.get(entry.studentId) ?? { name: "Aluno" }) : { name: entry.guestName ?? "Convidado" }));
         return {
+          people,
+          peopleTotal: sample.length,
           event,
           seatsTaken: seatsTaken(list.map(toSeated)),
           waitlisted: list.filter((item) => item.status === "waitlisted").length,
@@ -161,6 +185,8 @@ export type EventRegistrationRow = {
   name: string;
   isGuest: boolean;
   charge?: Charge;
+  /** Foto autorizada do aluno (rota privada), quando houver. */
+  imageUrl?: string;
 };
 
 export type EventBundle = {
@@ -186,9 +212,10 @@ export function getEventBundle(eventId: string) {
       ]);
       const studentIds = [...new Set(registrations.rows.flatMap((row) => (row.student_id ? [row.student_id] : [])))];
       const chargeIds = registrations.rows.flatMap((row) => (row.charge_id ? [row.charge_id] : []));
-      const [students, charges] = await Promise.all([
+      const [students, charges, previews] = await Promise.all([
         studentIds.length ? tables.listRows<Student>({ databaseId, tableId: APPWRITE_IDS.tables.students, queries: [Query.equal("$id", studentIds), Query.limit(2000)] }) : { rows: [] as Student[] },
-        chargeIds.length ? tables.listRows<Charge>({ databaseId, tableId: APPWRITE_IDS.tables.charges, queries: [Query.equal("$id", chargeIds), Query.limit(2000)] }) : { rows: [] as Charge[] }
+        chargeIds.length ? tables.listRows<Charge>({ databaseId, tableId: APPWRITE_IDS.tables.charges, queries: [Query.equal("$id", chargeIds), Query.limit(2000)] }) : { rows: [] as Charge[] },
+        getStudentPreviews(studentIds)
       ]);
       const studentById = new Map(students.rows.map((student) => [student.$id, student]));
       const chargeById = new Map(charges.rows.map((charge) => [charge.$id, charge]));
@@ -198,6 +225,7 @@ export function getEventBundle(eventId: string) {
         option: optionById.get(registration.option_id),
         name: registration.student_id ? (studentById.get(registration.student_id)?.full_name ?? "Aluno") : (registration.guest_name ?? "Convidado"),
         isGuest: !registration.student_id,
+        imageUrl: registration.student_id ? previews.get(registration.student_id)?.imageUrl : undefined,
         charge: registration.charge_id ? chargeById.get(registration.charge_id) : undefined
       }));
       return { event, options: options.rows, rows, seatsTaken: seatsTaken(registrations.rows.map(toSeated)) };

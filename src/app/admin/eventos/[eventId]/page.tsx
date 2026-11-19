@@ -1,7 +1,9 @@
+import type { ReactNode } from "react";
 import { notFound, redirect } from "next/navigation";
 import { Query } from "node-appwrite";
 import { completeEventAction, setEventStatusAction } from "@/app/actions/events";
 import { PortalShell } from "@/components/dashboard/portal-shell";
+import { AvatarGroup } from "@/components/shared/avatar-group";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { Button } from "@/components/ui/button";
 import { getChampionshipBundle } from "@/features/events/championship-queries";
@@ -28,13 +30,14 @@ import { adminEventPath, adminExamPath, ROUTES } from "@/lib/navigation/routes";
 
 const AUDIENCE_LABEL = { students: "Somente alunos", students_and_guests: "Alunos e convidados", public: "Aberto ao público" } as const;
 
-function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function Stat({ label, value, hint, extra }: { label: string; value: string; hint?: string; extra?: ReactNode }) {
   return (
     <div className="p-4 sm:px-5">
       <dt className="text-sm font-medium text-muted-foreground">{label}</dt>
       <dd className="mt-1 space-y-0.5">
         <p className="text-xl font-semibold tracking-tight tabular-nums text-foreground">{value}</p>
         {hint ? <p className="text-sm text-muted-foreground">{hint}</p> : null}
+        {extra ? <div className="pt-1.5">{extra}</div> : null}
       </dd>
     </div>
   );
@@ -70,12 +73,12 @@ async function EventDetail({ admin, bundle, tab, ok, erro }: { admin: Profile; b
 
   const checkinRows: CheckinRow[] = rows
     .filter((row) => ["confirmed", "checked_in", "completed", "no_show"].includes(row.registration.status))
-    .map((row) => ({ id: row.registration.$id, name: row.name, optionLabel: row.option?.label ?? "—", companions: row.registration.companions, status: row.registration.status, isGuest: row.isGuest }));
+    .map((row) => ({ id: row.registration.$id, name: row.name, optionLabel: row.option?.label ?? "—", companions: row.registration.companions, status: row.registration.status, isGuest: row.isGuest, imageUrl: row.imageUrl }));
 
   const overview = (
     <div className="space-y-4">
       <dl className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
-        <Stat label="Vagas" value={event.capacity ? `${bundle.seatsTaken}/${event.capacity}` : String(bundle.seatsTaken)} hint={event.capacity ? "ocupadas" : "sem limite"} />
+        <Stat label="Vagas" value={event.capacity ? `${bundle.seatsTaken}/${event.capacity}` : String(bundle.seatsTaken)} hint={event.capacity ? "ocupadas" : "sem limite"} extra={<AvatarGroup people={active.map((row) => ({ name: row.name, imageUrl: row.imageUrl }))} max={5} size="sm" surface="card" label="Inscritos e interessados" />} />
         <Stat label="Confirmados" value={String(confirmed)} hint={`${present} presentes`} />
         <Stat label="Pendências" value={String(pending)} hint={`${waitlisted} na lista de espera`} />
         <Stat label="Receita" value={formatBrl(receivedCents)} hint={`${formatBrl(expectedCents)} previstos`} />

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { checkInAction } from "@/app/actions/events";
+import { PersonAvatar } from "@/components/shared/avatar-group";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ export type CheckinRow = {
   companions: number;
   status: RegistrationStatus;
   isGuest: boolean;
+  imageUrl?: string;
 };
 
 /** Lista do dia: busca por nome, check-in e desfazer. Só confirmados e presentes aparecem. */
@@ -41,7 +43,8 @@ export function CheckinList({ rows, returnTo, closed }: { rows: CheckinRow[]; re
             const isPresent = row.status === "checked_in" || row.status === "completed";
             return (
               <li key={row.id} className="flex items-center justify-between gap-3 px-4 py-3 sm:px-5">
-                <div className="min-w-0 space-y-0.5">
+                <PersonAvatar name={row.name} imageUrl={row.imageUrl} size="sm" />
+                <div className="min-w-0 flex-1 space-y-0.5">
                   <p className="truncate text-sm font-medium text-foreground">{row.name}</p>
                   <p className="text-sm text-muted-foreground">
                     {row.optionLabel}

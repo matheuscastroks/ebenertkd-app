@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AvatarGroup } from "@/components/shared/avatar-group";
 import { ArrowRightIcon } from "@/components/ui/arrow-right";
 import { Button } from "@/components/ui/button";
 import { formatEventDay, formatEventTime } from "@/features/events/dates";
@@ -40,12 +41,15 @@ export function EventCard({ data }: { data: EventCardData }) {
           {deadline ? ` · ${deadline}` : ""}
         </p>
       </div>
-      <Button asChild variant="outline" size="sm" className="min-h-9 self-start sm:self-center">
-        <Link href={href}>
-          Abrir
-          <ArrowRightIcon className="size-3.5" aria-hidden="true" />
-        </Link>
-      </Button>
+      <div className="flex items-center justify-between gap-4 sm:shrink-0 sm:justify-end">
+        <AvatarGroup people={data.people} total={data.peopleTotal} max={4} size="sm" surface="card" />
+        <Button asChild variant="outline" size="sm" className="min-h-9">
+          <Link href={href}>
+            Abrir
+            <ArrowRightIcon className="size-3.5" aria-hidden="true" />
+          </Link>
+        </Button>
+      </div>
     </li>
   );
 }

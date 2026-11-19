@@ -4,6 +4,7 @@ import { OperationToast } from "@/components/shared/operation-toast";
 import { SearchField } from "@/components/shared/search-field";
 import { Button } from "@/components/ui/button";
 import { listStudentAccessProfiles } from "@/features/students/access-service";
+import { listProfilePhotoDocumentIds } from "@/features/students/service";
 import { StudentAccessTable } from "@/features/students/components/student-access-table";
 import { requireProfile } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
@@ -19,6 +20,7 @@ export default async function StudentAccessPage({
   const query = await searchParams;
   const page = Math.max(1, Number.parseInt(query.page ?? "1", 10) || 1);
   const result = await listStudentAccessProfiles(query.q, page);
+  const photoIds = await listProfilePhotoDocumentIds(result.rows.map((row) => row.$id)).catch(() => new Map<string, string>());
 
   return (
     <PortalShell
@@ -66,6 +68,7 @@ export default async function StudentAccessPage({
 
         <StudentAccessTable
           profiles={toClientData(result.rows)}
+          photoIds={Object.fromEntries(photoIds)}
           currentQuery={{ q: query.q, page: query.page }}
         />
 

@@ -1,4 +1,5 @@
 import { approveRegistrationAction } from "@/app/actions/events";
+import { PersonAvatar } from "@/components/shared/avatar-group";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -42,9 +43,14 @@ export function RegistrationTable({ rows, returnTo }: { rows: EventRegistrationR
             return (
               <TableRow key={registration.$id}>
                 <TableCell className="font-medium">
-                  {row.name}
-                  {row.isGuest ? <span className="ml-2 text-xs font-normal text-muted-foreground">convidado</span> : null}
-                  {registration.companions > 0 ? <span className="ml-2 text-xs font-normal text-muted-foreground">+{registration.companions}</span> : null}
+                  <div className="flex items-center gap-3">
+                    <PersonAvatar name={row.name} imageUrl={row.imageUrl} size="sm" />
+                    <span className="min-w-0">
+                      {row.name}
+                      {row.isGuest ? <span className="ml-2 text-xs font-normal text-muted-foreground">convidado</span> : null}
+                      {registration.companions > 0 ? <span className="ml-2 text-xs font-normal text-muted-foreground">+{registration.companions}</span> : null}
+                    </span>
+                  </div>
                 </TableCell>
                 <TableCell>{row.option?.label ?? "—"}</TableCell>
                 <TableCell>

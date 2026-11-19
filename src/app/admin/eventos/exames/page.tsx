@@ -6,6 +6,7 @@ import { PlusIcon } from "@/components/ui/plus";
 import { createExamEventAction } from "@/app/actions/exams";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { DateField } from "@/components/shared/date-field";
+import { AvatarGroup } from "@/components/shared/avatar-group";
 import { EmptyState } from "@/components/shared/empty-state";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
@@ -46,6 +47,7 @@ function ExamList({ events }: { events: ExamOverview["events"] }) {
             </p>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-4 sm:shrink-0 sm:justify-end">
+            <AvatarGroup people={event.candidates} total={event.participantCount} max={4} size="sm" surface="card" />
             <div className="text-left sm:text-right">
               <p className="text-sm font-medium tabular-nums text-foreground">
                 {event.participantCount} {event.participantCount === 1 ? "candidato" : "candidatos"}

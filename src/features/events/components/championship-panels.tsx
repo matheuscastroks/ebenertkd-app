@@ -1,3 +1,4 @@
+import { StudentAvatar } from "@/features/students/components/student-avatar";
 import Link from "next/link";
 import { confirmChampionshipAction, recordResultAction, reviewRegistrationDocumentAction, submitToFederationAction } from "@/app/actions/championships";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
@@ -94,9 +95,14 @@ export function ChampionshipTeamTable({ rows, returnTo }: { rows: ChampionshipRo
             return (
               <TableRow key={registration.$id}>
                 <TableCell className="font-medium">
-                  {row.name}
-                  <div className="text-xs font-normal text-muted-foreground">
-                    {[row.beltName, row.ageClass, row.sex === "masculino" ? "Masc." : row.sex === "feminino" ? "Fem." : null, registration.declared_weight_grams ? formatWeightKg(registration.declared_weight_grams) : null].filter(Boolean).join(" · ")}
+                  <div className="flex items-center gap-3">
+                    <StudentAvatar name={row.name} photoDocumentId={row.photoDocumentId} size="sm" />
+                    <div className="min-w-0">
+                      {row.name}
+                      <div className="text-xs font-normal text-muted-foreground">
+                        {[row.beltName, row.ageClass, row.sex === "masculino" ? "Masc." : row.sex === "feminino" ? "Fem." : null, registration.declared_weight_grams ? formatWeightKg(registration.declared_weight_grams) : null].filter(Boolean).join(" · ")}
+                      </div>
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell>{row.option?.label ?? "—"}</TableCell>
