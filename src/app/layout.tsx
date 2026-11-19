@@ -9,7 +9,6 @@ import { InstallGuide } from "@/components/pwa/install-guide";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "@/components/theme-provider";
 
 const poppins = localFont({
   src: [
@@ -63,18 +62,16 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   const [identity, billingPolicy] = await Promise.all([getAcademyIdentity(), getPolicy("billing")]);
   const config = { ...toBrand(identity), dueDayOptions: billingPolicy.due_day_options, professorLabel: professorLabel(identity) };
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html lang="pt-BR">
       <body className={poppins.variable}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <AcademyConfigProvider value={config}>
-            <TooltipProvider>
-              <RegisterServiceWorker />
-              <InstallGuide />
-              {children}
-              <Toaster closeButton position="top-right" />
-            </TooltipProvider>
-          </AcademyConfigProvider>
-        </ThemeProvider>
+        <AcademyConfigProvider value={config}>
+          <TooltipProvider>
+            <RegisterServiceWorker />
+            <InstallGuide />
+            {children}
+            <Toaster closeButton position="top-right" />
+          </TooltipProvider>
+        </AcademyConfigProvider>
       </body>
     </html>
   );

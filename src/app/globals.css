@@ -2,9 +2,14 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+/*
+ * A aparência segue apenas o sistema (HIG: sem ajuste de tema próprio do app),
+ * inclusive quando o modo Automático troca claro/escuro com o app aberto.
+ */
+@custom-variant dark (@media (prefers-color-scheme: dark));
 
 :root {
+  color-scheme: light;
   --radius: 0.625rem;
   /*
    * Paleta alinhada ao Apple HIG (Color, Dark Mode, Branding):
@@ -116,70 +121,71 @@
   --badge-close-ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.dark {
-  color-scheme: dark;
-  /*
-   * Dark Mode: fundos mais escuros e primeiro plano mais claro, sem inverter o claro.
-   * Base preta e camadas elevadas (#1C1C1E → #2C2C2E) dão profundidade sem sombra;
-   * cores de marca/status sobem de luminosidade, como as variantes dark do sistema.
-   */
-  --background: oklch(0 0 0);
-  --foreground: oklch(0.975 0.002 286);
-  --card: oklch(0.227 0.004 286);
-  --card-foreground: oklch(0.975 0.002 286);
-  --card-elevated: oklch(0.294 0.004 286);
-  --popover: oklch(0.294 0.004 286);
-  --popover-foreground: oklch(0.975 0.002 286);
-  --surface-recessed: oklch(0.175 0.004 286);
-  --primary: oklch(0.782 0.165 67);
-  --primary-foreground: oklch(0.18 0.006 286);
-  --secondary: oklch(0.575 0.012 286 / 32%);
-  --secondary-foreground: oklch(0.975 0.002 286);
-  --muted: oklch(0.575 0.012 286 / 24%);
-  --muted-foreground: oklch(0.74 0.008 286);
-  --accent: oklch(0.575 0.012 286 / 24%);
-  --accent-foreground: oklch(0.975 0.002 286);
-  --destructive: oklch(0.663 0.224 28.3);
-  --border: oklch(0.6 0.006 286 / 30%);
-  --input: oklch(0.65 0.006 286 / 45%);
-  --ring: oklch(0.782 0.165 67);
-  --chart-1: oklch(0.782 0.165 67);
-  --chart-2: oklch(0.771 0.118 212);
-  --chart-3: oklch(0.6 0.19 278.1);
-  --chart-4: oklch(0.68 0.2 312.4);
-  --chart-5: oklch(0.68 0.21 16);
-  --sidebar: oklch(0.205 0.004 286);
-  --sidebar-foreground: oklch(0.975 0.002 286);
-  --sidebar-primary: oklch(0.782 0.165 67);
-  --sidebar-primary-foreground: oklch(0.18 0.006 286);
-  --sidebar-accent: oklch(0.575 0.012 286 / 24%);
-  --sidebar-accent-foreground: oklch(0.975 0.002 286);
-  --sidebar-border: oklch(0.6 0.006 286 / 24%);
-  --sidebar-ring: oklch(0.782 0.165 67);
-  --primary-hover: oklch(0.82 0.15 70);
-  --primary-text: oklch(0.82 0.14 70);
-  --primary-border: oklch(0.782 0.165 67);
-  --destructive-hover: oklch(0.71 0.19 26);
-  --destructive-foreground: oklch(0.145 0 0);
-  --success: oklch(0.756 0.19 147);
-  --success-foreground: oklch(0.82 0.15 148);
-  --success-soft: oklch(0.756 0.19 147 / 16%);
-  --warning: oklch(0.885 0.17 94);
-  --warning-foreground: oklch(0.88 0.14 92);
-  --warning-soft: oklch(0.885 0.17 94 / 14%);
-  --info: oklch(0.624 0.206 255.5);
-  --info-foreground: oklch(0.78 0.12 252);
-  --info-soft: oklch(0.624 0.206 255.5 / 20%);
-  --danger-soft: oklch(0.663 0.224 28.3 / 18%);
-  --danger-text: oklch(0.78 0.13 24);
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    /*
+     * Dark Mode: fundos mais escuros e primeiro plano mais claro, sem inverter o claro.
+     * Base preta e camadas elevadas (#1C1C1E → #2C2C2E) dão profundidade sem sombra;
+     * cores de marca/status sobem de luminosidade, como as variantes dark do sistema.
+     */
+    --background: oklch(0 0 0);
+    --foreground: oklch(0.975 0.002 286);
+    --card: oklch(0.227 0.004 286);
+    --card-foreground: oklch(0.975 0.002 286);
+    --card-elevated: oklch(0.294 0.004 286);
+    --popover: oklch(0.294 0.004 286);
+    --popover-foreground: oklch(0.975 0.002 286);
+    --surface-recessed: oklch(0.175 0.004 286);
+    --primary: oklch(0.782 0.165 67);
+    --primary-foreground: oklch(0.18 0.006 286);
+    --secondary: oklch(0.575 0.012 286 / 32%);
+    --secondary-foreground: oklch(0.975 0.002 286);
+    --muted: oklch(0.575 0.012 286 / 24%);
+    --muted-foreground: oklch(0.74 0.008 286);
+    --accent: oklch(0.575 0.012 286 / 24%);
+    --accent-foreground: oklch(0.975 0.002 286);
+    --destructive: oklch(0.663 0.224 28.3);
+    --border: oklch(0.6 0.006 286 / 30%);
+    --input: oklch(0.65 0.006 286 / 45%);
+    --ring: oklch(0.782 0.165 67);
+    --chart-1: oklch(0.782 0.165 67);
+    --chart-2: oklch(0.771 0.118 212);
+    --chart-3: oklch(0.6 0.19 278.1);
+    --chart-4: oklch(0.68 0.2 312.4);
+    --chart-5: oklch(0.68 0.21 16);
+    --sidebar: oklch(0.205 0.004 286);
+    --sidebar-foreground: oklch(0.975 0.002 286);
+    --sidebar-primary: oklch(0.782 0.165 67);
+    --sidebar-primary-foreground: oklch(0.18 0.006 286);
+    --sidebar-accent: oklch(0.575 0.012 286 / 24%);
+    --sidebar-accent-foreground: oklch(0.975 0.002 286);
+    --sidebar-border: oklch(0.6 0.006 286 / 24%);
+    --sidebar-ring: oklch(0.782 0.165 67);
+    --primary-hover: oklch(0.82 0.15 70);
+    --primary-text: oklch(0.82 0.14 70);
+    --primary-border: oklch(0.782 0.165 67);
+    --destructive-hover: oklch(0.71 0.19 26);
+    --destructive-foreground: oklch(0.145 0 0);
+    --success: oklch(0.756 0.19 147);
+    --success-foreground: oklch(0.82 0.15 148);
+    --success-soft: oklch(0.756 0.19 147 / 16%);
+    --warning: oklch(0.885 0.17 94);
+    --warning-foreground: oklch(0.88 0.14 92);
+    --warning-soft: oklch(0.885 0.17 94 / 14%);
+    --info: oklch(0.624 0.206 255.5);
+    --info-foreground: oklch(0.78 0.12 252);
+    --info-soft: oklch(0.624 0.206 255.5 / 20%);
+    --danger-soft: oklch(0.663 0.224 28.3 / 18%);
+    --danger-text: oklch(0.78 0.13 24);
+  }
 }
 
 /*
  * Increase Contrast (HIG: toda cor customizada precisa de variante de alto contraste).
- * `:root:not(.dark)` evita que a variante clara vaze para o tema escuro.
  */
-@media (prefers-contrast: more) {
-  :root:not(.dark) {
+@media (prefers-contrast: more) and (prefers-color-scheme: light) {
+  :root {
     --foreground: oklch(0.1 0.004 286);
     --card-foreground: oklch(0.1 0.004 286);
     --popover-foreground: oklch(0.1 0.004 286);
@@ -194,8 +200,10 @@
     --warning-foreground: oklch(0.4 0.085 75);
     --info-foreground: oklch(0.4 0.2 263);
   }
+}
 
-  .dark {
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root {
     --foreground: oklch(1 0 0);
     --card-foreground: oklch(1 0 0);
     --popover-foreground: oklch(1 0 0);
@@ -320,14 +328,6 @@
 [data-slot="button"]:focus-visible {
   outline: 2px solid var(--foreground);
   outline-offset: 3px;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  html[data-theme-transition]::view-transition-old(root),
-  html[data-theme-transition]::view-transition-new(root) {
-    animation-duration: 260ms;
-    animation-timing-function: ease-in-out;
-  }
 }
 
 @keyframes t-enter {

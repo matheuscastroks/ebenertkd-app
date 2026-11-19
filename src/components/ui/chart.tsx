@@ -4,7 +4,8 @@ import * as React from "react";
 import * as RechartsPrimitive from "recharts";
 import { cn } from "@/lib/utils";
 
-const CHART_THEMES = { light: "", dark: ".dark" } as const;
+// A aparência segue o sistema: o tema escuro é uma media query, não uma classe.
+const CHART_THEMES = { light: "", dark: "@media (prefers-color-scheme: dark)" } as const;
 
 export type ChartConfig = Record<
   string,
@@ -52,7 +53,8 @@ function ChartStyle({ id, config }: { id: string; config: ChartConfig }) {
         .join("\n");
 
       if (!declarations) return null;
-      return `${prefix} [data-chart=${id}] {\n${declarations}\n}`;
+      const rule = `[data-chart=${id}] {\n${declarations}\n}`;
+      return prefix ? `${prefix} {\n${rule}\n}` : rule;
     })
     .filter(Boolean)
     .join("\n");

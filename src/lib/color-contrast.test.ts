@@ -40,10 +40,26 @@ function luminance(rgb: RGB) {
   return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
 }
 
-describe.each([":root", ".dark"])("contraste AA %s", (theme) => {
-  const block = css.slice(css.indexOf(`${theme} {`)).split("}")[0];
+/** Tokens do primeiro bloco `:root { … }` após o marcador (ex.: uma media query). */
+function tokensAfter(marker: string) {
+  const start = css.indexOf(marker);
+  if (start < 0) throw new Error(`Missing block ${marker}`);
+  const body = css.slice(css.indexOf(":root {", start)).split("}")[0];
+  return Object.fromEntries([...body.matchAll(/--([\w-]+): ([^;]+);/g)].map((m) => [m[1], m[2]]));
+}
+
+const light = tokensAfter("@custom-variant dark");
+const dark = { ...light, ...tokensAfter("@media (prefers-color-scheme: dark) {") };
+const modes: Array<[string, Record<string, string>]> = [
+  ["claro", light],
+  ["escuro", dark],
+  ["claro + alto contraste", { ...light, ...tokensAfter("@media (prefers-contrast: more) and (prefers-color-scheme: light)") }],
+  ["escuro + alto contraste", { ...dark, ...tokensAfter("@media (prefers-contrast: more) and (prefers-color-scheme: dark)") }],
+];
+
+describe.each(modes)("contraste AA — %s", (theme, tokens) => {
   const raw = (name: string) => {
-    const value = block.match(new RegExp(`--${name}: ([^;]+);`))?.[1];
+    const value = tokens[name];
     if (!value) throw new Error(`Missing ${name} in ${theme}`);
     return value;
   };

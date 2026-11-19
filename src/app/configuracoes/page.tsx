@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Bell, ChevronRight, Palette, Shield, User } from "@/components/ui/icons";
 import { isPushConfigured } from "@/features/notifications/push-config";
 import { PortalShell } from "@/components/dashboard/portal-shell";
-import { ThemePreference } from "@/components/dashboard/theme-preference";
 import { LogoutButton } from "@/components/dashboard/logout-button";
 import { NotificationPreferences } from "@/features/notifications/components/notification-preferences";
 import { PushPermissionCard } from "@/features/notifications/components/push-permission-card";
@@ -114,7 +113,7 @@ export default async function SettingsPage({
             </TabsTrigger>
             <TabsTrigger value="preferences" className="min-h-11 rounded-lg text-sm font-medium">
               <Bell className="mr-2 size-4" aria-hidden="true" />
-              Notificações & Aparência
+              Notificações & App
             </TabsTrigger>
             <TabsTrigger value="account" className="min-h-11 rounded-lg text-sm font-medium">
               <Shield className="mr-2 size-4" aria-hidden="true" />
@@ -133,7 +132,7 @@ export default async function SettingsPage({
             </SettingsGroup>
           </TabsContent>
 
-          {/* ABA 2: Notificações & Aparência */}
+          {/* ABA 2: Notificações & App (aparência segue o sistema) */}
           <TabsContent value="preferences" className="space-y-8">
             <SettingsGroup
               id="settings-notifications"
@@ -142,10 +141,6 @@ export default async function SettingsPage({
             >
               <NotificationPreferences initial={preferences} showFinancial={!minor} />
               <PushPermissionCard configured={pushConfigured} initiallyActive={pushActive} />
-            </SettingsGroup>
-
-            <SettingsGroup id="settings-appearance" title="Aparência">
-              <ThemePreference />
             </SettingsGroup>
 
             <SettingsGroup
