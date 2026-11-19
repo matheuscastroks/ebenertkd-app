@@ -8,7 +8,7 @@ import { getStudentEvents } from "@/features/events/student-events-service";
 import { DependentContext } from "@/features/families/components/dependent-context";
 import { requireCapability } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
-import { guardianBillingPath, guardianEventsPath, guardianExamsPath, ROUTES } from "@/lib/navigation/routes";
+import { guardianBillingPath, guardianEnrollmentPath, guardianEventsPath, guardianExamsPath, ROUTES } from "@/lib/navigation/routes";
 
 async function DependentEventsContent({ guardian, profileId }: { guardian: Profile; profileId: string }) {
   const data = await getStudentEvents(guardian, profileId);
@@ -19,6 +19,7 @@ async function DependentEventsContent({ guardian, profileId }: { guardian: Profi
       returnTo={guardianEventsPath(profileId)}
       billingHref={guardianBillingPath(profileId)}
       examsHref={guardianExamsPath(profileId)}
+      enrollmentHref={guardianEnrollmentPath(profileId)}
       showFinancial={data.showFinancial}
       viewer={{ kind: "guardian", dependentName: data.profile.full_name }}
       open={toClientData(data.open)}
@@ -37,7 +38,7 @@ export default async function DependentEventsPage({ params, searchParams }: { pa
       activePath={ROUTES.guardianDependents}
       breadcrumbs={[{ label: "Minha família", href: ROUTES.guardian }, { label: "Eventos" }]}
       title="Eventos"
-      subtitle="Inscreva o dependente, confirme interesses e acompanhe os pagamentos."
+      subtitle="Inscreva o dependente, autorize campeonatos, envie documentos e acompanhe os pagamentos."
     >
       <DependentContext guardian={guardian} profileId={profileId} section="eventos" />
       <EventFeedback ok={query.ok} erro={query.erro} />

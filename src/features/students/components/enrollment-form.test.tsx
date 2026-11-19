@@ -150,7 +150,7 @@ describe("EnrollmentForm", () => {
     render(<EnrollmentForm bundle={{ ...bundle, student: {
       ...student,
       address: JSON.stringify({ street: "Rua Central", number: "10", neighborhood: "Centro", city: "Rio de Janeiro", state: "RJ", cep: "20000000" }),
-      health_condition: "no", training_class_id: "class-1",
+      health_condition: "no", training_class_id: "class-1", sex: "feminino",
     } }} targetProfileId="profile-integration" classes={classes} />);
     await user.click(screen.getByRole("button", { name: "Avançar" }));
     expect(screen.getByText("Passo 2 de 4 · Saúde")).toBeInTheDocument();

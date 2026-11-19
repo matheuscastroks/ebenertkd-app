@@ -45,7 +45,8 @@ export const APPWRITE_IDS = {
     eventOptions: "event_options",
     eventRegistrations: "event_registrations",
     eventRegistrationDocuments: "event_registration_documents",
-    eventResults: "event_results"
+    eventResults: "event_results",
+    studentBadges: "student_badges"
   },
   functions: {
     dailyOperations: "daily-operations",

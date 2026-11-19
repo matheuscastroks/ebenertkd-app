@@ -60,6 +60,8 @@ export type EventOption = Models.Row & {
   label: string;
   modality: EventModality;
   price_cents: number;
+  /** Taxa da federação (campeonato), cobrada à parte dos custos da academia. */
+  federation_fee_cents?: number | null;
   capacity?: number | null;
   eligibility_json?: string | null;
   max_per_registrant_group?: string | null;
@@ -83,6 +85,7 @@ export type EventRegistration = Models.Row & {
   rank_key_snapshot?: string | null;
   age_class_snapshot?: string | null;
   price_cents: number;
+  federation_price_cents?: number | null;
   charge_id?: string | null;
   federation_charge_id?: string | null;
   financial_decision?: EventFinancialDecision | null;
@@ -101,7 +104,11 @@ export type EventRegistrationDocument = Models.Row & {
   registration_id: string;
   kind: "guardian_authorization" | "responsibility_term" | "medical" | "federation_card" | "other";
   file_id: string;
+  original_name?: string | null;
+  mime_type?: string | null;
   status: "pending" | "approved" | "rejected";
+  rejection_reason?: string | null;
+  uploaded_by_account_id?: string | null;
   reviewed_by_account_id?: string | null;
   reviewed_at?: string | null;
   created_at: string;

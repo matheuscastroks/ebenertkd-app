@@ -12,7 +12,7 @@ export default async function NewEventPage() {
       profile={admin}
       activePath={ROUTES.adminEvents}
       title="Novo evento"
-      subtitle="Aulão, seminário, confraternização ou outro evento com inscrições."
+      subtitle="Campeonato, aulão, seminário, confraternização ou outro evento com inscrições."
       breadcrumbs={[{ label: "Eventos", href: ROUTES.adminEvents }, { label: "Novo evento" }]}
     >
       <div className="w-full min-w-0">

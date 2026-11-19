@@ -4,6 +4,8 @@ import { completeEventAction, setEventStatusAction } from "@/app/actions/events"
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { Button } from "@/components/ui/button";
+import { getChampionshipBundle } from "@/features/events/championship-queries";
+import { ChampionshipDetail } from "@/features/events/components/championship-detail";
 import { AddRegistrationDialog } from "@/features/events/components/add-registration-dialog";
 import { CancelEventDialog } from "@/features/events/components/cancel-event-dialog";
 import { CheckinList, type CheckinRow } from "@/features/events/components/checkin-list";
@@ -221,6 +223,11 @@ export default async function AdminEventPage({ params, searchParams }: { params:
   const [admin, { eventId }, query] = await Promise.all([requireProfile("admin"), params, searchParams]);
   const bundle = await getEventBundle(eventId).catch(() => null);
   if (!bundle) notFound();
+  if (bundle.event.event_type === "championship") {
+    const championship = await getChampionshipBundle(eventId).catch(() => null);
+    if (!championship) notFound();
+    return <ChampionshipDetail admin={admin} bundle={championship} tab={query.aba} ok={query.ok} erro={query.erro} />;
+  }
   // Exames têm tela própria (bancas, elegibilidade e promoção de faixa).
   if (bundle.event.event_type === "belt_exam") redirect(adminExamPath(eventId));
   return <EventDetail admin={admin} bundle={bundle} tab={query.aba} ok={query.ok} erro={query.erro} />;

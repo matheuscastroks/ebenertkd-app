@@ -19,6 +19,7 @@ const studentDraftObject = z.object({
   emergencyContactPhone: z.string().trim().max(24).optional(),
   startedAtTkd: z.string().optional(),
   rankKey: rankKeySchema.optional(),
+  sex: z.enum(["feminino", "masculino"]).optional(),
   trainingClassId: z.string().trim().max(36).optional(),
   healthCondition: z.enum(["yes", "no"]).optional(),
   healthDetails: optionalText,

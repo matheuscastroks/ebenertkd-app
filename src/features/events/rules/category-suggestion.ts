@@ -1,5 +1,5 @@
 import type { EligibilityRule } from "@/features/events/schemas";
-import { ageClassOf, eventAge, evaluateEventEligibility, type EventAthlete } from "@/features/events/rules/eligibility-rules";
+import { ageClassOf, eventAge, evaluateEventEligibility, formatWeightKg, type EventAthlete } from "@/features/events/rules/eligibility-rules";
 import type { EventAgeCutoff } from "@/features/events/types";
 import type { RankKey } from "@/features/academy/ranks";
 
@@ -30,4 +30,31 @@ export function suggestCategory(input: {
   }
   const age = eventAge(input.athlete.birthDate, input.event.startsAt, input.event.ageCutoff);
   return { suggestedOptionId: eligibleOptionIds[0] ?? null, eligibleOptionIds, ineligible, ageClass: ageClassOf(age)?.label ?? null };
+}
+
+export type WeightRange = { minGrams?: number; maxGrams?: number };
+
+/** O peso declarado cabe na faixa da categoria? Sem faixa, qualquer peso serve. */
+export function weightFits(range: WeightRange | undefined, grams: number | null | undefined) {
+  if (!range) return true;
+  if (grams == null) return false;
+  if (range.minGrams !== undefined && grams < range.minGrams) return false;
+  if (range.maxGrams !== undefined && grams > range.maxGrams) return false;
+  return true;
+}
+
+/** Explica por que o peso não cabe ("peso acima do máximo: 45 kg"); null se cabe ou não há peso para comparar. */
+export function weightMisfitReason(range: WeightRange | undefined, grams: number | null | undefined) {
+  if (!range || grams == null) return null;
+  if (range.minGrams !== undefined && grams < range.minGrams) return `peso abaixo do mínimo: ${formatWeightKg(range.minGrams)}`;
+  if (range.maxGrams !== undefined && grams > range.maxGrams) return `peso acima do máximo: ${formatWeightKg(range.maxGrams)}`;
+  return null;
+}
+
+/**
+ * Categoria sugerida pelo peso entre as opções já elegíveis (idade, sexo e faixa): a primeira, na ordem de
+ * cadastro, cujo peso cabe. Pura, usada ao vivo no formulário de inscrição.
+ */
+export function suggestOptionByWeight<T extends { id: string; eligible: boolean; range?: WeightRange }>(options: readonly T[], grams: number | null | undefined) {
+  return options.find((option) => option.eligible && weightFits(option.range, grams)) ?? null;
 }

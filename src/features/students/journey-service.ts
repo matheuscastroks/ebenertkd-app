@@ -10,6 +10,7 @@ import { sortBeltHistoryNewestFirst } from "@/features/exams/rules";
 import type { BeltHistory } from "@/features/exams/types";
 import { resolveStudentProfile } from "@/features/students/access";
 import { evaluateStudentCompliance } from "@/features/students/compliance-rules";
+import { listStudentBadges, type StudentBadgeRow } from "@/features/students/badge-service";
 import { getLatestParqForStudent } from "@/features/students/parq-service";
 import {
   buildBeltRoadmap,
@@ -45,11 +46,12 @@ export async function getStudentJourneySnapshot(actor: Profile, requestedProfile
       readiness: buildStudentReadiness({ currentRankKey: null, presencesSinceLastBelt: 0 }, { ranks, exam }),
       monthlySeries: buildMonthlyAttendanceSeries([], 6),
       compliance: null,
+      earnedBadges: [] as StudentBadgeRow[],
     };
   }
 
   const { tables, config } = createAppwriteAdminClient();
-  const [enrollmentsRes, beltHistoryRes, documentsRes, trainingClass, latestParq] = await Promise.all([
+  const [enrollmentsRes, beltHistoryRes, documentsRes, trainingClass, latestParq, earnedBadges] = await Promise.all([
     tables.listRows<Enrollment>({
       databaseId: config.databaseId,
       tableId: APPWRITE_IDS.tables.enrollments,
@@ -69,6 +71,7 @@ export async function getStudentJourneySnapshot(actor: Profile, requestedProfile
       ? getTrainingClass(student.training_class_id).catch(() => null)
       : Promise.resolve(null),
     getLatestParqForStudent(student.$id).catch(() => null),
+    listStudentBadges(student.$id).catch(() => [] as StudentBadgeRow[]),
   ]);
 
   const enrollment = enrollmentsRes.rows[0] ?? null;
@@ -135,5 +138,6 @@ export async function getStudentJourneySnapshot(actor: Profile, requestedProfile
     readiness,
     monthlySeries,
     compliance,
+    earnedBadges,
   };
 }

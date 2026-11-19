@@ -9,10 +9,12 @@ import { Progress } from "@/components/ui/progress";
 import type { Profile } from "@/features/auth/types";
 import { getPolicy } from "@/features/academy/config-service";
 import { buildStudentConsistencyReport } from "@/features/students/achievements-rules";
+import { EarnedBadges } from "@/features/students/components/earned-badges";
 import { ConsistencyHeatmap } from "@/features/students/components/consistency-heatmap";
 import { StudentMonthlyProgressChart } from "@/features/students/components/journey-charts";
 import { getStudentJourneySnapshot } from "@/features/students/journey-service";
 import { requireCapability } from "@/lib/auth/session";
+import { toClientData } from "@/lib/client-data";
 import { ROUTES } from "@/lib/navigation/routes";
 import { Award, CheckCircle2, Flame } from "@/components/ui/icons";
 
@@ -37,6 +39,7 @@ async function StudentAchievementsContent({ profile }: { profile: Profile }) {
     badges: gamification.badges,
     entries: snapshot.attendanceEntries,
     beltHistory: snapshot.beltHistory,
+    earnedBadges: snapshot.earnedBadges,
     startedAt:
       snapshot.student.started_at_tkd ??
       snapshot.enrollment?.contract_start ??
@@ -101,6 +104,8 @@ async function StudentAchievementsContent({ profile }: { profile: Profile }) {
           <StudentMonthlyProgressChart series={snapshot.monthlySeries} />
         </section>
       </div>
+
+      <EarnedBadges badges={toClientData(snapshot.earnedBadges)} />
 
       <section aria-labelledby="badges-heading" className="space-y-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">

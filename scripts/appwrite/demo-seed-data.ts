@@ -1383,3 +1383,63 @@ export function demoExamDefinitions(referenceDate = new Date().toISOString()) {
     }
   ];
 }
+
+const FEMININE_FIRST_NAMES = new Set(["Camila", "Beatriz", "Mariana", "Larissa", "Sofia", "Isabela", "Carolina", "Alice", "Daniela", "Leticia"]);
+
+/** Sexo do aluno demo (campo `students.sex`), pelo primeiro nome do catálogo de cenários. */
+export function demoStudentSex(fullName: string): "feminino" | "masculino" {
+  return FEMININE_FIRST_NAMES.has(fullName.trim().split(/\s+/)[0] ?? "") ? "feminino" : "masculino";
+}
+
+type DemoChampionshipOption = { key: string; label: string; modality: "kyorugi" | "poomsae"; eligibility: Record<string, unknown> };
+
+const championshipOptions: DemoChampionshipOption[] = [
+  { key: "k-cadete-m-45", label: "Kyorugi Cadete Masc. -45 kg", modality: "kyorugi", eligibility: { min_age: 12, max_age: 14, sex: "M", min_weight_grams: 41000, max_weight_grams: 45000 } },
+  { key: "k-cadete-m-49", label: "Kyorugi Cadete Masc. -49 kg", modality: "kyorugi", eligibility: { min_age: 12, max_age: 14, sex: "M", min_weight_grams: 45000, max_weight_grams: 49000 } },
+  { key: "k-adulto-f-57", label: "Kyorugi Adulto Fem. -57 kg", modality: "kyorugi", eligibility: { min_age: 18, max_age: 32, sex: "F", min_weight_grams: 49000, max_weight_grams: 57000 } },
+  { key: "k-adulto-f-67", label: "Kyorugi Adulto Fem. -67 kg", modality: "kyorugi", eligibility: { min_age: 18, max_age: 32, sex: "F", min_weight_grams: 57000, max_weight_grams: 67000 } },
+  { key: "k-adulto-m-68", label: "Kyorugi Adulto Masc. -68 kg", modality: "kyorugi", eligibility: { min_age: 18, max_age: 32, sex: "M", min_weight_grams: 58000, max_weight_grams: 68000 } },
+  { key: "k-adulto-m-80", label: "Kyorugi Adulto Masc. -80 kg", modality: "kyorugi", eligibility: { min_age: 18, max_age: 32, sex: "M", min_weight_grams: 68000, max_weight_grams: 80000 } },
+  { key: "p-adulto-f", label: "Poomsae Adulto Fem.", modality: "poomsae", eligibility: { min_age: 18, max_age: 32, sex: "F" } },
+  { key: "p-adulto-m", label: "Poomsae Adulto Masc.", modality: "poomsae", eligibility: { min_age: 18, max_age: 32, sex: "M" } }
+];
+
+/**
+ * Campeonatos demo: um próximo (interesse aberto, cronograma e categorias) e um passado já concluído com
+ * resultados, que alimentam medalhas e conquistas no perfil. A academia só monta a equipe e envia à federação.
+ */
+export function demoChampionshipDefinitions(referenceDate = new Date().toISOString()) {
+  const next = monthOffset(referenceDate, 2);
+  const previous = monthOffset(referenceDate, -1);
+  const day = (month: string, dayOfMonth: number) => `${month}-${String(dayOfMonth).padStart(2, "0")}T14:00:00.000Z`;
+  return {
+    upcoming: {
+      key: "estadual",
+      title: "Campeonato Estadual de Taekwondo",
+      description: "Etapa estadual organizada pela federação. A academia monta a equipe e envia as inscrições.",
+      organizer_name: "Federação Estadual de Taekwondo",
+      starts_at: day(next, 14),
+      ends_at: day(next, 15),
+      location_text: "Ginásio Municipal",
+      academy_fee_cents: 6000,
+      federation_fee_cents: 12000,
+      deadlines: [
+        { kind: "affiliation" as const, label: "Filiação na federação", due_at: day(monthOffset(referenceDate, 1), 20), notify_days_before: 5 },
+        { kind: "registration" as const, label: "Inscrição na federação", due_at: day(monthOffset(referenceDate, 1), 28), notify_days_before: 3 },
+        { kind: "category_change" as const, label: "Troca de categoria", due_at: day(next, 7), notify_days_before: 3 },
+        { kind: "weigh_in" as const, label: "Pesagem", due_at: day(next, 13), notify_days_before: 1 }
+      ],
+      options: championshipOptions
+    },
+    past: {
+      key: "copa-ebener",
+      title: "Copa Ebener de Taekwondo",
+      description: "Campeonato regional já realizado.",
+      organizer_name: "Liga Regional de Taekwondo",
+      starts_at: day(previous, 8),
+      ends_at: day(previous, 8),
+      location_text: "Ginásio Municipal",
+      options: championshipOptions.filter((option) => ["k-adulto-f-57", "k-adulto-m-68"].includes(option.key))
+    }
+  };
+}

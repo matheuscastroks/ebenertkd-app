@@ -96,6 +96,7 @@ export async function adminUpdateStudentAction(formData: FormData) {
       emergencyContactPhone: String(formData.get("emergency_contact_phone") ?? "") || undefined,
       startedAtTkd: String(formData.get("started_at_tkd") ?? "") || undefined,
       rankKey: (String(formData.get("rank_key") ?? "") || undefined) as RankKey | undefined,
+      sex: (String(formData.get("sex") ?? "") || undefined) as "feminino" | "masculino" | undefined,
       trainingClassId: String(formData.get("training_class_id") ?? "") || undefined,
       healthCondition: (String(formData.get("health_condition") ?? "") || undefined) as "yes" | "no" | undefined,
       healthDetails: String(formData.get("health_details") ?? "") || undefined,

@@ -12,7 +12,9 @@ import { BeltBadge } from "@/features/students/components/belt-badge";
 import { BeltProgressionPill } from "@/features/students/components/belt-progression-pill";
 import { StudentMonthlyProgressChart } from "@/features/students/components/journey-charts";
 import { getStudentJourneySnapshot } from "@/features/students/journey-service";
+import { EarnedBadges } from "@/features/students/components/earned-badges";
 import { requireCapability } from "@/lib/auth/session";
+import { toClientData } from "@/lib/client-data";
 import { formatBusinessDateBr } from "@/lib/dates";
 import { ROUTES } from "@/lib/navigation/routes";
 import { ArrowRight, BookOpen, CheckCircle2 } from "@/components/ui/icons";
@@ -231,6 +233,7 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
           </section>
         </div>
       </div>
+      <EarnedBadges badges={toClientData(snapshot.earnedBadges)} />
     </div>
   );
 }

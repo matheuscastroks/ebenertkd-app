@@ -16,17 +16,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
+import { useBeltRanks } from "@/components/academy-config-provider";
+import { Checkbox } from "@/components/ui/checkbox";
+import type { RankKey } from "@/features/academy/ranks";
 import { EVENT_TYPE_HINT, EVENT_TYPE_LABEL } from "@/features/events/labels";
-import type { EventAudience, EventType } from "@/features/events/types";
+import { buildCategoryPresets, PRESET_SEX_LABEL, type PresetAgeClassKey, type PresetSex } from "@/features/events/rules/category-presets";
+import { CHAMPIONSHIP_DEADLINE_KINDS, DEADLINE_KIND_LABEL } from "@/features/events/rules/deadline-rules";
+import { AGE_CLASSES } from "@/features/events/rules/eligibility-rules";
+import type { EligibilityRule } from "@/features/events/schemas";
+import type { EventAudience, EventDeadlineKind, EventModality, EventType } from "@/features/events/types";
 import { LocationSelect } from "@/features/locations/components/location-select";
 import type { TrainingLocation } from "@/features/locations/types";
 import { formatBrl, reaisToCents } from "@/lib/money";
 import { adminEventPath, ROUTES } from "@/lib/navigation/routes";
 
 const STEPS = ["Tipo", "Dados e datas", "Opções", "Regras", "Revisão"] as const;
-const SELECTABLE_TYPES: EventType[] = ["seminar", "social", "other"];
+const SELECTABLE_TYPES: EventType[] = ["seminar", "social", "other", "championship"];
 
-type OptionDraft = { label: string; price: string; capacity: string };
+type OptionDraft = { label: string; price: string; capacity: string; federationFee: string; modality: EventModality; eligibility?: EligibilityRule };
+type DeadlineDraft = { date: string; notify: string };
+
+const blankOption = (label = ""): OptionDraft => ({ label, price: "", capacity: "", federationFee: "", modality: "general" });
 
 const AUDIENCE_LABEL: Record<EventAudience, string> = {
   students: "Somente alunos",
@@ -37,10 +47,11 @@ const AUDIENCE_LABEL: Record<EventAudience, string> = {
 const PRESETS: Record<EventType, { options: OptionDraft[]; audience: EventAudience; maxCompanions: string }> = {
   belt_exam: { options: [], audience: "students", maxCompanions: "0" },
   championship: { options: [], audience: "students", maxCompanions: "0" },
-  seminar: { options: [{ label: "Participante", price: "", capacity: "" }], audience: "students_and_guests", maxCompanions: "0" },
-  social: { options: [{ label: "Aluno", price: "", capacity: "" }], audience: "students", maxCompanions: "2" },
-  other: { options: [{ label: "Participante", price: "", capacity: "" }], audience: "students", maxCompanions: "0" }
+  seminar: { options: [blankOption("Participante")], audience: "students_and_guests", maxCompanions: "0" },
+  social: { options: [blankOption("Aluno")], audience: "students", maxCompanions: "2" },
+  other: { options: [blankOption("Participante")], audience: "students", maxCompanions: "0" }
 };
+
 
 function moneyToCents(value: string) {
   if (!value.trim()) return 0;
@@ -73,12 +84,50 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
   const [birthYear, setBirthYear] = useState(true);
   const [publish, setPublish] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Campeonato: organizador externo, cronograma da federação e gerador de categorias.
+  const ranks = useBeltRanks();
+  const [organizerName, setOrganizerName] = useState("");
+  const [externalUrl, setExternalUrl] = useState("");
+  const [deadlines, setDeadlines] = useState<Record<string, DeadlineDraft>>({});
+  const [presetModality, setPresetModality] = useState<"kyorugi" | "poomsae">("kyorugi");
+  const [presetAges, setPresetAges] = useState<PresetAgeClassKey[]>(["cadete", "juvenil", "adulto"]);
+  const [presetSexes, setPresetSexes] = useState<PresetSex[]>(["M", "F"]);
+  const [presetPrice, setPresetPrice] = useState("");
+  const [presetFee, setPresetFee] = useState("");
+  const [presetMinRank, setPresetMinRank] = useState("none");
+  const championship = type === "championship";
 
   function chooseType(next: EventType) {
     setType(next);
     setOptions(PRESETS[next].options.map((option) => ({ ...option })));
     setAudience(PRESETS[next].audience);
     setMaxCompanions(PRESETS[next].maxCompanions);
+    setRequiresApproval(false);
+  }
+
+  function toggle<T extends string>(list: T[], value: T, set: (next: T[]) => void) {
+    set(list.includes(value) ? list.filter((item) => item !== value) : [...list, value]);
+  }
+
+  function generatePresets() {
+    const price = moneyToCents(presetPrice);
+    const fee = moneyToCents(presetFee);
+    if (price === null || fee === null) {
+      setError("Informe valores válidos para os custos e a taxa da federação.");
+      return;
+    }
+    if (!presetAges.length || !presetSexes.length) {
+      setError("Escolha ao menos uma classe de idade e um sexo.");
+      return;
+    }
+    const generated = buildCategoryPresets({ modality: presetModality, ageClassKeys: presetAges, sexes: presetSexes, priceCents: price, federationFeeCents: fee, minRankKey: presetMinRank === "none" ? undefined : (presetMinRank as RankKey) });
+    const drafts = generated.map<OptionDraft>((item) => ({ label: item.label, price: item.priceCents ? String(item.priceCents / 100).replace(".", ",") : "", capacity: "", federationFee: item.federationFeeCents ? String(item.federationFeeCents / 100).replace(".", ",") : "", modality: item.modality, eligibility: item.eligibility }));
+    setError(null);
+    setOptions((current) => [...current.filter((option) => !drafts.some((draft) => draft.label === option.label)), ...drafts].slice(0, 30));
+  }
+
+  function updateDeadline(kind: EventDeadlineKind, patch: Partial<DeadlineDraft>) {
+    setDeadlines((current) => ({ ...current, [kind]: { ...(current[kind] ?? { date: "", notify: "3" }), ...patch } }));
   }
 
   function updateOption(index: number, patch: Partial<OptionDraft>) {
@@ -89,7 +138,7 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
     if (target >= 1 && type && !SELECTABLE_TYPES.includes(type)) return "Escolha um tipo de evento.";
     if (target >= 2 && (title.trim().length < 3 || !date || !startTime)) return "Informe o nome, a data e o horário.";
     if (target >= 2 && opensDate && closesDate && closesDate < opensDate) return "O encerramento das inscrições não pode ser antes da abertura.";
-    if (target >= 3 && (options.length === 0 || options.some((option) => option.label.trim().length < 2 || moneyToCents(option.price) === null))) return "Preencha o nome e um valor válido em todas as opções.";
+    if (target >= 3 && (options.length === 0 || options.some((option) => option.label.trim().length < 2 || moneyToCents(option.price) === null || moneyToCents(option.federationFee) === null))) return championship ? "Gere ou cadastre ao menos uma categoria e confira os valores." : "Preencha o nome e um valor válido em todas as opções.";
     if (target >= 4 && (moneyToCents(companionPrice) === null || (capacity && Number(capacity) < 1))) return "Revise a capacidade e o valor dos acompanhantes.";
     return null;
   }
@@ -122,7 +171,12 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
       startsTime: startTime,
       endsTime: endTime || undefined,
       locationText: location || undefined,
-      organizerType: "academy",
+      organizerType: championship ? "external" : "academy",
+      organizerName: championship ? organizerName.trim() || undefined : undefined,
+      externalUrl: championship ? externalUrl.trim() || undefined : undefined,
+      deadlines: championship
+        ? CHAMPIONSHIP_DEADLINE_KINDS.flatMap((kind) => (deadlines[kind]?.date ? [{ kind, label: DEADLINE_KIND_LABEL[kind], dueDate: deadlines[kind].date, notifyDaysBefore: Number(deadlines[kind].notify) || 0 }] : []))
+        : [],
       registrationOpensDate: opensDate || undefined,
       registrationClosesDate: closesDate || undefined,
       audience,
@@ -131,7 +185,7 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
       maxCompanions: companions,
       companionPriceCents: companions > 0 ? (moneyToCents(companionPrice) ?? 0) : 0,
       ageCutoff: birthYear ? "birth_year" : "event_date",
-      options: options.map((option) => ({ label: option.label.trim(), priceCents: moneyToCents(option.price) ?? 0, capacity: option.capacity ? Number(option.capacity) : undefined, modality: "general" })),
+      options: options.map((option) => ({ label: option.label.trim(), priceCents: moneyToCents(option.price) ?? 0, federationFeeCents: moneyToCents(option.federationFee) ?? 0, capacity: option.capacity ? Number(option.capacity) : undefined, modality: option.modality, eligibility: option.eligibility })),
       publish
     };
     setError(null);
@@ -170,10 +224,6 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
             <span className="block text-sm font-semibold text-foreground">{EVENT_TYPE_LABEL.belt_exam}</span>
             <span className="mt-1 block text-sm text-muted-foreground">Criado em Exames de faixa, com elegibilidade e promoção de graduação.</span>
           </Link>
-          <div className="rounded-xl border border-dashed border-border bg-card p-4 opacity-70">
-            <span className="block text-sm font-semibold text-foreground">{EVENT_TYPE_LABEL.championship}</span>
-            <span className="mt-1 block text-sm text-muted-foreground">Em breve: prazos da federação, categorias e documentos.</span>
-          </div>
         </div>
       </div>
 
@@ -207,10 +257,37 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
               <FieldLabel htmlFor="event-location">Local</FieldLabel>
               <LocationSelect id="event-location" name="location" locations={locations} placeholder="Selecione o dojang ou informe outro local" />
             </Field>
-            <DateField id="event-opens" name="opens_date" label="Inscrições abrem em" defaultValue={opensDate} onValueChange={setOpensDate} description="Vazio: abrem ao publicar." />
-            <DateField id="event-closes" name="closes_date" label="Inscrições encerram em" defaultValue={closesDate} onValueChange={setClosesDate} description="Vazio: até o dia do evento." />
+            <DateField id="event-opens" name="opens_date" label={championship ? "Interesse aberto em" : "Inscrições abrem em"} defaultValue={opensDate} onValueChange={setOpensDate} description="Vazio: abrem ao publicar." />
+            <DateField id="event-closes" name="closes_date" label={championship ? "Interesse encerra em" : "Inscrições encerram em"} defaultValue={closesDate} onValueChange={setClosesDate} description="Vazio: até o dia do evento." />
           </CardContent>
         </Card>
+        {championship ? (
+          <Card className="mt-4">
+            <CardHeader>
+              <CardTitle>Organizador e cronograma</CardTitle>
+              <CardDescription>A academia monta a equipe e envia à federação. Cada prazo gera lembretes para você e para a equipe.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 sm:grid-cols-2">
+              <Field>
+                <FieldLabel htmlFor="event-organizer">Federação ou organizador</FieldLabel>
+                <Input id="event-organizer" value={organizerName} onChange={(event) => setOrganizerName(event.target.value)} maxLength={128} placeholder="Ex.: Federação Estadual de Taekwondo" className="h-11" />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="event-url">Link do edital (opcional)</FieldLabel>
+                <Input id="event-url" value={externalUrl} onChange={(event) => setExternalUrl(event.target.value)} maxLength={512} inputMode="url" placeholder="https://" className="h-11" />
+              </Field>
+              {CHAMPIONSHIP_DEADLINE_KINDS.map((kind) => (
+                <div key={kind} className="grid grid-cols-[1fr_6rem] items-end gap-3 rounded-lg border border-border p-3">
+                  <DateField id={`deadline-${kind}`} name={`deadline_${kind}`} label={DEADLINE_KIND_LABEL[kind]} defaultValue={deadlines[kind]?.date ?? ""} onValueChange={(value) => updateDeadline(kind, { date: value })} />
+                  <Field>
+                    <FieldLabel htmlFor={`deadline-notify-${kind}`}>Avisar (dias)</FieldLabel>
+                    <Input id={`deadline-notify-${kind}`} value={deadlines[kind]?.notify ?? "3"} onChange={(event) => updateDeadline(kind, { notify: event.target.value.replace(/\D/g, "").slice(0, 2) })} inputMode="numeric" className="h-11 tabular-nums" />
+                  </Field>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        ) : null}
       </div>
 
       <div hidden={step !== 2}>
@@ -220,8 +297,73 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
             <CardDescription>Cada opção tem nome, valor e, se quiser, um limite próprio de vagas.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {championship ? (
+              <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-3">
+                <div className="flex items-center gap-1">
+                  <p className="text-sm font-medium">Gerar categorias</p>
+                  <InfoTip label="Sobre as categorias geradas">Divisões de peso de referência por classe de idade e sexo. Confira com o edital da federação: você pode editar nomes e valores depois de gerar.</InfoTip>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <Field>
+                    <FieldLabel htmlFor="preset-modality">Modalidade</FieldLabel>
+                    <Select value={presetModality} onValueChange={(value) => setPresetModality(value as "kyorugi" | "poomsae")}>
+                      <SelectTrigger id="preset-modality" className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="kyorugi">Kyorugi (luta, por peso)</SelectItem>
+                        <SelectItem value="poomsae">Poomsae (formas)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="preset-price">Custos da academia (R$)</FieldLabel>
+                    <Input id="preset-price" value={presetPrice} onChange={(event) => setPresetPrice(event.target.value)} inputMode="decimal" placeholder="0,00" className="h-11 tabular-nums" />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="preset-fee">Taxa da federação (R$)</FieldLabel>
+                    <Input id="preset-fee" value={presetFee} onChange={(event) => setPresetFee(event.target.value)} inputMode="decimal" placeholder="0,00" className="h-11 tabular-nums" />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="preset-rank">Graduação mínima</FieldLabel>
+                    <Select value={presetMinRank} onValueChange={setPresetMinRank}>
+                      <SelectTrigger id="preset-rank" className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sem mínimo</SelectItem>
+                        {ranks.filter((rank) => rank.enabled).map((rank) => (
+                          <SelectItem key={rank.rank_key} value={rank.rank_key}>
+                            {rank.display_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                </div>
+                <div className="flex flex-wrap gap-x-5 gap-y-2" role="group" aria-label="Classes de idade e sexo">
+                  {AGE_CLASSES.map((entry) => (
+                    <label key={entry.key} className="flex min-h-9 items-center gap-2 text-sm" htmlFor={`preset-age-${entry.key}`}>
+                      <Checkbox id={`preset-age-${entry.key}`} checked={presetAges.includes(entry.key)} onCheckedChange={() => toggle(presetAges, entry.key, setPresetAges)} />
+                      {entry.label} ({entry.max >= 200 ? `${entry.min}+` : `${entry.min}–${entry.max}`})
+                    </label>
+                  ))}
+                  {(["M", "F"] as const).map((sex) => (
+                    <label key={sex} className="flex min-h-9 items-center gap-2 text-sm" htmlFor={`preset-sex-${sex}`}>
+                      <Checkbox id={`preset-sex-${sex}`} checked={presetSexes.includes(sex)} onCheckedChange={() => toggle(presetSexes, sex, setPresetSexes)} />
+                      {PRESET_SEX_LABEL[sex]}
+                    </label>
+                  ))}
+                </div>
+                <Button type="button" variant="outline" className="min-h-11" onClick={generatePresets}>
+                  Gerar categorias
+                </Button>
+                <p className="text-xs text-muted-foreground">A idade conta pelo ano de nascimento, a menos que você mude na etapa Regras.</p>
+              </div>
+            ) : null}
+            {championship && options.length === 0 ? <p className="text-sm text-muted-foreground">Nenhuma categoria ainda. Gere pelo painel acima ou adicione uma categoria manualmente.</p> : null}
             {options.map((option, index) => (
-              <div key={index} className="grid gap-3 rounded-lg border border-border p-3 sm:grid-cols-[1fr_9rem_9rem_auto] sm:items-end">
+              <div key={index} className={`grid gap-3 rounded-lg border border-border p-3 sm:items-end ${championship ? "sm:grid-cols-[1fr_8rem_8rem_auto]" : "sm:grid-cols-[1fr_9rem_9rem_auto]"}`}>
                 <Field>
                   <FieldLabel htmlFor={`option-label-${index}`}>Nome</FieldLabel>
                   <Input id={`option-label-${index}`} value={option.label} onChange={(event) => updateOption(index, { label: event.target.value })} maxLength={128} className="h-11" />
@@ -230,16 +372,23 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
                   <FieldLabel htmlFor={`option-price-${index}`}>Valor (R$)</FieldLabel>
                   <Input id={`option-price-${index}`} value={option.price} onChange={(event) => updateOption(index, { price: event.target.value })} inputMode="decimal" placeholder="0,00" className="h-11 tabular-nums" />
                 </Field>
-                <Field>
-                  <FieldLabel htmlFor={`option-capacity-${index}`}>Vagas</FieldLabel>
-                  <Input id={`option-capacity-${index}`} value={option.capacity} onChange={(event) => updateOption(index, { capacity: event.target.value.replace(/\D/g, "") })} inputMode="numeric" placeholder="Sem limite" className="h-11 tabular-nums" />
-                </Field>
-                <Button type="button" variant="outline" className="min-h-11" disabled={options.length === 1} onClick={() => setOptions((current) => current.filter((_, position) => position !== index))}>
+                {championship ? (
+                  <Field>
+                    <FieldLabel htmlFor={`option-fee-${index}`}>Federação (R$)</FieldLabel>
+                    <Input id={`option-fee-${index}`} value={option.federationFee} onChange={(event) => updateOption(index, { federationFee: event.target.value })} inputMode="decimal" placeholder="0,00" className="h-11 tabular-nums" />
+                  </Field>
+                ) : (
+                  <Field>
+                    <FieldLabel htmlFor={`option-capacity-${index}`}>Vagas</FieldLabel>
+                    <Input id={`option-capacity-${index}`} value={option.capacity} onChange={(event) => updateOption(index, { capacity: event.target.value.replace(/\D/g, "") })} inputMode="numeric" placeholder="Sem limite" className="h-11 tabular-nums" />
+                  </Field>
+                )}
+                <Button type="button" variant="outline" className="min-h-11" disabled={!championship && options.length === 1} onClick={() => setOptions((current) => current.filter((_, position) => position !== index))}>
                   Remover
                 </Button>
               </div>
             ))}
-            <Button type="button" variant="outline" className="min-h-11" disabled={options.length >= 30} onClick={() => setOptions((current) => [...current, { label: "", price: "", capacity: "" }])}>
+            <Button type="button" variant="outline" className="min-h-11" disabled={options.length >= 30} onClick={() => setOptions((current) => [...current, blankOption()])}>
               Adicionar opção
             </Button>
           </CardContent>
@@ -252,6 +401,8 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
             <CardTitle>Regras</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
+            {!championship ? (
+              <>
             <Field>
               <div className="flex items-center gap-1">
                 <FieldLabel htmlFor="event-audience">Quem pode se inscrever</FieldLabel>
@@ -294,6 +445,8 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
               </div>
               <Switch checked={requiresApproval} onCheckedChange={setRequiresApproval} aria-label="Aprovar cada inscrição" />
             </div>
+            </>
+          ) : null}
             <div className="flex items-start justify-between gap-3 rounded-lg border border-border p-3 sm:col-span-2">
               <div className="space-y-0.5">
                 <div className="flex items-center gap-1">

@@ -4,6 +4,7 @@ import { AppwriteException, Client, ID, Permission, Query, Role, Storage, Tables
 import { InputFile } from "node-appwrite/file";
 import { DEFAULT_ACADEMY_IDENTITY, DEFAULT_CONTRACT_POLICY } from "../../src/features/academy/defaults";
 import { DEFAULT_RANK_SETTINGS } from "../../src/features/academy/rank-defaults";
+import { badgesForEventResult } from "../../src/features/students/badge-rules";
 import { APPWRITE_IDS } from "../../src/lib/appwrite/ids";
 import { readServerAppwriteConfig } from "../../src/lib/appwrite/config";
 import { testPersonas } from "./test-personas";
@@ -11,7 +12,9 @@ import {
   buildDemoScenario,
   demoDueDate,
   demoExamDefinitions,
+  demoChampionshipDefinitions,
   demoSimpleEventDefinitions,
+  demoStudentSex,
   demoId,
   monthOffset,
   type DemoStudentScenario
@@ -518,6 +521,7 @@ async function main() {
         emergency_contact_phone: scenario.guardianPhone ?? scenario.phone,
         started_at_tkd: dateTime(`${scenario.startMonth ?? "2025-01"}-01`),
         rank_key: scenario.rankKey,
+        sex: demoStudentSex(scenario.fullName),
         training_class_id: primaryClass.$id,
         training_class: primaryClass.name,
         health_condition: scenario.healthCondition ?? "no",
@@ -1057,6 +1061,114 @@ async function main() {
           updated_at: now
         });
         attendanceCount++;
+      }
+    }
+  }
+
+  console.log("🏆 Sincronizando campeonatos (próximo com cronograma e um já concluído com medalhas)...");
+  {
+    const { upcoming, past } = demoChampionshipDefinitions(now);
+    const baseEvent = (def: { title: string; description: string; organizer_name: string; starts_at: string; ends_at: string; location_text: string }, status: string) => ({
+      event_type: "championship",
+      title: def.title,
+      description: def.description,
+      status,
+      starts_at: def.starts_at,
+      ends_at: def.ends_at,
+      location_text: def.location_text,
+      organizer_type: "external",
+      organizer_name: def.organizer_name,
+      audience: "students",
+      requires_approval: false,
+      age_cutoff: "birth_year",
+      created_by_account_id: admin.account_id,
+      created_at: now,
+      updated_at: now
+    });
+    const upcomingId = demoId("event", upcoming.key);
+    await upsertRow(APPWRITE_IDS.tables.events, upcomingId, baseEvent(upcoming, "registration_open"));
+    const upcomingOptionIds = new Map<string, string>();
+    for (const [index, option] of upcoming.options.entries()) {
+      const optionId = demoId("event-option", `${upcoming.key}:${option.key}`);
+      upcomingOptionIds.set(option.key, optionId);
+      await upsertRow(APPWRITE_IDS.tables.eventOptions, optionId, {
+        event_id: upcomingId,
+        label: option.label,
+        modality: option.modality,
+        price_cents: upcoming.academy_fee_cents,
+        federation_fee_cents: upcoming.federation_fee_cents,
+        eligibility_json: JSON.stringify(option.eligibility),
+        max_per_registrant_group: option.modality === "kyorugi" ? "kyorugi" : null,
+        sort_order: index,
+        created_at: now,
+        updated_at: now
+      });
+    }
+    for (const deadline of upcoming.deadlines) {
+      await upsertRow(APPWRITE_IDS.tables.eventDeadlines, demoId("event-deadline", `${upcoming.key}:${deadline.kind}`), { event_id: upcomingId, kind: deadline.kind, label: deadline.label, due_at: deadline.due_at, notify_days_before: deadline.notify_days_before, created_at: now, updated_at: now });
+    }
+    const interests = [
+      { student: "student-05", option: "k-adulto-m-80", weight: 74000, guardian: false },
+      { student: "student-08", option: "k-adulto-f-67", weight: 62000, guardian: false },
+      { student: "junior", option: "k-cadete-m-45", weight: 43500, guardian: false }
+    ];
+    for (const interest of interests) {
+      const studentRow = studentRowsByKey.get(interest.student);
+      const enrollmentRow = enrollmentRowsByKey.get(interest.student);
+      const optionId = upcomingOptionIds.get(interest.option);
+      if (!studentRow || !enrollmentRow || !optionId) continue;
+      await upsertRow(APPWRITE_IDS.tables.eventRegistrations, demoId("event-registration", `${upcoming.key}:${interest.student}`), {
+        event_id: upcomingId,
+        option_id: optionId,
+        student_id: studentRow.$id,
+        enrollment_id: enrollmentRow.$id,
+        registered_by_account_id: admin.account_id,
+        status: "interested",
+        companions: 0,
+        declared_weight_grams: interest.weight,
+        rank_key_snapshot: studentRow.rank_key as string,
+        price_cents: upcoming.academy_fee_cents,
+        federation_price_cents: upcoming.federation_fee_cents,
+        terms_accepted_at: now,
+        created_at: now,
+        updated_at: now
+      });
+    }
+
+    const pastId = demoId("event", past.key);
+    await upsertRow(APPWRITE_IDS.tables.events, pastId, baseEvent(past, "completed"));
+    const pastResults = [
+      { student: "adult", option: "k-adulto-f-57", medal: "gold" as const, placement: 1, weight: 55000 },
+      { student: "student-05", option: "k-adulto-m-68", medal: "none" as const, placement: undefined, weight: 66000 }
+    ];
+    for (const [index, option] of past.options.entries()) {
+      await upsertRow(APPWRITE_IDS.tables.eventOptions, demoId("event-option", `${past.key}:${option.key}`), { event_id: pastId, label: option.label, modality: option.modality, price_cents: 0, eligibility_json: JSON.stringify(option.eligibility), sort_order: index, created_at: now, updated_at: now });
+    }
+    for (const entry of pastResults) {
+      const studentRow = studentRowsByKey.get(entry.student);
+      const enrollmentRow = enrollmentRowsByKey.get(entry.student);
+      if (!studentRow || !enrollmentRow) continue;
+      const registrationId = demoId("event-registration", `${past.key}:${entry.student}`);
+      await upsertRow(APPWRITE_IDS.tables.eventRegistrations, registrationId, {
+        event_id: pastId,
+        option_id: demoId("event-option", `${past.key}:${entry.option}`),
+        student_id: studentRow.$id,
+        enrollment_id: enrollmentRow.$id,
+        registered_by_account_id: admin.account_id,
+        status: "completed",
+        companions: 0,
+        declared_weight_grams: entry.weight,
+        rank_key_snapshot: studentRow.rank_key as string,
+        price_cents: 0,
+        terms_accepted_at: past.starts_at,
+        external_submitted_at: past.starts_at,
+        created_at: now,
+        updated_at: now
+      });
+      const resultId = demoId("event-result", registrationId);
+      await upsertRow(APPWRITE_IDS.tables.eventResults, resultId, { registration_id: registrationId, event_id: pastId, student_id: studentRow.$id, placement: entry.placement ?? null, medal: entry.medal, recorded_by_account_id: admin.account_id, recorded_at: past.starts_at });
+      for (const badge of badgesForEventResult({ studentId: studentRow.$id, resultId, eventId: pastId, eventTitle: past.title, medal: entry.medal })) {
+        await upsertRow(APPWRITE_IDS.tables.studentBadges, demoId("student-badge", badge.sourceKey), { student_id: badge.studentId, kind: badge.kind, source: badge.source, source_id: badge.sourceId, source_key: badge.sourceKey, event_id: badge.eventId, title: badge.title, description: badge.description, awarded_at: past.starts_at, created_at: now });
       }
     }
   }

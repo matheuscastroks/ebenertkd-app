@@ -99,7 +99,9 @@ describe("defaults = valores atuais do código", () => {
           { id: "lessons-50", title: "50 treinos no dojang", description: "Acumule 50 presenças confirmadas.", metric: "total_presences", target: 50 },
           { id: "lessons-100", title: "100 treinos no dojang", description: "Marca histórica de dedicação no tatame.", metric: "total_presences", target: 100 },
           { id: "first-graduation", title: "Primeira graduação", description: "Conquiste sua primeira troca de faixa em exame.", metric: "graduations", target: 1 },
-          { id: "one-year", title: "1 ano de Taekwondo", description: "Complete 12 meses de prática na academia.", metric: "tenure_months", target: 12 }
+          { id: "one-year", title: "1 ano de Taekwondo", description: "Complete 12 meses de prática na academia.", metric: "tenure_months", target: 12 },
+          { id: "first-event", title: "Primeiro evento", description: "Participe de um campeonato, aulão ou seminário.", metric: "events_attended", target: 1 },
+          { id: "first-medal", title: "Primeira medalha", description: "Suba ao pódio em um campeonato.", metric: "medals", target: 1 }
         ]
       }
     });

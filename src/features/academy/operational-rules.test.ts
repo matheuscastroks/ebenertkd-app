@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { evaluateStudentRetention } from "@/features/classes/retention-rules";
 import { classifyContractRenewalBucket, renewalEvent } from "@/features/contracts/rules";
 import { shouldGenerateCompetence } from "@/features/billing/rules";
-import { DEFAULT_COMPLIANCE_POLICY, DEFAULT_RETENTION_POLICY, type BadgeDefinition } from "@/features/academy/defaults";
+import { DEFAULT_BADGES, DEFAULT_COMPLIANCE_POLICY, DEFAULT_RETENTION_POLICY, type BadgeDefinition } from "@/features/academy/defaults";
 import { complianceImpactNotes, notificationsImpactNotes } from "@/features/academy/impact-notes";
 import { countComplianceChange, countRetentionChange } from "@/features/academy/impact-rules";
 import { PolicyValidationError, parsePolicyData, parsePolicyInput } from "@/features/academy/schemas";
@@ -92,8 +92,8 @@ describe("conquistas por política", () => {
     expect(report.unlockedCount).toBe(1);
   });
 
-  it("sem política usa as 8 conquistas originais", () => {
-    expect(buildStudentConsistencyReport({ entries: [], beltHistory: [], referenceDate: "2026-11-18" }).badges).toHaveLength(8);
+  it("sem política usa as conquistas padrão", () => {
+    expect(buildStudentConsistencyReport({ entries: [], beltHistory: [], referenceDate: "2026-11-18" }).badges).toHaveLength(DEFAULT_BADGES.length);
   });
 });
 
@@ -169,7 +169,7 @@ describe("validação das novas seções", () => {
 
   it("leitura tolerante: dado inválido volta ao default sem lançar", () => {
     expect(parsePolicyData("compliance", "{quebrado").parq_validity_days).toBe(365);
-    expect(parsePolicyData("gamification", JSON.stringify({ badges: "x" })).badges).toHaveLength(8);
+    expect(parsePolicyData("gamification", JSON.stringify({ badges: "x" })).badges).toHaveLength(DEFAULT_BADGES.length);
     expect(parsePolicyData("retention", JSON.stringify({ window_days: 45, critical_rate_pct: "x" }))).toMatchObject({ window_days: 45, critical_rate_pct: 50 });
   });
 });

@@ -56,7 +56,21 @@ export const EVENT_ERROR_MESSAGE: Record<string, string> = {
   event_invalid_transition: "O evento não pode mudar para esse estado.",
   event_paid_charge_decision_required: "Há cobrança paga: escolha entre crédito futuro e manter a cobrança.",
   event_has_active_registrations: "Há inscrições ativas: informe como tratar os pagamentos.",
-  guardian_required: "A inscrição de menor precisa ser feita pelo responsável."
+  guardian_required: "A inscrição de menor precisa ser feita pelo responsável.",
+  event_not_championship: "Esta ação vale só para campeonatos.",
+  event_category_limit: "O atleta já tem uma categoria desta modalidade neste campeonato.",
+  event_category_locked: "O prazo de troca de categoria já passou. Fale com o professor.",
+  registration_not_ready: "Faltam autorização, termo ou documentos aprovados para confirmar este atleta.",
+  registration_already_submitted: "A inscrição já foi enviada à federação. Fale com o professor para alterar.",
+  document_not_found: "Documento não encontrado.",
+  document_file_required: "Escolha o arquivo do documento.",
+  rejection_reason_required: "Informe o motivo da recusa.",
+  invalid_size: "O arquivo precisa ter até 5 MB.",
+  invalid_signature: "Envie uma imagem (JPG, PNG ou WebP) ou PDF válido.",
+  invalid_extension: "A extensão do arquivo não corresponde ao tipo.",
+  bulk_empty: "Selecione ao menos uma inscrição.",
+  "Informe um peso válido": "Informe um peso válido, em kg (ex.: 45,5).",
+  "Selecione ao menos um atleta": "Selecione ao menos um atleta."
 };
 
 export function eventErrorMessage(code: string | undefined | null, fallback = "Não foi possível concluir. Tente novamente.") {

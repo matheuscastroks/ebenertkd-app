@@ -19,6 +19,7 @@ export const CACHE_TAGS = {
   event: (id: string) => `event:${id}`,
   eventRegistrations: (id: string) => `event-registrations:${id}`,
   studentEvents: (studentId: string) => `student-events:${studentId}`,
+  studentBadges: (studentId: string) => `student-badges:${studentId}`,
   // Perfis e sessão (autorização NUNCA vem do cache: só a linha do perfil)
   profiles: "profiles",
   profile: (profileId: string) => `profile:${profileId}`,

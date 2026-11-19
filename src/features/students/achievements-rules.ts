@@ -1,5 +1,6 @@
 import { DEFAULT_BADGES, type BadgeDefinition } from "@/features/academy/defaults";
 import type { BeltHistory } from "@/features/exams/types";
+import { summarizeBadges, type EarnedBadgeKind } from "@/features/students/badge-rules";
 import { daysBetweenIsoDates, saoPauloToday } from "@/lib/dates";
 
 export type AchievementEntry = {
@@ -76,6 +77,8 @@ export function buildStudentConsistencyReport(input: {
   referenceDate?: string;
   /** Conquistas da academia (padrão = as 8 originais). A métrica de cada uma é fixa; título, descrição e meta são editáveis. */
   badges?: readonly BadgeDefinition[];
+  /** Conquistas de eventos já concedidas (`student_badges`): alimentam as metas de eventos e medalhas. */
+  earnedBadges?: ReadonlyArray<{ kind: EarnedBadgeKind }>;
 }): StudentConsistencyReport {
   const referenceDay = (input.referenceDate ?? saoPauloToday()).slice(0, 10);
   const presentEntries = input.entries.filter((e) => e.status === "present");
@@ -149,12 +152,15 @@ export function buildStudentConsistencyReport(input: {
     ? Math.max(0, Math.floor(daysBetweenIsoDates(input.startedAt.slice(0, 10), referenceDay) / 30))
     : 0;
 
+  const earnedTotals = summarizeBadges(input.earnedBadges ?? []);
   const metricValues: Record<BadgeDefinition["metric"], number> = {
     total_presences: totalPresences,
     best_week_streak: bestWeekStreak,
     perfect_months: perfectMonthsCount,
     graduations: graduationsCount,
     tenure_months: tenureMonths,
+    events_attended: earnedTotals.events,
+    medals: earnedTotals.medals,
   };
   const badges: StudentBadge[] = (input.badges ?? DEFAULT_BADGES).map((badge) =>
     makeBadge(badge.id, badge.title, badge.description, metricValues[badge.metric], badge.target)

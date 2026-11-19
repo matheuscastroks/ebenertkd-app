@@ -4,7 +4,7 @@ import webpush from "web-push";
 import { DEFAULT_PREFERENCES, pushAllowed, pushPayload } from "./push-rules.js";
 import { safeErrorMessage } from "./safe-error.js";
 import { resolvePolicies } from "./policy-defaults.js";
-import { parqExpiryDay, parqReminderStage, pendingReminder, processingDays, reminderCopy, renewalReminderDays, shouldGenerate } from "./reminders.js";
+import { eventDeadlineStage, parqExpiryDay, parqReminderStage, pendingReminder, processingDays, reminderCopy, renewalReminderDays, shouldGenerate } from "./reminders.js";
 
 const databaseId = process.env.APPWRITE_DATABASE_ID ?? "ebenertkd";
 const eventId = (value) => createHash("sha256").update(value).digest("hex").slice(0, 36);
@@ -263,8 +263,36 @@ async function main({ req, res, log, error }) {
       if (!(cause instanceof AppwriteException) || cause.code !== 404) throw cause;
     }
 
+    step = "event-deadline-reminders";
+    let eventReminders = 0;
+    try {
+      const upcomingEvents = await listAll(tables, "events", [Query.equal("status", ["published", "registration_open", "registration_closed", "in_progress"])]);
+      const eventsById = new Map(upcomingEvents.map((event) => [event.$id, event]));
+      const deadlines = eventsById.size ? await listAll(tables, "event_deadlines", [Query.equal("event_id", [...eventsById.keys()])]) : [];
+      for (const deadline of deadlines) {
+        const due = eventDeadlineStage(deadline.due_at, deadline.notify_days_before, day);
+        const event = eventsById.get(deadline.event_id);
+        if (!due || !event) continue;
+        const days = `${due.daysLeft} ${due.daysLeft === 1 ? "dia" : "dias"}`;
+        const title = due.stage === "today" ? `Prazo hoje: ${deadline.label}` : `Prazo em ${days}: ${deadline.label}`;
+        const body = due.stage === "today" ? `${event.title}: o prazo de ${deadline.label.toLowerCase()} termina hoje.` : `${event.title}: o prazo de ${deadline.label.toLowerCase()} termina em ${days}.`;
+        const key = `event-deadline:${deadline.$id}:${due.stage}`;
+        await notifyAdmins(tables, { title, body, dedupeKey: `${key}:admin`, actionUrl: `/admin/eventos/${event.$id}` });
+        const registrations = await listAll(tables, "event_registrations", [Query.equal("event_id", [event.$id]), Query.equal("status", ["interested", "pending_approval", "confirmed", "waitlisted", "checked_in"])]);
+        for (const registration of registrations) {
+          if (!registration.student_id) continue;
+          const recipients = await financialRecipients(tables, registration.student_id);
+          if (!recipients.length) continue;
+          await createNotification(tables, { title, body, dedupeKey: `${key}:${registration.student_id}`, recipients, actionUrl: "/aluno/eventos" });
+          eventReminders += recipients.length;
+        }
+      }
+    } catch (cause) {
+      if (!(cause instanceof AppwriteException) || cause.code !== 404) throw cause;
+    }
+
     step = "automation-run";
-    await tables.createRow({ databaseId, tableId: "automation_runs", rowId: idempotencyKey, permissions: [], data: { job: "daily-operations", idempotency_key: idempotencyKey, status: "completed", started_at: now.toISOString(), finished_at: new Date().toISOString(), details: JSON.stringify({ phase: 6, reminders, expired, charges_created: chargesCreated, marked_overdue: markedOverdue, payment_reminders: paymentReminders, parq_reminders: parqReminders, covered_days: coveredDays.length }), created_at: now.toISOString() } });
+    await tables.createRow({ databaseId, tableId: "automation_runs", rowId: idempotencyKey, permissions: [], data: { job: "daily-operations", idempotency_key: idempotencyKey, status: "completed", started_at: now.toISOString(), finished_at: new Date().toISOString(), details: JSON.stringify({ phase: 6, reminders, expired, charges_created: chargesCreated, marked_overdue: markedOverdue, payment_reminders: paymentReminders, parq_reminders: parqReminders, event_reminders: eventReminders, covered_days: coveredDays.length }), created_at: now.toISOString() } });
     log(`Recorded ${idempotencyKey}: ${chargesCreated} charges, ${markedOverdue} overdue, ${parqReminders} parq reminders`);
     return res.json({ ok: true, idempotencyKey, reminders, expired, chargesCreated, markedOverdue, paymentReminders, parqReminders });
   } catch (cause) {

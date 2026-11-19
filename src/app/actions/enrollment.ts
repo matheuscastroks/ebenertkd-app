@@ -43,6 +43,7 @@ function enrollmentInput(formData: FormData) {
     emergencyContactPhone: value("emergency_contact_phone"),
     startedAtTkd: value("started_at_tkd"),
     rankKey: (value("rank_key") || undefined) as RankKey | undefined,
+    sex: (value("sex") || undefined) as "feminino" | "masculino" | undefined,
     trainingClassId: value("training_class_id"),
     healthCondition: (value("health_condition") || undefined) as "yes" | "no" | undefined,
     healthDetails: value("health_details") || undefined,

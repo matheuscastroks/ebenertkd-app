@@ -151,7 +151,7 @@ export const DEFAULT_NOTIFICATIONS_POLICY = {
 };
 
 /** O que cada conquista mede. A métrica é fixa por conquista; o professor ajusta título, descrição e meta. */
-export const BADGE_METRICS = ["total_presences", "best_week_streak", "perfect_months", "graduations", "tenure_months"] as const;
+export const BADGE_METRICS = ["total_presences", "best_week_streak", "perfect_months", "graduations", "tenure_months", "events_attended", "medals"] as const;
 export type BadgeMetric = (typeof BADGE_METRICS)[number];
 
 export const BADGE_METRIC_LABELS: Record<BadgeMetric, string> = {
@@ -159,7 +159,9 @@ export const BADGE_METRIC_LABELS: Record<BadgeMetric, string> = {
   best_week_streak: "Semanas seguidas de treino",
   perfect_months: "Meses sem faltas",
   graduations: "Graduações conquistadas",
-  tenure_months: "Meses de academia"
+  tenure_months: "Meses de academia",
+  events_attended: "Eventos e campeonatos de que participou",
+  medals: "Medalhas em campeonatos"
 };
 
 export type BadgeDefinition = { id: string; title: string; description: string; metric: BadgeMetric; target: number };
@@ -172,7 +174,9 @@ export const DEFAULT_BADGES: BadgeDefinition[] = [
   { id: "lessons-50", title: "50 treinos no dojang", description: "Acumule 50 presenças confirmadas.", metric: "total_presences", target: 50 },
   { id: "lessons-100", title: "100 treinos no dojang", description: "Marca histórica de dedicação no tatame.", metric: "total_presences", target: 100 },
   { id: "first-graduation", title: "Primeira graduação", description: "Conquiste sua primeira troca de faixa em exame.", metric: "graduations", target: 1 },
-  { id: "one-year", title: "1 ano de Taekwondo", description: "Complete 12 meses de prática na academia.", metric: "tenure_months", target: 12 }
+  { id: "one-year", title: "1 ano de Taekwondo", description: "Complete 12 meses de prática na academia.", metric: "tenure_months", target: 12 },
+  { id: "first-event", title: "Primeiro evento", description: "Participe de um campeonato, aulão ou seminário.", metric: "events_attended", target: 1 },
+  { id: "first-medal", title: "Primeira medalha", description: "Suba ao pódio em um campeonato.", metric: "medals", target: 1 }
 ];
 
 export const DEFAULT_GAMIFICATION_POLICY = {

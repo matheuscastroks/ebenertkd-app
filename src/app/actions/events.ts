@@ -6,6 +6,7 @@ import { ZodError } from "zod";
 import { cancelEvent, completeEvent, createEvent, setEventStatus } from "@/features/events/event-service";
 import { eventErrorMessage } from "@/features/events/labels";
 import { safeEventReturnPath, withQuery } from "@/features/events/paths";
+import { parseWeightKgToGrams } from "@/features/events/schemas";
 import { approveRegistration, cancelRegistration, confirmInterest, registerForEvent, rejectRegistration, setCheckIn } from "@/features/events/registration-service";
 import { EVENT_STATUSES, type EventStatus } from "@/features/events/types";
 import { requireProfile } from "@/lib/auth/session";
@@ -92,6 +93,7 @@ export async function registerForEventAction(formData: FormData) {
       guestName: str(formData, "guest_name"),
       guestContact: str(formData, "guest_contact"),
       acceptedTerms: formData.get("accepted_terms") === "on",
+      declaredWeightGrams: parseWeightKgToGrams(str(formData, "weight_kg")) ?? undefined,
       notes: str(formData, "notes")
     });
     query = { ok: registration.status === "waitlisted" ? "waitlisted" : registration.status === "interested" ? "interested" : registration.status === "pending_approval" ? "pending" : "registered" };

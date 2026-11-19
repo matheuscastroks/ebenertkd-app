@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parqExpiryDay, parqReminderStage, pendingReminder, processingDays, reminderCopy, reminderStage, renewalReminderDays, shouldGenerate } from "./reminders.js";
+import { eventDeadlineStage, parqExpiryDay, parqReminderStage, pendingReminder, processingDays, reminderCopy, reminderStage, renewalReminderDays, shouldGenerate } from "./reminders.js";
 
 describe("processingDays", () => {
   it("covers only today on the first run or a same-day rerun", () => {
@@ -98,5 +98,20 @@ describe("régua customizada da academia", () => {
     expect(parqExpiryDay("2027-01-01T12:00:00.000Z", 180)).toBe("2027-06-30");
     expect(shouldGenerate("2027-04", "2027-03-25", 3)).toBe(false);
     expect(shouldGenerate("2027-04", "2027-03-29", 3)).toBe(true);
+  });
+});
+
+describe("eventDeadlineStage", () => {
+  const due = "2027-03-10T02:59:00.000Z"; // 09/03 23:59 em Brasília
+
+  it("avisa ao entrar na janela e no dia do prazo", () => {
+    expect(eventDeadlineStage(due, 3, "2027-03-05")).toBeNull();
+    expect(eventDeadlineStage(due, 3, "2027-03-07")).toEqual({ stage: "upcoming", daysLeft: 2 });
+    expect(eventDeadlineStage(due, 3, "2027-03-09")).toEqual({ stage: "today", daysLeft: 0 });
+  });
+
+  it("não avisa depois do prazo e respeita janela zero", () => {
+    expect(eventDeadlineStage(due, 3, "2027-03-10")).toBeNull();
+    expect(eventDeadlineStage(due, 0, "2027-03-08")).toBeNull();
   });
 });

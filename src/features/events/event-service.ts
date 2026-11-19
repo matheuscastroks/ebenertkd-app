@@ -10,8 +10,11 @@ import { seatsTaken, type SeatedRegistration } from "@/features/events/rules/cap
 import { eventChargeCancellation } from "@/features/events/rules/pricing-rules";
 import { assertEventTransition, holdsSeat, isActiveRegistration, isEventTerminal } from "@/features/events/rules/status-rules";
 import { cancelEventSchema, eventInputSchema } from "@/features/events/schemas";
-import type { Event, EventOption, EventRegistration, EventStatus, EventType } from "@/features/events/types";
+import { DEADLINE_KIND_LABEL } from "@/features/events/rules/deadline-rules";
+import type { Event, EventDeadline, EventOption, EventRegistration, EventStatus, EventType } from "@/features/events/types";
 import type { ExamParticipant } from "@/features/exams/types";
+import { badgeForSeminarAttendance } from "@/features/students/badge-rules";
+import { awardBadges } from "@/features/students/badge-service";
 import type { Student } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
@@ -21,6 +24,8 @@ import { CACHE_TAGS } from "@/lib/cache/tags";
 
 /** Tipos tratados pelo fluxo simples de inscrição (E2). Campeonato tem fluxo próprio. */
 export const SIMPLE_EVENT_TYPES: readonly EventType[] = ["seminar", "social", "other"];
+/** Tipos que o aluno e o responsável veem na tela de eventos (exames têm tela própria). */
+export const STUDENT_EVENT_TYPES: readonly EventType[] = [...SIMPLE_EVENT_TYPES, "championship"];
 
 export function toSeated(registration: EventRegistration): SeatedRegistration {
   return { id: registration.$id, option_id: registration.option_id, status: registration.status, companions: registration.companions, waitlist_position: registration.waitlist_position, created_at: registration.created_at };
@@ -83,8 +88,10 @@ export async function createEvent(actor: Profile, raw: unknown) {
           label: option.label,
           modality: option.modality,
           price_cents: option.priceCents,
+          federation_fee_cents: option.federationFeeCents > 0 ? option.federationFeeCents : undefined,
           capacity: option.capacity,
           eligibility_json: option.eligibility && Object.keys(option.eligibility).length ? JSON.stringify(option.eligibility) : undefined,
+          max_per_registrant_group: input.eventType === "championship" && option.modality === "kyorugi" ? "kyorugi" : undefined,
           sort_order: index,
           created_at: now,
           updated_at: now
@@ -92,8 +99,19 @@ export async function createEvent(actor: Profile, raw: unknown) {
       })
     )
   );
+  await Promise.all(
+    input.deadlines.map((deadline) =>
+      tables.createRow<EventDeadline>({
+        databaseId,
+        tableId: APPWRITE_IDS.tables.eventDeadlines,
+        rowId: ID.unique(),
+        permissions: [],
+        data: { event_id: event.$id, kind: deadline.kind, label: deadline.label || DEADLINE_KIND_LABEL[deadline.kind], due_at: saoPauloInstant(deadline.dueDate, "23:59"), notify_days_before: deadline.notifyDaysBefore, created_at: now, updated_at: now }
+      })
+    )
+  );
   invalidateEventTags(event.$id);
-  await writeAuditEvent("event.created", actor.account_id, "event", event.$id, { event_type: input.eventType, status: event.status, guests_allowed: guestsAllowed });
+  await writeAuditEvent("event.created", actor.account_id, "event", event.$id, { event_type: input.eventType, status: event.status, guests_allowed: guestsAllowed, deadlines: input.deadlines.length });
   return event;
 }
 
@@ -246,12 +264,16 @@ export async function completeEvent(actor: Profile, eventId: string) {
   const now = new Date().toISOString();
   for (const registration of registrations) {
     if (!holdsSeat(registration.status) && registration.status !== "waitlisted" && registration.status !== "interested") continue;
-    const next = registration.status === "checked_in" ? "completed" : registration.status === "confirmed" ? "no_show" : registration.status === "completed" ? "completed" : "cancelled";
+    const next = registration.status === "checked_in" ? "completed" : registration.status === "confirmed" ? (event.event_type === "championship" ? "completed" : "no_show") : registration.status === "completed" ? "completed" : "cancelled";
     await tables.updateRow({ databaseId, tableId: APPWRITE_IDS.tables.eventRegistrations, rowId: registration.$id, data: { status: next, guest_contact: registration.student_id ? undefined : null, updated_at: now } });
   }
   const updated = await tables.updateRow<Event>({ databaseId, tableId: APPWRITE_IDS.tables.events, rowId: eventId, data: { status: "completed", updated_at: now } });
   invalidateTags(CACHE_TAGS.events, CACHE_TAGS.event(eventId), CACHE_TAGS.eventRegistrations(eventId));
   for (const registration of registrations) if (registration.student_id) invalidateTags(CACHE_TAGS.studentEvents(registration.student_id));
+  if (event.event_type === "seminar") {
+    // Presença em aulão/seminário vira conquista (idempotente por inscrição).
+    await awardBadges(registrations.filter((registration) => registration.student_id && registration.status === "checked_in").map((registration) => badgeForSeminarAttendance({ studentId: registration.student_id!, registrationId: registration.$id, eventId: event.$id, eventTitle: event.title })));
+  }
   await writeAuditEvent("event.completed", actor.account_id, "event", eventId, { registrations: registrations.length });
   return updated;
 }

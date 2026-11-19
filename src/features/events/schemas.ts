@@ -36,10 +36,20 @@ export function parseEligibilityJson(value: string | null | undefined): Eligibil
 export const eventOptionInputSchema = z.object({
   label: z.string().trim().min(2, "Informe o nome da opção").max(128),
   priceCents: z.coerce.number().int().min(0).default(0),
+  /** Taxa da federação (campeonato), cobrada separadamente dos custos da academia. */
+  federationFeeCents: z.coerce.number().int().min(0).default(0),
   capacity: z.coerce.number().int().min(1).optional(),
   modality: z.enum(["kyorugi", "poomsae", "festival", "team", "general"]).default("general"),
   eligibility: eligibilityRuleSchema.optional()
 });
+
+export const eventDeadlineInputSchema = z.object({
+  kind: z.enum(["affiliation", "registration", "category_change", "weigh_in", "payment", "custom"]),
+  label: z.string().trim().max(128).optional(),
+  dueDate: isoDay,
+  notifyDaysBefore: z.coerce.number().int().min(0).max(60).default(3)
+});
+export type EventDeadlineInput = z.infer<typeof eventDeadlineInputSchema>;
 
 /** Eventos simples e demais tipos criados pelo assistente (exames têm schema próprio em `features/exams`). */
 export const eventInputSchema = z
@@ -64,6 +74,8 @@ export const eventInputSchema = z
     ageCutoff: z.enum(["birth_year", "event_date"]).default("birth_year"),
     externalUrl: optionalText(512),
     options: z.array(eventOptionInputSchema).min(1, "Cadastre ao menos uma opção de inscrição").max(30),
+    /** Cronograma (campeonato): filiação, inscrição, troca de categoria, pesagem... Cada prazo gera lembretes. */
+    deadlines: z.array(eventDeadlineInputSchema).max(12).default([]),
     publish: z.boolean().default(true)
   })
   .superRefine((value, ctx) => {
@@ -76,6 +88,16 @@ export const eventInputSchema = z
   });
 export type EventInput = z.infer<typeof eventInputSchema>;
 
+/** Aceita gramas (número) ou vazio. O formulário converte "45,5" kg em gramas antes de validar. */
+const optionalWeightGrams = z.preprocess((value) => (value === "" || value === null || value === undefined ? undefined : value), z.coerce.number().int().min(10_000, "Informe um peso válido").max(250_000, "Informe um peso válido").optional());
+
+/** Converte texto em kg ("45,5", "45.5 kg") para gramas; null se inválido. */
+export function parseWeightKgToGrams(value: string | null | undefined): number | null {
+  const normalized = (value ?? "").toLowerCase().replace("kg", "").trim().replace(",", ".");
+  if (!/^\d{1,3}(\.\d{1,3})?$/.test(normalized)) return null;
+  return Math.round(Number(normalized) * 1000);
+}
+
 export const registrationInputSchema = z
   .object({
     eventId: z.string().min(1).max(36),
@@ -86,6 +108,8 @@ export const registrationInputSchema = z
     guestName: z.string().trim().min(3, "Informe o nome").max(128).optional(),
     guestContact: z.string().trim().max(24).optional(),
     acceptedTerms: z.boolean().default(false),
+    /** Peso declarado do atleta (campeonato), em gramas. */
+    declaredWeightGrams: optionalWeightGrams,
     notes: optionalText(500)
   })
   .superRefine((value, ctx) => {
@@ -106,4 +130,25 @@ export const cancelEventSchema = z.object({
   eventId: z.string().min(1).max(36),
   reason: z.string().trim().min(3, "Informe o motivo").max(255),
   decision: z.enum(["future_credit", "keep_charge"]).optional()
+});
+
+export const updateWeightSchema = z.object({
+  registrationId: z.string().min(1).max(36),
+  declaredWeightGrams: z.coerce.number().int().min(10_000, "Informe um peso válido").max(250_000, "Informe um peso válido")
+});
+
+export const eventResultSchema = z.object({
+  registrationId: z.string().min(1).max(36),
+  medal: z.enum(["gold", "silver", "bronze", "none"]),
+  placement: z.preprocess((value) => (value === "" || value === null || value === undefined ? undefined : value), z.coerce.number().int().min(1).max(999).optional()),
+  notes: optionalText(500),
+  /** Não compareceu (ex.: pesagem): vira `no_show`, sem resultado nem conquistas. */
+  absent: z.boolean().optional()
+});
+
+export const registrationDocumentKindSchema = z.enum(["guardian_authorization", "responsibility_term", "medical", "federation_card", "other"]);
+
+export const federationSubmissionSchema = z.object({
+  registrationIds: z.array(z.string().min(1).max(36)).min(1, "Selecione ao menos um atleta").max(300),
+  submitted: z.boolean().default(true)
 });

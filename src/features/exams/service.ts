@@ -14,6 +14,8 @@ import type { Event } from "@/features/events/types";
 import { examEventSchema, examParticipantSchema, examResultSchema } from "@/features/exams/schemas";
 import { toExamEvent, type BeltHistory, type ExamEvent, type ExamParticipant } from "@/features/exams/types";
 import { notifyStudentEvent } from "@/features/notifications/notification-service";
+import { badgeForExamApproval } from "@/features/students/badge-rules";
+import { awardBadges } from "@/features/students/badge-service";
 import type { Enrollment, Student, StudentDocument } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
@@ -303,6 +305,7 @@ export async function recordExamResult(actor: Profile, raw: unknown) {
   );
   await writeAuditEvent("exam.result.recorded", actor.account_id, "exam_participant", participant.$id, { result: input.result, target_rank_key: participant.target_rank_key });
   const targetName = beltNameOf(ranks.map(toPublicRank), participant.target_rank_key);
+  if (input.result === "approved") await awardBadges([badgeForExamApproval({ studentId: student.$id, participantId: participant.$id, eventId: event.$id, beltName: targetName })]);
   const resultTitle =
     input.result === "approved"
       ? `Parabéns! Aprovado para Faixa ${targetName}`

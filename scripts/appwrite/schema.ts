@@ -209,6 +209,8 @@ export const tables: TableDefinition[] = [
       { key: "emergency_contact_phone", kind: "varchar", size: 24, required: false },
       { key: "started_at_tkd", kind: "datetime", required: false },
       { key: "rank_key", kind: "varchar", size: 16, required: false },
+      // Sexo para categorias de campeonato; opcional no banco, exigido no formulário de matrícula.
+      { key: "sex", kind: "enum", elements: ["feminino", "masculino"], required: false },
       { key: "training_class_id", kind: "varchar", size: 36, required: false },
       { key: "training_class", kind: "varchar", size: 64, required: false },
       { key: "health_condition", kind: "enum", elements: ["yes", "no"], required: false },
@@ -896,6 +898,8 @@ export const tables: TableDefinition[] = [
       { key: "label", kind: "varchar", size: 128, required: true },
       { key: "modality", kind: "enum", elements: ["kyorugi", "poomsae", "festival", "team", "general"], required: true },
       { key: "price_cents", kind: "integer", required: true, min: 0 },
+      // Taxa da federação (campeonato), cobrada separadamente dos custos da academia (`price_cents`).
+      { key: "federation_fee_cents", kind: "integer", required: false, min: 0 },
       { key: "capacity", kind: "integer", required: false, min: 1 },
       { key: "eligibility_json", kind: "text", required: false },
       { key: "max_per_registrant_group", kind: "varchar", size: 32, required: false },
@@ -924,6 +928,7 @@ export const tables: TableDefinition[] = [
       { key: "rank_key_snapshot", kind: "varchar", size: 16, required: false },
       { key: "age_class_snapshot", kind: "varchar", size: 32, required: false },
       { key: "price_cents", kind: "integer", required: true, min: 0 },
+      { key: "federation_price_cents", kind: "integer", required: false, min: 0 },
       { key: "charge_id", kind: "varchar", size: 36, required: false },
       { key: "federation_charge_id", kind: "varchar", size: 36, required: false },
       { key: "financial_decision", kind: "enum", elements: ["future_credit", "keep_charge"], required: false },
@@ -950,7 +955,11 @@ export const tables: TableDefinition[] = [
       { key: "registration_id", kind: "varchar", size: 36, required: true },
       { key: "kind", kind: "enum", elements: ["guardian_authorization", "responsibility_term", "medical", "federation_card", "other"], required: true },
       { key: "file_id", kind: "varchar", size: 36, required: true },
+      { key: "original_name", kind: "varchar", size: 255, required: false },
+      { key: "mime_type", kind: "varchar", size: 64, required: false },
       { key: "status", kind: "enum", elements: ["pending", "approved", "rejected"], required: true },
+      { key: "rejection_reason", kind: "varchar", size: 255, required: false },
+      { key: "uploaded_by_account_id", kind: "varchar", size: 36, required: false },
       { key: "reviewed_by_account_id", kind: "varchar", size: 36, required: false },
       { key: "reviewed_at", kind: "datetime", required: false },
       { key: "created_at", kind: "datetime", required: true },
@@ -975,6 +984,27 @@ export const tables: TableDefinition[] = [
       { key: "registration_unique", type: "unique", columns: ["registration_id"] },
       { key: "event_idx", type: "key", columns: ["event_id"] },
       { key: "student_idx", type: "key", columns: ["student_id"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.studentBadges,
+    name: "Student badges",
+    columns: [
+      { key: "student_id", kind: "varchar", size: 36, required: true },
+      { key: "kind", kind: "enum", elements: ["participation", "medal_gold", "medal_silver", "medal_bronze", "exam_approved", "seminar_attendance"], required: true },
+      { key: "source", kind: "enum", elements: ["event_result", "event_attendance", "exam_result"], required: true },
+      { key: "source_id", kind: "varchar", size: 36, required: true },
+      // `source:source_id:kind`: garante uma única conquista por origem (idempotente).
+      { key: "source_key", kind: "varchar", size: 96, required: true },
+      { key: "event_id", kind: "varchar", size: 36, required: false },
+      { key: "title", kind: "varchar", size: 128, required: true },
+      { key: "description", kind: "varchar", size: 255, required: false },
+      { key: "awarded_at", kind: "datetime", required: true },
+      { key: "created_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "source_key_unique", type: "unique", columns: ["source_key"] },
+      { key: "student_awarded_idx", type: "key", columns: ["student_id", "awarded_at"] }
     ]
   }
 ];

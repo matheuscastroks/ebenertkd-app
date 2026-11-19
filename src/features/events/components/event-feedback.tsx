@@ -11,7 +11,18 @@ const OK_COPY: Record<string, [string, string?]> = {
   rejected: ["Inscrição recusada"],
   status: ["Situação do evento atualizada"],
   completed: ["Evento encerrado", "Presenças registradas e contatos de convidados apagados."],
-  created: ["Evento criado"]
+  created: ["Evento criado"],
+  team_confirmed: ["Atleta confirmado na equipe", "As cobranças da academia e da federação foram criadas."],
+  submitted: ["Enviado à federação", "O atleta foi marcado como enviado e foi avisado."],
+  submission_undone: ["Envio à federação desfeito"],
+  weight: ["Peso atualizado"],
+  result: ["Resultado registrado", "A conquista foi adicionada ao perfil do aluno."],
+  document: ["Documento enviado", "O professor vai revisar em breve."],
+  document_approved: ["Documento aprovado"],
+  document_rejected: ["Documento recusado", "A família foi avisada para reenviar."],
+  reminders: ["Lembretes enviados", "Cada prazo é avisado uma vez por etapa."],
+  bulk: ["Ações aplicadas a todas as inscrições selecionadas"],
+  bulk_partial: ["Algumas inscrições ficaram de fora", "Elas têm pendências: confira os motivos na lista."]
 };
 
 /** Avisos de resultado das actions de eventos, vindos de `?ok=` e `?erro=` (limpos da URL após exibir). */

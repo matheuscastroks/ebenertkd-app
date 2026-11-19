@@ -7,3 +7,4 @@ export function renewalReminderDays(endsAt: string, days: string[], today: strin
 export function shouldGenerate(competence: string, day: string, leadDays?: number): boolean;
 export function parqExpiryDay(signedAt: string, validityDays?: number): string;
 export function parqReminderStage(daysLeft: number, reminderDays?: readonly number[]): string | null;
+export function eventDeadlineStage(dueAt: string, notifyDaysBefore: number | null | undefined, day: string): { stage: "upcoming" | "today"; daysLeft: number } | null;

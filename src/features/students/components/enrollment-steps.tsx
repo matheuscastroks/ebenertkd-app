@@ -86,6 +86,21 @@ export function PersonalEnrollmentStep({ bundle, onValueChange }: StepProps) {
             />
           </div>
           <div className="sm:col-span-6">
+            <FormField>
+              <FieldLabel htmlFor="enrollment-sex">Sexo *</FieldLabel>
+              <Select name="sex" defaultValue={student.sex ?? ""} onValueChange={(value) => onValueChange?.("sex", value)} required>
+                <SelectTrigger id="enrollment-sex" className="w-full">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="feminino">Feminino</SelectItem>
+                  <SelectItem value="masculino">Masculino</SelectItem>
+                </SelectContent>
+              </Select>
+              <FieldDescription>Usado para as categorias de campeonatos.</FieldDescription>
+            </FormField>
+          </div>
+          <div className="sm:col-span-6">
             <PhoneField
               id="enrollment-whatsapp"
               label="WhatsApp"

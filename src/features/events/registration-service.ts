@@ -1,80 +1,25 @@
 import "server-only";
 
-import { createHash } from "node:crypto";
 import { AppwriteException, Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import { writeAuditEvent } from "@/features/auth/service";
-import { cancelUnpaidEventCharge, createEventCharge, reopenEventCharge } from "@/features/billing/charge-service";
-import type { Charge } from "@/features/billing/types";
-import { getBeltRanks } from "@/features/academy/config-service";
-import { beltNameOf, toPublicRank } from "@/features/academy/belt-rules";
 import { invalidateEventTags, toSeated } from "@/features/events/event-service";
 import { decideSeat, nextWaitlistPosition, planDemotions, planWaitlistPromotions, seatsOf, seatsTaken } from "@/features/events/rules/capacity-rules";
-import { evaluateEventEligibility, ageClassOf, eventAge } from "@/features/events/rules/eligibility-rules";
-import { eventChargeCancellation, registrationPriceCents } from "@/features/events/rules/pricing-rules";
+import { ageClassOf, eventAge } from "@/features/events/rules/eligibility-rules";
+import { registrationPriceCents } from "@/features/events/rules/pricing-rules";
+import { ensureCharge, evaluateOptionEligibility, loadEventContext, loadRegistrationForActor, notifyRegistration, settleRegistrationCharges, stableId, type Tables } from "@/features/events/registration-support";
 import { assertRegistrationTransition, isEventTerminal, isRegistrationOpen } from "@/features/events/rules/status-rules";
-import { cancelRegistrationSchema, parseEligibilityJson, registrationInputSchema } from "@/features/events/schemas";
+import { cancelRegistrationSchema, registrationInputSchema } from "@/features/events/schemas";
 import type { Event, EventOption, EventRegistration } from "@/features/events/types";
-import { notifyStudentEvent } from "@/features/notifications/notification-service";
-import { canAccessStudent, resolveStudentProfile } from "@/features/students/access";
+import { resolveStudentProfile } from "@/features/students/access";
 import type { Enrollment, Student } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { invalidateTags } from "@/lib/cache/invalidate";
 import { CACHE_TAGS } from "@/lib/cache/tags";
-import { formatEventDayTime } from "@/features/events/dates";
-import { guardianEventsPath, ROUTES } from "@/lib/navigation/routes";
-
-type Tables = ReturnType<typeof createAppwriteAdminClient>["tables"];
-
-const stableId = (...parts: string[]) => createHash("sha256").update(parts.join(":")).digest("hex").slice(0, 36);
-
-async function loadEventContext(tables: Tables, databaseId: string, eventId: string) {
-  const event = await tables.getRow<Event>({ databaseId, tableId: APPWRITE_IDS.tables.events, rowId: eventId }).catch(() => {
-    throw new Error("event_not_found");
-  });
-  if (event.event_type === "belt_exam") throw new Error("event_not_found");
-  const [options, registrations] = await Promise.all([
-    tables.listRows<EventOption>({ databaseId, tableId: APPWRITE_IDS.tables.eventOptions, queries: [Query.equal("event_id", [eventId]), Query.limit(100)] }),
-    tables.listRows<EventRegistration>({ databaseId, tableId: APPWRITE_IDS.tables.eventRegistrations, queries: [Query.equal("event_id", [eventId]), Query.limit(5000)] })
-  ]);
-  return { event, options: options.rows, registrations: registrations.rows };
-}
 
 function capacityLimits(event: Event, options: readonly EventOption[]) {
   return { eventCapacity: event.capacity, optionCapacities: Object.fromEntries(options.map((option) => [option.$id, option.capacity])) };
-}
-
-function notifyRegistration(input: { studentId: string; event: Event; registrationId: string; kind: "confirmed" | "waitlisted" | "promoted" | "cancelled" | "pending" | "rejected"; actorAccountId?: string }) {
-  const when = formatEventDayTime(input.event.starts_at);
-  const copy = {
-    confirmed: ["Inscrição confirmada", `Vaga garantida em ${input.event.title}, ${when}.`],
-    waitlisted: ["Você está na lista de espera", `${input.event.title} está lotado. Avisaremos se abrir uma vaga.`],
-    promoted: ["Abriu uma vaga!", `Sua inscrição em ${input.event.title} foi confirmada (${when}).`],
-    cancelled: ["Inscrição cancelada", `A inscrição em ${input.event.title} foi cancelada.`],
-    pending: ["Inscrição recebida", `Aguardando a aprovação do professor para ${input.event.title}.`],
-    rejected: ["Inscrição não aprovada", `A inscrição em ${input.event.title} não foi aprovada.`]
-  }[input.kind];
-  return notifyStudentEvent({
-    studentId: input.studentId,
-    audience: "family",
-    title: copy[0],
-    body: copy[1],
-    dedupeKey: `event-registration:${input.registrationId}:${input.kind}`,
-    studentActionUrl: ROUTES.studentEvents,
-    guardianActionUrl: guardianEventsPath,
-    actorAccountId: input.actorAccountId
-  }).catch(() => undefined);
-}
-
-/** Cria (ou reabre) a cobrança `event_fee` da academia. Convidados e inscrições gratuitas não geram cobrança. */
-async function ensureCharge(tables: Tables, databaseId: string, registration: EventRegistration, event: Event) {
-  if (!registration.student_id || !registration.enrollment_id || registration.price_cents <= 0) return registration;
-  const enrollment = await tables.getRow<Enrollment>({ databaseId, tableId: APPWRITE_IDS.tables.enrollments, rowId: registration.enrollment_id });
-  let charge = await createEventCharge({ enrollment, registrationId: registration.$id, item: "academy", eventTitle: event.title, eventDate: event.starts_at, amountCents: registration.price_cents });
-  if (charge.status === "cancelled") charge = await reopenEventCharge(charge, registration.price_cents);
-  if (registration.charge_id === charge.$id) return registration;
-  return tables.updateRow<EventRegistration>({ databaseId, tableId: APPWRITE_IDS.tables.eventRegistrations, rowId: registration.$id, data: { charge_id: charge.$id, updated_at: new Date().toISOString() } });
 }
 
 /** Aplica rebaixamentos (corrida de inscrições) e devolve a lista atualizada. */
@@ -105,28 +50,6 @@ async function promoteWaitlist(tables: Tables, databaseId: string, event: Event,
   return promoted.length;
 }
 
-type Access = { registration: EventRegistration; event: Event; options: EventOption[]; student?: Student; isAdmin: boolean };
-
-/** Carrega a inscrição e garante que o ator pode agir sobre ela (própria, de dependente ou admin). */
-async function loadRegistrationForActor(actor: Profile, registrationId: string): Promise<Access> {
-  const { tables, config } = createAppwriteAdminClient();
-  const databaseId = config.databaseId;
-  const registration = await tables.getRow<EventRegistration>({ databaseId, tableId: APPWRITE_IDS.tables.eventRegistrations, rowId: registrationId }).catch(() => {
-    throw new Error("registration_not_found");
-  });
-  const { event, options } = await loadEventContext(tables, databaseId, registration.event_id);
-  const isAdmin = actor.role === "admin";
-  if (isAdmin) return { registration, event, options, isAdmin, student: registration.student_id ? await tables.getRow<Student>({ databaseId, tableId: APPWRITE_IDS.tables.students, rowId: registration.student_id }) : undefined };
-  if (!registration.student_id) {
-    // Convidado: só quem o inscreveu enxerga e altera.
-    if (registration.registered_by_account_id !== actor.account_id) throw new Error("registration_forbidden");
-    return { registration, event, options, isAdmin };
-  }
-  const student = await tables.getRow<Student>({ databaseId, tableId: APPWRITE_IDS.tables.students, rowId: registration.student_id });
-  if (!(await canAccessStudent(actor, student.profile_id))) throw new Error("registration_forbidden");
-  return { registration, event, options, student, isAdmin };
-}
-
 export async function registerForEvent(actor: Profile, raw: unknown) {
   const input = registrationInputSchema.parse(raw);
   const { tables, config } = createAppwriteAdminClient();
@@ -138,6 +61,8 @@ export async function registerForEvent(actor: Profile, raw: unknown) {
   if (isEventTerminal(event.status)) throw new Error("event_terminal");
   if (!isAdmin && !isRegistrationOpen(event)) throw new Error("event_registration_closed");
   if (input.companions > (event.max_companions ?? 0)) throw new Error("event_companions_not_allowed");
+  // Campeonato: a academia monta a equipe (interesse → confirmação → envio à federação), sem vaga reservada na hora.
+  const championship = event.event_type === "championship";
 
   const now = new Date().toISOString();
   const price = registrationPriceCents({ optionPriceCents: option.price_cents, companions: input.companions, companionPriceCents: event.companion_price_cents });
@@ -156,7 +81,7 @@ export async function registerForEvent(actor: Profile, raw: unknown) {
   // --- Convidado sem conta: só nome e WhatsApp; cobrança é combinada pessoalmente.
   if (!input.studentProfileId) {
     if (actor.role === "minor_student") throw new Error("guardian_required");
-    if (event.audience === "students") throw new Error("event_guests_not_allowed");
+    if (event.audience === "students" || championship) throw new Error("event_guests_not_allowed");
     const status = decideSeat({ eventCapacity: event.capacity, eventTaken: seatsTaken(registrations.map(toSeated)), optionCapacity: option.capacity, optionTaken: seatsTaken(registrations.map(toSeated), option.$id), seatsWanted, requiresApproval: event.requires_approval || !isAdmin });
     const created = await tables.createRow<EventRegistration>({
       databaseId,
@@ -183,17 +108,15 @@ export async function registerForEvent(actor: Profile, raw: unknown) {
   if (!enrollment) throw new Error("active_enrollment_required");
   if (!isAdmin && !input.acceptedTerms && actor.role !== "minor_student") throw new Error("event_terms_required");
 
-  const rule = parseEligibilityJson(option.eligibility_json);
-  const needsOverdue = Boolean(rule.require_no_overdue);
-  const overdue = needsOverdue ? (await tables.listRows<Charge>({ databaseId, tableId: APPWRITE_IDS.tables.charges, queries: [Query.equal("student_id", [student.$id]), Query.equal("status", ["overdue"]), Query.limit(1)] })).total > 0 : false;
-  const ranks = (await getBeltRanks()).map(toPublicRank);
-  const eligibility = evaluateEventEligibility({
-    rule,
-    athlete: { rankKey: student.rank_key, birthDate: student.birth_date, hasActiveEnrollment: true, hasOverdueCharges: overdue },
-    event: { startsAt: event.starts_at, ageCutoff: event.age_cutoff },
-    rankLabel: (key) => beltNameOf(ranks, key)
-  });
+  const eligibility = await evaluateOptionEligibility(tables, databaseId, { student, event, option, weightGrams: input.declaredWeightGrams });
   if (!isAdmin && !eligibility.eligible) throw new Error("event_not_eligible");
+  if (championship) {
+    // Uma categoria por modalidade (ex.: um peso no kyorugi), exceto a professora.
+    const group = option.max_per_registrant_group;
+    const optionGroup = new Map(options.map((item) => [item.$id, item.max_per_registrant_group]));
+    const sameGroup = group && registrations.some((item) => item.student_id === student.$id && item.option_id !== option.$id && ["interested", "pending_approval", "confirmed", "checked_in", "completed"].includes(item.status) && optionGroup.get(item.option_id) === group);
+    if (!isAdmin && sameGroup) throw new Error("event_category_limit");
+  }
 
   const asMinor = profile.role === "minor_student";
   const minorSelf = asMinor && actor.$id === profile.$id;
@@ -204,7 +127,7 @@ export async function registerForEvent(actor: Profile, raw: unknown) {
   if (existing && existing.status !== "cancelled") return existing;
 
   const others = registrations.filter((item) => item.$id !== existing?.$id);
-  const status = minorSelf
+  const status = minorSelf || championship
     ? ("interested" as const)
     : decideSeat({ eventCapacity: event.capacity, eventTaken: seatsTaken(others.map(toSeated)), optionCapacity: option.capacity, optionTaken: seatsTaken(others.map(toSeated), option.$id), seatsWanted, requiresApproval: event.requires_approval });
   const data = {
@@ -215,6 +138,8 @@ export async function registerForEvent(actor: Profile, raw: unknown) {
     waitlist_position: status === "waitlisted" ? nextWaitlistPosition(others.map(toSeated)) : null,
     rank_key_snapshot: student.rank_key ?? undefined,
     age_class_snapshot: ageClassOf(age)?.label,
+    declared_weight_grams: input.declaredWeightGrams,
+    federation_price_cents: championship ? (option.federation_fee_cents ?? 0) : undefined,
     terms_accepted_at: input.acceptedTerms ? now : undefined,
     guardian_authorized_at: guardianActing ? now : undefined,
     guardian_account_id: guardianActing ? actor.account_id : undefined,
@@ -254,6 +179,16 @@ export async function confirmInterest(actor: Profile, registrationId: string) {
   if (!isAdmin && !isRegistrationOpen(event)) throw new Error("event_registration_closed");
   const { tables, config } = createAppwriteAdminClient();
   const databaseId = config.databaseId;
+  if (event.event_type === "championship") {
+    // Campeonato: o responsável só autoriza; quem confirma a equipe e cobra é a professora.
+    if (isAdmin) throw new Error("registration_invalid_transition");
+    const now = new Date().toISOString();
+    const row = await tables.updateRow<EventRegistration>({ databaseId, tableId: APPWRITE_IDS.tables.eventRegistrations, rowId: registration.$id, data: { terms_accepted_at: now, guardian_authorized_at: now, guardian_account_id: actor.account_id, updated_at: now } });
+    invalidateEventTags(event.$id, student?.$id);
+    await writeAuditEvent("event.registration.guardian_authorized", actor.account_id, "event_registration", row.$id, { event_id: event.$id });
+    if (student) await notifyRegistration({ studentId: student.$id, event, registrationId: row.$id, kind: "authorized", actorAccountId: actor.account_id });
+    return row;
+  }
   const all = (await tables.listRows<EventRegistration>({ databaseId, tableId: APPWRITE_IDS.tables.eventRegistrations, queries: [Query.equal("event_id", [event.$id]), Query.limit(5000)] })).rows;
   const others = all.filter((item) => item.$id !== registration.$id).map(toSeated);
   const status = decideSeat({ eventCapacity: event.capacity, eventTaken: seatsTaken(others), optionCapacity: options.find((o) => o.$id === registration.option_id)?.capacity, optionTaken: seatsTaken(others, registration.option_id), seatsWanted: seatsOf(registration), requiresApproval: event.requires_approval });
@@ -281,18 +216,7 @@ export async function cancelRegistration(actor: Profile, raw: unknown) {
   assertRegistrationTransition(registration.status, "cancelled");
   const { tables, config } = createAppwriteAdminClient();
   const databaseId = config.databaseId;
-  let decision = input.decision;
-  if (registration.charge_id) {
-    const charge = await tables.getRow<Charge>({ databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: registration.charge_id });
-    if (!isAdmin && !["pending", "overdue", "cancelled"].includes(charge.status)) throw new Error("event_paid_charge_decision_required");
-    const handling = eventChargeCancellation(charge.status, decision);
-    if (handling === "cancel") {
-      await cancelUnpaidEventCharge(charge, `Inscrição cancelada: ${registration.$id}`);
-      decision = undefined;
-    }
-  } else {
-    decision = undefined;
-  }
+  const decision = await settleRegistrationCharges(tables, databaseId, registration, { decision: input.decision, isAdmin, reason: `Inscrição cancelada: ${registration.$id}` });
   const now = new Date().toISOString();
   const updated = await tables.updateRow<EventRegistration>({ databaseId, tableId: APPWRITE_IDS.tables.eventRegistrations, rowId: registration.$id, data: { status: "cancelled", waitlist_position: null, cancelled_at: now, financial_decision: decision, updated_at: now } });
   invalidateEventTags(event.$id, student?.$id);
@@ -331,16 +255,7 @@ export async function rejectRegistration(actor: Profile, raw: unknown) {
   assertRegistrationTransition(registration.status, "rejected");
   const { tables, config } = createAppwriteAdminClient();
   const databaseId = config.databaseId;
-  let decision = input.decision;
-  if (registration.charge_id) {
-    const charge = await tables.getRow<Charge>({ databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: registration.charge_id });
-    if (eventChargeCancellation(charge.status, decision) === "cancel") {
-      await cancelUnpaidEventCharge(charge, `Inscrição recusada: ${registration.$id}`);
-      decision = undefined;
-    }
-  } else {
-    decision = undefined;
-  }
+  const decision = await settleRegistrationCharges(tables, databaseId, registration, { decision: input.decision, isAdmin: true, reason: `Inscrição recusada: ${registration.$id}` });
   const now = new Date().toISOString();
   const updated = await tables.updateRow<EventRegistration>({ databaseId, tableId: APPWRITE_IDS.tables.eventRegistrations, rowId: registration.$id, data: { status: "rejected", waitlist_position: null, financial_decision: decision, updated_at: now } });
   invalidateEventTags(event.$id, student?.$id);

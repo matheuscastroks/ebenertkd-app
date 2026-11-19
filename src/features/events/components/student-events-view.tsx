@@ -6,6 +6,8 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { formatEventDay, formatEventTime } from "@/features/events/dates";
 import { CancelRegistrationDialog } from "@/features/events/components/cancel-registration-dialog";
+import { ChampionshipEntryDetails, StudentDeadlineList } from "@/features/events/components/championship-entry-details";
+import { ChampionshipRegisterDialog } from "@/features/events/components/championship-register-dialog";
 import { GuestRegisterDialog, RegisterDialog } from "@/features/events/components/register-dialog";
 import { EventTypeBadge, RegistrationStatusBadge } from "@/features/events/components/status-badges";
 import { isRegistrationOpen } from "@/features/events/rules/status-rules";
@@ -21,6 +23,8 @@ type Props = {
   returnTo: string;
   billingHref: string;
   examsHref: string;
+  /** Cadastro do aluno (para completar o sexo antes de competir). */
+  enrollmentHref?: string;
   showFinancial: boolean;
   viewer: EventsViewer;
   open: StudentOpenEvent[];
@@ -29,7 +33,7 @@ type Props = {
 };
 
 function priceText(item: StudentOpenEvent) {
-  const prices = item.options.map((entry) => entry.option.price_cents);
+  const prices = item.options.map((entry) => entry.option.price_cents + (entry.option.federation_fee_cents ?? 0));
   if (!prices.length) return null;
   const min = Math.min(...prices);
   const max = Math.max(...prices);
@@ -49,7 +53,8 @@ function OpenEventCard({ item, props }: { item: StudentOpenEvent; props: Props }
   const { event } = item;
   const allMine = item.options.length > 0 && item.options.every((entry) => entry.mine);
   const price = props.showFinancial ? priceText(item) : null;
-  const guestsAllowed = event.audience !== "students" && props.viewer.kind !== "minor";
+  const championship = event.event_type === "championship";
+  const guestsAllowed = event.audience !== "students" && props.viewer.kind !== "minor" && !championship;
   return (
     <li className="space-y-3 p-4 sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -65,8 +70,9 @@ function OpenEventCard({ item, props }: { item: StudentOpenEvent; props: Props }
           {event.description ? <p className="max-w-prose text-sm text-muted-foreground">{event.description}</p> : null}
           <p className="text-sm text-muted-foreground">
             {price ? `${price} · ` : ""}
-            {item.seatsLeft === null ? "Vagas ilimitadas" : item.seatsLeft === 0 ? "Lotado (lista de espera)" : `${item.seatsLeft} vagas restantes`}
+            {championship ? (event.organizer_name ? `Organização: ${event.organizer_name}` : "A academia monta a equipe e envia à federação") : item.seatsLeft === null ? "Vagas ilimitadas" : item.seatsLeft === 0 ? "Lotado (lista de espera)" : `${item.seatsLeft} vagas restantes`}
           </p>
+          {championship && item.deadlines ? <StudentDeadlineList deadlines={item.deadlines} /> : null}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {item.registrationState === "open" ? (
@@ -74,7 +80,7 @@ function OpenEventCard({ item, props }: { item: StudentOpenEvent; props: Props }
               <StatusBadge tone="success">Você já está inscrito</StatusBadge>
             ) : (
               <>
-                <RegisterDialog item={item} studentProfileId={props.studentProfileId} returnTo={props.returnTo} who={props.viewer} showFinancial={props.showFinancial} />
+                {championship ? <ChampionshipRegisterDialog item={item} studentProfileId={props.studentProfileId} returnTo={props.returnTo} who={props.viewer} showFinancial={props.showFinancial} profileHref={props.enrollmentHref} /> : <RegisterDialog item={item} studentProfileId={props.studentProfileId} returnTo={props.returnTo} who={props.viewer} showFinancial={props.showFinancial} />}
                 {guestsAllowed ? <GuestRegisterDialog item={item} returnTo={props.returnTo} /> : null}
               </>
             )
@@ -99,12 +105,14 @@ function OpenEventCard({ item, props }: { item: StudentOpenEvent; props: Props }
 }
 
 function RegistrationRow({ entry, props, canCancel }: { entry: StudentEventEntry; props: Props; canCancel: boolean }) {
-  const { registration, event, option, charge } = entry;
-  const paid = charge ? !["pending", "overdue", "cancelled"].includes(charge.status) : false;
-  const confirmInterest = props.viewer.kind === "guardian" && registration.status === "interested";
+  const { registration, event, option, charge, federationCharge } = entry;
+  const championship = event.event_type === "championship";
+  const paid = [charge, federationCharge].some((item) => item && !["pending", "overdue", "cancelled"].includes(item.status));
+  const confirmInterest = props.viewer.kind === "guardian" && registration.status === "interested" && !championship;
   const cancellable = canCancel && ["interested", "pending_approval", "confirmed", "waitlisted"].includes(registration.status) && isRegistrationOpen(event) && !paid && (props.viewer.kind !== "minor" || registration.status === "interested");
   return (
-    <li className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+    <li className="p-4 sm:p-5">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0 space-y-1">
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-sm font-semibold text-foreground">{event.title}</p>
@@ -116,17 +124,25 @@ function RegistrationRow({ entry, props, canCancel }: { entry: StudentEventEntry
           {option ? ` · ${option.label}` : ""}
           {registration.companions > 0 ? ` · +${registration.companions} acompanhante${registration.companions > 1 ? "s" : ""}` : ""}
         </p>
-        {props.showFinancial && charge ? (
-          <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            {formatBrl(charge.amount_cents)}
-            <StatusBadge tone={examFeeTones[charge.status]}>{examFeeLabels[charge.status]}</StatusBadge>
-            {charge.status === "pending" || charge.status === "overdue" ? (
-              <Link href={props.billingHref} className="font-medium text-primary underline-offset-4 hover:underline">
-                Pagar
-              </Link>
-            ) : null}
-          </p>
-        ) : null}
+        {props.showFinancial
+          ? [
+              { label: championship ? "Academia" : "", charge },
+              { label: "Federação", charge: federationCharge }
+            ].map((line) =>
+              line.charge ? (
+                <p key={line.label || "charge"} className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                  {line.label ? `${line.label}: ` : ""}
+                  {formatBrl(line.charge.amount_cents)}
+                  <StatusBadge tone={examFeeTones[line.charge.status]}>{examFeeLabels[line.charge.status]}</StatusBadge>
+                  {line.charge.status === "pending" || line.charge.status === "overdue" ? (
+                    <Link href={props.billingHref} className="font-medium text-primary underline-offset-4 hover:underline">
+                      Pagar
+                    </Link>
+                  ) : null}
+                </p>
+              ) : null
+            )
+          : null}
         {paid && canCancel && ["confirmed", "pending_approval"].includes(registration.status) ? <p className="text-sm text-muted-foreground">Para cancelar uma inscrição paga, fale com o professor.</p> : null}
       </div>
       <div className="flex flex-wrap items-center gap-2">
@@ -141,6 +157,8 @@ function RegistrationRow({ entry, props, canCancel }: { entry: StudentEventEntry
         ) : null}
         {cancellable ? <CancelRegistrationDialog registrationId={registration.$id} returnTo={props.returnTo} personName={event.title} hasPaidCharge={false} /> : null}
       </div>
+    </div>
+    {championship ? <ChampionshipEntryDetails entry={entry} viewer={props.viewer} returnTo={props.returnTo} /> : null}
     </li>
   );
 }
@@ -156,7 +174,7 @@ export function StudentEventsView(props: Props) {
           Abertos para inscrição
         </h2>
         {props.open.length === 0 ? (
-          <EmptyState title="Nenhum evento no momento" description="Aulões, seminários e confraternizações aparecem aqui assim que o professor publicar." />
+          <EmptyState title="Nenhum evento no momento" description="Campeonatos, aulões, seminários e confraternizações aparecem aqui assim que o professor publicar." />
         ) : (
           <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
             {props.open.map((item) => (

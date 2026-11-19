@@ -60,7 +60,8 @@ describe("Appwrite infrastructure schema", () => {
       "event_options",
       "event_registrations",
       "event_registration_documents",
-      "event_results"
+      "event_results",
+      "student_badges"
     ]);
     expect(tables.find((table) => table.id === "profiles")?.indexes).toContainEqual({
       key: "account_id_unique",

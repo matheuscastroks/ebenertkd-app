@@ -17,6 +17,8 @@ export type Student = Models.Row & {
   started_at_tkd?: string | null;
   /** Graduação (`rank_key`, p. ex. "gub-9"). Nome e cor da faixa vêm sempre da configuração. */
   rank_key?: string | null;
+  /** Sexo para categorias de campeonato (opcional no banco; o formulário de matrícula exige). */
+  sex?: "feminino" | "masculino" | null;
   training_class_id?: string | null;
   training_class?: string | null;
   health_condition?: "yes" | "no" | null;

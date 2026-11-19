@@ -149,6 +149,21 @@ export function EditStudentDialog({
             </h4>
             <div className="grid items-start gap-3 sm:grid-cols-2">
               <div>
+                <Field>
+                  <FieldLabel htmlFor="edit-sex">Sexo</FieldLabel>
+                  <Select name="sex" defaultValue={student.sex ?? ""}>
+                    <SelectTrigger id="edit-sex" className="w-full">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="feminino">Feminino</SelectItem>
+                      <SelectItem value="masculino">Masculino</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </div>
+
+              <div>
                 <PhoneField
                   id="edit-whatsapp"
                   name="whatsapp"

@@ -85,3 +85,23 @@ describe("demo seed catalog", () => {
     expect(exams.find((e) => e.status === "confirmed")?.key).toBe("upcoming-exam");
   });
 });
+
+describe("demo seed events and sex", () => {
+  it("assigns a sex to every demo student", async () => {
+    const { demoStudentSex } = await import("./demo-seed-data");
+    const scenarios = buildDemoScenario("2026-11-19T12:00:00.000Z");
+    expect(scenarios.every((scenario) => ["feminino", "masculino"].includes(demoStudentSex(scenario.fullName)))).toBe(true);
+    expect(demoStudentSex("Camila Ferreira")).toBe("feminino");
+    expect(demoStudentSex("Rodrigo Silveira")).toBe("masculino");
+  });
+
+  it("defines an upcoming championship with the federation schedule and a past one", async () => {
+    const { demoChampionshipDefinitions, demoSimpleEventDefinitions } = await import("./demo-seed-data");
+    const { upcoming, past } = demoChampionshipDefinitions("2026-11-19T12:00:00.000Z");
+    expect(upcoming.deadlines.map((deadline) => deadline.kind)).toEqual(["affiliation", "registration", "category_change", "weigh_in"]);
+    expect(upcoming.options.length).toBeGreaterThan(0);
+    expect(upcoming.federation_fee_cents).toBeGreaterThan(0);
+    expect(past.starts_at < upcoming.starts_at).toBe(true);
+    expect(demoSimpleEventDefinitions("2026-11-19T12:00:00.000Z").some((event) => event.event_type === "seminar")).toBe(true);
+  });
+});

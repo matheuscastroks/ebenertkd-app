@@ -91,3 +91,17 @@ export const parqExpiryDay = (signedAt, validityDays = DEFAULT_POLICIES.complian
 /** Etapa do lembrete de PAR-Q para os dias que faltam: 0 = venceu hoje ("expired"), demais = "Nd". `null` fora dos dias da política. */
 export const parqReminderStage = (daysLeft, reminderDays = DEFAULT_POLICIES.compliance.parq_reminder_days) =>
   reminderDays.includes(daysLeft) ? (daysLeft === 0 ? "expired" : `${daysLeft}d`) : null;
+
+/**
+ * Lembrete de prazo de evento (filiação, inscrição, troca de categoria, pesagem). `dueAt` é um instante ISO e o dia
+ * conta no fuso de Brasília (UTC-3, sem horário de verão). Avisa uma vez ao entrar na janela `notifyDaysBefore`
+ * (padrão 3 dias) e no próprio dia; depois do prazo, nada.
+ */
+export const eventDeadlineStage = (dueAt, notifyDaysBefore, day) => {
+  const dueDay = new Date(Date.parse(dueAt) - 3 * 3600000).toISOString().slice(0, 10);
+  const left = Math.round((utc(dueDay) - utc(day)) / DAY_MS);
+  if (left < 0) return null;
+  if (left === 0) return { stage: "today", daysLeft: 0 };
+  const window = notifyDaysBefore ?? 3;
+  return window > 0 && left <= window ? { stage: "upcoming", daysLeft: left } : null;
+};

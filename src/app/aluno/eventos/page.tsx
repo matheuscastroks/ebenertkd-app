@@ -18,6 +18,7 @@ async function StudentEventsContent({ profile }: { profile: Profile }) {
       returnTo={ROUTES.studentEvents}
       billingHref={ROUTES.studentBilling}
       examsHref={ROUTES.studentExams}
+      enrollmentHref={ROUTES.studentEnrollment}
       showFinancial={data.showFinancial}
       viewer={data.minorSelf ? { kind: "minor" } : { kind: "self" }}
       open={toClientData(data.open)}
@@ -31,7 +32,7 @@ export default async function StudentEventsPage({ searchParams }: { searchParams
   const [profile, query] = await Promise.all([requireCapability("student"), searchParams]);
 
   return (
-    <PortalShell profile={profile} activePath={ROUTES.studentEvents} title="Eventos" subtitle="Aulões, seminários e confraternizações da academia.">
+    <PortalShell profile={profile} activePath={ROUTES.studentEvents} title="Eventos" subtitle="Campeonatos, aulões, seminários e confraternizações da academia.">
       <div className="w-full min-w-0">
         <EventFeedback ok={query.ok} erro={query.erro} />
         <Suspense fallback={<ListItemsSkeleton count={3} />}>
