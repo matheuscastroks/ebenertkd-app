@@ -20,7 +20,7 @@ function initials(name: string) {
 export function avatarLift(index: number, active: number | null): CSSProperties {
   if (active === null) return {};
   if (index === active) {
-    return { "--shift": "var(--avatar-lift)", "--scale-active": "var(--avatar-scale)", zIndex: 10 } as CSSProperties;
+    return { "--shift": "var(--avatar-lift)", "--scale-active": "var(--avatar-scale)" } as CSSProperties;
   }
   const factor = Number((AVATAR_FALLOFF ** Math.abs(index - active)).toFixed(4));
   return { "--shift": `calc(var(--avatar-lift) * ${factor})` } as CSSProperties;

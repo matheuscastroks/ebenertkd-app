@@ -34,7 +34,7 @@ describe("AvatarGroup", () => {
 
   it("calcula o decaimento da elevação pela distância", () => {
     expect(avatarLift(2, null)).toEqual({});
-    expect(avatarLift(2, 2)).toEqual({ "--shift": "var(--avatar-lift)", "--scale-active": "var(--avatar-scale)", zIndex: 10 });
+    expect(avatarLift(2, 2)).toEqual({ "--shift": "var(--avatar-lift)", "--scale-active": "var(--avatar-scale)" });
     expect(avatarLift(3, 2)).toEqual({ "--shift": "calc(var(--avatar-lift) * 0.45)" });
     expect(avatarLift(0, 2)).toEqual({ "--shift": "calc(var(--avatar-lift) * 0.2025)" });
   });
@@ -48,7 +48,8 @@ describe("AvatarGroup", () => {
     expect(items[1].style.getPropertyValue("--scale-active")).toBe("var(--avatar-scale)");
     expect(items[0].style.getPropertyValue("--shift")).toBe("calc(var(--avatar-lift) * 0.45)");
     expect(items[0].style.getPropertyValue("--scale-active")).toBe("");
-    expect(items[1].style.zIndex).toBe("10");
+    // Não altera zIndex para manter a ordem natural do DOM (sem sobrepor o card da frente)
+    expect(items[1].style.zIndex).toBe("");
     expect(items[3].style.getPropertyValue("--shift")).toBe("calc(var(--avatar-lift) * 0.2025)");
     fireEvent.pointerLeave(list);
     expect(items[1].style.getPropertyValue("--shift")).toBe("");
