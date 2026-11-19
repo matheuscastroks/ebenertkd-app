@@ -168,7 +168,7 @@ export function getRegistrationHub() {
     async (): Promise<RegistrationHub> => {
       const { tables, config } = createAppwriteAdminClient();
       const databaseId = config.databaseId;
-      const events = (await tables.listRows<Event>({ databaseId, tableId: APPWRITE_IDS.tables.events, queries: [Query.notEqual("event_type", ["belt_exam"]), Query.notEqual("status", ["draft", "completed", "cancelled"]), Query.limit(200)] })).rows;
+      const events = (await tables.listRows<Event>({ databaseId, tableId: APPWRITE_IDS.tables.events, queries: [Query.notEqual("event_type", ["belt_exam"]), Query.equal("status", ["published", "registration_open", "registration_closed", "in_progress"]), Query.limit(200)] })).rows;
       const queues = emptyQueues();
       if (!events.length) return { queues, total: 0 };
       const registrations: EventRegistration[] = [];
