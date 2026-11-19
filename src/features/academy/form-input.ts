@@ -56,3 +56,25 @@ export function contractFormToPatch(formData: FormData): Record<string, unknown>
     rematriculation_after_months: toNumber(formData.get("rematriculation_after_months"))
   };
 }
+
+export function examFormToPatch(formData: FormData): Record<string, unknown> {
+  const fee = formData.get("default_fee");
+  const decision = String(formData.get("absent_default_decision") ?? "");
+  return {
+    // Campo vazio = sem taxa padrão (a banca informa a taxa).
+    default_fee_cents: fee == null || String(fee).trim() === "" ? null : moneyToCents(fee),
+    block_on_overdue: isOn(formData.get("block_on_overdue")),
+    almost_ready_pct: toNumber(formData.get("almost_ready_pct")),
+    fallback_min_days: toNumber(formData.get("fallback_min_days")),
+    fallback_min_presences: toNumber(formData.get("fallback_min_presences")),
+    allow_skip_grades: isOn(formData.get("allow_skip_grades")),
+    absent_default_decision: decision === "" || decision === "none" ? null : decision
+  };
+}
+
+export function beltsFormToPatch(formData: FormData): Record<string, unknown> {
+  return {
+    form_label: String(formData.get("form_label") ?? ""),
+    level_label: String(formData.get("level_label") ?? "")
+  };
+}

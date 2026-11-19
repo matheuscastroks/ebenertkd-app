@@ -1,5 +1,6 @@
 import type { AccessPolicy } from "@/features/academy/defaults";
 import { evaluateStudentAppAccess } from "@/features/billing/access-lock-rules";
+import type { StudentEligibilityAssessment } from "@/features/exams/eligibility-rules";
 import type { Charge, Payment } from "@/features/billing/types";
 import type { Enrollment } from "@/features/students/types";
 
@@ -31,4 +32,29 @@ export function countLockedStudents(input: {
     if (state.locked) locked += 1;
   }
   return locked;
+}
+
+export type EligibilityImpact = {
+  /** Alunos avaliados. */
+  total: number;
+  /** Podiam prestar exame e deixam de poder. */
+  leaving: number;
+  /** Não podiam e passam a poder. */
+  entering: number;
+};
+
+/** "N alunos deixam de estar elegíveis e M passam a estar": compara a avaliação atual com a proposta (pura). */
+export function countEligibilityChange(
+  before: ReadonlyArray<Pick<StudentEligibilityAssessment, "studentId" | "canTakeExam">>,
+  after: ReadonlyArray<Pick<StudentEligibilityAssessment, "studentId" | "canTakeExam">>
+): EligibilityImpact {
+  const wasEligible = new Map(before.map((row) => [row.studentId, row.canTakeExam]));
+  let leaving = 0;
+  let entering = 0;
+  for (const row of after) {
+    const was = wasEligible.get(row.studentId) ?? false;
+    if (was && !row.canTakeExam) leaving += 1;
+    if (!was && row.canTakeExam) entering += 1;
+  }
+  return { total: after.length, leaving, entering };
 }

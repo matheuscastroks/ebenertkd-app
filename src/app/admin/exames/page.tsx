@@ -15,11 +15,12 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getPolicy } from "@/features/academy/config-service";
 import { examEventLabels, examEventTones, formatExamDate } from "@/features/exams/labels";
 import { getExamsOverview } from "@/features/exams/service";
 import { LocationSelect } from "@/features/locations/components/location-select";
 import { listLocations } from "@/features/locations/locations-service";
-import { formatBrl } from "@/lib/money";
+import { centsToReaisInput, formatBrl } from "@/lib/money";
 import { adminExamPath, ROUTES } from "@/lib/navigation/routes";
 import { requireProfile } from "@/lib/auth/session";
 
@@ -188,10 +189,11 @@ export default async function ExamsPage({
 }: {
   searchParams: Promise<{ error?: string; cancelled?: string }>;
 }) {
-  const [admin, locations, query] = await Promise.all([
+  const [admin, locations, query, examPolicy] = await Promise.all([
     requireProfile("admin"),
     listLocations(),
     searchParams,
+    getPolicy("exam"),
   ]);
 
   return (
@@ -227,7 +229,7 @@ export default async function ExamsPage({
 
             <Field>
               <FieldLabel htmlFor="exam-fee">Taxa padrão por aluno (R$)</FieldLabel>
-              <Input id="exam-fee" name="default_fee_reais" type="number" inputMode="decimal" min="0" step="0.01" placeholder="150,00" required className="h-11 tabular-nums" />
+              <Input id="exam-fee" name="default_fee_reais" type="number" inputMode="decimal" min="0" step="0.01" placeholder="150,00" defaultValue={examPolicy.default_fee_cents != null ? centsToReaisInput(examPolicy.default_fee_cents) : undefined} required className="h-11 tabular-nums" />
             </Field>
 
             <Field className="sm:col-span-2">

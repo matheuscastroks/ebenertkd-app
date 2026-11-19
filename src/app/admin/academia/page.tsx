@@ -18,7 +18,7 @@ const sectionStatus = (customized: PolicySection[], sections: PolicySection[]): 
 
 export default async function AdminAcademyOverviewPage() {
   const admin = await requireProfile("admin");
-  const { identity, customized } = await getAcademyConfigOverview();
+  const { identity, customized, customizedRanks } = await getAcademyConfigOverview();
   const checklist = identityChecklist(identity);
   const pending = checklist.filter((item) => !item.done);
 
@@ -36,10 +36,22 @@ export default async function AdminAcademyOverviewPage() {
       status: sectionStatus(customized, ["billing"])
     },
     {
+      title: "Graduações",
+      description: "Nome, cor, forma, tempo e presenças de cada graduação, com modelos CBTKD, ITF e Kukkiwon.",
+      href: ROUTES.adminAcademyGrades,
+      status: customizedRanks > 0 || customized.includes("belts") ? { label: "Configurado", tone: "success" } : { label: "Usando o padrão", tone: "neutral" }
+    },
+    {
       title: "Contratos",
       description: "Duração, prazo de cancelamento, encargo de saída e rematrícula.",
       href: ROUTES.adminAcademyContracts,
       status: sectionStatus(customized, ["contract"])
+    },
+    {
+      title: "Exames",
+      description: "Taxa padrão, bloqueio por inadimplência, elegibilidade e inscrição em graduações acima.",
+      href: ROUTES.adminAcademyExams,
+      status: sectionStatus(customized, ["exam"])
     }
   ];
 
@@ -57,7 +69,7 @@ export default async function AdminAcademyOverviewPage() {
       }
     >
       <div className="w-full min-w-0 space-y-6">
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {cards.map((card) => (
             <Card key={card.href}>
               <CardHeader>

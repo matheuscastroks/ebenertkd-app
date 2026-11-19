@@ -457,13 +457,15 @@ Sem editar os arquivos do outro plano enquanto ele estiver em execução; integr
 - [x] Testes: snapshot preservado após mudar política; bloqueio desligado; aviso de impacto do bloqueio; taxa de matrícula idempotente
 
 ### Etapa 3 — Faixas, presets e exames (alta)
-- [ ] Declarar `belt_rank_settings`; coluna aditiva `rank_key` em `students`, `exam_participants`, `belt_history`; catálogo `ranks.ts`
-- [ ] Presets CBTKD (= atual), Kukkiwon e ITF com campos "a confirmar" marcados
-- [ ] Script idempotente de bootstrap e backfill de `rank_key` (com `--dry-run`)
-- [ ] `belt-rules.ts`; migrar F1–F15 e E1–E5 para a configuração de faixas
-- [ ] `/admin/academia/graduacoes` e `/admin/academia/exames`; editor com prévia do badge
-- [ ] "Aplicar modelo" CBTKD/ITF/Kukkiwon (só nomes, cores e formas, com prévia)
-- [ ] Testes: progressão com ponta/listra/Poom; renomear/recolorir não altera alunos nem histórico; paleta + color picker; elegibilidade com tempos/presenças configurados; impacto "entram/saem da elegibilidade"
+- [x] Declarar `belt_rank_settings` (uma linha por `rank_key`, único) e catálogo fixo `src/features/academy/ranks.ts`. Pela decisão 0.1-7/8 as colunas `current_belt` e `gub` de `students`, os rótulos de faixa de `exam_participants` e `belt_history` **saem** do `schema.ts` e entram `students.rank_key`, `exam_participants.target_rank_key`, `belt_history.previous_rank_key`/`new_rank_key`. **Decisão do snapshot (§2.5):** `belt_history` guarda também o nome da faixa na época (`previous_belt_name`, `new_belt_name`), usado só na exibição do histórico; a cor e o nível vêm sempre da configuração atual. As inscrições em exame guardam só `target_rank_key` (nome sempre derivado da configuração).
+- [x] Presets CBTKD (= padrão do código), ITF e Kukkiwon em `src/features/academy/presets/` com nomes, cores, estilos e formas; campos incertos marcados `revise` e exibidos como "Revise: valor sugerido"
+- [x] ~~Script de bootstrap e backfill de `rank_key`~~ — **cancelado** (decisão 0.1-8: o banco será recriado; sem linha, valem os padrões do código). `setup.ts` só cria (nunca remove colunas): colunas antigas só somem ao recriar o banco; **`infra:apply` pendente**
+- [x] `belt-rules.ts` (+ `rank-defaults.ts`, `rank-schemas.ts`, `rank-changes.ts`, `preset-rules.ts`, `belt-colors.ts`); F1–F15 e E1–E5 migrados: `BELT_OPTIONS`, `GUB_BELT_OPTIONS`, `DAN_BELT_OPTIONS`, `gubForBelt`, `beltForGub`, `getBeltTheme` e o mapa de nomes do `belt-badge` foram removidos. `evaluateExamEligibility`, `buildStudentReadiness`, `buildBeltRoadmap` e o funil anual recebem as graduações e a política `exam` por parâmetro; `study-catalog.ts` é indexado por `rank_key`
+- [x] `/admin/academia/graduacoes` (uma linha por graduação, em acordeão; no celular cada linha vira um cartão) e `/admin/academia/exames`; editor com prévia ao vivo do `BeltBadge`; rotas, menu, cartões da visão geral e teste das rotas
+- [x] "Aplicar modelo" CBTKD/ITF/Kukkiwon (só nomes, cores, estilos e formas, com prévia e confirmação; também ajusta os termos "Poomsae/Tul" e "Gub/Gup/Geup" da seção `belts`)
+- [x] Seções de política `exam` e `belts`; tempo, presenças, idade mínima e taxa por graduação; aviso de impacto "N alunos deixam de estar elegíveis e M passam a estar" antes de salvar tempos/presenças/idade/habilitação e a política de exame
+- [x] Testes: progressão com ponta/listra/Poom/Dan; renomear/recolorir não escreve em alunos nem histórico; paleta + color picker + hex; elegibilidade com tempos/presenças configurados; impacto; graduação desativada some do seletor; graduação com alunos não pode ser desativada; aluno/responsável/menor recebem `admin_required`
+- **Adiado / não feito nesta etapa:** (1) `infra:apply` (adiciona `belt_rank_settings`, `rank_key` e os nomes do histórico; as colunas obrigatórias novas exigem banco vazio ou recriado); (2) a Function `daily-operations` não lê graduações nem a política `exam` (não usa faixas hoje); (3) catálogo de estudos por preset (Etapa 6): o guia continua com conteúdo Taegeuk e mostra a forma configurada ao lado; (4) a gravação de várias graduações é sequencial, com revisão por linha (um conflito no meio deixa as anteriores salvas; a tela recarrega); (5) `min_age_years` vale para prestar exame **para** a graduação (interpretação adotada), só quando o nascimento do aluno é conhecido.
 
 ### Etapa 4 — Regras operacionais e Function (média)
 - [ ] Seções `retention`, `compliance`, `notifications`, `gamification`; tela `/admin/academia/regras`

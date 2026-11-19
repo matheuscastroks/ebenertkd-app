@@ -2,10 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import type { Profile } from "@/features/auth/types";
-import { savePolicySection, saveAcademyIdentity } from "@/features/academy/config-admin-service";
+import { applyBeltPreset, savePolicySection, saveAcademyIdentity, saveBeltRanks } from "@/features/academy/config-admin-service";
 import type { PolicySection } from "@/features/academy/defaults";
-import { accessFormToPatch, billingFormToPatch, contractFormToPatch, identityFormToInput } from "@/features/academy/form-input";
-import { previewAccessImpact, type AccessImpact } from "@/features/academy/impact-service";
+import { accessFormToPatch, beltsFormToPatch, billingFormToPatch, contractFormToPatch, examFormToPatch, identityFormToInput } from "@/features/academy/form-input";
+import type { EligibilityImpact } from "@/features/academy/impact-rules";
+import { previewAccessImpact, previewEligibilityImpact, type AccessImpact } from "@/features/academy/impact-service";
+import { RankInUseError, type RankPatch } from "@/features/academy/rank-changes";
+import { RankValidationError } from "@/features/academy/rank-schemas";
 import { PolicyValidationError } from "@/features/academy/schemas";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
@@ -75,6 +78,79 @@ export async function previewAccessImpactAction(formData: FormData): Promise<{ o
   const actor = await requireProfile("admin");
   try {
     return { ok: true, impact: await previewAccessImpact(actor, accessFormToPatch(formData)) };
+  } catch {
+    return { ok: false };
+  }
+}
+
+export async function saveExamPolicyAction(formData: FormData): Promise<AcademySaveResult> {
+  const actor = await requireProfile("admin");
+  return savePolicy("exam", examFormToPatch(formData), formData, actor, [ROUTES.adminAcademyExams, ROUTES.adminAcademy, ROUTES.adminExamEligibility, ROUTES.adminExams]);
+}
+
+export async function saveBeltsPolicyAction(formData: FormData): Promise<AcademySaveResult> {
+  const actor = await requireProfile("admin");
+  return savePolicy("belts", beltsFormToPatch(formData), formData, actor, [ROUTES.adminAcademyGrades, ROUTES.adminAcademy]);
+}
+
+export async function previewExamImpactAction(formData: FormData): Promise<{ ok: true; impact: EligibilityImpact } | { ok: false }> {
+  const actor = await requireProfile("admin");
+  try {
+    return { ok: true, impact: await previewEligibilityImpact(actor, { examPatch: examFormToPatch(formData) }) };
+  } catch {
+    return { ok: false };
+  }
+}
+
+/* ------------------------------------------------------------------ graduações */
+
+export type RankSaveResult =
+  | { ok: true; changed: number }
+  | { ok: false; error: "revision_conflict" | "invalid" | "rank_in_use" | "failed"; fields?: Record<string, string>; inUse?: string[] };
+
+function rankFailure(error: unknown): RankSaveResult {
+  if (error instanceof Error && error.message === "revision_conflict") return { ok: false, error: "revision_conflict" };
+  if (error instanceof RankInUseError) return { ok: false, error: "rank_in_use", inUse: error.ranks.map((rank) => rank.rank_key) };
+  if (error instanceof RankValidationError) {
+    return { ok: false, error: "invalid", fields: Object.fromEntries(error.issues.map((issue) => [issue.rank_key ? `${issue.rank_key}.${issue.field}` : issue.field, issue.message])) };
+  }
+  console.error(`[academy-ranks] ${safeErrorMessage(error)}`);
+  return { ok: false, error: "failed" };
+}
+
+function revalidateRankPages() {
+  revalidatePath("/", "layout");
+  revalidatePath(ROUTES.adminAcademyGrades);
+  revalidatePath(ROUTES.adminAcademy);
+}
+
+/** Salva as alterações de graduações. Recebe só as graduações alteradas, cada uma com a revisão que o professor viu. */
+export async function saveBeltRanksAction(patches: RankPatch[], reason?: string): Promise<RankSaveResult> {
+  const actor = await requireProfile("admin");
+  try {
+    const result = await saveBeltRanks(actor, patches, reason?.trim() || undefined);
+    revalidateRankPages();
+    return { ok: true, changed: result.changed };
+  } catch (error) {
+    return rankFailure(error);
+  }
+}
+
+export async function applyBeltPresetAction(presetId: string): Promise<RankSaveResult> {
+  const actor = await requireProfile("admin");
+  try {
+    const result = await applyBeltPreset(actor, presetId);
+    revalidateRankPages();
+    return { ok: true, changed: result.changed };
+  } catch (error) {
+    return rankFailure(error);
+  }
+}
+
+export async function previewRankImpactAction(patches: RankPatch[]): Promise<{ ok: true; impact: EligibilityImpact } | { ok: false }> {
+  const actor = await requireProfile("admin");
+  try {
+    return { ok: true, impact: await previewEligibilityImpact(actor, { rankPatches: patches }) };
   } catch {
     return { ok: false };
   }

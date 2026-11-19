@@ -1,4 +1,4 @@
-import type { AccessPolicy, BillingPolicy, ContractPolicy } from "@/features/academy/defaults";
+import type { AccessPolicy, BillingPolicy, ContractPolicy, ExamPolicy } from "@/features/academy/defaults";
 import { formatBrl } from "@/lib/money";
 
 /** Avisos em texto mostrados antes de confirmar. Só aparecem para o que realmente mudou. */
@@ -54,4 +54,37 @@ export function contractImpactNotes(before: ContractPolicy, after: ContractPolic
 export function templateUsesCancellationVariables(content: string): boolean {
   return /{{\s*(contrato\.dia_limite_cancelamento|contract\.cancellation_notice_day)\s*}}/i.test(content)
     && /{{\s*(contrato\.encargo_saida|contract\.exit_fee)\s*}}/i.test(content);
+}
+
+/** "N alunos deixam de estar elegíveis e M passam a estar", com singular e plural corretos. */
+export function eligibilityImpactText(impact: { leaving: number; entering: number }): string {
+  const leaving = impact.leaving === 1 ? "1 aluno deixa de estar elegível" : `${impact.leaving} alunos deixam de estar elegíveis`;
+  const entering = impact.entering === 1 ? "1 passa a estar" : `${impact.entering} passam a estar`;
+  return `${leaving} e ${entering}.`;
+}
+
+export function examImpactNotes(before: ExamPolicy, after: ExamPolicy): string[] {
+  const notes: string[] = [];
+  if (before.block_on_overdue !== after.block_on_overdue) {
+    notes.push(after.block_on_overdue
+      ? "Quem tem mensalidade em atraso passa a ficar com pendência financeira e não pode ser inscrito até regularizar."
+      : "A inadimplência deixa de bloquear a inscrição: o aluno aparece como apto e o aviso financeiro continua visível.");
+  }
+  if (before.almost_ready_pct !== after.almost_ready_pct) {
+    notes.push(`"Quase pronto" passa a valer a partir de ${after.almost_ready_pct}% da meta.`);
+  }
+  if (before.allow_skip_grades !== after.allow_skip_grades) {
+    notes.push(after.allow_skip_grades
+      ? "Será possível inscrever o aluno para qualquer graduação habilitada acima da atual."
+      : "Novas inscrições só poderão ser para a próxima graduação. Inscrições já feitas não mudam.");
+  }
+  if (before.default_fee_cents !== after.default_fee_cents) {
+    notes.push(after.default_fee_cents == null
+      ? "Novas bancas voltam a pedir a taxa digitada."
+      : `Novas bancas sugerem a taxa de ${formatBrl(after.default_fee_cents)}. Bancas existentes não mudam.`);
+  }
+  if (before.absent_default_decision !== after.absent_default_decision) {
+    notes.push("A decisão sugerida ao cancelar uma inscrição já paga muda. Você ainda escolhe em cada caso.");
+  }
+  return notes;
 }
