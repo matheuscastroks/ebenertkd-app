@@ -406,8 +406,9 @@
 
 .t-badge {
   position: absolute;
-  top: -2px;
-  right: -2px;
+  /* Na borda do botão (40px), fora da área do sino. */
+  top: -4px;
+  right: -4px;
   pointer-events: none;
   will-change: transform;
 }
