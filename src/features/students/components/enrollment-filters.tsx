@@ -106,7 +106,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Field>
           <FieldLabel htmlFor="enrollment-search">Aluno</FieldLabel>
-          <InputGroup className="h-11">
+          <InputGroup className="h-10">
             <InputGroupAddon>
               <Search className="size-4" aria-hidden="true" />
             </InputGroupAddon>
@@ -120,7 +120,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
           </InputGroup>
         </Field>
 
-        <Button type="button" variant="outline" className="min-h-11 sm:hidden" aria-expanded={expanded} aria-controls="enrollment-secondary-filters" onClick={() => setExpanded(!expanded)}>Filtros ({activeCount})</Button>
+        <Button type="button" variant="outline" className="min-h-10 sm:hidden" aria-expanded={expanded} aria-controls="enrollment-secondary-filters" onClick={() => setExpanded(!expanded)}>Filtros ({activeCount})</Button>
         <div id="enrollment-secondary-filters" className={`${expanded ? "grid" : "hidden"} gap-3 sm:grid sm:col-span-2 xl:col-span-3 xl:grid-cols-3`}>
         <Field>
           <FieldLabel htmlFor="enrollment-status">Status</FieldLabel>
@@ -128,7 +128,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
             value={optimisticFilters.status || "all"}
             onValueChange={(val) => update("status", val)}
           >
-            <SelectTrigger id="enrollment-status" className="w-full h-11" leadingIcon={<SlidersHorizontal className="size-4" />}>
+            <SelectTrigger id="enrollment-status" className="w-full h-10" leadingIcon={<SlidersHorizontal className="size-4" />}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -159,7 +159,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
             value={optimisticFilters.turma || "all"}
             onValueChange={(val) => update("turma", val)}
           >
-            <SelectTrigger id="enrollment-class" className="w-full h-11" leadingIcon={<UsersRound className="size-4" />}>
+            <SelectTrigger id="enrollment-class" className="w-full h-10" leadingIcon={<UsersRound className="size-4" />}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

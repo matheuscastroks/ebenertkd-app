@@ -59,7 +59,7 @@ export function RankSelect({
   const list = options ?? selectableRanks(ranks, keep ?? value ?? defaultValue);
   return (
     <Select name={name} value={value} defaultValue={defaultValue} onValueChange={onValueChange} required={required} disabled={disabled}>
-      <SelectTrigger id={id} className={cn("h-11 w-full", className)} leadingIcon={leadingIcon}>
+      <SelectTrigger id={id} className={cn("h-10 w-full", className)} leadingIcon={leadingIcon}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

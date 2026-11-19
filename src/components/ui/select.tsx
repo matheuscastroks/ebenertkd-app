@@ -45,18 +45,22 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "group/select-trigger flex w-full items-center justify-between gap-2 rounded-xl border border-input bg-background px-3.5 py-2 text-sm text-foreground whitespace-nowrap shadow-xs transition-[color,background-color,border-color,box-shadow] duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none outline-none select-none hover:border-border/80 focus-visible:border-primary/60 focus-visible:ring-3 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-placeholder:text-muted-foreground data-[size=default]:h-10 data-[size=default]:min-h-10 data-[size=sm]:h-9 data-[size=sm]:rounded-lg *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 dark:bg-input/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "group/select-trigger flex w-full items-center justify-between gap-2 rounded-xl border border-input bg-background px-3.5 py-2 text-sm text-foreground whitespace-nowrap shadow-xs transition-[color,background-color,border-color,box-shadow] duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none outline-none select-none hover:border-border/80 focus-visible:border-primary/60 focus-visible:ring-3 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-placeholder:text-muted-foreground dark:bg-input/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        size === "sm" ? "h-9 min-h-9 text-xs" : "h-10 min-h-10",
         className
       )}
       {...props}
     >
       <span className="flex items-center gap-2 min-w-0 flex-1 truncate">
         {leadingIcon ? (
-          <span className="shrink-0 text-muted-foreground [&_svg]:size-4">
+          <span
+            aria-hidden="true"
+            className="flex size-4 shrink-0 items-center justify-center text-muted-foreground [&>div]:flex [&>div]:items-center [&>div]:justify-center [&_svg]:size-full"
+          >
             {leadingIcon}
           </span>
         ) : null}
-        {children}
+        <span className="truncate flex-1 text-left">{children}</span>
       </span>
       <SelectPrimitive.Icon asChild>
         <ChevronDownIcon className="pointer-events-none size-4 text-muted-foreground shrink-0 transition-transform duration-(--duration-fast) ease-(--ease-smooth-out) group-data-open/select-trigger:rotate-180 motion-reduce:transition-none" />

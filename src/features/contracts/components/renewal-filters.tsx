@@ -87,7 +87,7 @@ export function RenewalFilters() {
       <div className="grid gap-3 sm:grid-cols-2">
         <Field>
           <FieldLabel htmlFor="renewal-search">Aluno</FieldLabel>
-          <InputGroup className="h-11">
+          <InputGroup className="h-10">
             <InputGroupAddon>
               <SearchIcon className="size-4" aria-hidden="true" />
             </InputGroupAddon>
@@ -111,7 +111,7 @@ export function RenewalFilters() {
             value={optimistic.bucket || "all"}
             onValueChange={(value) => update("bucket", value)}
           >
-            <SelectTrigger id="renewal-bucket" className="h-11 w-full" leadingIcon={<CalendarDays className="size-4" />}>
+            <SelectTrigger id="renewal-bucket" className="h-10 w-full" leadingIcon={<CalendarDays className="size-4" />}>
               <SelectValue>{bucketLabel}</SelectValue>
             </SelectTrigger>
             <SelectContent>

@@ -90,7 +90,7 @@ export function ComplianceFilters({ classes }: { classes: TrainingClass[] }) {
       <div className="grid gap-3 sm:grid-cols-3">
         <Field>
           <FieldLabel htmlFor="compliance-search">Aluno</FieldLabel>
-          <InputGroup className="h-11">
+          <InputGroup className="h-10">
             <InputGroupAddon>
               <SearchIcon className="size-4" aria-hidden="true" />
             </InputGroupAddon>
@@ -114,7 +114,7 @@ export function ComplianceFilters({ classes }: { classes: TrainingClass[] }) {
             value={optimistic.status || "all"}
             onValueChange={(value) => update("status", value)}
           >
-            <SelectTrigger id="compliance-status" className="h-11 w-full" leadingIcon={<FileCheck className="size-4" />}>
+            <SelectTrigger id="compliance-status" className="h-10 w-full" leadingIcon={<FileCheck className="size-4" />}>
               <SelectValue>{statusLabel}</SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -133,7 +133,7 @@ export function ComplianceFilters({ classes }: { classes: TrainingClass[] }) {
             value={optimistic.turma || "all"}
             onValueChange={(value) => update("turma", value)}
           >
-            <SelectTrigger id="compliance-class" className="h-11 w-full" leadingIcon={<UsersRound className="size-4" />}>
+            <SelectTrigger id="compliance-class" className="h-10 w-full" leadingIcon={<UsersRound className="size-4" />}>
               <SelectValue>{classLabel}</SelectValue>
             </SelectTrigger>
             <SelectContent>

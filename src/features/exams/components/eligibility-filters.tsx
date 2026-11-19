@@ -98,7 +98,7 @@ export function EligibilityFilters({ classes, almostReadyPct = 75 }: { classes: 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Field>
           <FieldLabel htmlFor="eligibility-search">Aluno</FieldLabel>
-          <InputGroup className="h-11">
+          <InputGroup className="h-10">
             <InputGroupAddon>
               <SearchIcon className="size-4" aria-hidden="true" />
             </InputGroupAddon>
@@ -119,7 +119,7 @@ export function EligibilityFilters({ classes, almostReadyPct = 75 }: { classes: 
         <Field>
           <FieldLabel htmlFor="eligibility-status">Aptidão</FieldLabel>
           <Select value={optimistic.status || "all"} onValueChange={(value) => update("status", value)}>
-            <SelectTrigger id="eligibility-status" className="h-11 w-full" leadingIcon={<SlidersHorizontal className="size-4" />}>
+            <SelectTrigger id="eligibility-status" className="h-10 w-full" leadingIcon={<SlidersHorizontal className="size-4" />}>
               <SelectValue>{statusLabel}</SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -147,7 +147,7 @@ export function EligibilityFilters({ classes, almostReadyPct = 75 }: { classes: 
         <Field>
           <FieldLabel htmlFor="eligibility-class">Turma</FieldLabel>
           <Select value={optimistic.turma || "all"} onValueChange={(value) => update("turma", value)}>
-            <SelectTrigger id="eligibility-class" className="h-11 w-full" leadingIcon={<UsersRound className="size-4" />}>
+            <SelectTrigger id="eligibility-class" className="h-10 w-full" leadingIcon={<UsersRound className="size-4" />}>
               <SelectValue>{classLabel}</SelectValue>
             </SelectTrigger>
             <SelectContent>

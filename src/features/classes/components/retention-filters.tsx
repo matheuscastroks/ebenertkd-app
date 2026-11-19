@@ -89,7 +89,7 @@ export function RetentionFilters({ classes }: { classes: TrainingClass[] }) {
       <div className="grid gap-3 sm:grid-cols-3">
         <Field>
           <FieldLabel htmlFor="retention-search">Aluno</FieldLabel>
-          <InputGroup className="h-11">
+          <InputGroup className="h-10">
             <InputGroupAddon>
               <SearchIcon className="size-4" aria-hidden="true" />
             </InputGroupAddon>
@@ -110,7 +110,7 @@ export function RetentionFilters({ classes }: { classes: TrainingClass[] }) {
         <Field>
           <FieldLabel htmlFor="retention-risk">Nível de risco</FieldLabel>
           <Select value={optimistic.risk || "all"} onValueChange={(value) => update("risk", value)}>
-            <SelectTrigger id="retention-risk" className="h-11 w-full" leadingIcon={<AlertTriangle className="size-4" />}>
+            <SelectTrigger id="retention-risk" className="h-10 w-full" leadingIcon={<AlertTriangle className="size-4" />}>
               <SelectValue>{riskLabel}</SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -126,7 +126,7 @@ export function RetentionFilters({ classes }: { classes: TrainingClass[] }) {
         <Field>
           <FieldLabel htmlFor="retention-class">Turma</FieldLabel>
           <Select value={optimistic.turma || "all"} onValueChange={(value) => update("turma", value)}>
-            <SelectTrigger id="retention-class" className="h-11 w-full" leadingIcon={<UsersRound className="size-4" />}>
+            <SelectTrigger id="retention-class" className="h-10 w-full" leadingIcon={<UsersRound className="size-4" />}>
               <SelectValue>{classLabel}</SelectValue>
             </SelectTrigger>
             <SelectContent>
