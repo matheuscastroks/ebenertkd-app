@@ -8,7 +8,6 @@ export const APPWRITE_IDS = {
     classEnrollments: "class_enrollments",
     lessons: "lessons",
     attendanceRecords: "attendance_records",
-    examEvents: "exam_events",
     examParticipants: "exam_participants",
     beltHistory: "belt_history",
     students: "students",
@@ -40,7 +39,13 @@ export const APPWRITE_IDS = {
     academyPolicies: "academy_policies",
     academyConfigRevisions: "academy_config_revisions",
     beltRankSettings: "belt_rank_settings",
-    trainingLocations: "training_locations"
+    trainingLocations: "training_locations",
+    events: "events",
+    eventDeadlines: "event_deadlines",
+    eventOptions: "event_options",
+    eventRegistrations: "event_registrations",
+    eventRegistrationDocuments: "event_registration_documents",
+    eventResults: "event_results"
   },
   functions: {
     dailyOperations: "daily-operations",

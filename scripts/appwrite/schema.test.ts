@@ -23,7 +23,6 @@ describe("Appwrite infrastructure schema", () => {
       "class_enrollments",
       "lessons",
       "attendance_records",
-      "exam_events",
       "exam_participants",
       "belt_history",
       "students",
@@ -55,7 +54,13 @@ describe("Appwrite infrastructure schema", () => {
       "academy_policies",
       "academy_config_revisions",
       "belt_rank_settings",
-      "training_locations"
+      "training_locations",
+      "events",
+      "event_deadlines",
+      "event_options",
+      "event_registrations",
+      "event_registration_documents",
+      "event_results"
     ]);
     expect(tables.find((table) => table.id === "profiles")?.indexes).toContainEqual({
       key: "account_id_unique",

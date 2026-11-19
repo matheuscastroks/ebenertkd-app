@@ -15,8 +15,10 @@ export const CACHE_TAGS = {
   trainingLocations: "training-locations",
   financeScenarios: "finance-scenarios",
   tuitionAdjustments: "tuition-adjustments",
-  examEvents: "exam-events",
-  examEvent: (id: string) => `exam-event:${id}`,
+  events: "events",
+  event: (id: string) => `event:${id}`,
+  eventRegistrations: (id: string) => `event-registrations:${id}`,
+  studentEvents: (studentId: string) => `student-events:${studentId}`,
   // Perfis e sessão (autorização NUNCA vem do cache: só a linha do perfil)
   profiles: "profiles",
   profile: (profileId: string) => `profile:${profileId}`,

@@ -152,24 +152,6 @@ export const tables: TableDefinition[] = [
     ]
   },
   {
-    id: APPWRITE_IDS.tables.examEvents,
-    name: "Exam events",
-    columns: [
-      { key: "name", kind: "varchar", size: 128, required: true },
-      { key: "event_date", kind: "datetime", required: true },
-      { key: "location", kind: "varchar", size: 160, required: false },
-      { key: "default_fee_cents", kind: "integer", required: true, min: 0 },
-      { key: "status", kind: "enum", elements: ["planned", "confirmed", "completed", "cancelled"], required: true },
-      { key: "created_by_account_id", kind: "varchar", size: 36, required: true },
-      { key: "created_at", kind: "datetime", required: true },
-      { key: "updated_at", kind: "datetime", required: true }
-    ],
-    indexes: [
-      { key: "date_idx", type: "key", columns: ["event_date"] },
-      { key: "status_idx", type: "key", columns: ["status"] }
-    ]
-  },
-  {
     id: APPWRITE_IDS.tables.examParticipants,
     name: "Exam participants",
     columns: [
@@ -456,7 +438,7 @@ export const tables: TableDefinition[] = [
       { key: "enrollment_id", kind: "varchar", size: 36, required: true },
       { key: "student_id", kind: "varchar", size: 36, required: true },
       { key: "contract_id", kind: "varchar", size: 36, required: false },
-      { key: "charge_type", kind: "enum", elements: ["monthly_fee", "enrollment_fee", "exam_fee", "exit_fee"], required: true },
+      { key: "charge_type", kind: "enum", elements: ["monthly_fee", "enrollment_fee", "exam_fee", "exit_fee", "event_fee"], required: true },
       { key: "competence", kind: "varchar", size: 7, required: true },
       { key: "origin_id", kind: "varchar", size: 36, required: true },
       { key: "amount_cents", kind: "integer", required: true, min: 0 },
@@ -848,6 +830,152 @@ export const tables: TableDefinition[] = [
       { key: "updated_at", kind: "datetime", required: true }
     ],
     indexes: [{ key: "status_idx", type: "key", columns: ["status"] }]
+  },
+  {
+    id: APPWRITE_IDS.tables.events,
+    name: "Events",
+    columns: [
+      { key: "event_type", kind: "enum", elements: ["belt_exam", "championship", "seminar", "social", "other"], required: true },
+      { key: "title", kind: "varchar", size: 128, required: true },
+      { key: "description", kind: "text", required: false },
+      { key: "status", kind: "enum", elements: ["draft", "published", "registration_open", "registration_closed", "in_progress", "completed", "cancelled"], required: true },
+      { key: "starts_at", kind: "datetime", required: true },
+      { key: "ends_at", kind: "datetime", required: false },
+      { key: "location_id", kind: "varchar", size: 36, required: false },
+      { key: "location_text", kind: "varchar", size: 160, required: false },
+      { key: "organizer_type", kind: "enum", elements: ["academy", "external"], required: true },
+      { key: "organizer_name", kind: "varchar", size: 128, required: false },
+      { key: "registration_opens_at", kind: "datetime", required: false },
+      { key: "registration_closes_at", kind: "datetime", required: false },
+      { key: "audience", kind: "enum", elements: ["students", "students_and_guests", "public"], required: true },
+      { key: "requires_approval", kind: "boolean", required: true },
+      { key: "capacity", kind: "integer", required: false, min: 1 },
+      { key: "max_companions", kind: "integer", required: false, min: 0 },
+      { key: "companion_price_cents", kind: "integer", required: false, min: 0 },
+      // Idade das classes de campeonato: ano de nascimento (padrão WT) ou data exata do evento.
+      { key: "age_cutoff", kind: "enum", elements: ["birth_year", "event_date"], required: true },
+      // Exame de faixa: taxa padrão da banca (a taxa da graduação alvo, quando configurada, tem prioridade).
+      { key: "exam_fee_cents", kind: "integer", required: false, min: 0 },
+      { key: "cover_file_id", kind: "varchar", size: 36, required: false },
+      { key: "external_url", kind: "varchar", size: 512, required: false },
+      { key: "cancelled_at", kind: "datetime", required: false },
+      { key: "cancellation_reason", kind: "varchar", size: 255, required: false },
+      { key: "created_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "starts_at_idx", type: "key", columns: ["starts_at"] },
+      { key: "status_idx", type: "key", columns: ["status"] },
+      { key: "type_idx", type: "key", columns: ["event_type"] },
+      { key: "type_starts_idx", type: "key", columns: ["event_type", "starts_at"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.eventDeadlines,
+    name: "Event deadlines",
+    columns: [
+      { key: "event_id", kind: "varchar", size: 36, required: true },
+      { key: "kind", kind: "enum", elements: ["affiliation", "registration", "category_change", "weigh_in", "payment", "custom"], required: true },
+      { key: "label", kind: "varchar", size: 128, required: true },
+      { key: "due_at", kind: "datetime", required: true },
+      { key: "notify_days_before", kind: "integer", required: false, min: 0, max: 60 },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "event_idx", type: "key", columns: ["event_id"] },
+      { key: "due_at_idx", type: "key", columns: ["due_at"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.eventOptions,
+    name: "Event options",
+    columns: [
+      { key: "event_id", kind: "varchar", size: 36, required: true },
+      { key: "label", kind: "varchar", size: 128, required: true },
+      { key: "modality", kind: "enum", elements: ["kyorugi", "poomsae", "festival", "team", "general"], required: true },
+      { key: "price_cents", kind: "integer", required: true, min: 0 },
+      { key: "capacity", kind: "integer", required: false, min: 1 },
+      { key: "eligibility_json", kind: "text", required: false },
+      { key: "max_per_registrant_group", kind: "varchar", size: 32, required: false },
+      { key: "sort_order", kind: "integer", required: true, min: 0 },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [{ key: "event_idx", type: "key", columns: ["event_id", "sort_order"] }]
+  },
+  {
+    id: APPWRITE_IDS.tables.eventRegistrations,
+    name: "Event registrations",
+    columns: [
+      { key: "event_id", kind: "varchar", size: 36, required: true },
+      { key: "option_id", kind: "varchar", size: 36, required: true },
+      { key: "student_id", kind: "varchar", size: 36, required: false },
+      { key: "enrollment_id", kind: "varchar", size: 36, required: false },
+      // Convidado sem conta: só o mínimo (LGPD); apagado após o evento.
+      { key: "guest_name", kind: "varchar", size: 128, required: false },
+      { key: "guest_contact", kind: "varchar", size: 24, required: false },
+      { key: "registered_by_account_id", kind: "varchar", size: 36, required: false },
+      { key: "status", kind: "enum", elements: ["interested", "pending_approval", "confirmed", "waitlisted", "checked_in", "completed", "no_show", "rejected", "cancelled"], required: true },
+      { key: "waitlist_position", kind: "integer", required: false, min: 1 },
+      { key: "companions", kind: "integer", required: true, min: 0 },
+      { key: "declared_weight_grams", kind: "integer", required: false, min: 0 },
+      { key: "rank_key_snapshot", kind: "varchar", size: 16, required: false },
+      { key: "age_class_snapshot", kind: "varchar", size: 32, required: false },
+      { key: "price_cents", kind: "integer", required: true, min: 0 },
+      { key: "charge_id", kind: "varchar", size: 36, required: false },
+      { key: "federation_charge_id", kind: "varchar", size: 36, required: false },
+      { key: "financial_decision", kind: "enum", elements: ["future_credit", "keep_charge"], required: false },
+      { key: "terms_accepted_at", kind: "datetime", required: false },
+      { key: "guardian_authorized_at", kind: "datetime", required: false },
+      { key: "guardian_account_id", kind: "varchar", size: 36, required: false },
+      { key: "external_submitted_at", kind: "datetime", required: false },
+      { key: "checked_in_at", kind: "datetime", required: false },
+      { key: "cancelled_at", kind: "datetime", required: false },
+      { key: "notes", kind: "text", required: false },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "event_status_idx", type: "key", columns: ["event_id", "status"] },
+      { key: "student_idx", type: "key", columns: ["student_id"] },
+      { key: "event_option_student_unique", type: "unique", columns: ["event_id", "option_id", "student_id"] }
+    ]
+  },
+  {
+    id: APPWRITE_IDS.tables.eventRegistrationDocuments,
+    name: "Event registration documents",
+    columns: [
+      { key: "registration_id", kind: "varchar", size: 36, required: true },
+      { key: "kind", kind: "enum", elements: ["guardian_authorization", "responsibility_term", "medical", "federation_card", "other"], required: true },
+      { key: "file_id", kind: "varchar", size: 36, required: true },
+      { key: "status", kind: "enum", elements: ["pending", "approved", "rejected"], required: true },
+      { key: "reviewed_by_account_id", kind: "varchar", size: 36, required: false },
+      { key: "reviewed_at", kind: "datetime", required: false },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [{ key: "registration_idx", type: "key", columns: ["registration_id"] }]
+  },
+  {
+    id: APPWRITE_IDS.tables.eventResults,
+    name: "Event results",
+    columns: [
+      { key: "registration_id", kind: "varchar", size: 36, required: true },
+      { key: "event_id", kind: "varchar", size: 36, required: true },
+      { key: "student_id", kind: "varchar", size: 36, required: true },
+      { key: "placement", kind: "integer", required: false, min: 1 },
+      { key: "medal", kind: "enum", elements: ["gold", "silver", "bronze", "none"], required: true },
+      { key: "notes", kind: "text", required: false },
+      { key: "recorded_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "recorded_at", kind: "datetime", required: true }
+    ],
+    indexes: [
+      { key: "registration_unique", type: "unique", columns: ["registration_id"] },
+      { key: "event_idx", type: "key", columns: ["event_id"] },
+      { key: "student_idx", type: "key", columns: ["student_id"] }
+    ]
   }
 ];
 

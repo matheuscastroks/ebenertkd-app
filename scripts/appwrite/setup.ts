@@ -133,6 +133,25 @@ async function reconcile() {
         }
         continue;
       }
+      if (column.kind === "enum") {
+        // Aditivo: só acrescenta valores novos ao enum remoto (nunca remove).
+        const remoteElements = (remoteColumn as typeof remoteColumn & { elements?: string[] }).elements ?? [];
+        const missing = column.elements.filter((element) => !remoteElements.includes(element));
+        if (missing.length > 0) {
+          changes.push(`update enum ${table.id}.${column.key} (+${missing.join(", ")})`);
+          if (mode === "apply") {
+            await tablesDb.updateEnumColumn({
+              databaseId: config.databaseId,
+              tableId: table.id,
+              key: column.key,
+              elements: [...remoteElements, ...missing],
+              required: column.required,
+              xdefault: null as unknown as string
+            });
+            await waitForColumn(table.id, column.key);
+          }
+        }
+      }
       if (column.kind === "integer") {
         const current = remoteColumn as typeof remoteColumn & { min?: number | bigint; max?: number | bigint };
         const currentMin = current.min == null ? undefined : Number(current.min);
