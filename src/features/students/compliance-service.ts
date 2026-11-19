@@ -1,5 +1,7 @@
 import "server-only";
 
+import { getPolicy } from "@/features/academy/config-service";
+import type { CompliancePolicy } from "@/features/academy/defaults";
 import type { TrainingClass } from "@/features/classes/types";
 import {
   evaluateStudentCompliance,
@@ -21,7 +23,7 @@ export type ComplianceFilters = {
   search?: string;
 };
 
-function loadComplianceDataset() {
+export function loadComplianceDataset() {
   return cachedRead(
     {
       name: "admin-annual-compliance-dataset",
@@ -41,12 +43,15 @@ function loadComplianceDataset() {
   );
 }
 
-export async function getAnnualComplianceOverview(filters: ComplianceFilters = {}) {
-  const [{ students, enrollments, documents, classes }, parqByStudent] = await Promise.all([
-    loadComplianceDataset(),
-    listLatestParqByStudent(),
-  ]);
-  const referenceDate = saoPauloToday();
+export type ComplianceDataset = Awaited<ReturnType<typeof loadComplianceDataset>>;
+
+/** Avalia todos os alunos ativos com a política informada (pura sobre os dados carregados). */
+export function buildComplianceAssessments(
+  { students, enrollments, documents, classes }: ComplianceDataset,
+  parqByStudent: Awaited<ReturnType<typeof listLatestParqByStudent>>,
+  policy: CompliancePolicy,
+  referenceDate: string
+) {
 
   const classById = new Map(classes.map((item) => [item.$id, item]));
   const enrollmentByStudent = new Map(enrollments.map((item) => [item.student_id, item]));
@@ -79,11 +84,18 @@ export async function getAnnualComplianceOverview(filters: ComplianceFilters = {
         latestParq: parqByStudent.get(student.$id) ?? null,
         trainingClassName: classObj?.name ?? student.training_class,
         referenceDate,
+        policy,
       });
     })
   );
+  return assessments;
+}
 
-  const summary = summarizeCompliance(assessments);
+export async function getAnnualComplianceOverview(filters: ComplianceFilters = {}) {
+  const [dataset, parqByStudent, policy] = await Promise.all([loadComplianceDataset(), listLatestParqByStudent(), getPolicy("compliance")]);
+  const { classes } = dataset;
+  const assessments = buildComplianceAssessments(dataset, parqByStudent, policy, saoPauloToday());
+  const summary = summarizeCompliance(assessments, policy);
 
   const normalizedSearch = filters.search?.trim().toLocaleLowerCase("pt-BR");
   const filteredRows = assessments.filter((row) => {
@@ -98,6 +110,7 @@ export async function getAnnualComplianceOverview(filters: ComplianceFilters = {
   return {
     rows: filteredRows,
     summary,
+    policy,
     classes: classes.filter((item) => item.status === "active"),
   };
 }

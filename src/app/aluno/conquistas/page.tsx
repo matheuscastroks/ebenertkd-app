@@ -7,6 +7,7 @@ import { CardGridSkeleton, MetricCardsSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type { Profile } from "@/features/auth/types";
+import { getPolicy } from "@/features/academy/config-service";
 import { buildStudentConsistencyReport } from "@/features/students/achievements-rules";
 import { ConsistencyHeatmap } from "@/features/students/components/consistency-heatmap";
 import { StudentMonthlyProgressChart } from "@/features/students/components/journey-charts";
@@ -16,7 +17,7 @@ import { ROUTES } from "@/lib/navigation/routes";
 import { Award, CheckCircle2, Flame } from "@/components/ui/icons";
 
 async function StudentAchievementsContent({ profile }: { profile: Profile }) {
-  const snapshot = await getStudentJourneySnapshot(profile);
+  const [snapshot, gamification] = await Promise.all([getStudentJourneySnapshot(profile), getPolicy("gamification")]);
 
   if (!snapshot.student) {
     return (
@@ -33,6 +34,7 @@ async function StudentAchievementsContent({ profile }: { profile: Profile }) {
   }
 
   const report = buildStudentConsistencyReport({
+    badges: gamification.badges,
     entries: snapshot.attendanceEntries,
     beltHistory: snapshot.beltHistory,
     startedAt:

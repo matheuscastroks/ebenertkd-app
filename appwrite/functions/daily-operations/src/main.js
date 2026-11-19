@@ -3,7 +3,8 @@ import { AppwriteException, Client, Query, TablesDB } from "node-appwrite";
 import webpush from "web-push";
 import { DEFAULT_PREFERENCES, pushAllowed, pushPayload } from "./push-rules.js";
 import { safeErrorMessage } from "./safe-error.js";
-import { pendingReminder, processingDays, reminderCopy, renewalReminderDays } from "./reminders.js";
+import { resolvePolicies } from "./policy-defaults.js";
+import { parqExpiryDay, parqReminderStage, pendingReminder, processingDays, reminderCopy, renewalReminderDays, shouldGenerate } from "./reminders.js";
 
 const databaseId = process.env.APPWRITE_DATABASE_ID ?? "ebenertkd";
 const eventId = (value) => createHash("sha256").update(value).digest("hex").slice(0, 36);
@@ -25,7 +26,17 @@ const withinContract = (competence, contract) => {
   const last = new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10);
   return last >= contract.starts_at.slice(0, 10) && first <= contract.ends_at.slice(0, 10);
 };
-const shouldGenerate = (competence, day) => Date.parse(`${day}T00:00:00Z`) >= Date.parse(`${competence}-01T00:00:00Z`) - 7 * 86400000;
+
+/** Lê `academy_policies` uma vez por execução. Falha ou ausência de linhas usam os defaults (nunca derruba a rotina). */
+async function loadPolicies(tables) {
+  try {
+    const rows = await listAll(tables, "academy_policies");
+    return resolvePolicies(rows);
+  } catch (cause) {
+    console.error(`policies_unavailable: ${safeErrorMessage(cause)}`);
+    return resolvePolicies([]);
+  }
+}
 
 const decryptSubscription = (value) => {
   const key = Buffer.from(process.env.PUSH_SUBSCRIPTION_ENCRYPTION_KEY ?? "", "base64");
@@ -138,9 +149,10 @@ async function main({ req, res, log, error }) {
   if (!executionKey) return res.json({ ok: false, error: "missing_execution_key" }, 500);
   const client = new Client().setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT).setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID).setKey(executionKey);
   const tables = new TablesDB(client);
-  let step = "contracts";
+  let step = "policies";
 
   try {
+    const policies = await loadPolicies(tables);
     step = "last-run";
     const lastRuns = await tables.listRows({ databaseId, tableId: "automation_runs", queries: [Query.equal("job", ["daily-operations"]), Query.orderDesc("$createdAt"), Query.limit(10)] });
     const lastRun = lastRuns.rows.find((row) => row.status === "completed" && row.started_at.slice(0, 10) < day);
@@ -152,7 +164,7 @@ async function main({ req, res, log, error }) {
     let expired = 0;
     for (const contract of contracts.rows) {
       const days = daysUntil(contract.ends_at, day);
-      for (const { day: reminderDay, left } of renewalReminderDays(contract.ends_at, coveredDays, day)) {
+      for (const { day: reminderDay, left } of renewalReminderDays(contract.ends_at, coveredDays, day, policies.contract.renewal_reminder_days)) {
         const key = `contract.renewal_${left}:${contract.$id}:${reminderDay}`;
         try {
           await tables.createRow({ databaseId, tableId: "audit_events", rowId: eventId(key), permissions: [], data: { event_type: `contract.renewal_${left}`, entity_type: "contract", entity_id: contract.$id, metadata: JSON.stringify({ days: left, student_id: contract.student_id }), created_at: now.toISOString() } });
@@ -177,7 +189,7 @@ async function main({ req, res, log, error }) {
       const contract = signedByEnrollment.get(enrollment.$id);
       if (!contract || !enrollment.approved_due_day) continue;
       for (const competence of competences) {
-        if (!shouldGenerate(competence, day) || !withinContract(competence, contract)) continue;
+        if (!shouldGenerate(competence, day, policies.billing.charge_lead_days) || !withinContract(competence, contract)) continue;
         const rowId = chargeId(enrollment.$id, "monthly_fee", competence, contract.$id);
         try {
           await tables.createRow({ databaseId, tableId: "charges", rowId, permissions: [], data: { enrollment_id: enrollment.$id, student_id: enrollment.student_id, contract_id: contract.$id, charge_type: "monthly_fee", competence, origin_id: contract.$id, amount_cents: contract.monthly_fee_cents, due_date: `${dueDate(competence, enrollment.approved_due_day)}T12:00:00.000Z`, status: "pending", description: `Mensalidade ${competence}`, created_at: now.toISOString(), updated_at: now.toISOString() } });
@@ -201,7 +213,7 @@ async function main({ req, res, log, error }) {
     const reminderCharges = await listAll(tables, "charges", [Query.equal("status", ["pending", "overdue"])]);
     let paymentReminders = 0;
     for (const charge of reminderCharges) {
-      const reminder = pendingReminder(charge.due_date, coveredDays, day);
+      const reminder = pendingReminder(charge.due_date, coveredDays, day, policies.notifications);
       if (!reminder) continue;
       const { stage, daysLeft } = reminder;
       const recipients = await financialRecipients(tables, charge.student_id);
@@ -224,9 +236,10 @@ async function main({ req, res, log, error }) {
       }
       for (const enrollment of enrollments) {
         const latestParq = latestParqByStudent.get(enrollment.student_id);
-        if (!latestParq || !latestParq.expires_at) continue;
-        const left = daysUntil(latestParq.expires_at, day);
-        const stage = left === 30 ? "30d" : left === 7 ? "7d" : left === 0 ? "expired" : null;
+        if (!latestParq || !latestParq.signed_at) continue;
+        // Validade e dias de lembrete são da política atual da academia (não a data gravada na assinatura).
+        const left = daysUntil(parqExpiryDay(latestParq.signed_at, policies.compliance.parq_validity_days), day);
+        const stage = parqReminderStage(left, policies.compliance.parq_reminder_days);
         if (!stage) continue;
         const recipients = await financialRecipients(tables, enrollment.student_id);
         if (!recipients.length) continue;

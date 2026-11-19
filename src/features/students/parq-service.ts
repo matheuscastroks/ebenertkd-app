@@ -1,6 +1,7 @@
 import "server-only";
 
 import { AppwriteException, ID, Query } from "node-appwrite";
+import { getPolicy } from "@/features/academy/config-service";
 import { writeAuditEvent } from "@/features/auth/service";
 import type { Profile } from "@/features/auth/types";
 import { hashContent, privacyIpFingerprint } from "@/features/contracts/rules";
@@ -159,7 +160,7 @@ export async function submitParq(
         : "guardian";
 
   const now = new Date().toISOString();
-  const expiresAt = computeParqExpirationDate(now);
+  const expiresAt = computeParqExpirationDate(now, (await getPolicy("compliance")).parq_validity_days);
   const answersJson = JSON.stringify(validated.answers);
   const contentHash = hashContent(
     JSON.stringify({

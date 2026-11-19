@@ -3,9 +3,20 @@ import "server-only";
 import { Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import { getBeltRanks, getPolicy } from "@/features/academy/config-service";
-import { countEligibilityChange, countLockedStudents, type EligibilityImpact } from "@/features/academy/impact-rules";
+import {
+  countComplianceChange,
+  countEligibilityChange,
+  countLockedStudents,
+  countRetentionChange,
+  type ComplianceImpact,
+  type EligibilityImpact,
+  type RetentionImpact
+} from "@/features/academy/impact-rules";
 import { applyRankChanges, planRankChanges, type RankPatch } from "@/features/academy/rank-changes";
 import { RankValidationError } from "@/features/academy/rank-schemas";
+import { buildRetentionAssessments, loadRetentionDataset } from "@/features/classes/retention-service";
+import { buildComplianceAssessments, loadComplianceDataset } from "@/features/students/compliance-service";
+import { listLatestParqByStudent } from "@/features/students/parq-service";
 import { buildEligibilityAssessments, loadEligibilityDataset } from "@/features/exams/eligibility-service";
 import { parsePolicyInput } from "@/features/academy/schemas";
 import type { Charge, Payment } from "@/features/billing/types";
@@ -48,4 +59,28 @@ export async function previewAccessImpact(actor: Profile, patch: Record<string, 
     lockedNow: countLockedStudents({ enrollments, charges, payments, policy: current, referenceDate }),
     lockedProposed: countLockedStudents({ enrollments, charges, payments, policy: proposed, referenceDate })
   };
+}
+
+export type { ComplianceImpact, RetentionImpact } from "@/features/academy/impact-rules";
+
+/** "N alunos ficariam irregulares" com a validade de atestado/PAR-Q proposta. Somente leitura; só o administrador consulta. */
+export async function previewComplianceImpact(actor: Profile, patch: Record<string, unknown>): Promise<ComplianceImpact> {
+  if (actor.role !== "admin") throw new Error("admin_required");
+  const current = await getPolicy("compliance");
+  const proposed = parsePolicyInput("compliance", { ...current, ...patch });
+  const [dataset, parqByStudent] = await Promise.all([loadComplianceDataset(), listLatestParqByStudent()]);
+  const referenceDate = saoPauloToday();
+  return countComplianceChange(
+    buildComplianceAssessments(dataset, parqByStudent, current, referenceDate),
+    buildComplianceAssessments(dataset, parqByStudent, proposed, referenceDate)
+  );
+}
+
+/** Nova contagem por nível de risco de evasão com os limiares propostos. Somente leitura; só o administrador consulta. */
+export async function previewRetentionImpact(actor: Profile, patch: Record<string, unknown>): Promise<RetentionImpact> {
+  if (actor.role !== "admin") throw new Error("admin_required");
+  const [dataset, current] = await Promise.all([loadRetentionDataset(), getPolicy("retention")]);
+  const proposed = parsePolicyInput("retention", { ...current, ...patch });
+  const referenceDate = saoPauloToday();
+  return countRetentionChange(buildRetentionAssessments(dataset, current, referenceDate), buildRetentionAssessments(dataset, proposed, referenceDate));
 }

@@ -18,6 +18,16 @@ function toNumber(value: FormDataEntryValue | null): number {
 
 const isOn = (value: FormDataEntryValue | null) => value === "on" || value === "true";
 
+/** Lista de números digitada como "30, 7, 0" (vírgula, ponto e vírgula ou espaço). Vazio = lista vazia; item inválido vira NaN e falha na validação. */
+export function parseNumberList(value: FormDataEntryValue | null): number[] {
+  const text = value == null ? "" : String(value);
+  return text
+    .split(/[,;\s]+/)
+    .map((item) => item.trim())
+    .filter((item) => item !== "")
+    .map((item) => Number(item));
+}
+
 export function identityFormToInput(formData: FormData): Record<string, unknown> {
   const keys = [
     "legal_name", "display_name", "short_name", "document_type", "document_number", "address_line", "address_complement",
@@ -35,7 +45,9 @@ export function billingFormToPatch(formData: FormData): Record<string, unknown> 
     enrollment_fee_enabled: isOn(formData.get("enrollment_fee_enabled")),
     enrollment_fee_cents: moneyToCents(formData.get("enrollment_fee")),
     due_day_options: formData.getAll("due_day_options").map((value) => Number(value)),
-    adjustment_min_notice_days: toNumber(formData.get("adjustment_min_notice_days"))
+    adjustment_min_notice_days: toNumber(formData.get("adjustment_min_notice_days")),
+    // O assistente e outras telas podem não exibir este campo: nesse caso mantém o valor salvo.
+    ...(formData.has("charge_lead_days") ? { charge_lead_days: toNumber(formData.get("charge_lead_days")) } : {})
   };
 }
 
@@ -53,7 +65,8 @@ export function contractFormToPatch(formData: FormData): Record<string, unknown>
     cancellation_notice_day: toNumber(formData.get("cancellation_notice_day")),
     exit_fee_mode: String(formData.get("exit_fee_mode") ?? ""),
     exit_fee_cents: moneyToCents(formData.get("exit_fee")),
-    rematriculation_after_months: toNumber(formData.get("rematriculation_after_months"))
+    rematriculation_after_months: toNumber(formData.get("rematriculation_after_months")),
+    ...(formData.has("renewal_reminder_days") ? { renewal_reminder_days: parseNumberList(formData.get("renewal_reminder_days")) } : {})
   };
 }
 
@@ -77,4 +90,39 @@ export function beltsFormToPatch(formData: FormData): Record<string, unknown> {
     form_label: String(formData.get("form_label") ?? ""),
     level_label: String(formData.get("level_label") ?? "")
   };
+}
+
+export function retentionFormToPatch(formData: FormData): Record<string, unknown> {
+  const keys = [
+    "critical_consecutive_absences", "critical_days_without_presence", "critical_rate_pct", "critical_min_lessons",
+    "warning_consecutive_absences", "warning_days_without_presence", "warning_rate_pct", "warning_min_lessons", "window_days"
+  ];
+  return Object.fromEntries(keys.map((key) => [key, toNumber(formData.get(key))]));
+}
+
+export function complianceFormToPatch(formData: FormData): Record<string, unknown> {
+  return {
+    medical_validity_days: toNumber(formData.get("medical_validity_days")),
+    medical_expiring_window_days: toNumber(formData.get("medical_expiring_window_days")),
+    parq_validity_days: toNumber(formData.get("parq_validity_days")),
+    parq_expiring_window_days: toNumber(formData.get("parq_expiring_window_days")),
+    parq_reminder_days: parseNumberList(formData.get("parq_reminder_days"))
+  };
+}
+
+export function notificationsFormToPatch(formData: FormData): Record<string, unknown> {
+  return {
+    payment_stages: parseNumberList(formData.get("payment_stages")),
+    overdue_weekly_from_day: toNumber(formData.get("overdue_weekly_from_day")),
+    due_soon_alert_days: toNumber(formData.get("due_soon_alert_days"))
+  };
+}
+
+/** As conquistas viajam como JSON em um campo oculto (a tela edita título, descrição e meta; a métrica é fixa). */
+export function gamificationFormToPatch(formData: FormData): Record<string, unknown> {
+  try {
+    return { badges: JSON.parse(String(formData.get("badges_json") ?? "[]")) as unknown };
+  } catch {
+    return { badges: null };
+  }
 }

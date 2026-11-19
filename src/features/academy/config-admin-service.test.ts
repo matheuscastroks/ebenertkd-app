@@ -128,6 +128,6 @@ describe("savePolicySection", () => {
   });
 
   it("seção desconhecida é recusada", async () => {
-    await expect(savePolicySection(admin, "retention" as never, {}, 0)).rejects.toThrow("invalid_policy_section");
+    await expect(savePolicySection(admin, "inexistente" as never, {}, 0)).rejects.toThrow("invalid_policy_section");
   });
 });

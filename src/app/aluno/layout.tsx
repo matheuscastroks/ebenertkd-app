@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { PortalFrame } from "@/components/dashboard/portal-shell";
+import { getPolicy } from "@/features/academy/config-service";
 import { getStudentAppAccessByProfileId } from "@/features/billing/access-lock-service";
 import { StudentAccessGate } from "@/features/billing/components/student-access-gate";
 import { evaluateParqStatus, type ParqStatus } from "@/features/students/parq-rules";
@@ -30,8 +31,8 @@ export default async function StudentLayout({ children }: { children: ReactNode 
       daysRemaining = access.daysRemaining;
     }
     if (studentId) {
-      const latestParq = await getLatestParqForStudent(studentId).catch(() => null);
-      parqStatus = evaluateParqStatus(latestParq, saoPauloToday()).status;
+      const [latestParq, compliance] = await Promise.all([getLatestParqForStudent(studentId).catch(() => null), getPolicy("compliance")]);
+      parqStatus = evaluateParqStatus(latestParq, saoPauloToday(), compliance).status;
     }
   } catch {
     // Falha transitória de leitura não deve travar o aluno fora do portal.

@@ -56,7 +56,7 @@ async function RetentionContent({ searchParams }: { searchParams: SearchParams }
     search: params.q,
   });
 
-  const { summary, rows } = data;
+  const { summary, rows, windowDays } = data;
   const netSign = summary.netGrowthInMonth > 0 ? "+" : "";
 
   return (
@@ -127,7 +127,7 @@ async function RetentionContent({ searchParams }: { searchParams: SearchParams }
         </div>
       </dl>
 
-      <RetentionCharts summary={summary} />
+      <RetentionCharts summary={summary} windowDays={windowDays} />
 
       {rows.length === 0 ? (
         <EmptyState
@@ -184,7 +184,7 @@ async function RetentionContent({ searchParams }: { searchParams: SearchParams }
                           {formatBusinessDateBr(row.lastPresentDate)}
                         </span>
                         {row.total30d > 0
-                          ? ` · ${row.attended30d}/${row.total30d} aulas (30d)`
+                          ? ` · ${row.attended30d}/${row.total30d} aulas (${row.windowDays}d)`
                           : ""}
                       </p>
                     </div>

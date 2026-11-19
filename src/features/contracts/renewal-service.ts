@@ -21,6 +21,7 @@ import { CACHE_TAGS } from "@/lib/cache/tags";
 import { saoPauloToday } from "@/lib/dates";
 
 export async function listContractsRequiringRenewal(referenceDate = new Date().toISOString()) {
+  const reminderDays = (await getPolicy("contract")).renewal_reminder_days;
   const { tables, config } = createAppwriteAdminClient();
   const rows = await tables.listRows<Contract>({
     databaseId: config.databaseId,
@@ -28,7 +29,7 @@ export async function listContractsRequiringRenewal(referenceDate = new Date().t
     queries: [Query.equal("status", ["signed"]), Query.limit(500)],
   });
   return rows.rows
-    .map((contract) => ({ contract, event: renewalEvent(contract.ends_at, referenceDate) }))
+    .map((contract) => ({ contract, event: renewalEvent(contract.ends_at, referenceDate, reminderDays) }))
     .filter((item) => item.event);
 }
 

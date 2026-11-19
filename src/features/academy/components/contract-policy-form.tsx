@@ -41,6 +41,7 @@ export function ContractPolicyForm({
   const [mode, setMode] = useState<ExitFeeMode>(policy.exit_fee_mode);
   const [fixedFee, setFixedFee] = useState(policy.exit_fee_cents > 0 ? centsToInput(policy.exit_fee_cents) : "");
   const [rematriculation, setRematriculation] = useState(String(policy.rematriculation_after_months));
+  const [reminders, setReminders] = useState(policy.renewal_reminder_days.join(", "));
 
   const after: ContractPolicy = useMemo(() => ({
     ...policy,
@@ -48,8 +49,14 @@ export function ContractPolicyForm({
     cancellation_notice_day: parseIntegerInput(noticeDay),
     exit_fee_mode: mode,
     exit_fee_cents: mode === "fixed" ? parseMoneyInput(fixedFee) : 0,
-    rematriculation_after_months: parseIntegerInput(rematriculation)
-  }), [policy, duration, noticeDay, mode, fixedFee, rematriculation]);
+    rematriculation_after_months: parseIntegerInput(rematriculation),
+    renewal_reminder_days: reminders
+      .split(/[,;\s]+/)
+      .filter((item) => item.trim() !== "")
+      .map((item) => Math.trunc(Number(item)))
+      .filter((item) => Number.isFinite(item) && item > 0)
+      .sort((a, b) => b - a)
+  }), [policy, duration, noticeDay, mode, fixedFee, rematriculation, reminders]);
   const notes = contractImpactNotes(policy, after, templateUsesVariables);
 
   return (
@@ -67,6 +74,9 @@ export function ContractPolicyForm({
           </ConfigField>
           <ConfigField id="rematriculation_after_months" label="Rematrícula após afastamento (meses)" error={fieldErrors.rematriculation_after_months} help="Quem volta depois deste tempo afastado pode precisar de uma nova matrícula. Entra no texto do contrato.">
             <Input id="rematriculation_after_months" name="rematriculation_after_months" inputMode="numeric" value={rematriculation} onChange={(event) => setRematriculation(event.target.value)} required />
+          </ConfigField>
+          <ConfigField id="renewal_reminder_days" label="Avisos de renovação (dias antes do fim)" error={fieldErrors.renewal_reminder_days} help="Dias antes do término do contrato em que a renovação é lembrada. Separe por vírgula. Ex.: 30, 7." className="sm:col-span-2">
+            <Input id="renewal_reminder_days" name="renewal_reminder_days" inputMode="text" placeholder="Ex.: 30, 7" value={reminders} onChange={(event) => setReminders(event.target.value)} required />
           </ConfigField>
         </CardContent>
       </Card>
@@ -114,7 +124,8 @@ export function ContractPolicyForm({
             { label: "Duração padrão", value: `${after.default_duration_months} meses` },
             { label: "Dia limite do aviso", value: `dia ${after.cancellation_notice_day}` },
             { label: "Encargo de saída", value: exitFeeText(after) },
-            { label: "Rematrícula após", value: `${after.rematriculation_after_months} meses` }
+            { label: "Rematrícula após", value: `${after.rematriculation_after_months} meses` },
+            { label: "Avisos de renovação", value: `${after.renewal_reminder_days.join(", ")} dias antes` }
           ]}
           confirmLabel="Salvar"
           action={save}

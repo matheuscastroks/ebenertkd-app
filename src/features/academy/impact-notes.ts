@@ -1,4 +1,4 @@
-import type { AccessPolicy, BillingPolicy, ContractPolicy, ExamPolicy } from "@/features/academy/defaults";
+import type { AccessPolicy, BillingPolicy, CompliancePolicy, ContractPolicy, ExamPolicy, GamificationPolicy, NotificationsPolicy, RetentionPolicy } from "@/features/academy/defaults";
 import { formatBrl } from "@/lib/money";
 
 /** Avisos em texto mostrados antes de confirmar. Só aparecem para o que realmente mudou. */
@@ -18,6 +18,9 @@ export function billingImpactNotes(before: BillingPolicy, after: BillingPolicy):
   }
   if (before.adjustment_min_notice_days !== after.adjustment_min_notice_days) {
     notes.push(`O aviso mínimo de reajuste passa a ser de ${after.adjustment_min_notice_days} dias nas próximas campanhas.`);
+  }
+  if (before.charge_lead_days !== after.charge_lead_days) {
+    notes.push(`As mensalidades passam a ser geradas ${after.charge_lead_days} dias antes da competência pela rotina diária (é preciso publicar a Function). Cobranças já geradas não mudam.`);
   }
   return notes;
 }
@@ -43,6 +46,9 @@ export function contractImpactNotes(before: ContractPolicy, after: ContractPolic
     if (templateUsesVariables === false) {
       notes.push("O texto do modelo publicado não usa as variáveis de cancelamento: publique uma nova versão do modelo para o contrato refletir a regra.");
     }
+  }
+  if (JSON.stringify(before.renewal_reminder_days) !== JSON.stringify(after.renewal_reminder_days)) {
+    notes.push(`Os avisos de renovação passam a sair ${after.renewal_reminder_days.join(", ")} dias antes do fim do contrato (é preciso publicar a Function).`);
   }
   if (before.default_duration_months !== after.default_duration_months) {
     notes.push(`A duração sugerida passa a ser de ${after.default_duration_months} meses em novas aprovações e renovações (você ainda pode ajustar as datas).`);
@@ -87,4 +93,51 @@ export function examImpactNotes(before: ExamPolicy, after: ExamPolicy): string[]
     notes.push("A decisão sugerida ao cancelar uma inscrição já paga muda. Você ainda escolhe em cada caso.");
   }
   return notes;
+}
+
+export function retentionImpactNotes(before: RetentionPolicy, after: RetentionPolicy): string[] {
+  const keys = Object.keys(before) as Array<keyof RetentionPolicy>;
+  if (keys.every((key) => before[key] === after[key])) return [];
+  const notes = ["Os limiares valem de imediato para o painel de retenção e para os alertas de evasão. Nenhum aluno é alterado: só a classificação de risco muda."];
+  if (before.window_days !== after.window_days) {
+    notes.push(`A frequência passa a ser medida nos últimos ${after.window_days} dias (antes ${before.window_days}).`);
+  }
+  return notes;
+}
+
+const days = (value: number) => `${value} ${value === 1 ? "dia" : "dias"}`;
+
+export function complianceImpactNotes(before: CompliancePolicy, after: CompliancePolicy): string[] {
+  const notes: string[] = [];
+  if (before.medical_validity_days !== after.medical_validity_days) {
+    notes.push(`O atestado médico passa a valer ${days(after.medical_validity_days)} (antes ${days(before.medical_validity_days)}). Vale também para os atestados já aprovados.`);
+  }
+  if (before.parq_validity_days !== after.parq_validity_days) {
+    notes.push(`O PAR-Q passa a valer ${days(after.parq_validity_days)} contados da assinatura (antes ${days(before.parq_validity_days)}). Vale também para os questionários já assinados.`);
+  }
+  if (before.medical_expiring_window_days !== after.medical_expiring_window_days || before.parq_expiring_window_days !== after.parq_expiring_window_days) {
+    notes.push("A janela de alerta de vencimento muda nos painéis de regularidade.");
+  }
+  if (JSON.stringify(before.parq_reminder_days) !== JSON.stringify(after.parq_reminder_days)) {
+    notes.push(after.parq_reminder_days.length === 0
+      ? "Nenhum lembrete de renovação do PAR-Q será enviado."
+      : `Os lembretes do PAR-Q passam a sair ${after.parq_reminder_days.map((day) => (day === 0 ? "no dia do vencimento" : `${day} dias antes`)).join(", ")}. Exige publicar a rotina diária.`);
+  }
+  return notes;
+}
+
+export function notificationsImpactNotes(before: NotificationsPolicy, after: NotificationsPolicy): string[] {
+  const notes: string[] = [];
+  if (JSON.stringify(before.payment_stages) !== JSON.stringify(after.payment_stages) || before.overdue_weekly_from_day !== after.overdue_weekly_from_day) {
+    notes.push("A nova régua vale para os lembretes de pagamento a partir da próxima execução da rotina diária (é preciso publicar a Function). Lembretes já enviados não se repetem.");
+  }
+  if (before.due_soon_alert_days !== after.due_soon_alert_days) {
+    notes.push(`O alerta de vencimento próximo no aplicativo passa a aparecer ${days(after.due_soon_alert_days)} antes.`);
+  }
+  return notes;
+}
+
+export function gamificationImpactNotes(before: GamificationPolicy, after: GamificationPolicy): string[] {
+  if (JSON.stringify(before.badges) === JSON.stringify(after.badges)) return [];
+  return ["Títulos, descrições e metas novos aparecem para todos os alunos na página de conquistas. Quem já cumpria uma meta menor mantém a conquista; quem não alcança a nova meta volta a ver o progresso."];
 }

@@ -35,6 +35,9 @@ export const ROUTES = {
   adminAcademyContracts: "/admin/academia/contratos",
   adminAcademyGrades: "/admin/academia/graduacoes",
   adminAcademyExams: "/admin/academia/exames",
+  adminAcademyRules: "/admin/academia/regras",
+  adminAcademySetup: "/admin/academia/primeiros-passos",
+  adminAcademyHistory: "/admin/academia/historico",
   adminAnnualReport: "/admin/relatorios/anual",
   adminSystem: "/admin/sistema",
   student: "/aluno",
@@ -161,7 +164,10 @@ export function navigationForProfile(
           { label: "Financeiro", href: ROUTES.adminAcademyFinance },
           { label: "Graduações", href: ROUTES.adminAcademyGrades },
           { label: "Contratos", href: ROUTES.adminAcademyContracts },
-          { label: "Exames", href: ROUTES.adminAcademyExams }
+          { label: "Exames", href: ROUTES.adminAcademyExams },
+          { label: "Regras operacionais", href: ROUTES.adminAcademyRules },
+          { label: "Primeiros passos", href: ROUTES.adminAcademySetup },
+          { label: "Histórico de alterações", href: ROUTES.adminAcademyHistory }
         ]
       },
       { label: "Balanço anual", shortLabel: "Anual", href: ROUTES.adminAnnualReport, icon: "reports", group: "Gestão" },

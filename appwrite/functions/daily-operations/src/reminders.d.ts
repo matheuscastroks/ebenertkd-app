@@ -1,5 +1,9 @@
-export function reminderStage(due: string, day: string): string | null;
+import type { PolicyDefaults } from "./policy-defaults.js";
+export function reminderStage(due: string, day: string, policy?: Pick<PolicyDefaults["notifications"], "payment_stages" | "overdue_weekly_from_day">): string | null;
 export function processingDays(lastRunDay: string | undefined, today: string): string[];
-export function pendingReminder(due: string, days: string[], today: string): { stage: string; daysLeft: number | null } | null;
+export function pendingReminder(due: string, days: string[], today: string, policy?: Pick<PolicyDefaults["notifications"], "payment_stages" | "overdue_weekly_from_day">): { stage: string; daysLeft: number | null } | null;
 export function reminderCopy(stage: string, description: string, daysLeft?: number | null): { title: string; body: string };
-export function renewalReminderDays(endsAt: string, days: string[], today: string): { day: string; left: number }[];
+export function renewalReminderDays(endsAt: string, days: string[], today: string, reminderDays?: readonly number[]): { day: string; left: number }[];
+export function shouldGenerate(competence: string, day: string, leadDays?: number): boolean;
+export function parqExpiryDay(signedAt: string, validityDays?: number): string;
+export function parqReminderStage(daysLeft: number, reminderDays?: readonly number[]): string | null;

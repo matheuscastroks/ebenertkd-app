@@ -30,6 +30,7 @@ export function BillingPolicyForm({ policy, revision }: { policy: BillingPolicy;
   const [enrollmentFee, setEnrollmentFee] = useState(policy.enrollment_fee_cents > 0 ? centsToInput(policy.enrollment_fee_cents) : "");
   const [days, setDays] = useState<number[]>(policy.due_day_options);
   const [notice, setNotice] = useState(String(policy.adjustment_min_notice_days));
+  const [leadDays, setLeadDays] = useState(String(policy.charge_lead_days));
 
   const after: BillingPolicy = useMemo(() => ({
     ...policy,
@@ -37,8 +38,9 @@ export function BillingPolicyForm({ policy, revision }: { policy: BillingPolicy;
     enrollment_fee_enabled: enrollmentEnabled,
     enrollment_fee_cents: parseMoneyInput(enrollmentFee),
     due_day_options: [...days].sort((a, b) => a - b),
-    adjustment_min_notice_days: parseIntegerInput(notice)
-  }), [policy, fee, enrollmentEnabled, enrollmentFee, days, notice]);
+    adjustment_min_notice_days: parseIntegerInput(notice),
+    charge_lead_days: parseIntegerInput(leadDays)
+  }), [policy, fee, enrollmentEnabled, enrollmentFee, days, notice, leadDays]);
   const notes = billingImpactNotes(policy, after);
 
   const toggleDay = (day: number, checked: boolean) => setDays((current) => (checked ? [...new Set([...current, day])] : current.filter((item) => item !== day)));
@@ -64,6 +66,10 @@ export function BillingPolicyForm({ policy, revision }: { policy: BillingPolicy;
           </ConfigField>
           <ConfigField id="adjustment_min_notice_days" label="Aviso mínimo de reajuste (dias)" error={fieldErrors.adjustment_min_notice_days} help="Antecedência recomendada entre o aviso e a vigência do novo valor. A tela de reajuste alerta quando o prazo é menor.">
             <Input id="adjustment_min_notice_days" name="adjustment_min_notice_days" inputMode="numeric" value={notice} onChange={(event) => setNotice(event.target.value)} required />
+          </ConfigField>
+
+          <ConfigField id="charge_lead_days" label="Gerar a mensalidade antes (dias)" error={fieldErrors.charge_lead_days} help="A rotina diária cria a cobrança da competência com esta antecedência em relação ao dia 1. Cobranças já geradas não mudam.">
+            <Input id="charge_lead_days" name="charge_lead_days" inputMode="numeric" value={leadDays} onChange={(event) => setLeadDays(event.target.value)} required />
           </ConfigField>
 
           <div className="space-y-3 sm:col-span-2">
@@ -112,7 +118,8 @@ export function BillingPolicyForm({ policy, revision }: { policy: BillingPolicy;
             { label: "Mensalidade padrão", value: formatBrl(after.default_monthly_fee_cents) },
             { label: "Taxa de matrícula", value: after.enrollment_fee_enabled ? formatBrl(after.enrollment_fee_cents) : "Não cobrada" },
             { label: "Dias de vencimento", value: after.due_day_options.join(", ") || "Nenhum" },
-            { label: "Aviso mínimo de reajuste", value: `${after.adjustment_min_notice_days} dias` }
+            { label: "Aviso mínimo de reajuste", value: `${after.adjustment_min_notice_days} dias` },
+            { label: "Geração da mensalidade", value: `${after.charge_lead_days} dias antes` }
           ]}
           confirmLabel="Salvar"
           action={save}

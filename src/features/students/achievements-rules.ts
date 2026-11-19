@@ -1,3 +1,4 @@
+import { DEFAULT_BADGES, type BadgeDefinition } from "@/features/academy/defaults";
 import type { BeltHistory } from "@/features/exams/types";
 import { daysBetweenIsoDates, saoPauloToday } from "@/lib/dates";
 
@@ -73,6 +74,8 @@ export function buildStudentConsistencyReport(input: {
   beltHistory: BeltHistory[];
   startedAt?: string | null;
   referenceDate?: string;
+  /** Conquistas da academia (padrão = as 8 originais). A métrica de cada uma é fixa; título, descrição e meta são editáveis. */
+  badges?: readonly BadgeDefinition[];
 }): StudentConsistencyReport {
   const referenceDay = (input.referenceDate ?? saoPauloToday()).slice(0, 10);
   const presentEntries = input.entries.filter((e) => e.status === "present");
@@ -146,16 +149,16 @@ export function buildStudentConsistencyReport(input: {
     ? Math.max(0, Math.floor(daysBetweenIsoDates(input.startedAt.slice(0, 10), referenceDay) / 30))
     : 0;
 
-  const badges: StudentBadge[] = [
-    makeBadge("first-lesson", "Primeiro treino", "Registre sua primeira presença no dojang.", totalPresences, 1),
-    makeBadge("streak-4w", "Constância de 4 semanas", "Mantenha 4 semanas seguidas de treino.", bestWeekStreak, 4),
-    makeBadge("perfect-month", "Mês exemplar", "Complete um mês inteiro (4+ aulas) sem faltas.", perfectMonthsCount, 1),
-    makeBadge("lessons-25", "25 treinos concluídos", "Acumule 25 presenças confirmadas.", totalPresences, 25),
-    makeBadge("lessons-50", "50 treinos no dojang", "Acumule 50 presenças confirmadas.", totalPresences, 50),
-    makeBadge("lessons-100", "100 treinos no dojang", "Marca histórica de dedicação no tatame.", totalPresences, 100),
-    makeBadge("first-graduation", "Primeira graduação", "Conquiste sua primeira troca de faixa em exame.", graduationsCount, 1),
-    makeBadge("one-year", "1 ano de Taekwondo", "Complete 12 meses de prática na academia.", tenureMonths, 12),
-  ];
+  const metricValues: Record<BadgeDefinition["metric"], number> = {
+    total_presences: totalPresences,
+    best_week_streak: bestWeekStreak,
+    perfect_months: perfectMonthsCount,
+    graduations: graduationsCount,
+    tenure_months: tenureMonths,
+  };
+  const badges: StudentBadge[] = (input.badges ?? DEFAULT_BADGES).map((badge) =>
+    makeBadge(badge.id, badge.title, badge.description, metricValues[badge.metric], badge.target)
+  );
 
   // Heatmap das últimas 20 semanas (segunda a domingo).
   const dayStatusMap = new Map<string, { status: "present" | "excused"; count: number }>();

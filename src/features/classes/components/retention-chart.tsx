@@ -33,7 +33,7 @@ const classRiskConfig = {
   critical: { label: "Crítico", color: "var(--destructive)" },
 } satisfies ChartConfig;
 
-export function RetentionCharts({ summary }: { summary: RetentionCohortSummary }) {
+export function RetentionCharts({ summary, windowDays = 30 }: { summary: RetentionCohortSummary; windowDays?: number }) {
   if (summary.totalActive === 0) {
     return (
       <p className="py-6 text-center text-sm text-muted-foreground">
@@ -63,7 +63,7 @@ export function RetentionCharts({ summary }: { summary: RetentionCohortSummary }
             Saúde de presença da academia
           </h2>
           <p className="text-xs text-muted-foreground">
-            Classificação pelos últimos 30 dias e faltas seguidas.
+            Classificação pelos últimos {windowDays} dias e faltas seguidas.
           </p>
         </div>
 

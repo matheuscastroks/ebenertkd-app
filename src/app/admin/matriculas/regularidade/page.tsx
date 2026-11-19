@@ -74,7 +74,9 @@ async function ComplianceContent({ searchParams }: { searchParams: SearchParams 
     search: params.q,
   });
 
-  const { summary, rows } = data;
+  const { summary, rows, policy } = data;
+  const medicalWindow = policy.medical_expiring_window_days;
+  const parqWindow = policy.parq_expiring_window_days;
 
   return (
     <div className="space-y-6">
@@ -104,7 +106,7 @@ async function ComplianceContent({ searchParams }: { searchParams: SearchParams 
         >
           <dt className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
             <span className="size-2 shrink-0 rounded-full bg-warning" aria-hidden="true" />
-            Vencem em 30 dias
+            Vencem em {medicalWindow} dias
           </dt>
           <dd className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-foreground">
             {summary.expiringSoonCount}
@@ -165,7 +167,7 @@ async function ComplianceContent({ searchParams }: { searchParams: SearchParams 
           </p>
         </div>
         <div className="p-4 sm:px-5">
-          <p className="text-xs font-medium text-muted-foreground">PAR-Q vence em 30d</p>
+          <p className="text-xs font-medium text-muted-foreground">PAR-Q vence em {parqWindow}d</p>
           <p className="mt-1 text-xl font-semibold tracking-tight tabular-nums text-foreground">
             {summary.parqExpiringSoonCount}
           </p>
@@ -234,7 +236,7 @@ async function ComplianceContent({ searchParams }: { searchParams: SearchParams 
                         {row.fullName}
                       </p>
                       <StatusBadge tone={STATUS_TONES[row.medicalStatus]}>
-                        {STATUS_LABELS[row.medicalStatus]}
+                        {row.medicalStatus === "expiring_soon" ? `Vence em ≤ ${medicalWindow} dias` : STATUS_LABELS[row.medicalStatus]}
                       </StatusBadge>
                       <StatusBadge tone={PARQ_TONES[row.parqStatus]}>
                         {PARQ_STATUS_LABELS[row.parqStatus]}

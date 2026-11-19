@@ -1,3 +1,4 @@
+import { DEFAULT_COMPLIANCE_POLICY, type CompliancePolicy } from "@/features/academy/defaults";
 import { evaluateParqStatus, type ParqStatus } from "@/features/students/parq-rules";
 import type { Enrollment, ParqSubmission, Student, StudentDocument } from "@/features/students/types";
 import { daysBetweenIsoDates, saoPauloToday } from "@/lib/dates";
@@ -8,9 +9,6 @@ export type MedicalComplianceStatus =
   | "expired"
   | "pending_review"
   | "missing";
-
-export const MEDICAL_VALIDITY_DAYS = 365;
-export const MEDICAL_EXPIRING_WINDOW_DAYS = 30;
 
 export type StudentComplianceAssessment = {
   studentId: string;
@@ -75,11 +73,14 @@ export function evaluateStudentCompliance(input: {
   latestParq?: ParqSubmission | null;
   trainingClassName?: string | null;
   referenceDate?: string;
+  /** Validades e janelas da academia (padrão = valores originais do sistema). */
+  policy?: CompliancePolicy;
 }): StudentComplianceAssessment {
+  const policy = input.policy ?? DEFAULT_COMPLIANCE_POLICY;
   const referenceDay = (input.referenceDate ?? saoPauloToday()).slice(0, 10);
   const medCert = input.documents.find((doc) => doc.document_type === "medical_certificate");
   const photo = input.documents.find((doc) => doc.document_type === "profile_photo");
-  const parq = evaluateParqStatus(input.latestParq, referenceDay);
+  const parq = evaluateParqStatus(input.latestParq, referenceDay, policy);
 
   let medicalStatus: MedicalComplianceStatus = "missing";
   let medicalIssuedAt: string | null = null;
@@ -92,11 +93,11 @@ export function evaluateStudentCompliance(input: {
       medicalIssuedAt = (medCert.updated_at || medCert.created_at).slice(0, 10);
     } else if (medCert.status === "approved") {
       medicalIssuedAt = (medCert.updated_at || medCert.created_at).slice(0, 10);
-      medicalExpiresAt = addDaysIso(medicalIssuedAt, MEDICAL_VALIDITY_DAYS);
+      medicalExpiresAt = addDaysIso(medicalIssuedAt, policy.medical_validity_days);
       daysUntilExpiration = daysBetweenIsoDates(referenceDay, medicalExpiresAt);
       if (daysUntilExpiration < 0) {
         medicalStatus = "expired";
-      } else if (daysUntilExpiration <= MEDICAL_EXPIRING_WINDOW_DAYS) {
+      } else if (daysUntilExpiration <= policy.medical_expiring_window_days) {
         medicalStatus = "expiring_soon";
       } else {
         medicalStatus = "valid";
@@ -145,7 +146,7 @@ export function sortComplianceAssessments(
   });
 }
 
-export function summarizeCompliance(rows: StudentComplianceAssessment[]): ComplianceSummary {
+export function summarizeCompliance(rows: StudentComplianceAssessment[], policy: Pick<CompliancePolicy, "medical_expiring_window_days"> = DEFAULT_COMPLIANCE_POLICY): ComplianceSummary {
   const totalActive = rows.length;
   const validCount = rows.filter((r) => r.medicalStatus === "valid").length;
   const expiringSoonCount = rows.filter((r) => r.medicalStatus === "expiring_soon").length;
@@ -183,7 +184,7 @@ export function summarizeCompliance(rows: StudentComplianceAssessment[]): Compli
     parqComplianceRatePct,
     breakdown: [
       { key: "valid", label: "Em dia", count: validCount },
-      { key: "expiring_soon", label: "Vence em 30d", count: expiringSoonCount },
+      { key: "expiring_soon", label: `Vence em ${policy.medical_expiring_window_days}d`, count: expiringSoonCount },
       { key: "expired", label: "Vencido", count: expiredCount },
       { key: "pending_review", label: "Em análise", count: pendingReviewCount },
       { key: "missing", label: "Pendente / Recusado", count: missingCount },

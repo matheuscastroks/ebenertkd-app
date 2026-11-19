@@ -4,9 +4,28 @@ import { revalidatePath } from "next/cache";
 import type { Profile } from "@/features/auth/types";
 import { applyBeltPreset, savePolicySection, saveAcademyIdentity, saveBeltRanks } from "@/features/academy/config-admin-service";
 import type { PolicySection } from "@/features/academy/defaults";
-import { accessFormToPatch, beltsFormToPatch, billingFormToPatch, contractFormToPatch, examFormToPatch, identityFormToInput } from "@/features/academy/form-input";
+import {
+  accessFormToPatch,
+  beltsFormToPatch,
+  billingFormToPatch,
+  complianceFormToPatch,
+  contractFormToPatch,
+  examFormToPatch,
+  gamificationFormToPatch,
+  identityFormToInput,
+  notificationsFormToPatch,
+  retentionFormToPatch
+} from "@/features/academy/form-input";
 import type { EligibilityImpact } from "@/features/academy/impact-rules";
-import { previewAccessImpact, previewEligibilityImpact, type AccessImpact } from "@/features/academy/impact-service";
+import {
+  previewAccessImpact,
+  previewComplianceImpact,
+  previewEligibilityImpact,
+  previewRetentionImpact,
+  type AccessImpact,
+  type ComplianceImpact,
+  type RetentionImpact
+} from "@/features/academy/impact-service";
 import { RankInUseError, type RankPatch } from "@/features/academy/rank-changes";
 import { RankValidationError } from "@/features/academy/rank-schemas";
 import { PolicyValidationError } from "@/features/academy/schemas";
@@ -72,6 +91,44 @@ export async function saveAccessPolicyAction(formData: FormData): Promise<Academ
 export async function saveContractPolicyAction(formData: FormData): Promise<AcademySaveResult> {
   const actor = await requireProfile("admin");
   return savePolicy("contract", contractFormToPatch(formData), formData, actor, [ROUTES.adminAcademyContracts, ROUTES.adminAcademy]);
+}
+
+export async function saveRetentionPolicyAction(formData: FormData): Promise<AcademySaveResult> {
+  const actor = await requireProfile("admin");
+  return savePolicy("retention", retentionFormToPatch(formData), formData, actor, [ROUTES.adminAcademyRules, ROUTES.adminAcademy, ROUTES.adminRetention]);
+}
+
+export async function saveCompliancePolicyAction(formData: FormData): Promise<AcademySaveResult> {
+  const actor = await requireProfile("admin");
+  return savePolicy("compliance", complianceFormToPatch(formData), formData, actor, [ROUTES.adminAcademyRules, ROUTES.adminAcademy, ROUTES.adminCompliance, ROUTES.studentParq, ROUTES.studentCard]);
+}
+
+export async function saveNotificationsPolicyAction(formData: FormData): Promise<AcademySaveResult> {
+  const actor = await requireProfile("admin");
+  return savePolicy("notifications", notificationsFormToPatch(formData), formData, actor, [ROUTES.adminAcademyRules, ROUTES.adminAcademy]);
+}
+
+export async function saveGamificationPolicyAction(formData: FormData): Promise<AcademySaveResult> {
+  const actor = await requireProfile("admin");
+  return savePolicy("gamification", gamificationFormToPatch(formData), formData, actor, [ROUTES.adminAcademyRules, ROUTES.adminAcademy, ROUTES.studentAchievements]);
+}
+
+export async function previewComplianceImpactAction(formData: FormData): Promise<{ ok: true; impact: ComplianceImpact } | { ok: false }> {
+  const actor = await requireProfile("admin");
+  try {
+    return { ok: true, impact: await previewComplianceImpact(actor, complianceFormToPatch(formData)) };
+  } catch {
+    return { ok: false };
+  }
+}
+
+export async function previewRetentionImpactAction(formData: FormData): Promise<{ ok: true; impact: RetentionImpact } | { ok: false }> {
+  const actor = await requireProfile("admin");
+  try {
+    return { ok: true, impact: await previewRetentionImpact(actor, retentionFormToPatch(formData)) };
+  } catch {
+    return { ok: false };
+  }
 }
 
 export async function previewAccessImpactAction(formData: FormData): Promise<{ ok: true; impact: AccessImpact } | { ok: false }> {

@@ -70,7 +70,38 @@ describe("defaults = valores atuais do código", () => {
         allow_skip_grades: true,
         absent_default_decision: null
       },
-      belts: { form_label: "Poomsae", level_label: "Gub" }
+      belts: { form_label: "Poomsae", level_label: "Gub" },
+      retention: {
+        critical_consecutive_absences: 3,
+        critical_days_without_presence: 21,
+        critical_rate_pct: 50,
+        critical_min_lessons: 4,
+        warning_consecutive_absences: 2,
+        warning_days_without_presence: 14,
+        warning_rate_pct: 75,
+        warning_min_lessons: 3,
+        window_days: 30
+      },
+      compliance: {
+        medical_validity_days: 365,
+        medical_expiring_window_days: 30,
+        parq_validity_days: 365,
+        parq_expiring_window_days: 30,
+        parq_reminder_days: [30, 7, 0]
+      },
+      notifications: { payment_stages: [-3, 0, 3], overdue_weekly_from_day: 10, due_soon_alert_days: 7 },
+      gamification: {
+        badges: [
+          { id: "first-lesson", title: "Primeiro treino", description: "Registre sua primeira presença no dojang.", metric: "total_presences", target: 1 },
+          { id: "streak-4w", title: "Constância de 4 semanas", description: "Mantenha 4 semanas seguidas de treino.", metric: "best_week_streak", target: 4 },
+          { id: "perfect-month", title: "Mês exemplar", description: "Complete um mês inteiro (4+ aulas) sem faltas.", metric: "perfect_months", target: 1 },
+          { id: "lessons-25", title: "25 treinos concluídos", description: "Acumule 25 presenças confirmadas.", metric: "total_presences", target: 25 },
+          { id: "lessons-50", title: "50 treinos no dojang", description: "Acumule 50 presenças confirmadas.", metric: "total_presences", target: 50 },
+          { id: "lessons-100", title: "100 treinos no dojang", description: "Marca histórica de dedicação no tatame.", metric: "total_presences", target: 100 },
+          { id: "first-graduation", title: "Primeira graduação", description: "Conquiste sua primeira troca de faixa em exame.", metric: "graduations", target: 1 },
+          { id: "one-year", title: "1 ano de Taekwondo", description: "Complete 12 meses de prática na academia.", metric: "tenure_months", target: 12 }
+        ]
+      }
     });
   });
 

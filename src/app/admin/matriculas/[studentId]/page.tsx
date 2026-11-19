@@ -32,7 +32,7 @@ export default async function EnrollmentReviewPage({ params, searchParams }: { p
     getStudentAppAccessByStudentId(studentId).catch(() => null),
   ]);
   const policies = await getAcademyPolicies();
-  const parqAssessment = evaluateParqStatus(latestParq, saoPauloToday());
+  const parqAssessment = evaluateParqStatus(latestParq, saoPauloToday(), policies.compliance);
   const notice = query.updated === "student"
     ? "Dados cadastrais do aluno atualizados com sucesso."
     : query.updated === "access_override"

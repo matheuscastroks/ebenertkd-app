@@ -1,6 +1,7 @@
 import "server-only";
 
 import { Query } from "node-appwrite";
+import { getPolicy } from "@/features/academy/config-service";
 import type { Profile } from "@/features/auth/types";
 import { getStudentAppAccessByStudentId } from "@/features/billing/access-lock-service";
 import type { Charge } from "@/features/billing/types";
@@ -80,7 +81,8 @@ async function syncForStudentProfile(
 
   const today = saoPauloToday();
   const enrollment = enrollmentsRes.rows[0] ?? null;
-  const parq = options.includeFinancial ? evaluateParqStatus(latestParq, today) : null;
+  const [compliancePolicy, notificationsPolicy] = await Promise.all([getPolicy("compliance"), getPolicy("notifications")]);
+  const parq = options.includeFinancial ? evaluateParqStatus(latestParq, today, compliancePolicy) : null;
 
   const specs = buildPendingNotificationSpecs({
     student,
@@ -93,6 +95,7 @@ async function syncForStudentProfile(
     isGuardianView: options.isGuardianView,
     includeFinancial: options.includeFinancial,
     referenceDate: today,
+    dueSoonAlertDays: notificationsPolicy.due_soon_alert_days,
   });
 
   for (const spec of specs) {

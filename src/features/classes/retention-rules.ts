@@ -1,3 +1,4 @@
+import { DEFAULT_RETENTION_POLICY, type RetentionPolicy } from "@/features/academy/defaults";
 import { daysBetweenIsoDates, saoPauloToday } from "@/lib/dates";
 
 export type RetentionRiskLevel = "critical" | "warning" | "healthy";
@@ -20,6 +21,8 @@ export type EvaluateStudentRetentionInput = {
   enrollmentCreatedAt: string;
   attendanceEntries: RetentionAttendanceEntry[];
   referenceDate?: string;
+  /** Limiares da academia (padrão = valores originais do sistema). */
+  policy?: RetentionPolicy;
 };
 
 export type StudentRetentionAssessment = {
@@ -35,9 +38,12 @@ export type StudentRetentionAssessment = {
   consecutiveAbsences: number;
   lastPresentDate: string | null;
   daysSinceLastPresent: number | null;
+  /** Aulas na janela de frequência da política (30 dias por padrão; o nome "30d" é histórico). */
   attended30d: number;
   total30d: number;
   rate30d: number;
+  /** Tamanho da janela usada em `attended30d`/`total30d`/`rate30d`. */
+  windowDays: number;
   riskLevel: RetentionRiskLevel;
   riskReason: string;
 };
@@ -95,8 +101,9 @@ export function evaluateStudentRetention(
     daysBetweenIsoDates(input.enrollmentCreatedAt.slice(0, 10), referenceDay)
   );
 
+  const policy = input.policy ?? DEFAULT_RETENTION_POLICY;
   const window30dEntries = sorted.filter(
-    (entry) => daysBetweenIsoDates(entry.lessonDate.slice(0, 10), referenceDay) <= 30 &&
+    (entry) => daysBetweenIsoDates(entry.lessonDate.slice(0, 10), referenceDay) <= policy.window_days &&
       daysBetweenIsoDates(entry.lessonDate.slice(0, 10), referenceDay) >= 0
   );
   const measurable30d = window30dEntries.filter((entry) => entry.status !== "excused");
@@ -107,27 +114,27 @@ export function evaluateStudentRetention(
   let riskLevel: RetentionRiskLevel = "healthy";
   let riskReason = "Frequência regular";
 
-  if (consecutiveAbsences >= 3) {
+  if (consecutiveAbsences >= policy.critical_consecutive_absences) {
     riskLevel = "critical";
     riskReason = `${consecutiveAbsences} faltas seguidas`;
-  } else if (daysSinceLastPresent !== null && daysSinceLastPresent >= 21) {
+  } else if (daysSinceLastPresent !== null && daysSinceLastPresent >= policy.critical_days_without_presence) {
     riskLevel = "critical";
     riskReason = `${daysSinceLastPresent} dias sem treinar`;
-  } else if (lastPresentDate === null && daysEnrolled >= 21 && sorted.length > 0) {
+  } else if (lastPresentDate === null && daysEnrolled >= policy.critical_days_without_presence && sorted.length > 0) {
     riskLevel = "critical";
-    riskReason = "Sem presença há mais de 21 dias";
-  } else if (total30d >= 4 && rate30d < 50) {
+    riskReason = `Sem presença há mais de ${policy.critical_days_without_presence} dias`;
+  } else if (total30d >= policy.critical_min_lessons && rate30d < policy.critical_rate_pct) {
     riskLevel = "critical";
-    riskReason = `Frequência de ${rate30d}% nos últimos 30 dias`;
-  } else if (consecutiveAbsences === 2) {
+    riskReason = `Frequência de ${rate30d}% nos últimos ${policy.window_days} dias`;
+  } else if (consecutiveAbsences >= policy.warning_consecutive_absences) {
     riskLevel = "warning";
-    riskReason = "2 faltas seguidas";
-  } else if (daysSinceLastPresent !== null && daysSinceLastPresent >= 14) {
+    riskReason = `${consecutiveAbsences} faltas seguidas`;
+  } else if (daysSinceLastPresent !== null && daysSinceLastPresent >= policy.warning_days_without_presence) {
     riskLevel = "warning";
     riskReason = `${daysSinceLastPresent} dias sem treinar`;
-  } else if (total30d >= 3 && rate30d < 75) {
+  } else if (total30d >= policy.warning_min_lessons && rate30d < policy.warning_rate_pct) {
     riskLevel = "warning";
-    riskReason = `Frequência de ${rate30d}% nos últimos 30 dias`;
+    riskReason = `Frequência de ${rate30d}% nos últimos ${policy.window_days} dias`;
   }
 
   return {
@@ -146,6 +153,7 @@ export function evaluateStudentRetention(
     attended30d,
     total30d,
     rate30d,
+    windowDays: policy.window_days,
     riskLevel,
     riskReason,
   };

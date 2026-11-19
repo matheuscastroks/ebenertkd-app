@@ -11,8 +11,8 @@ import { ROUTES } from "@/lib/navigation/routes";
 
 type SectionCard = { title: string; description: string; href: string; status: { label: string; tone: StatusTone } };
 
-const sectionStatus = (customized: PolicySection[], sections: PolicySection[]): { label: string; tone: StatusTone } =>
-  sections.every((section) => customized.includes(section))
+const sectionStatus = (customized: PolicySection[], sections: PolicySection[], any = false): { label: string; tone: StatusTone } =>
+  sections[any ? "some" : "every"]((section) => customized.includes(section))
     ? { label: "Configurado", tone: "success" }
     : { label: "Usando o padrão", tone: "neutral" };
 
@@ -52,6 +52,12 @@ export default async function AdminAcademyOverviewPage() {
       description: "Taxa padrão, bloqueio por inadimplência, elegibilidade e inscrição em graduações acima.",
       href: ROUTES.adminAcademyExams,
       status: sectionStatus(customized, ["exam"])
+    },
+    {
+      title: "Regras operacionais",
+      description: "Risco de evasão, validade de atestado e PAR-Q, lembretes de pagamento e conquistas.",
+      href: ROUTES.adminAcademyRules,
+      status: sectionStatus(customized, ["retention", "compliance", "notifications", "gamification"], true)
     }
   ];
 

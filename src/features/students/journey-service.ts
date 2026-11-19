@@ -29,7 +29,7 @@ export async function getStudentJourneySnapshot(actor: Profile, requestedProfile
   const targetProfile = await resolveStudentProfile(actor, requestedProfileId);
   const attendance = await getAttendanceHistory(actor, targetProfile.$id);
   const student = attendance.student;
-  const [ranks, exam] = await Promise.all([getBeltRanks(), getPolicy("exam")]);
+  const [ranks, exam, compliancePolicy] = await Promise.all([getBeltRanks(), getPolicy("exam"), getPolicy("compliance")]);
   const publicRanks = ranks.map(toPublicRank);
 
   if (!student) {
@@ -120,6 +120,7 @@ export async function getStudentJourneySnapshot(actor: Profile, requestedProfile
     latestParq,
     trainingClassName: trainingClass?.name ?? student.training_class,
     referenceDate,
+    policy: compliancePolicy,
   });
 
   return {

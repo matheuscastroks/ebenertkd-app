@@ -118,12 +118,77 @@ export const DEFAULT_BELTS_POLICY = {
   level_label: "Gub"
 };
 
+/** Risco de evasão: limiares do painel de retenção (crítico e atenção) e a janela de frequência. */
+export const DEFAULT_RETENTION_POLICY = {
+  critical_consecutive_absences: 3,
+  critical_days_without_presence: 21,
+  critical_rate_pct: 50,
+  critical_min_lessons: 4,
+  warning_consecutive_absences: 2,
+  warning_days_without_presence: 14,
+  warning_rate_pct: 75,
+  warning_min_lessons: 3,
+  window_days: 30
+};
+
+/** Atestado médico e PAR-Q: validade, janela de alerta e dias dos lembretes (dias antes do vencimento; 0 = no dia). */
+export const DEFAULT_COMPLIANCE_POLICY = {
+  medical_validity_days: 365,
+  medical_expiring_window_days: 30,
+  parq_validity_days: 365,
+  parq_expiring_window_days: 30,
+  parq_reminder_days: [30, 7, 0] as number[]
+};
+
+/**
+ * Régua de lembretes de pagamento: dias em relação ao vencimento (negativo = antes, 0 = no dia, positivo = atraso),
+ * a partir de que dia de atraso o lembrete passa a ser semanal e o alerta de vencimento próximo no aplicativo.
+ */
+export const DEFAULT_NOTIFICATIONS_POLICY = {
+  payment_stages: [-3, 0, 3] as number[],
+  overdue_weekly_from_day: 10,
+  due_soon_alert_days: 7
+};
+
+/** O que cada conquista mede. A métrica é fixa por conquista; o professor ajusta título, descrição e meta. */
+export const BADGE_METRICS = ["total_presences", "best_week_streak", "perfect_months", "graduations", "tenure_months"] as const;
+export type BadgeMetric = (typeof BADGE_METRICS)[number];
+
+export const BADGE_METRIC_LABELS: Record<BadgeMetric, string> = {
+  total_presences: "Presenças confirmadas",
+  best_week_streak: "Semanas seguidas de treino",
+  perfect_months: "Meses sem faltas",
+  graduations: "Graduações conquistadas",
+  tenure_months: "Meses de academia"
+};
+
+export type BadgeDefinition = { id: string; title: string; description: string; metric: BadgeMetric; target: number };
+
+export const DEFAULT_BADGES: BadgeDefinition[] = [
+  { id: "first-lesson", title: "Primeiro treino", description: "Registre sua primeira presença no dojang.", metric: "total_presences", target: 1 },
+  { id: "streak-4w", title: "Constância de 4 semanas", description: "Mantenha 4 semanas seguidas de treino.", metric: "best_week_streak", target: 4 },
+  { id: "perfect-month", title: "Mês exemplar", description: "Complete um mês inteiro (4+ aulas) sem faltas.", metric: "perfect_months", target: 1 },
+  { id: "lessons-25", title: "25 treinos concluídos", description: "Acumule 25 presenças confirmadas.", metric: "total_presences", target: 25 },
+  { id: "lessons-50", title: "50 treinos no dojang", description: "Acumule 50 presenças confirmadas.", metric: "total_presences", target: 50 },
+  { id: "lessons-100", title: "100 treinos no dojang", description: "Marca histórica de dedicação no tatame.", metric: "total_presences", target: 100 },
+  { id: "first-graduation", title: "Primeira graduação", description: "Conquiste sua primeira troca de faixa em exame.", metric: "graduations", target: 1 },
+  { id: "one-year", title: "1 ano de Taekwondo", description: "Complete 12 meses de prática na academia.", metric: "tenure_months", target: 12 }
+];
+
+export const DEFAULT_GAMIFICATION_POLICY = {
+  badges: DEFAULT_BADGES
+};
+
 export const DEFAULT_POLICIES = {
   billing: DEFAULT_BILLING_POLICY,
   access: DEFAULT_ACCESS_POLICY,
   contract: DEFAULT_CONTRACT_POLICY,
   exam: DEFAULT_EXAM_POLICY,
-  belts: DEFAULT_BELTS_POLICY
+  belts: DEFAULT_BELTS_POLICY,
+  retention: DEFAULT_RETENTION_POLICY,
+  compliance: DEFAULT_COMPLIANCE_POLICY,
+  notifications: DEFAULT_NOTIFICATIONS_POLICY,
+  gamification: DEFAULT_GAMIFICATION_POLICY
 };
 
 export type PolicySection = keyof typeof DEFAULT_POLICIES;
@@ -134,11 +199,19 @@ export type AccessPolicy = typeof DEFAULT_ACCESS_POLICY;
 export type ContractPolicy = typeof DEFAULT_CONTRACT_POLICY;
 export type ExamPolicy = typeof DEFAULT_EXAM_POLICY;
 export type BeltsPolicy = typeof DEFAULT_BELTS_POLICY;
+export type RetentionPolicy = typeof DEFAULT_RETENTION_POLICY;
+export type CompliancePolicy = typeof DEFAULT_COMPLIANCE_POLICY;
+export type NotificationsPolicy = typeof DEFAULT_NOTIFICATIONS_POLICY;
+export type GamificationPolicy = typeof DEFAULT_GAMIFICATION_POLICY;
 export type AcademyPolicies = {
   billing: BillingPolicy;
   access: AccessPolicy;
   contract: ContractPolicy;
   exam: ExamPolicy;
   belts: BeltsPolicy;
+  retention: RetentionPolicy;
+  compliance: CompliancePolicy;
+  notifications: NotificationsPolicy;
+  gamification: GamificationPolicy;
 };
 export type PolicyOf<S extends PolicySection> = AcademyPolicies[S];

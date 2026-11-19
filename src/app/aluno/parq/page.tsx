@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { CardGridSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
+import { getPolicy } from "@/features/academy/config-service";
 import type { Profile } from "@/features/auth/types";
 import { ParqForm } from "@/features/students/components/parq-form";
 import { evaluateParqStatus } from "@/features/students/parq-rules";
@@ -31,7 +32,7 @@ async function StudentParqContent({ profile }: { profile: Profile }) {
   }
 
   const today = saoPauloToday();
-  const assessment = evaluateParqStatus(latest, today);
+  const assessment = evaluateParqStatus(latest, today, await getPolicy("compliance"));
 
   return (
     <ParqForm

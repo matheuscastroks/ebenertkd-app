@@ -8,6 +8,8 @@ import {
   type RetentionRiskLevel,
 } from "@/features/classes/retention-rules";
 import type { AttendanceRecord, Lesson, TrainingClass } from "@/features/classes/types";
+import { getPolicy } from "@/features/academy/config-service";
+import type { RetentionPolicy } from "@/features/academy/defaults";
 import type { CancellationRequest } from "@/features/contracts/types";
 import type { Enrollment, Student, StudentDocument } from "@/features/students/types";
 import { listAllRows } from "@/lib/appwrite/all-rows";
@@ -22,7 +24,7 @@ export type RetentionOverviewFilters = {
   search?: string;
 };
 
-function loadRetentionDataset() {
+export function loadRetentionDataset() {
   return cachedRead(
     {
       name: "admin-retention-dataset",
@@ -58,12 +60,11 @@ function loadRetentionDataset() {
   );
 }
 
-export async function getRetentionOverview(filters: RetentionOverviewFilters = {}) {
-  const { students, enrollments, classes, lessons, attendance, cancellations, photos } =
-    await loadRetentionDataset();
+export type RetentionDataset = Awaited<ReturnType<typeof loadRetentionDataset>>;
 
-  const referenceDate = saoPauloToday();
-  const currentCompetence = saoPauloCurrentCompetence();
+/** Avalia todos os alunos ativos com a política informada (pura sobre os dados carregados). */
+export function buildRetentionAssessments(dataset: RetentionDataset, policy: RetentionPolicy, referenceDate: string) {
+  const { students, enrollments, classes, lessons, attendance, photos } = dataset;
 
   const classById = new Map(classes.map((item) => [item.$id, item]));
   const lessonById = new Map(lessons.map((item) => [item.$id, item]));
@@ -88,16 +89,6 @@ export async function getRetentionOverview(filters: RetentionOverviewFilters = {
     attendanceByStudent.set(record.student_id, list);
   }
 
-  const newEnrollmentsInMonth = enrollments.filter(
-    (item) =>
-      (item.status === "active" || item.status === "awaiting_renewal") &&
-      (item.contract_start ?? item.created_at).startsWith(currentCompetence)
-  ).length;
-
-  const cancellationsInMonth = cancellations.filter((item) =>
-    (item.decided_at ?? item.target_exit_month).startsWith(currentCompetence)
-  ).length;
-
   const activeStudents = students.filter((student) => {
     const enrollment = enrollmentByStudent.get(student.$id);
     return (
@@ -107,7 +98,7 @@ export async function getRetentionOverview(filters: RetentionOverviewFilters = {
     );
   });
 
-  const assessments = sortRetentionAssessments(
+  return sortRetentionAssessments(
     activeStudents.map((student) => {
       const enrollment = enrollmentByStudent.get(student.$id);
       const classObj = student.training_class_id
@@ -126,9 +117,29 @@ export async function getRetentionOverview(filters: RetentionOverviewFilters = {
         enrollmentCreatedAt: enrollment?.contract_start ?? enrollment?.created_at ?? student.created_at,
         attendanceEntries: attendanceByStudent.get(student.$id) ?? [],
         referenceDate,
+        policy,
       });
     })
   );
+}
+
+export async function getRetentionOverview(filters: RetentionOverviewFilters = {}) {
+  const [dataset, policy] = await Promise.all([loadRetentionDataset(), getPolicy("retention")]);
+  const { enrollments, classes, cancellations } = dataset;
+
+  const referenceDate = saoPauloToday();
+  const currentCompetence = saoPauloCurrentCompetence();
+  const assessments = buildRetentionAssessments(dataset, policy, referenceDate);
+
+  const newEnrollmentsInMonth = enrollments.filter(
+    (item) =>
+      (item.status === "active" || item.status === "awaiting_renewal") &&
+      (item.contract_start ?? item.created_at).startsWith(currentCompetence)
+  ).length;
+
+  const cancellationsInMonth = cancellations.filter((item) =>
+    (item.decided_at ?? item.target_exit_month).startsWith(currentCompetence)
+  ).length;
 
   const summary = summarizeRetentionCohort(
     assessments,
@@ -149,6 +160,7 @@ export async function getRetentionOverview(filters: RetentionOverviewFilters = {
   return {
     rows: filteredRows,
     summary,
+    windowDays: policy.window_days,
     classes: classes.filter((item) => item.status === "active"),
   };
 }

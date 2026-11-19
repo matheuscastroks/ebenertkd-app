@@ -21,7 +21,7 @@ import { ArrowRight, ShieldCheck } from "@/components/ui/icons";
 
 const MEDICAL_LABELS: Record<MedicalComplianceStatus, string> = {
   valid: "Atestado em dia",
-  expiring_soon: "Atestado vence em até 30 dias",
+  expiring_soon: "Atestado vence em breve",
   expired: "Atestado vencido",
   pending_review: "Atestado em análise",
   missing: "Atestado pendente",

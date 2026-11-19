@@ -8,6 +8,7 @@ import { listTrainingClasses } from "@/features/classes/service";
 import { getNextClassSchedule } from "@/features/classes/schedule";
 import { listStudentContracts } from "@/features/contracts/contract-service";
 import { buildPendencies } from "@/features/families/pendencies";
+import { getPolicy } from "@/features/academy/config-service";
 import { evaluateParqStatus } from "@/features/students/parq-rules";
 import { getLatestParqForStudent } from "@/features/students/parq-service";
 import { listProfilePhotoDocumentIds } from "@/features/students/service";
@@ -18,9 +19,10 @@ export type DependentSnapshot = Awaited<ReturnType<typeof loadDependentSnapshots
 
 /** Tudo o que o responsável precisa para saber o que está pendente para cada filho. */
 export async function loadDependentSnapshots(guardian: Profile, minors: Profile[]) {
-  const [classes, photos] = await Promise.all([
+  const [classes, photos, compliancePolicy] = await Promise.all([
     listTrainingClasses(true).catch(() => []),
-    listProfilePhotoDocumentIds(minors.map((minor) => minor.$id)).catch(() => new Map<string, string>())
+    listProfilePhotoDocumentIds(minors.map((minor) => minor.$id)).catch(() => new Map<string, string>()),
+    getPolicy("compliance")
   ]);
   return Promise.all(minors.map(async (minor) => {
     const [history, charges, contracts] = await Promise.all([
@@ -35,7 +37,7 @@ export async function loadDependentSnapshots(guardian: Profile, minors: Profile[
           getStudentAppAccessByStudentId(student.$id).catch(() => null),
         ])
       : [null, null];
-    const parqAssessment = student?.$id ? evaluateParqStatus(latestParq, saoPauloToday()) : null;
+    const parqAssessment = student?.$id ? evaluateParqStatus(latestParq, saoPauloToday(), compliancePolicy) : null;
     const trainingClass = classes.find((item) => item.$id === student?.training_class_id);
     const pendencies = buildPendencies({
       studentStatus: student?.status,

@@ -1,8 +1,13 @@
+import { DEFAULT_COMPLIANCE_POLICY, type CompliancePolicy } from "@/features/academy/defaults";
 import type { ParqSubmission } from "@/features/students/types";
 import { daysBetweenIsoDates, saoPauloToday } from "@/lib/dates";
 
-export const PARQ_VALIDITY_DAYS = 365;
-export const PARQ_EXPIRING_WINDOW_DAYS = 30;
+/** Validade e janela de alerta do PAR-Q vêm da política de conformidade da academia. */
+export type ParqPolicy = Pick<CompliancePolicy, "parq_validity_days" | "parq_expiring_window_days">;
+
+function addDaysIso(isoDay: string, days: number): string {
+  return new Date(Date.parse(`${isoDay.slice(0, 10)}T00:00:00Z`) + days * 86400000).toISOString().slice(0, 10);
+}
 
 export const PARQ_HEADER_INTRO =
   "Este Questionário tem por objetivo identificar a necessidade de avaliação por um médico antes do início ou do aumento de nível da atividade física. Por favor, assinale \"sim\" ou \"não\" às seguintes perguntas:";
@@ -110,12 +115,12 @@ export type ParqAssessment = {
   answers: Partial<ParqAnswersMap>;
 };
 
-export function computeParqExpirationDate(signedAtIso: string): string {
+export function computeParqExpirationDate(signedAtIso: string, validityDays: number = DEFAULT_COMPLIANCE_POLICY.parq_validity_days): string {
   const baseMs = Date.parse(signedAtIso);
   if (!Number.isFinite(baseMs)) {
     throw new Error("invalid_parq_signed_at");
   }
-  return new Date(baseMs + PARQ_VALIDITY_DAYS * 86400000).toISOString();
+  return new Date(baseMs + validityDays * 86400000).toISOString();
 }
 
 export function validateParqAnswers(raw: Record<string, unknown>): {
@@ -168,7 +173,8 @@ export function parseParqAnswersJson(answersJson?: string | null): Partial<ParqA
 
 export function evaluateParqStatus(
   latestSubmission: ParqSubmission | null | undefined,
-  referenceDate?: string
+  referenceDate?: string,
+  policy: ParqPolicy = DEFAULT_COMPLIANCE_POLICY
 ): ParqAssessment {
   if (!latestSubmission) {
     return {
@@ -188,7 +194,8 @@ export function evaluateParqStatus(
 
   const referenceDay = (referenceDate ?? saoPauloToday()).slice(0, 10);
   const signedDay = latestSubmission.signed_at.slice(0, 10);
-  const expiresDay = latestSubmission.expires_at.slice(0, 10);
+  // A validade é regra da academia: vale a data da assinatura somada à validade atual (e não a gravada na época).
+  const expiresDay = addDaysIso(signedDay, policy.parq_validity_days);
   const daysUntilExpiration = daysBetweenIsoDates(referenceDay, expiresDay);
   const answers = parseParqAnswersJson(latestSubmission.answers_json);
   const yesQuestionNumbers = PARQ_QUESTIONS.filter((q) => answers[q.id] === "yes").map(
@@ -198,7 +205,7 @@ export function evaluateParqStatus(
   let status: ParqStatus;
   if (daysUntilExpiration < 0) {
     status = "expired";
-  } else if (daysUntilExpiration <= PARQ_EXPIRING_WINDOW_DAYS) {
+  } else if (daysUntilExpiration <= policy.parq_expiring_window_days) {
     status = "expiring_soon";
   } else {
     status = "valid";

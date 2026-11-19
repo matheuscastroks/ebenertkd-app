@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import type { Profile } from "@/features/auth/types";
 import { DependentContext } from "@/features/families/components/dependent-context";
 import { ParqForm } from "@/features/students/components/parq-form";
+import { getPolicy } from "@/features/academy/config-service";
 import { evaluateParqStatus } from "@/features/students/parq-rules";
 import { getParqContextForActor } from "@/features/students/parq-service";
 import { requireCapability } from "@/lib/auth/session";
@@ -38,7 +39,7 @@ async function GuardianParqContent({
   }
 
   const today = saoPauloToday();
-  const assessment = evaluateParqStatus(latest, today);
+  const assessment = evaluateParqStatus(latest, today, await getPolicy("compliance"));
 
   return (
     <ParqForm

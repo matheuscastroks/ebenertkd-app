@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { DEFAULT_BILLING_POLICY } from "@/features/academy/defaults";
 import type { Charge, Payment } from "@/features/billing/types";
 
 export function resolveDueDate(competence: string, dueDay: number) {
@@ -15,10 +16,11 @@ export function isCompetenceWithinContract(competence: string, startsAt: string,
   const last = new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10);
   return last >= startsAt.slice(0, 10) && first <= endsAt.slice(0, 10);
 }
-export function shouldGenerateCompetence(competence: string, referenceDate: string) {
+/** A mensalidade é gerada `leadDays` antes da competência (padrão da política financeira: 7). */
+export function shouldGenerateCompetence(competence: string, referenceDate: string, leadDays: number = DEFAULT_BILLING_POLICY.charge_lead_days) {
   const start = Date.parse(`${competence}-01T00:00:00Z`);
   const reference = Date.parse(`${referenceDate.slice(0, 10)}T00:00:00Z`);
-  return reference >= start - 7 * 86400000;
+  return reference >= start - leadDays * 86400000;
 }
 export function effectiveChargeStatus(status: Charge["status"], dueDate: string, referenceDate: string): Charge["status"] {
   return status === "pending" && dueDate.slice(0, 10) < referenceDate.slice(0, 10) ? "overdue" : status;

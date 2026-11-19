@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { DEFAULT_CONTRACT_POLICY } from "@/features/academy/defaults";
 
 export const CONTRACT_VARIABLES = [
   "student.full_name",
@@ -205,9 +206,10 @@ export function contractReminderDays(endDate: string, referenceDate: string) {
   return Math.round((end - reference) / 86400000);
 }
 
-export function renewalEvent(endDate: string, referenceDate: string) {
+/** Aviso de renovação: nos dias da política (padrão 30 e 7 antes do fim) ou quando o contrato já terminou. */
+export function renewalEvent(endDate: string, referenceDate: string, reminderDays: readonly number[] = DEFAULT_CONTRACT_POLICY.renewal_reminder_days) {
   const days = contractReminderDays(endDate, referenceDate);
-  if (days === 30 || days === 7) return { kind: "reminder" as const, days };
+  if (reminderDays.includes(days)) return { kind: "reminder" as const, days };
   if (days < 0) return { kind: "expired" as const, days };
   return null;
 }

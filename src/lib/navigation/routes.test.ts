@@ -32,6 +32,9 @@ describe("navigationForProfile", () => {
       ROUTES.adminAcademyGrades,
       ROUTES.adminAcademyContracts,
       ROUTES.adminAcademyExams,
+      ROUTES.adminAcademyRules,
+      ROUTES.adminAcademySetup,
+      ROUTES.adminAcademyHistory,
     ]);
     expect(items.find((item) => item.href === ROUTES.adminAnnualReport)).toMatchObject({ group: "Gestão", icon: "reports" });
     expect(items.find((item) => item.href === ROUTES.adminSystem)).toMatchObject({ group: "Gestão", icon: "system" });
@@ -81,6 +84,9 @@ describe("navigationForProfile", () => {
         ROUTES.adminAcademyGrades,
         ROUTES.adminAcademyContracts,
         ROUTES.adminAcademyExams,
+        ROUTES.adminAcademyRules,
+        ROUTES.adminAcademySetup,
+        ROUTES.adminAcademyHistory,
         ROUTES.adminAnnualReport,
         ROUTES.adminSystem,
       ],

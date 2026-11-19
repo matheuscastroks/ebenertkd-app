@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   ABSENT_DECISIONS,
+  BADGE_METRICS,
   DEFAULT_ACADEMY_IDENTITY,
   DEFAULT_POLICIES,
   DUE_DAY_MAX,
@@ -80,10 +81,10 @@ export type AcademyIdentityInput = z.infer<typeof academyIdentitySchema>;
 
 /* ------------------------------------------------------------------ políticas */
 
-const dayList = (min: number, max: number, maxLength: number) =>
+const dayList = (min: number, max: number, maxLength: number, minLength = 1) =>
   z
     .array(z.coerce.number().int().min(min).max(max))
-    .min(1)
+    .min(minLength)
     .max(maxLength)
     .refine((list) => new Set(list).size === list.length, "Dias repetidos");
 
@@ -93,6 +94,20 @@ export const nullableInt = (min: number, max: number) =>
     (value) => (value === "" || value === null || value === undefined ? null : Number(value)),
     z.number().int().min(min).max(max).nullable()
   );
+
+const badgeSchema = z.object({
+  id: z.string().regex(/^[a-z0-9-]{2,32}$/, "Identificador inválido"),
+  title: z.string().trim().min(2, "Informe o título").max(48, "Use até 48 caracteres"),
+  description: z.string().trim().max(140, "Use até 140 caracteres"),
+  metric: z.enum(BADGE_METRICS),
+  target: z.coerce.number().int().min(1, "A meta deve ser de pelo menos 1").max(1000)
+});
+
+const badgeList = z
+  .array(badgeSchema)
+  .min(1)
+  .max(24)
+  .refine((list) => new Set(list.map((badge) => badge.id)).size === list.length, "Conquistas repetidas");
 
 /** Campo a campo: cada chave tem o seu schema, para a leitura aproveitar os campos válidos. */
 export const POLICY_FIELD_SCHEMAS = {
@@ -131,6 +146,32 @@ export const POLICY_FIELD_SCHEMAS = {
   belts: {
     form_label: z.string().trim().min(2, "Informe o termo da forma").max(24),
     level_label: z.string().trim().min(2, "Informe o termo do nível").max(16)
+  },
+  retention: {
+    critical_consecutive_absences: z.coerce.number().int().min(1).max(30),
+    critical_days_without_presence: z.coerce.number().int().min(1).max(365),
+    critical_rate_pct: z.coerce.number().int().min(1).max(100),
+    critical_min_lessons: z.coerce.number().int().min(1).max(60),
+    warning_consecutive_absences: z.coerce.number().int().min(1).max(30),
+    warning_days_without_presence: z.coerce.number().int().min(1).max(365),
+    warning_rate_pct: z.coerce.number().int().min(1).max(100),
+    warning_min_lessons: z.coerce.number().int().min(1).max(60),
+    window_days: z.coerce.number().int().min(7).max(180)
+  },
+  compliance: {
+    medical_validity_days: z.coerce.number().int().min(30).max(1825),
+    medical_expiring_window_days: z.coerce.number().int().min(0).max(365),
+    parq_validity_days: z.coerce.number().int().min(30).max(1825),
+    parq_expiring_window_days: z.coerce.number().int().min(0).max(365),
+    parq_reminder_days: dayList(0, 365, 6, 0)
+  },
+  notifications: {
+    payment_stages: dayList(-30, 60, 8, 0),
+    overdue_weekly_from_day: z.coerce.number().int().min(1).max(120),
+    due_soon_alert_days: z.coerce.number().int().min(0).max(30)
+  },
+  gamification: {
+    badges: badgeList
   }
 } as const satisfies Record<PolicySection, Record<string, z.ZodType>>;
 
@@ -149,13 +190,37 @@ export function crossFieldIssues(section: PolicySection, value: PolicyRecord): P
   if (section === "contract" && value.exit_fee_mode === "fixed" && Number(value.exit_fee_cents) <= 0) {
     issues.push({ field: "exit_fee_cents", message: "Informe o valor fixo do encargo" });
   }
+  if (section === "retention") {
+    if (Number(value.warning_consecutive_absences) >= Number(value.critical_consecutive_absences)) {
+      issues.push({ field: "warning_consecutive_absences", message: "O nível de atenção deve começar antes do crítico (menos faltas seguidas)" });
+    }
+    if (Number(value.warning_days_without_presence) >= Number(value.critical_days_without_presence)) {
+      issues.push({ field: "warning_days_without_presence", message: "O nível de atenção deve começar antes do crítico (menos dias sem treinar)" });
+    }
+    if (Number(value.warning_rate_pct) < Number(value.critical_rate_pct)) {
+      issues.push({ field: "warning_rate_pct", message: "A frequência de atenção não pode ser menor que a do nível crítico" });
+    }
+  }
+  if (section === "compliance") {
+    const reminders = (value.parq_reminder_days as number[] | undefined) ?? [];
+    if (reminders.some((day) => day > Number(value.parq_validity_days))) {
+      issues.push({ field: "parq_reminder_days", message: "Os lembretes não podem ser anteriores à validade do PAR-Q" });
+    }
+  }
+  if (section === "notifications") {
+    const stages = (value.payment_stages as number[] | undefined) ?? [];
+    if (stages.some((day) => day > 0 && day >= Number(value.overdue_weekly_from_day))) {
+      issues.push({ field: "overdue_weekly_from_day", message: "O lembrete semanal deve começar depois do último lembrete da régua" });
+    }
+  }
   return issues;
 }
 
 function normalizeList(field: string, value: unknown) {
   if (!Array.isArray(value)) return value;
   if (field === "due_day_options") return [...value].sort((a, b) => a - b);
-  if (field === "renewal_reminder_days") return [...value].sort((a, b) => b - a);
+  if (field === "renewal_reminder_days" || field === "parq_reminder_days") return [...value].sort((a, b) => b - a);
+  if (field === "payment_stages") return [...value].sort((a, b) => a - b);
   return value;
 }
 

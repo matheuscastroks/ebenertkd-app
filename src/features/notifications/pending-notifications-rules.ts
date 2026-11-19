@@ -1,3 +1,4 @@
+import { DEFAULT_NOTIFICATIONS_POLICY } from "@/features/academy/defaults";
 import type { StudentAppAccessState } from "@/features/billing/access-lock-rules";
 import { effectiveChargeStatus } from "@/features/billing/rules";
 import type { Charge } from "@/features/billing/types";
@@ -39,9 +40,12 @@ export function buildPendingNotificationSpecs(input: {
   isGuardianView: boolean;
   includeFinancial: boolean;
   referenceDate: string;
+  /** Alerta de vencimento próximo: cobranças que vencem em até este número de dias (padrão 7). */
+  dueSoonAlertDays?: number;
 }): PendingNotificationSpec[] {
   const specs: PendingNotificationSpec[] = [];
   const { student, enrollment, parq, charges, contracts, access, links, isGuardianView, includeFinancial, referenceDate } = input;
+  const dueSoonAlertDays = input.dueSoonAlertDays ?? DEFAULT_NOTIFICATIONS_POLICY.due_soon_alert_days;
   const subjectPrefix = isGuardianView ? `${student.full_name.split(" ")[0]}: ` : "";
   const referenceDay = referenceDate.slice(0, 10);
   const referenceIso = `${referenceDay}T12:00:00.000Z`;
@@ -157,7 +161,7 @@ export function buildPendingNotificationSpecs(input: {
         });
       } else if (status === "pending") {
         const daysLeft = daysBetweenIsoDates(referenceDay, dueDay);
-        if (daysLeft <= 7) {
+        if (daysLeft <= dueSoonAlertDays) {
           specs.push({
             kind: "payment_reminder",
             title: `${subjectPrefix}${charge.description} vence ${daysLeft <= 0 ? "hoje" : daysLeft === 1 ? "amanhã" : `em ${daysLeft} dias`}`,
