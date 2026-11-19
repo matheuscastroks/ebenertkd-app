@@ -23,6 +23,8 @@
 4. **Presets CBTKD / ITF / Kukkiwon** viram apenas **modelos de nomes e cores** aplicados à tabela de gubs; depois o professor ajusta livremente.
 5. **Tempos e presenças mínimos para exame são configuráveis por gub** (nada fixo); os valores atuais (90–180 dias, 20–48 presenças) são só o padrão inicial.
 6. **Política de privacidade genérica e simples** neste primeiro momento: texto básico com o nome da academia e um contato, sem exigir CNPJ/endereço/DPO para publicar. Os campos jurídicos completos ficam opcionais.
+7. **Cadastro só com gub/graduação (2026-11-19).** Nenhum formulário pede mais "faixa": matrícula, edição de aluno, inscrição em exame e filtros usam um único campo **Graduação** (`rank_key`: 10º gub … 1º gub, Poom, Dan). A faixa (nome e cor) é sempre **derivada** de `belt_rank_settings` e exibida como o admin configurou. A coluna `current_belt` e as listas de nomes de faixa (`BELT_OPTIONS`, `gubForBelt` etc.) saem do schema e do código; quem precisa do nome o resolve pela configuração a partir do `rank_key`.
+8. **Sem compatibilidade com dados antigos (2026-11-19).** Todo o ambiente, inclusive o de produção, ainda é de desenvolvimento e não tem usuários reais. O banco será apagado antes do lançamento. Portanto: **nenhum** script de backfill ou migração de dados (§3.3 item 1 cancelado), nenhum fallback para registros "antigos" (ex.: contrato sem `policy_snapshot_json` não existe; o snapshot é obrigatório) e nenhum campo mantido só por compatibilidade. Colunas obsoletas saem do `schema.ts`. Continua valendo usar **defaults quando a linha de configuração não existe**, porque o banco novo nasce vazio. O seed de usuários de teste acompanha o schema novo.
 
 ---
 
@@ -430,29 +432,29 @@ Sem editar os arquivos do outro plano enquanto ele estiver em execução; integr
 ## 6. Etapas de execução
 
 ### Etapa 0 — Correções imediatas (sem schema novo)
-- [ ] Unificar a grafia da marca no PDF (`pdf.ts:46`) com o nome usado nas demais telas
-- [ ] Criar `src/features/academy/defaults.ts` com todos os valores atuais (fonte única) e fazer as constantes existentes reexportarem dele
-- [ ] Teste: snapshot dos defaults (qualquer mudança acidental de valor quebra o teste)
+- [x] Unificar a grafia da marca no PDF (`pdf.ts:46`) com o nome usado nas demais telas (o cabeçalho usa o nome curto da identidade em maiúsculas: "EBENER TKD")
+- [x] Criar `src/features/academy/defaults.ts` com todos os valores atuais (fonte única) e fazer as constantes existentes reexportarem dele (cobre identidade e as seções `billing`, `access`, `contract`; as demais seções entram em `DEFAULT_POLICIES` nas etapas 3 e 4)
+- [x] Teste: snapshot dos defaults (qualquer mudança acidental de valor quebra o teste)
 
 ### Etapa 1 — Identidade (prioridade alta)
-- [ ] Declarar `academy_settings` e `academy_config_revisions` em `schema.ts` + `ids.ts`; atualizar `schema.test.ts`
-- [ ] `npm run infra:plan` → revisar → `npm run infra:apply`
-- [ ] `config-service.ts` (leitura com `cachedRead`) e `config-admin-service.ts` (gravação, revisão, auditoria)
-- [ ] Tela `/admin/academia` e `/admin/academia/identidade`; rotas e menu (`routes.ts` + teste)
-- [ ] Substituir I1, I2, I4–I9, C2, C3, C6, B12 pela identidade
-- [ ] Política de privacidade **genérica e simples** (decisão 0.1-6): texto básico com nome da academia e contato; remove `PRIVACY_PLACEHOLDER`; CNPJ/endereço/DPO opcionais
-- [ ] Rota do logo e uso no PDF/carteirinha
-- [ ] Testes: autorização (aluno/responsável/menor recebem `admin_required`), validação de CNPJ/CPF/cor, fallback sem linha, concorrência por `revision`
+- [x] Declarar `academy_settings` e `academy_config_revisions` em `schema.ts` + `ids.ts`; atualizar `schema.test.ts`
+- [x] `npm run infra:plan` → revisar (só adições) · **`npm run infra:apply` pendente**: não foi executado nesta rodada (adiciona 3 tabelas e 3 colunas em `contracts`; `policy_snapshot_json` e `academy_legal_name` são obrigatórias, então aplicar com o banco vazio ou recriado, conforme decisão 8)
+- [x] `config-service.ts` (leitura com `cachedRead`) e `config-admin-service.ts` (gravação, revisão, auditoria)
+- [x] Tela `/admin/academia` e `/admin/academia/identidade`; rotas e menu (`routes.ts` + teste)
+- [x] Substituir I1, I2, I4–I9, C2, C3, C6, B12 pela identidade (cliente via `AcademyConfigProvider` no layout raiz; o `theme_color` vale no manifest do PWA, a cor da barra do navegador no `viewport` continua a do tema claro/escuro)
+- [x] Política de privacidade **genérica e simples** (decisão 0.1-6): texto básico com nome da academia e contato; remove `PRIVACY_PLACEHOLDER`; CNPJ/endereço/DPO opcionais
+- [ ] Rota do logo e uso no PDF/carteirinha — **adiado**: a coluna `logo_file_id` já existe em `academy_settings`, mas faltam upload, a rota `GET /api/academia/logo` e o uso no PDF/carteirinha (TODO para uma próxima rodada)
+- [x] Testes: autorização (aluno/responsável/menor recebem `admin_required`), validação de CNPJ/CPF/cor, fallback sem linha, concorrência por `revision`
 
 ### Etapa 2 — Política financeira e de contrato (alta)
-- [ ] Declarar `academy_policies`; colunas aditivas em `contracts` (`policy_snapshot_json`, `academy_legal_name`, `academy_document`)
-- [ ] Zod das seções `billing`, `access`, `contract` com defaults
-- [ ] `/admin/academia/financeiro` (incluindo PIX movido) e `/admin/academia/contratos`; redirect de `/admin/financeiro/configuracoes`
-- [ ] Migrar B1, B2, B5, B7, B10, B11, B15 para parâmetros
-- [ ] Novas variáveis de contrato (C4) e texto padrão (C1) usando-as; aviso para publicar nova versão do modelo
-- [ ] `calculateExitFee` lê snapshot do contrato; contratos antigos mantêm dia 20 / 1 mensalidade
-- [ ] Taxa de matrícula (B3): gerar cobrança `enrollment_fee` na aprovação quando habilitada (idempotente por `chargeRowId`)
-- [ ] Testes: snapshot preservado após mudar política; bloqueio desligado; aviso de impacto do bloqueio; taxa de matrícula idempotente
+- [x] Declarar `academy_policies`; colunas em `contracts` (`policy_snapshot_json`, `academy_legal_name`, `academy_document`)
+- [x] Zod das seções `billing`, `access`, `contract` com defaults
+- [x] `/admin/academia/financeiro` (PIX e regra de acesso ao app incluídos) e `/admin/academia/contratos`; redirect de `/admin/financeiro/configuracoes` (o botão "Configurar PIX" da barra de `/admin/financeiro` continua como atalho para o mesmo `saveBillingSettings`)
+- [x] Migrar B1, B2, B5, B7, B10, B11, B15 para parâmetros (B8 `charge_lead_days` e C5 `renewal_reminder_days` existem no schema da política mas ficam sem tela até a Function `daily-operations` passar a lê-los, Etapa 4; B13 multa/juros idem)
+- [x] Novas variáveis de contrato (C4) e texto padrão (C1) usando-as; aviso para publicar nova versão do modelo
+- [x] `calculateExitFee` lê snapshot do contrato (obrigatório, sem ramo legado — decisão 8)
+- [x] Taxa de matrícula (B3): gerar cobrança `enrollment_fee` na aprovação quando habilitada (idempotente por `chargeRowId`)
+- [x] Testes: snapshot preservado após mudar política; bloqueio desligado; aviso de impacto do bloqueio; taxa de matrícula idempotente
 
 ### Etapa 3 — Faixas, presets e exames (alta)
 - [ ] Declarar `belt_rank_settings`; coluna aditiva `rank_key` em `students`, `exam_participants`, `belt_history`; catálogo `ranks.ts`
