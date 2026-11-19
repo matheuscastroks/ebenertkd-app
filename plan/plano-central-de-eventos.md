@@ -251,19 +251,19 @@ Backup antes da migração (Fase 7) e ensaio em ambiente de desenvolvimento com 
 ## 8. Etapas de execução
 
 ### Etapa E0 — Fundação de dados e regras
-- [ ] Declarar `events`, `event_deadlines`, `event_options`, `event_registrations`, `event_registration_documents`, `event_results`; `event_fee` em `charges`
-- [ ] IDs, cache tags, tipos e schemas zod
-- [ ] Regras puras com testes: status, elegibilidade, vagas/lista de espera, sugestão de categoria
+- [x] Declarar `events`, `event_deadlines`, `event_options`, `event_registrations`, `event_registration_documents`, `event_results`; `event_fee` em `charges`
+- [x] IDs, cache tags, tipos e schemas zod
+- [x] Regras puras com testes: status, elegibilidade, vagas/lista de espera, sugestão de categoria
 
 ### Etapa E1 — Migração e navegação
-- [ ] Script de migração dos exames (dry-run, idempotente, testado)
-- [ ] Grupo "Eventos" no menu, redirecionamentos de `/admin/exames/**`, testes de rotas
-- [ ] Bancas e elegibilidade funcionando dentro de `/admin/eventos/exames`
+- [x] ~~Script de migração dos exames (dry-run, idempotente, testado)~~ — **cancelado** (decisão do dono, 2026-11-19): exames nascem como `events` (`belt_exam`); `exam_events` saiu do schema
+- [x] Grupo "Eventos" no menu e testes de rotas (~~redirecionamentos~~ cancelados: `/admin/exames/**` foi removido)
+- [x] Bancas e elegibilidade funcionando dentro de `/admin/eventos/exames`
 
 ### Etapa E2 — Eventos simples (aulão, seminário, confraternização)
-- [ ] Assistente de criação, agenda e detalhe com abas
-- [ ] Inscrição do aluno/responsável, RSVP com acompanhantes, lista de espera, check-in
-- [ ] Cobrança `event_fee` e cancelamento com decisão financeira
+- [x] Assistente de criação, agenda e detalhe com abas
+- [x] Inscrição do aluno/responsável, RSVP com acompanhantes, lista de espera, check-in
+- [x] Cobrança `event_fee` e cancelamento com decisão financeira
 
 ### Etapa E3 — Campeonatos
 - [ ] Prazos (filiação, inscrição, troca de categoria, pesagem) com lembretes

@@ -79,3 +79,36 @@ export function planWaitlistPromotions(
 export function nextWaitlistPosition(registrations: readonly SeatedRegistration[]) {
   return waitlistOrder(registrations).reduce((max, registration) => Math.max(max, registration.waitlist_position ?? 0), 0) + 1;
 }
+
+function isDemotable(registration: SeatedRegistration) {
+  return registration.status === "pending_approval" || registration.status === "confirmed";
+}
+
+/**
+ * Reconciliação após corrida de inscrições: quem passou do limite (a última a chegar) volta para a
+ * lista de espera. Só inscrições ainda não presentes (`pending_approval`/`confirmed`) podem ser rebaixadas.
+ */
+export function planDemotions(
+  registrations: readonly SeatedRegistration[],
+  limits: { eventCapacity?: number | null; optionCapacities?: Record<string, number | null | undefined> }
+) {
+  const holders = registrations
+    .filter((registration) => holdsSeat(registration.status))
+    // Quem já está presente conta primeiro; os demais, na ordem de chegada.
+    .sort((a, b) => Number(isDemotable(a)) - Number(isDemotable(b)) || a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id));
+  let eventTaken = 0;
+  const optionTaken = new Map<string, number>();
+  const demote: string[] = [];
+  for (const registration of holders) {
+    const wanted = seatsOf(registration);
+    const taken = optionTaken.get(registration.option_id) ?? 0;
+    const fits = hasRoom(limits.eventCapacity, eventTaken, wanted) && hasRoom(limits.optionCapacities?.[registration.option_id], taken, wanted);
+    if (!fits && isDemotable(registration)) {
+      demote.push(registration.id);
+      continue;
+    }
+    eventTaken += wanted;
+    optionTaken.set(registration.option_id, taken + wanted);
+  }
+  return demote;
+}

@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { decideSeat, nextWaitlistPosition, planWaitlistPromotions, seatsOf, seatsTaken, type SeatedRegistration } from "@/features/events/rules/capacity-rules";
+import { decideSeat, nextWaitlistPosition, planDemotions, planWaitlistPromotions, seatsOf, seatsTaken, type SeatedRegistration } from "@/features/events/rules/capacity-rules";
 import { suggestCategory } from "@/features/events/rules/category-suggestion";
 import { ageClassOf, eventAge, evaluateEventEligibility, type EventAthlete } from "@/features/events/rules/eligibility-rules";
 import { assertEventTransition, assertRegistrationTransition, canTransitionEvent, canTransitionRegistration, effectiveRegistrationState, holdsSeat, isRegistrationOpen } from "@/features/events/rules/status-rules";
 import { eventInputSchema, parseEligibilityJson, registrationInputSchema } from "@/features/events/schemas";
 import { saoPauloInstant } from "@/features/events/dates";
+import type { Event } from "@/features/events/types";
 
 const reg = (id: string, status: SeatedRegistration["status"], companions = 0, extra: Partial<SeatedRegistration> = {}): SeatedRegistration => ({
   id, option_id: "opt-1", status, companions, created_at: `2026-01-0${id.length}T00:00:00.000Z`, ...extra
@@ -65,6 +66,20 @@ describe("vagas e lista de espera", () => {
     expect(planWaitlistPromotions(list, { eventCapacity: 1 })).toEqual([]);
     expect(planWaitlistPromotions(list, { eventCapacity: 10, optionCapacities: { "opt-1": 2 } })).toEqual(["ccc"]);
     expect(nextWaitlistPosition(list)).toBe(4);
+  });
+});
+
+describe("reconciliação de vagas", () => {
+  it("rebaixa quem passou do limite, começando por quem chegou por último", () => {
+    const list = [reg("a", "confirmed", 0, { created_at: "2026-01-01T10:00:00Z" }), reg("b", "confirmed", 0, { created_at: "2026-01-01T10:00:01Z" }), reg("c", "pending_approval", 0, { created_at: "2026-01-01T10:00:02Z" })];
+    expect(planDemotions(list, { eventCapacity: 2 })).toEqual(["c"]);
+    expect(planDemotions(list, { eventCapacity: 5 })).toEqual([]);
+    expect(planDemotions(list, { eventCapacity: 10, optionCapacities: { "opt-1": 1 } })).toEqual(["b", "c"]);
+  });
+
+  it("nunca rebaixa quem já fez check-in", () => {
+    const list = [reg("a", "confirmed", 0, { created_at: "2026-01-01T10:00:00Z" }), reg("b", "checked_in", 0, { created_at: "2026-01-01T10:00:01Z" })];
+    expect(planDemotions(list, { eventCapacity: 1 })).toEqual(["a"]);
   });
 });
 
@@ -138,5 +153,16 @@ describe("schemas", () => {
 
   it("converte data e hora de Brasília em instante UTC", () => {
     expect(saoPauloInstant("2026-12-05", "09:00")).toBe("2026-12-05T12:00:00.000Z");
+  });
+});
+
+describe("agenda", () => {
+  it("separa próximos de passados e cancelados", async () => {
+    const { splitAgenda } = await import("@/features/events/agenda");
+    const item = (id: string, startsAt: string, status = "registration_open") => ({ event: { $id: id, starts_at: startsAt, status } as unknown as Event });
+    const now = new Date("2026-06-10T12:00:00Z");
+    const result = splitAgenda([item("late", "2026-07-01T12:00:00Z"), item("soon", "2026-06-11T12:00:00Z"), item("old", "2026-05-01T12:00:00Z"), item("cancelled", "2026-06-20T12:00:00Z", "cancelled"), item("today", "2026-06-10T03:00:00Z")], now);
+    expect(result.upcoming.map((entry) => entry.event.$id)).toEqual(["today", "soon", "late"]);
+    expect(result.past.map((entry) => entry.event.$id)).toEqual(["old", "cancelled"]);
   });
 });

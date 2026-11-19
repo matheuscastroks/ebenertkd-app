@@ -302,6 +302,7 @@ export default async function AdminExamEligibilityPage({
       title="Elegibilidade para exames"
       subtitle="Cruze carência mínima na faixa, presenças acumuladas e situação financeira antes de fechar a banca."
       breadcrumbs={[
+        { label: "Eventos", href: ROUTES.adminEvents },
         { label: "Exames de faixa", href: ROUTES.adminExams },
         { label: "Elegibilidade" },
       ]}

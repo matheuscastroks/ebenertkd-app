@@ -146,6 +146,15 @@ export async function cancelUnpaidEventCharge(charge: Charge, reason: string) {
   return updated;
 }
 
+/** Reabre a cobrança de uma inscrição cancelada que voltou a ser confirmada (mesma origem, mesmo id). */
+export async function reopenEventCharge(charge: Charge, amountCents: number) {
+  if (charge.status !== "cancelled") return charge;
+  const { tables, config } = createAppwriteAdminClient();
+  const updated = await tables.updateRow<Charge>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: charge.$id, data: { status: "pending", amount_cents: amountCents, cancelled_at: null, cancellation_reason: null, updated_at: new Date().toISOString() } });
+  invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(charge.student_id));
+  return updated;
+}
+
 export async function getChargeForActor(actor: Profile, chargeId: string) {
   const { tables, config } = createAppwriteAdminClient();
   const charge = await tables.getRow<Charge>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: chargeId });

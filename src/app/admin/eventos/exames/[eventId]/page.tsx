@@ -717,6 +717,7 @@ export default async function ExamDetailPage({
         </StatusBadge>
       }
       breadcrumbs={[
+        { label: "Eventos", href: ROUTES.adminEvents },
         { label: "Exames de faixa", href: ROUTES.adminExams },
         { label: event.name },
       ]}
