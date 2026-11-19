@@ -3,6 +3,7 @@ import { MapPin, Plus, Trash2 } from "@/components/ui/icons";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
+import { EmptyState } from "@/components/shared/empty-state";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -132,6 +133,10 @@ export default async function AdminLocationsPage({
             description="Confira se o nome do local foi preenchido corretamente."
             clearParams={["error"]}
           />
+        ) : null}
+
+        {locations.length === 0 ? (
+          <EmptyState title="Nenhum local cadastrado" description="Cadastre o dojang ou tatame onde você treina. O primeiro local vira o padrão das turmas e exames." />
         ) : null}
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

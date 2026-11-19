@@ -2,50 +2,60 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireCapability } from "@/lib/auth/session";
+import { ZodError } from "zod";
 import { deleteLocation, saveLocation } from "@/features/locations/locations-service";
+import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
+import { safeErrorMessage } from "@/lib/security/safe-error";
 
-export async function saveLocationAction(formData: FormData) {
-  await requireCapability("admin");
-
-  const id = formData.get("id")?.toString() || undefined;
-  const name = formData.get("name")?.toString().trim();
-  const address = formData.get("address")?.toString().trim() || undefined;
-  const complement = formData.get("complement")?.toString().trim() || undefined;
-  const notes = formData.get("notes")?.toString().trim() || undefined;
-  const returnTo = formData.get("return_to")?.toString() || ROUTES.adminLocations;
-
-  if (!name) {
-    redirect(`${returnTo}?error=name_required`);
-  }
-
-  await saveLocation({
-    id,
-    name,
-    address,
-    complement,
-    notes,
-  });
-
+function revalidateLocationPages() {
   revalidatePath(ROUTES.adminLocations);
   revalidatePath(ROUTES.adminClasses);
   revalidatePath(ROUTES.adminExams);
-  redirect(`${returnTo}?saved=location`);
+}
+
+export async function saveLocationAction(formData: FormData) {
+  const actor = await requireProfile("admin");
+
+  const id = formData.get("id")?.toString() || undefined;
+  const returnTo = formData.get("return_to")?.toString() || ROUTES.adminLocations;
+  // Só caminhos internos: nunca redireciona para fora do app.
+  const safeReturn = returnTo.startsWith("/") && !returnTo.startsWith("//") ? returnTo : ROUTES.adminLocations;
+
+  try {
+    await saveLocation(actor, {
+      id,
+      name: formData.get("name")?.toString(),
+      address: formData.get("address")?.toString(),
+      complement: formData.get("complement")?.toString(),
+      notes: formData.get("notes")?.toString(),
+      ...(formData.has("is_default") ? { is_default: formData.get("is_default") === "on" } : {})
+    });
+  } catch (error) {
+    if (error instanceof ZodError) redirect(`${safeReturn}?error=name_required`);
+    console.error(`[locations] save_failed: ${safeErrorMessage(error)}`);
+    redirect(`${safeReturn}?error=save_failed`);
+  }
+
+  revalidateLocationPages();
+  redirect(`${safeReturn}?saved=location`);
 }
 
 export async function deleteLocationAction(formData: FormData) {
-  await requireCapability("admin");
+  const actor = await requireProfile("admin");
 
   const id = formData.get("id")?.toString();
   if (!id) {
     redirect(`${ROUTES.adminLocations}?error=invalid_id`);
   }
 
-  await deleteLocation(id);
+  try {
+    await deleteLocation(actor, id);
+  } catch (error) {
+    console.error(`[locations] delete_failed: ${safeErrorMessage(error)}`);
+    redirect(`${ROUTES.adminLocations}?error=delete_failed`);
+  }
 
-  revalidatePath(ROUTES.adminLocations);
-  revalidatePath(ROUTES.adminClasses);
-  revalidatePath(ROUTES.adminExams);
+  revalidateLocationPages();
   redirect(`${ROUTES.adminLocations}?deleted=location`);
 }

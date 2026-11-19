@@ -13,6 +13,7 @@ vi.mock("@/app/actions/tuition-adjustment", () => ({
   saveFinanceScenarioAction: actions.save,
   deleteFinanceScenarioAction: actions.remove
 }));
+vi.mock("@/app/actions/academy-settings", () => ({ saveDefaultMonthlyFeeAction: vi.fn() }));
 vi.mock("@/features/billing/components/planning-chart", () => ({ PlanningChart: () => <div data-testid="chart" /> }));
 
 import { PlanningCalculator } from "./planning-calculator";

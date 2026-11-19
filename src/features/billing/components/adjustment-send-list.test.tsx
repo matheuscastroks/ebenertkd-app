@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   refresh: vi.fn()
 }));
 
+vi.mock("@/app/actions/academy-settings", () => ({ saveDefaultMonthlyFeeAction: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), refresh: mocks.refresh }) }));
 vi.mock("@/app/actions/tuition-adjustment", () => ({
   applyTuitionAdjustmentAction: mocks.apply,

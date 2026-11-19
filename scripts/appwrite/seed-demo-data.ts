@@ -240,6 +240,22 @@ async function main() {
     { key: "masters-morning", name: "Turma Master & Avançados", weekdays: ["Terça", "Quinta"], start_time: "07:00", end_time: "08:15", location: "Dojang principal", capacity: 15 }
   ] as const;
 
+  // Locais de treino de demonstração (tabela training_locations; as turmas guardam só o nome do local).
+  const demoLocations = [
+    { key: "main", name: "Dojang principal", is_default: true },
+    { key: "kids", name: "Sala infantil", is_default: false }
+  ];
+  for (const location of demoLocations) {
+    await upsertRow(APPWRITE_IDS.tables.trainingLocations, demoId("location", location.key), {
+      name: location.name,
+      is_default: location.is_default,
+      status: "active",
+      updated_by_account_id: admin.account_id,
+      created_at: now,
+      updated_at: now
+    });
+  }
+
   const existingClasses = await tables.listRows<ClassRow>({
     databaseId: config.databaseId,
     tableId: APPWRITE_IDS.tables.trainingClasses,

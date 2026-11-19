@@ -54,7 +54,8 @@ describe("Appwrite infrastructure schema", () => {
       "academy_settings",
       "academy_policies",
       "academy_config_revisions",
-      "belt_rank_settings"
+      "belt_rank_settings",
+      "training_locations"
     ]);
     expect(tables.find((table) => table.id === "profiles")?.indexes).toContainEqual({
       key: "account_id_unique",
@@ -155,6 +156,14 @@ describe("Appwrite infrastructure schema", () => {
     expect(table?.columns.find((column) => column.key === "aliases")).toMatchObject({ kind: "varchar", array: true });
     expect(table?.columns.find((column) => column.key === "color_style")).toMatchObject({ kind: "enum", elements: ["solid", "tip", "stripe", "half"] });
     expect(table?.columns.find((column) => column.key === "enabled")).toMatchObject({ kind: "boolean", required: true });
+  });
+
+  it("declares training_locations (replaces data/locations.json), deny-by-default with audit columns", () => {
+    const table = tables.find((item) => item.id === "training_locations");
+    expect(table?.columns.map((column) => column.key)).toEqual(
+      expect.arrayContaining(["name", "address", "complement", "notes", "is_default", "status", "updated_by_account_id", "created_at", "updated_at"])
+    );
+    expect(table?.columns.find((column) => column.key === "status")).toMatchObject({ kind: "enum", elements: ["active", "archived"], required: true });
   });
 
   it("identifies graduations by rank_key and no longer stores belt labels or the gub integer", () => {

@@ -832,6 +832,22 @@ export const tables: TableDefinition[] = [
       { key: "updated_at", kind: "datetime", required: true }
     ],
     indexes: [{ key: "rank_key_unique", type: "unique", columns: ["rank_key"] }]
+  },
+  {
+    id: APPWRITE_IDS.tables.trainingLocations,
+    name: "Training locations",
+    columns: [
+      { key: "name", kind: "varchar", size: 96, required: true },
+      { key: "address", kind: "varchar", size: 200, required: false },
+      { key: "complement", kind: "varchar", size: 200, required: false },
+      { key: "notes", kind: "varchar", size: 500, required: false },
+      { key: "is_default", kind: "boolean", required: true },
+      { key: "status", kind: "enum", elements: ["active", "archived"], required: true },
+      { key: "updated_by_account_id", kind: "varchar", size: 36, required: true },
+      { key: "created_at", kind: "datetime", required: true },
+      { key: "updated_at", kind: "datetime", required: true }
+    ],
+    indexes: [{ key: "status_idx", type: "key", columns: ["status"] }]
   }
 ];
 

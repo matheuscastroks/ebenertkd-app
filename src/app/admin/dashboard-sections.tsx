@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { BillingOverviewChart } from "@/features/billing/components/billing-overview-chart";
+import { getAcademyIdentity } from "@/features/academy/config-service";
 import { listEnrollmentsForReview } from "@/features/students/service";
 import { getBillingOverview } from "@/features/billing/report-service";
 import { listTrainingClasses } from "@/features/classes/service";
@@ -14,6 +15,23 @@ import { ROUTES, adminClassPath, adminEnrollmentPath } from "@/lib/navigation/ro
 import { Calendar, FileText, MapPin, ReceiptText } from "@/components/ui/icons";
 
 const money = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value / 100);
+
+/** Cartão "Configure sua academia": aparece enquanto o assistente de primeiros passos não foi concluído. Não bloqueia o painel. */
+export async function SetupCardSection() {
+  const identity = await getAcademyIdentity();
+  if (identity.setup_completed_at) return null;
+  return (
+    <Alert>
+      <AlertTitle>Configure sua academia</AlertTitle>
+      <AlertDescription>
+        Em cinco passos curtos você confirma nome, graduações, mensalidade, PIX e contrato. Tudo já funciona com os valores atuais; ajuste quando quiser.
+        <Button asChild className="min-h-11 mt-2">
+          <Link href={ROUTES.adminAcademySetup}>Começar configuração</Link>
+        </Button>
+      </AlertDescription>
+    </Alert>
+  );
+}
 
 export async function UrgentTasksSection() {
   const results = await Promise.allSettled([

@@ -69,9 +69,19 @@ export default async function AdminAcademyOverviewPage() {
       subtitle="Os valores que antes ficavam fixos no sistema, agora editáveis por você."
       breadcrumbs={[{ label: "Configurações da academia" }]}
       headerActions={
-        <Button asChild variant="outline" className="min-h-11">
-          <Link href={ROUTES.adminLocations}>Locais de treino</Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          {!identity.setup_completed_at ? (
+            <Button asChild className="min-h-11">
+              <Link href={ROUTES.adminAcademySetup}>Primeiros passos</Link>
+            </Button>
+          ) : null}
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={ROUTES.adminAcademyHistory}>Histórico</Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={ROUTES.adminLocations}>Locais de treino</Link>
+          </Button>
+        </div>
       }
     >
       <div className="w-full min-w-0 space-y-6">

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import type { Profile } from "@/features/auth/types";
-import { applyBeltPreset, savePolicySection, saveAcademyIdentity, saveBeltRanks } from "@/features/academy/config-admin-service";
+import { applyBeltPreset, completeSetup, restoreConfigRevision, savePolicySection, saveAcademyIdentity, saveBeltRanks } from "@/features/academy/config-admin-service";
 import type { PolicySection } from "@/features/academy/defaults";
 import {
   accessFormToPatch,
@@ -210,5 +210,53 @@ export async function previewRankImpactAction(patches: RankPatch[]): Promise<{ o
     return { ok: true, impact: await previewEligibilityImpact(actor, { rankPatches: patches }) };
   } catch {
     return { ok: false };
+  }
+}
+
+/* ------------------------------------------------------------------ histórico e assistente */
+
+export type RestoreResult = { ok: true } | { ok: false; error: "revision_conflict" | "invalid" | "failed" };
+
+/** Restaura uma versão do histórico (gera nova revisão). `expectedRevision` = revisão mais recente da seção que a tela mostrou. */
+export async function restoreConfigRevisionAction(revisionId: string, expectedRevision: number): Promise<RestoreResult> {
+  const actor = await requireProfile("admin");
+  try {
+    await restoreConfigRevision(actor, String(revisionId), Number.isInteger(expectedRevision) && expectedRevision >= 0 ? expectedRevision : 0);
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof Error && error.message === "revision_conflict") return { ok: false, error: "revision_conflict" };
+    if (error instanceof PolicyValidationError || error instanceof RankValidationError || error instanceof ZodError || (error instanceof Error && ["revision_not_found", "revision_not_restorable", "invalid_policy_section"].includes(error.message))) {
+      return { ok: false, error: "invalid" };
+    }
+    console.error(`[academy-history] ${safeErrorMessage(error)}`);
+    return { ok: false, error: "failed" };
+  }
+}
+
+export async function completeSetupAction(): Promise<{ ok: true } | { ok: false; error: "identity_required" | "failed" }> {
+  const actor = await requireProfile("admin");
+  try {
+    await completeSetup(actor);
+    revalidatePath(ROUTES.admin);
+    revalidatePath(ROUTES.adminAcademy);
+    revalidatePath(ROUTES.adminAcademySetup);
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof Error && error.message === "identity_required") return { ok: false, error: "identity_required" };
+    console.error(`[academy-setup] ${safeErrorMessage(error)}`);
+    return { ok: false, error: "failed" };
+  }
+}
+
+/** Atalho das ferramentas financeiras: muda só a mensalidade padrão (gera uma revisão da seção `billing`). */
+export async function saveDefaultMonthlyFeeAction(cents: number, expectedRevisionValue: number): Promise<AcademySaveResult> {
+  const actor = await requireProfile("admin");
+  try {
+    const saved = await savePolicySection(actor, "billing", { default_monthly_fee_cents: cents }, Number.isInteger(expectedRevisionValue) && expectedRevisionValue >= 0 ? expectedRevisionValue : 0, "Mensalidade padrão atualizada pelas ferramentas financeiras");
+    for (const path of [ROUTES.adminAcademyFinance, ROUTES.adminAcademy, ROUTES.adminBillingCalculator, ROUTES.adminBillingAdjustment]) revalidatePath(path);
+    return { ok: true, revision: saved.revision };
+  } catch (error) {
+    return failure(error);
   }
 }

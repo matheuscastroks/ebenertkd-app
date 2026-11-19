@@ -215,3 +215,65 @@ export async function applyBeltPreset(actor: Profile, presetId: string, reason?:
   }
   return { changed: changes.length, preset: preset.id };
 }
+
+/* ------------------------------------------------------------------ restauração e assistente */
+
+const IDENTITY_EDITABLE_FIELDS = Object.keys(DEFAULT_ACADEMY_IDENTITY).filter((key) => !["logo_file_id", "timezone", "setup_completed_at"].includes(key));
+
+/**
+ * Restaura uma versão do histórico: aplica o conteúdo gravado naquela revisão pelo caminho normal de gravação, então gera uma
+ * NOVA revisão (o histórico nunca é reescrito) e respeita a concorrência: `expectedRevision` é a revisão mais recente da seção
+ * que o professor viu; se outra alteração entrou no meio, falha com `revision_conflict`.
+ */
+export async function restoreConfigRevision(actor: Profile, revisionId: string, expectedRevision: number) {
+  requireAdmin(actor);
+  const row = await readRow(APPWRITE_IDS.tables.academyConfigRevisions, revisionId);
+  if (!row) throw new Error("revision_not_found");
+  const target = safeJson(row.after_json);
+  if (!target) throw new Error("revision_not_restorable");
+  const section = String(row.section);
+  const reason = `Restaurada a versão ${row.revision}`;
+
+  if (row.scope === "policy") {
+    if (!isPolicySection(section)) throw new Error("invalid_policy_section");
+    const saved = await savePolicySection(actor, section, target, expectedRevision, reason);
+    return { scope: "policy" as const, section, revision: saved.revision };
+  }
+  if (row.scope === "settings") {
+    const current = await readRow(APPWRITE_IDS.tables.academySettings, ACADEMY_SETTINGS_ROW_ID);
+    const base = current ? pickFields(current, IDENTITY_EDITABLE_FIELDS) : {};
+    const saved = await saveAcademyIdentity(actor, { ...base, ...target }, expectedRevision, reason);
+    return { scope: "settings" as const, section, revision: saved.revision };
+  }
+  if (row.scope === "belt_ranks") {
+    const result = await saveBeltRanks(actor, [{ rank_key: section, revision: expectedRevision, data: target }], reason);
+    return { scope: "belt_ranks" as const, section, changed: result.changed };
+  }
+  throw new Error("revision_not_restorable");
+}
+
+/** Lê a linha do histórico para a tela (admin). Mais recentes primeiro, no máximo 200. */
+export async function listConfigRevisionRows(actor: Profile) {
+  requireAdmin(actor);
+  const { tables, config } = createAppwriteAdminClient();
+  const result = await tables.listRows<Models.Row & { scope: string; section: string; revision: number; before_json?: string; after_json?: string; reason?: string; changed_at: string }>({
+    databaseId: config.databaseId,
+    tableId: APPWRITE_IDS.tables.academyConfigRevisions,
+    queries: [Query.orderDesc("changed_at"), Query.limit(200)]
+  });
+  return result.rows;
+}
+
+/** Marca o assistente de primeira configuração como concluído (exige que a identidade já tenha sido salva no passo 1). */
+export async function completeSetup(actor: Profile) {
+  requireAdmin(actor);
+  const current = await readRow(APPWRITE_IDS.tables.academySettings, ACADEMY_SETTINGS_ROW_ID);
+  if (!current) throw new Error("identity_required");
+  if (current.setup_completed_at) return { revision: current.revision };
+  const now = new Date().toISOString();
+  const saved = await writeVersionedRow(APPWRITE_IDS.tables.academySettings, ACADEMY_SETTINGS_ROW_ID, current, current.revision, { setup_completed_at: now, updated_by_account_id: actor.account_id }, {});
+  invalidateTags(CACHE_TAGS.academySettings);
+  await appendRevision({ scope: "settings", section: "identity", entityId: saved.$id, revision: saved.revision, before: { setup_completed_at: null }, after: { setup_completed_at: now }, reason: "Assistente de primeiros passos concluído", actor });
+  await writeAuditEvent("academy.setup.completed", actor.account_id, "academy_settings", saved.$id, { revision: saved.revision });
+  return { revision: saved.revision };
+}

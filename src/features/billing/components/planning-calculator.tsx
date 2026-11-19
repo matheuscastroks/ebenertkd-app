@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { DefaultFeeShortcut, type DefaultFeeState } from "@/features/billing/components/default-fee-shortcut";
 import { PlanningChart } from "@/features/billing/components/planning-chart";
 import { centsToInput, parseIntegerInput, parseMoneyInput, parseNumberInput } from "@/features/billing/money-input";
 import type { PlanningBaseline } from "@/features/billing/planning-baseline";
@@ -201,7 +202,7 @@ function SectionTitle({ children, help, action }: { children: ReactNode; help?: 
  * O rascunho vem do navegador, que o servidor não enxerga: o snapshot do servidor é "sem rascunho" e,
  * ao hidratar, o corpo é remontado já com o rascunho (sem setState em efeito).
  */
-export function PlanningCalculator(props: { baseline: PlanningBaseline; scenarios: SavedScenario[] }) {
+export function PlanningCalculator(props: { baseline: PlanningBaseline; scenarios: SavedScenario[]; defaultFee?: DefaultFeeState }) {
   const raw = useSyncExternalStore(subscribeNone, readRawDraft, () => null);
   const hydrated = raw !== null;
   const draft = useMemo(() => parseDraft(raw), [raw]);
@@ -212,12 +213,14 @@ function CalculatorBody({
   baseline,
   scenarios: initialScenarios,
   initialDraft,
-  persist
+  persist,
+  defaultFee
 }: {
   baseline: PlanningBaseline;
   scenarios: SavedScenario[];
   initialDraft: Draft | null;
   persist: boolean;
+  defaultFee?: DefaultFeeState;
 }) {
   const [costs, setCosts] = useState<CostRow[]>(() =>
     (initialDraft && initialDraft.costs.length > 0 ? initialDraft.costs.map((item) => item.label) : SUGGESTED_COSTS).map((label, index) => ({
@@ -423,6 +426,7 @@ function CalculatorBody({
                     />
                     <AffixInput id="calc-fee" prefix="R$" value={fee} onChange={setFee} />
                     <RealValueReset show={edited(fee, realFee)} text={`Valor real: ${formatBrl(baseline.averageFeeCents)}`} onReset={() => setFee(realFee)} />
+                    {defaultFee ? <DefaultFeeShortcut initial={defaultFee} candidateCents={parseMoneyInput(fee)} /> : null}
                   </div>
                   <div className="space-y-1.5">
                     <FieldHeading

@@ -8,6 +8,7 @@ import {
   markAdjustmentNotifiedAction,
   publishAdjustmentNoticeAction
 } from "@/app/actions/tuition-adjustment";
+import { saveDefaultMonthlyFeeAction } from "@/app/actions/academy-settings";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,6 +17,7 @@ import { buildMessageVariables, buildWhatsappMessageLink, interpolateMessage } f
 import type { SendList } from "@/features/billing/adjustment-service";
 import { netFeeCents } from "@/features/billing/adjustment-rules";
 import { ConsequenceDialog } from "@/features/billing/components/consequence-dialog";
+import { Label } from "@/components/ui/label";
 import { formatBusinessDateBr } from "@/lib/dates";
 import { formatBrl } from "@/lib/money";
 import { MessageCircle } from "@/components/ui/icons";
@@ -23,11 +25,25 @@ import { MessageCircle } from "@/components/ui/icons";
 const STATUS_LABELS = { draft: "Rascunho", applied: "Reajuste confirmado", cancelled: "Cancelada" } as const;
 const STATUS_TONES = { draft: "warning", applied: "success", cancelled: "neutral" } as const;
 
-export function AdjustmentSendList({ data, professorName, academyName }: { data: SendList; professorName: string; academyName?: string }) {
+/** Valor novo mais comum entre os itens da campanha: é o que a opção "mensalidade padrão" propõe. */
+export function suggestedDefaultFeeCents(rows: ReadonlyArray<{ newFeeCents: number }>): number | null {
+  const counts = new Map<number, number>();
+  for (const row of rows) counts.set(row.newFeeCents, (counts.get(row.newFeeCents) ?? 0) + 1);
+  let best: number | null = null;
+  for (const [value, count] of counts) {
+    if (best === null || count > (counts.get(best) ?? 0) || (count === counts.get(best) && value > best)) best = value;
+  }
+  return best;
+}
+
+export function AdjustmentSendList({ data, professorName, academyName, billingDefault }: { data: SendList; professorName: string; academyName?: string; billingDefault?: { cents: number; revision: number } }) {
   const router = useRouter();
   const { adjustment, rows } = data;
   const [notified, setNotified] = useState<Record<string, boolean>>(() => Object.fromEntries(rows.map((row) => [row.enrollmentId, Boolean(row.notifiedAt)])));
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [updateDefault, setUpdateDefault] = useState(false);
+  const suggestedDefault = suggestedDefaultFeeCents(rows);
+  const offerDefault = billingDefault !== undefined && suggestedDefault !== null && suggestedDefault >= 100 && suggestedDefault !== billingDefault.cents;
   const [message, setMessage] = useState<{ tone: "success" | "error"; text: string } | null>(null);
   const [noticePublished, setNoticePublished] = useState(Boolean(adjustment.noticePublishedAt));
 
@@ -76,11 +92,16 @@ export function AdjustmentSendList({ data, professorName, academyName }: { data:
       setMessage({ tone: "error", text: result.error });
       return;
     }
+    let defaultNote = "";
+    if (updateDefault && offerDefault && !result.alreadyApplied) {
+      const saved = await saveDefaultMonthlyFeeAction(suggestedDefault, billingDefault.revision).catch(() => ({ ok: false as const }));
+      defaultNote = saved.ok ? ` A mensalidade padrão para novas matrículas agora é ${formatBrl(suggestedDefault)}.` : " Não foi possível atualizar a mensalidade padrão: ajuste em Configurações da academia.";
+    }
     setMessage({
       tone: "success",
-      text: result.alreadyApplied
+      text: defaultNote + (result.alreadyApplied
         ? "Este reajuste já havia sido confirmado."
-        : `Reajuste confirmado para ${result.applied} aluno${result.applied === 1 ? "" : "s"}.${result.skipped ? ` ${result.skipped} foram mantidos porque a mensalidade mudou desde a simulação.` : ""}`
+        : `Reajuste confirmado para ${result.applied} aluno${result.applied === 1 ? "" : "s"}.${result.skipped ? ` ${result.skipped} foram mantidos porque a mensalidade mudou desde a simulação.` : ""}`)
     });
     router.refresh();
   }
@@ -133,7 +154,16 @@ export function AdjustmentSendList({ data, professorName, academyName }: { data:
                     { label: "Ganho mensal em regime", value: formatBrl(adjustment.totalMonthlyImpactCents) }
                   ]}
                   action={apply}
-                />
+                >
+                  {offerDefault ? (
+                    <div className="flex items-start gap-3 rounded-lg border border-border p-3">
+                      <Checkbox id="update-default-fee" checked={updateDefault} onCheckedChange={(checked) => setUpdateDefault(checked === true)} />
+                      <Label htmlFor="update-default-fee" className="cursor-pointer leading-snug">
+                        Atualizar também a mensalidade padrão para novas matrículas para {formatBrl(suggestedDefault)}
+                      </Label>
+                    </div>
+                  ) : null}
+                </ConsequenceDialog>
                 <ConsequenceDialog
                   trigger={<Button type="button" variant="outline" className="min-h-11">Cancelar campanha</Button>}
                   title="Cancelar esta campanha?"

@@ -12,6 +12,7 @@ export const CACHE_TAGS = {
   academyPolicies: "academy-policies",
   academyRevisions: "academy-revisions",
   beltRanks: "belt-ranks",
+  trainingLocations: "training-locations",
   financeScenarios: "finance-scenarios",
   tuitionAdjustments: "tuition-adjustments",
   examEvents: "exam-events",
