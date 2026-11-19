@@ -28,9 +28,22 @@ export function PlanningChart({ students, feeCents, input }: { students: number;
 
   return (
     <div className="space-y-2">
-      <p className="text-xs text-muted-foreground">
-        Receita no caixa conforme o número de alunos, com as linhas de custos fixos e de custos mais pró-labore.
-      </p>
+      <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground" aria-label="Legenda do gráfico">
+        {(Object.keys(chartConfig) as Array<keyof typeof chartConfig>).map((key) => (
+          <li key={key} className="flex items-center gap-1.5">
+            <span
+              aria-hidden="true"
+              className="h-0.5 w-4 rounded-full"
+              style={{ backgroundColor: chartConfig[key].color, opacity: key === "revenue" ? 1 : 0.85 }}
+            />
+            {chartConfig[key].label}
+          </li>
+        ))}
+        <li className="flex items-center gap-1.5">
+          <span aria-hidden="true" className="size-2 rounded-full bg-primary" />
+          Você hoje: {students} aluno{students === 1 ? "" : "s"}
+        </li>
+      </ul>
       <ChartContainer config={chartConfig} className="aspect-auto h-64 w-full">
         <LineChart accessibilityLayer data={points} margin={{ top: 8, right: 12, bottom: 4, left: 0 }}>
           <CartesianGrid vertical={false} />
@@ -61,7 +74,6 @@ export function PlanningChart({ students, feeCents, input }: { students: number;
           <ReferenceDot x={students} y={currentRevenue} r={5} fill="var(--primary)" stroke="var(--background)" strokeWidth={2} ifOverflow="extendDomain" />
         </LineChart>
       </ChartContainer>
-      <p className="text-xs text-muted-foreground">O ponto marca você: {students} aluno{students === 1 ? "" : "s"} hoje.</p>
     </div>
   );
 }

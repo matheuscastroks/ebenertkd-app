@@ -44,16 +44,36 @@ describe("PlanningCalculator", () => {
   it("pré-preenche alunos e mensalidade reais e mostra o valor real ao editar", async () => {
     render(<PlanningCalculator baseline={baseline} scenarios={[]} />);
     expect(screen.getByLabelText("Alunos que pagam mensalidade")).toHaveValue("42");
-    expect(screen.getByLabelText("Mensalidade média (R$)")).toHaveValue("150,00");
-    expect(screen.getByText(/32 × .*150,00/)).toBeInTheDocument();
+    expect(screen.getByLabelText("Mensalidade média")).toHaveValue("150,00");
+    // A distribuição de valores fica no tooltip (?) da mensalidade média, não poluindo a tela
+    expect(screen.queryByText(/32 × .*150,00/)).not.toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole("button", { name: "Ajuda: Mensalidade média" }));
+    expect((await screen.findAllByText(/32 × .*150,00/)).length).toBeGreaterThan(0);
+
+    expect(screen.queryByText("Valor real: 42")).not.toBeInTheDocument();
     fill("Alunos que pagam mensalidade", "30");
-    expect(screen.getByText("Valor real: 42")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Valor real: 42/ }));
+    expect(screen.getByLabelText("Alunos que pagam mensalidade")).toHaveValue("42");
+  });
+
+  it("permite renomear, adicionar e remover custos fixos", async () => {
+    const user = userEvent.setup();
+    render(<PlanningCalculator baseline={baseline} scenarios={[]} />);
+    fireEvent.change(screen.getByLabelText("Nome do custo 1"), { target: { value: "Aluguel do dojang" } });
+    fill("Aluguel do dojang", "1500");
+    await user.click(screen.getByRole("button", { name: "Adicionar custo" }));
+    const names = screen.getAllByLabelText(/^Nome do custo/);
+    fireEvent.change(names[names.length - 1], { target: { value: "Faxina" } });
+    fill("Faxina", "300");
+    expect(screen.getByText("R$ 1.800,00")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Remover Faxina" }));
+    expect(screen.getByText("R$ 1.500,00")).toBeInTheDocument();
   });
 
   it("alterar alunos e mensalidade atualiza folga e ponto de equilíbrio", () => {
     render(<PlanningCalculator baseline={baseline} scenarios={[]} />);
     fill("Aluguel", "2000");
-    fill("Meta de pró-labore (R$)", "4000");
+    fill("Meta de pró-labore", "4000");
 
     // 42 × R$ 150 = R$ 6.300 contra necessidade de R$ 6.000
     expect(text("monthly-margin")).toContain("300,00");
@@ -65,7 +85,7 @@ describe("PlanningCalculator", () => {
     expect(screen.getByText("Déficit do mês")).toBeInTheDocument();
     expect(text("reading")).toMatch(/faltam .* Seriam necessários 40 alunos/);
 
-    fill("Mensalidade média (R$)", "200");
+    fill("Mensalidade média", "200");
     // 30 × 200 = 6.000: fecha exatamente
     expect(text("monthly-margin")).toContain("0,00");
     expect(screen.getByText("Folga do mês")).toBeInTheDocument();
@@ -76,7 +96,7 @@ describe("PlanningCalculator", () => {
     const user = userEvent.setup();
     render(<PlanningCalculator baseline={baseline} scenarios={[]} />);
     fill("Aluguel", "2000");
-    fill("Meta de pró-labore (R$)", "4000");
+    fill("Meta de pró-labore", "4000");
 
     expect(text("required-fee")).toContain("142,86");
 
@@ -84,14 +104,16 @@ describe("PlanningCalculator", () => {
     expect(text("students-goal")).toBe("40");
     expect(text("students-break-even")).toBe("14");
 
-    fill("Mensalidade média (R$)", "100");
+    fill("Mensalidade média", "100");
     expect(text("students-goal")).toBe("60");
   });
 
   it("explica quando cada aluno dá prejuízo", async () => {
     const user = userEvent.setup();
     render(<PlanningCalculator baseline={baseline} scenarios={[]} />);
-    fill("Custo por aluno (R$)", "200");
+    expect(screen.queryByLabelText("Custo por aluno")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Ajustes avançados/ }));
+    fill("Custo por aluno", "200");
     await user.click(screen.getByRole("tab", { name: "Quantos alunos preciso?" }));
     expect(screen.getAllByText(/cada aluno dá prejuízo/).length).toBeGreaterThan(0);
   });
@@ -100,7 +122,7 @@ describe("PlanningCalculator", () => {
     const user = userEvent.setup();
     render(<PlanningCalculator baseline={baseline} scenarios={[]} />);
     fill("Aluguel", "2000");
-    fill("Meta de pró-labore (R$)", "4000");
+    fill("Meta de pró-labore", "4000");
     await user.click(screen.getByRole("tab", { name: "E se...?" }));
 
     await user.click(screen.getByRole("button", { name: "Perdi 5 alunos" }));
@@ -119,7 +141,7 @@ describe("PlanningCalculator", () => {
     // 32 × 120 = 3.840 < custos fixos de 2.000? não: 3.840 > 2.000, mas abaixo da meta
     expect(text("whatif-margin")).toContain("2.160,00");
 
-    fill("Contratar instrutor (R$/mês)", "1900");
+    fill("Contratar instrutor", "1900");
     await user.click(screen.getAllByRole("button", { name: "Aplicar" })[0]);
     // custos fixos 3.900 > receita 3.840: abaixo do ponto de equilíbrio
     expect(screen.getByText(/abaixo do ponto de equilíbrio/)).toBeInTheDocument();
@@ -167,7 +189,7 @@ describe("PlanningCalculator", () => {
 
     render(<PlanningCalculator baseline={baseline} scenarios={[]} />);
     fill("Aluguel", "2500");
-    fill("Meta de pró-labore (R$)", "4000");
+    fill("Meta de pró-labore", "4000");
     expect(screen.getByRole("button", { name: "Salvar cenário" })).toBeDisabled();
     fill("Nome do cenário", "Com instrutor");
     await user.click(screen.getByRole("button", { name: "Salvar cenário" }));
@@ -185,7 +207,7 @@ describe("PlanningCalculator", () => {
     fill("Aluguel", "0");
     await user.click(screen.getByRole("button", { name: "Carregar" }));
     expect(screen.getByLabelText("Aluguel")).toHaveValue("2500,00");
-    expect(screen.getByLabelText("Inadimplência esperada (%)")).toHaveValue("5");
+    expect(screen.getByLabelText("Inadimplência esperada")).toHaveValue("5");
 
     await user.click(screen.getByRole("button", { name: "Excluir cenário Com instrutor" }));
     await waitFor(() => expect(actions.remove).toHaveBeenCalledWith("sc1"));
