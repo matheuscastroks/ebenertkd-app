@@ -13,7 +13,8 @@ import {
   type ExamEligibilityStatus,
   type StudentEligibilityAssessment,
 } from "@/features/exams/eligibility-rules";
-import type { BeltHistory, ExamEvent, ExamParticipant } from "@/features/exams/types";
+import type { Event } from "@/features/events/types";
+import { toExamEvent, type BeltHistory, type ExamEvent, type ExamParticipant } from "@/features/exams/types";
 import type { Enrollment, Student, StudentDocument } from "@/features/students/types";
 import { listAllRows } from "@/lib/appwrite/all-rows";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
@@ -34,7 +35,7 @@ export function loadEligibilityDataset() {
       name: "admin-exam-eligibility-dataset",
       key: [],
       tags: [
-        CACHE_TAGS.examEvents,
+        CACHE_TAGS.events,
         CACHE_TAGS.enrollments,
         CACHE_TAGS.studentsAll,
         CACHE_TAGS.attendanceAll,
@@ -65,7 +66,7 @@ export function loadEligibilityDataset() {
           Query.equal("status", ["present"]),
         ]),
         listAllRows<Charge>(APPWRITE_IDS.tables.charges),
-        listAllRows<ExamEvent>(APPWRITE_IDS.tables.examEvents),
+        listAllRows<Event>(APPWRITE_IDS.tables.events, [Query.equal("event_type", ["belt_exam"])]).then((rows): ExamEvent[] => rows.map(toExamEvent)),
         listAllRows<ExamParticipant>(APPWRITE_IDS.tables.examParticipants, [
           Query.equal("status", ["registered"]),
         ]),

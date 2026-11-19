@@ -19,7 +19,7 @@ import type { TrainingClass } from "@/features/classes/types";
 import { ROUTES } from "@/lib/navigation/routes";
 
 const statusLabels = { pending: "Pendente", proof_under_review: "Em análise", paid: "Pago", overdue: "Inadimplente", cancelled: "Cancelado" } as const;
-const typeLabels = { monthly_fee: "Mensalidade", enrollment_fee: "Matrícula", exam_fee: "Exame", exit_fee: "Saída" } as const;
+const typeLabels = { monthly_fee: "Mensalidade", enrollment_fee: "Matrícula", exam_fee: "Exame", event_fee: "Evento", exit_fee: "Saída" } as const;
 const filterNames = { student: "aluno", competence: "competência", trainingClass: "turma", type: "tipo", status: "situação" } as const;
 /** Filtros usados com menos frequência ficam recolhidos até o professor pedir. */
 const secondaryKeys = ["competence", "trainingClass", "type"] as const;

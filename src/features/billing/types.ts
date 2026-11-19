@@ -1,6 +1,6 @@
 import type { Models } from "node-appwrite";
 
-export type ChargeType = "monthly_fee" | "enrollment_fee" | "exam_fee" | "exit_fee";
+export type ChargeType = "monthly_fee" | "enrollment_fee" | "exam_fee" | "exit_fee" | "event_fee";
 export type ChargeStatus = "pending" | "proof_under_review" | "paid" | "overdue" | "cancelled";
 
 export type Charge = Models.Row & {

@@ -1,3 +1,4 @@
+import { EVENT_TYPE_LABEL } from "@/features/events/labels";
 import { getAcademyIdentity } from "@/features/academy/config-service";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -142,11 +143,11 @@ async function StudentCalendarContent({ profile }: { profile: Profile }) {
         <section aria-labelledby="upcoming-exams-heading" className="space-y-3">
           <div className="flex items-center justify-between gap-2">
             <h2 id="upcoming-exams-heading" className="text-base font-semibold">
-              Exames de faixa agendados
+              Próximos eventos
             </h2>
             <Button asChild variant="ghost" size="sm" className="min-h-9">
-              <Link href={ROUTES.studentExams}>
-                Meus exames
+              <Link href={ROUTES.studentEvents}>
+                Eventos
                 <ArrowRight className="size-3.5" aria-hidden="true" />
               </Link>
             </Button>
@@ -154,7 +155,7 @@ async function StudentCalendarContent({ profile }: { profile: Profile }) {
 
           {upcomingExams.length === 0 ? (
             <div className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground shadow-xs">
-              Nenhuma banca de exame marcada no calendário no momento.
+              Nenhum evento marcado no calendário no momento.
             </div>
           ) : (
             <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
@@ -163,8 +164,8 @@ async function StudentCalendarContent({ profile }: { profile: Profile }) {
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-sm font-semibold text-foreground">{exam.name}</p>
-                      <StatusBadge tone={exam.status === "confirmed" ? "success" : "info"}>
-                        {exam.status === "confirmed" ? "Confirmado" : "Planejado"}
+                      <StatusBadge tone={exam.type === "belt_exam" ? "info" : "neutral"}>
+                        {EVENT_TYPE_LABEL[exam.type]}
                       </StatusBadge>
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -182,9 +183,9 @@ async function StudentCalendarContent({ profile }: { profile: Profile }) {
                     title={exam.name}
                     date={exam.date}
                     location={exam.location}
-                    description={`Exame de graduação ${identity.short_name}.`}
-                    fileName={`exame-${exam.date}`}
-                    label="Salvar exame na agenda"
+                    description={`${EVENT_TYPE_LABEL[exam.type]} · ${identity.short_name}.`}
+                    fileName={`evento-${exam.date}`}
+                    label="Salvar na agenda"
                   />
                 </li>
               ))}

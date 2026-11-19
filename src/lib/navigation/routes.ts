@@ -10,8 +10,10 @@ export const ROUTES = {
   adminStudentAccess: "/admin/matriculas/acessos",
   adminClasses: "/admin/turmas",
   adminLocations: "/admin/locais",
-  adminExams: "/admin/exames",
-  adminExamEligibility: "/admin/exames/elegibilidade",
+  adminEvents: "/admin/eventos",
+  adminEventNew: "/admin/eventos/novo",
+  adminExams: "/admin/eventos/exames",
+  adminExamEligibility: "/admin/eventos/exames/elegibilidade",
   studentAttendance: "/aluno/frequencia",
   studentEvolution: "/aluno/evolucao",
   studentStudies: "/aluno/estudos",
@@ -20,6 +22,7 @@ export const ROUTES = {
   studentCard: "/aluno/carteirinha",
   studentParq: "/aluno/parq",
   studentExams: "/aluno/exames",
+  studentEvents: "/aluno/eventos",
   adminContracts: "/admin/contratos",
   adminContractRenewals: "/admin/contratos/renovacoes",
   adminContractTemplate: "/admin/contratos/modelo",
@@ -117,13 +120,13 @@ export function navigationForProfile(
         ]
       },
       {
-        label: "Exames de faixa",
-        shortLabel: "Exames",
-        href: ROUTES.adminExams,
+        label: "Eventos",
+        href: ROUTES.adminEvents,
         icon: "exams",
         group: "Academia",
         children: [
-          { label: "Bancas de exame", href: ROUTES.adminExams, exact: true },
+          { label: "Agenda de eventos", href: ROUTES.adminEvents, exact: true },
+          { label: "Exames de faixa", href: ROUTES.adminExams, exact: true },
           { label: "Elegibilidade", href: ROUTES.adminExamEligibility }
         ]
       },
@@ -196,6 +199,7 @@ export function navigationForProfile(
     { label: "Conquistas", href: ROUTES.studentAchievements, icon: "system", group: "Treino" },
     { label: "Calendário", href: ROUTES.studentCalendar, icon: "attendance", group: "Treino" },
     { label: "Meus exames", shortLabel: "Exames", bottomNav: minor, href: ROUTES.studentExams, icon: "exams", group: "Treino" },
+    { label: "Eventos", href: ROUTES.studentEvents, icon: "attendance", group: "Treino" },
     { label: "Carteirinha e saúde", shortLabel: "Carteirinha", href: ROUTES.studentCard, icon: "family", group: "Matrícula" },
     { label: "Questionário de saúde", shortLabel: "Saúde", href: ROUTES.studentParq, icon: "enrollment", group: "Matrícula" },
     { label: "Minha matrícula", shortLabel: "Matrícula", href: ROUTES.studentEnrollment, icon: "enrollment", group: "Matrícula" },
@@ -226,6 +230,14 @@ export function adminClassPath(classId: string) {
 
 export function adminLessonPath(classId: string, lessonId: string) {
   return `${adminClassPath(classId)}/aulas/${encodeURIComponent(lessonId)}`;
+}
+
+export function adminEventPath(eventId: string) {
+  return `${ROUTES.adminEvents}/${encodeURIComponent(eventId)}`;
+}
+
+export function guardianEventsPath(profileId: string) {
+  return `${ROUTES.guardianDependents}/${encodeURIComponent(profileId)}/eventos`;
 }
 
 export function adminExamPath(eventId: string) {

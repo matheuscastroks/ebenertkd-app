@@ -18,7 +18,7 @@ export async function createExamEventAction(formData: FormData) {
   } catch {
     redirect(`${ROUTES.adminExams}?error=create`);
   }
-  updateTag(CACHE_TAGS.examEvents);
+  updateTag(CACHE_TAGS.events);
   revalidatePath(ROUTES.adminExams);
   redirect(adminExamPath(eventId));
 }
@@ -36,7 +36,7 @@ export async function addExamParticipantAction(formData: FormData) {
   } catch {
     redirect(`${adminExamPath(eventId)}?error=participant`);
   }
-  updateTag(CACHE_TAGS.examEvents);
+  updateTag(CACHE_TAGS.events);
   updateTag(CACHE_TAGS.billingCharges);
   revalidatePath(adminExamPath(eventId));
   redirect(`${adminExamPath(eventId)}?added=1`);
@@ -50,7 +50,7 @@ export async function recordExamResultAction(formData: FormData) {
   } catch {
     redirect(`${adminExamPath(eventId)}?error=result`);
   }
-  updateTag(CACHE_TAGS.examEvents);
+  updateTag(CACHE_TAGS.events);
   revalidatePath(adminExamPath(eventId));
   redirect(`${adminExamPath(eventId)}?graded=1`);
 }
@@ -64,7 +64,7 @@ export async function cancelExamParticipantAction(formData: FormData) {
   } catch {
     redirect(`${adminExamPath(eventId)}?error=cancel`);
   }
-  updateTag(CACHE_TAGS.examEvents);
+  updateTag(CACHE_TAGS.events);
   updateTag(CACHE_TAGS.billingCharges);
   revalidatePath(adminExamPath(eventId));
   redirect(`${adminExamPath(eventId)}?cancelled=1`);
@@ -78,7 +78,7 @@ export async function cancelExamEventAction(formData: FormData) {
   } catch {
     redirect(`${adminExamPath(eventId)}?error=event-cancel`);
   }
-  updateTag(CACHE_TAGS.examEvents);
+  updateTag(CACHE_TAGS.events);
   revalidatePath(ROUTES.adminExams);
   redirect(`${ROUTES.adminExams}?cancelled=1`);
 }
@@ -97,7 +97,7 @@ export async function enrollEligibleStudentAction(formData: FormData) {
   } catch {
     redirect(`${ROUTES.adminExamEligibility}?error=enroll`);
   }
-  updateTag(CACHE_TAGS.examEvents);
+  updateTag(CACHE_TAGS.events);
   updateTag(CACHE_TAGS.billingCharges);
   revalidatePath(ROUTES.adminExamEligibility);
   revalidatePath(adminExamPath(eventId));

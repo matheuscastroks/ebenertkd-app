@@ -11,6 +11,7 @@ import {
   buildDemoScenario,
   demoDueDate,
   demoExamDefinitions,
+  demoSimpleEventDefinitions,
   demoId,
   monthOffset,
   type DemoStudentScenario
@@ -326,17 +327,55 @@ async function main() {
   const examMap = new Map<string, SeedRow>();
   for (const def of examDefinitions) {
     const rowId = demoId("exam-event", def.key);
-    const row = await upsertRow(APPWRITE_IDS.tables.examEvents, rowId, {
-      name: def.name,
-      event_date: def.event_date,
-      location: def.location,
-      default_fee_cents: def.default_fee_cents,
-      status: def.status,
+    const row = await upsertRow(APPWRITE_IDS.tables.events, rowId, {
+      event_type: "belt_exam",
+      title: def.name,
+      starts_at: def.event_date,
+      location_text: def.location,
+      exam_fee_cents: def.default_fee_cents,
+      status: def.status === "confirmed" ? "registration_closed" : def.status,
+      organizer_type: "academy",
+      audience: "students",
+      requires_approval: false,
+      age_cutoff: "birth_year",
       created_by_account_id: admin.account_id,
       created_at: def.created_at,
       updated_at: now
     });
     examMap.set(def.key, row);
+  }
+
+  console.log("🎉 Sincronizando eventos simples (aulão e confraternização)...");
+  for (const def of demoSimpleEventDefinitions(now)) {
+    const eventId = demoId("event", def.key);
+    await upsertRow(APPWRITE_IDS.tables.events, eventId, {
+      event_type: def.event_type,
+      title: def.title,
+      description: def.description,
+      status: "registration_open",
+      starts_at: def.starts_at,
+      ends_at: def.ends_at,
+      location_text: def.location_text,
+      organizer_type: "academy",
+      audience: def.audience,
+      requires_approval: false,
+      capacity: def.capacity,
+      max_companions: def.max_companions,
+      companion_price_cents: def.companion_price_cents,
+      age_cutoff: "birth_year",
+      created_by_account_id: admin.account_id,
+      created_at: now,
+      updated_at: now
+    });
+    await upsertRow(APPWRITE_IDS.tables.eventOptions, demoId("event-option", def.key), {
+      event_id: eventId,
+      label: def.option_label,
+      modality: "general",
+      price_cents: def.price_cents,
+      sort_order: 0,
+      created_at: now,
+      updated_at: now
+    });
   }
 
   console.log("👥 [5/9] Processando Alunos, Matrículas e Documentos de Saúde...");
@@ -840,7 +879,7 @@ async function main() {
       let examChargeId: string | null = null;
 
       if (ep.chargeStatus) {
-        const examCompetence = (eventRow.event_date as string).slice(0, 7);
+        const examCompetence = (eventRow.starts_at as string).slice(0, 7);
         examChargeId = demoId("charge", `${scenario.key}:${ep.eventIdKey}:exam-fee`);
 
         await upsertRow(APPWRITE_IDS.tables.charges, examChargeId, {
@@ -851,7 +890,7 @@ async function main() {
           competence: examCompetence,
           origin_id: eventRow.$id,
           amount_cents: ep.feeCents,
-          due_date: eventRow.event_date as string,
+          due_date: eventRow.starts_at as string,
           status: ep.chargeStatus === "paid" ? "paid" : ep.chargeStatus,
           description: `Taxa do exame de graduação - Faixa ${DEFAULT_RANK_SETTINGS[ep.targetRankKey].display_name}`,
           created_at: eventRow.created_at as string,
@@ -863,7 +902,7 @@ async function main() {
             charge_id: examChargeId,
             method: "manual",
             amount_cents: ep.feeCents,
-            paid_at: eventRow.event_date as string,
+            paid_at: eventRow.starts_at as string,
             status: "confirmed",
             recorded_by_account_id: admin.account_id,
             notes: "Taxa de exame quitada antecipadamente.",
@@ -1093,7 +1132,7 @@ async function main() {
     metadata: JSON.stringify({
       students: scenarios.length,
       classes: classDefinitions.length,
-      examEvents: examDefinitions.length,
+      events: examDefinitions.length,
       charges: totalCharges,
       payments: totalPayments,
       attendances: attendanceCount

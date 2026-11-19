@@ -1,7 +1,7 @@
 import { formatCompetence } from "@/features/billing/format-competence";
 import type { Charge } from "@/features/billing/types";
 
-export const chargeTypeLabels: Record<Charge["charge_type"], string> = { monthly_fee: "Mensalidade", enrollment_fee: "Taxa de matrícula", exam_fee: "Taxa de exame", exit_fee: "Taxa de saída" };
+export const chargeTypeLabels: Record<Charge["charge_type"], string> = { monthly_fee: "Mensalidade", enrollment_fee: "Taxa de matrícula", exam_fee: "Taxa de exame", event_fee: "Taxa de evento", exit_fee: "Taxa de saída" };
 
 /** Título legível da cobrança: troca a competência crua ("2026-10") por "out/2026". */
 export function chargeTitle(charge: Pick<Charge, "description" | "competence" | "charge_type">) {

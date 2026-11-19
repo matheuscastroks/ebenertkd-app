@@ -1306,6 +1306,42 @@ export function buildDemoScenario(referenceDate = new Date().toISOString()): Dem
   ];
 }
 
+export function demoSimpleEventDefinitions(referenceDate = new Date().toISOString()) {
+  const month = monthOffset(referenceDate, 1);
+  return [
+    {
+      key: "aulao-chutes",
+      event_type: "seminar" as const,
+      title: "Aulão de chutes",
+      description: "Treino especial aberto a convidados de outras academias.",
+      starts_at: `${month}-12T12:00:00.000Z`,
+      ends_at: `${month}-12T14:00:00.000Z`,
+      location_text: "Dojang Central Ebener TKD",
+      audience: "students_and_guests" as const,
+      capacity: 30,
+      max_companions: 0,
+      companion_price_cents: 0,
+      option_label: "Participante",
+      price_cents: 3000
+    },
+    {
+      key: "confraternizacao",
+      event_type: "social" as const,
+      title: "Confraternização de fim de ano",
+      description: "Churrasco com a família. Cada aluno pode levar acompanhantes.",
+      starts_at: `${month}-20T21:00:00.000Z`,
+      ends_at: `${month}-21T00:00:00.000Z`,
+      location_text: "Dojang Central Ebener TKD",
+      audience: "students" as const,
+      capacity: 80,
+      max_companions: 4,
+      companion_price_cents: 4000,
+      option_label: "Aluno",
+      price_cents: 4000
+    }
+  ];
+}
+
 export function demoExamDefinitions(referenceDate = new Date().toISOString()) {
   const currentMonth = monthOffset(referenceDate, 0);
   return [

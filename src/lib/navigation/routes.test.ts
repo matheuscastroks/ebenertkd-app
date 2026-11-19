@@ -13,11 +13,15 @@ describe("navigationForProfile", () => {
       ROUTES.adminContractTemplate,
       ROUTES.adminCancellations,
     ]);
-    expect(items.find((item) => item.href === ROUTES.adminExams)).toMatchObject({ group: "Academia", icon: "exams" });
-    expect(items.find((item) => item.href === ROUTES.adminExams)?.children?.map((item) => item.href)).toEqual([
+    expect(items.find((item) => item.label === "Exames de faixa")).toBeUndefined();
+    expect(items.find((item) => item.href === ROUTES.adminEvents)).toMatchObject({ label: "Eventos", group: "Academia", icon: "exams" });
+    expect(items.find((item) => item.href === ROUTES.adminEvents)?.children?.map((item) => item.href)).toEqual([
+      ROUTES.adminEvents,
       ROUTES.adminExams,
       ROUTES.adminExamEligibility,
     ]);
+    expect(ROUTES.adminExams).toBe("/admin/eventos/exames");
+    expect(ROUTES.adminExamEligibility).toBe("/admin/eventos/exames/elegibilidade");
     expect(items.find((item) => item.href === ROUTES.adminBilling)?.children?.map((item) => item.href)).toEqual([
       ROUTES.adminBilling,
       ROUTES.adminBillingClosing,
@@ -68,6 +72,7 @@ describe("navigationForProfile", () => {
         ROUTES.adminStudentAccess,
         ROUTES.adminClasses,
         ROUTES.adminLocations,
+        ROUTES.adminEvents,
         ROUTES.adminExams,
         ROUTES.adminExamEligibility,
         ROUTES.adminBilling,
@@ -100,6 +105,7 @@ describe("navigationForProfile", () => {
         ROUTES.studentAchievements,
         ROUTES.studentCalendar,
         ROUTES.studentExams,
+        ROUTES.studentEvents,
         ROUTES.studentCard,
         ROUTES.studentParq,
         ROUTES.studentEnrollment,
@@ -114,6 +120,7 @@ describe("navigationForProfile", () => {
         ROUTES.studentAchievements,
         ROUTES.studentCalendar,
         ROUTES.studentExams,
+        ROUTES.studentEvents,
         ROUTES.studentCard,
         ROUTES.studentParq,
         ROUTES.studentEnrollment,

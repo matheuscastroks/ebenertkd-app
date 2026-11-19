@@ -1,6 +1,11 @@
 import type { Models } from "node-appwrite";
+import type { Event, EventStatus } from "@/features/events/types";
 import type { PaidChargeDecision } from "@/features/exams/rules";
 
+/**
+ * Visão de uma banca de exame sobre a linha de `events` (`event_type = belt_exam`).
+ * Estado da banca: `planned` (data marcada, sem inscritos), `confirmed` (banca montada) e os terminais.
+ */
 export type ExamEvent = Models.Row & {
   name: string;
   event_date: string;
@@ -11,6 +16,15 @@ export type ExamEvent = Models.Row & {
   created_at: string;
   updated_at: string;
 };
+
+export function examStatusOf(status: EventStatus): ExamEvent["status"] {
+  if (status === "completed" || status === "cancelled") return status;
+  return status === "registration_closed" || status === "in_progress" ? "confirmed" : "planned";
+}
+
+export function toExamEvent(row: Event): ExamEvent {
+  return { ...row, name: row.title, event_date: row.starts_at, location: row.location_text, default_fee_cents: row.exam_fee_cents ?? 0, status: examStatusOf(row.status) };
+}
 
 export type ExamParticipant = Models.Row & {
   event_id: string;

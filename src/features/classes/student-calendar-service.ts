@@ -5,7 +5,8 @@ import type { Profile } from "@/features/auth/types";
 import { getTrainingClass } from "@/features/classes/service";
 import { buildUpcomingTrainingSessions } from "@/features/classes/student-calendar-rules";
 import type { Lesson } from "@/features/classes/types";
-import type { ExamEvent } from "@/features/exams/types";
+import { eventDayKey } from "@/features/events/dates";
+import type { Event } from "@/features/events/types";
 import { resolveStudentProfile } from "@/features/students/access";
 import type { Student } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
@@ -23,10 +24,10 @@ export async function getStudentCalendarData(actor: Profile, requestedProfileId?
       tableId: APPWRITE_IDS.tables.students,
       queries: [Query.equal("profile_id", [profile.$id]), Query.limit(1)],
     }),
-    tables.listRows<ExamEvent>({
+    tables.listRows<Event>({
       databaseId: config.databaseId,
-      tableId: APPWRITE_IDS.tables.examEvents,
-      queries: [Query.equal("status", ["planned", "confirmed"]), Query.orderAsc("event_date"), Query.limit(20)],
+      tableId: APPWRITE_IDS.tables.events,
+      queries: [Query.equal("status", ["published", "registration_open", "registration_closed", "in_progress"]), Query.orderAsc("starts_at"), Query.limit(30)],
     }),
   ]);
 
@@ -57,12 +58,13 @@ export async function getStudentCalendarData(actor: Profile, requestedProfileId?
   });
 
   const upcomingExams = examsRes.rows
-    .filter((event) => event.event_date.slice(0, 10) >= today)
+    .filter((event) => eventDayKey(event.starts_at) >= today)
     .map((event) => ({
       id: event.$id,
-      name: event.name,
-      date: event.event_date.slice(0, 10),
-      location: event.location ?? null,
+      name: event.title,
+      date: eventDayKey(event.starts_at),
+      location: event.location_text ?? null,
+      type: event.event_type,
       status: event.status,
     }));
 

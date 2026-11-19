@@ -10,8 +10,9 @@ import { beltNameOf, findRank, toPublicRank } from "@/features/academy/belt-rule
 import { getBeltRanks, getPolicy } from "@/features/academy/config-service";
 import { isRankKey } from "@/features/academy/ranks";
 import { assertNextGraduation, assertPromotion, examChargeCancellation, examFeeCents, type PaidChargeDecision } from "@/features/exams/rules";
+import type { Event } from "@/features/events/types";
 import { examEventSchema, examParticipantSchema, examResultSchema } from "@/features/exams/schemas";
-import type { BeltHistory, ExamEvent, ExamParticipant } from "@/features/exams/types";
+import { toExamEvent, type BeltHistory, type ExamEvent, type ExamParticipant } from "@/features/exams/types";
 import { notifyStudentEvent } from "@/features/notifications/notification-service";
 import type { Enrollment, Student, StudentDocument } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
@@ -23,6 +24,13 @@ import { formatBusinessDateBr } from "@/lib/dates";
 import { guardianExamsPath, ROUTES } from "@/lib/navigation/routes";
 
 const dateTime = (date: string) => `${date}T12:00:00.000Z`;
+/** Lê a linha de `events` e garante que é uma banca de exame. */
+async function getExamEventRow(tables: ReturnType<typeof createAppwriteAdminClient>["tables"], databaseId: string, eventId: string) {
+  const row = await tables.getRow<Event>({ databaseId, tableId: APPWRITE_IDS.tables.events, rowId: eventId });
+  if (row.event_type !== "belt_exam") throw new Error("event_not_found");
+  return row;
+}
+
 const stableId = (...parts: string[]) => createHash("sha256").update(parts.join(":" )).digest("hex").slice(0, 36);
 
 export async function createExamEvent(actor: Profile, raw: unknown) {
@@ -30,18 +38,18 @@ export async function createExamEvent(actor: Profile, raw: unknown) {
   const input = examEventSchema.parse(raw);
   const { tables, config } = createAppwriteAdminClient();
   const now = new Date().toISOString();
-  const event = await tables.createRow<ExamEvent>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examEvents, rowId: ID.unique(), permissions: [], data: { name: input.name, event_date: dateTime(input.eventDate), location: input.location, default_fee_cents: input.defaultFeeCents, status: "planned", created_by_account_id: actor.account_id, created_at: now, updated_at: now } });
-  invalidateTags(CACHE_TAGS.examEvents, CACHE_TAGS.examEvent(event.$id));
-  await writeAuditEvent("exam.event.created", actor.account_id, "exam_event", event.$id, { event_date: input.eventDate });
-  return event;
+  const event = await tables.createRow<Event>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.events, rowId: ID.unique(), permissions: [], data: { event_type: "belt_exam", title: input.name, status: "registration_open", starts_at: dateTime(input.eventDate), location_text: input.location, organizer_type: "academy", audience: "students", requires_approval: false, age_cutoff: "birth_year", exam_fee_cents: input.defaultFeeCents, created_by_account_id: actor.account_id, created_at: now, updated_at: now } });
+  invalidateTags(CACHE_TAGS.events, CACHE_TAGS.event(event.$id));
+  await writeAuditEvent("event.created", actor.account_id, "event", event.$id, { event_type: "belt_exam", starts_on: input.eventDate });
+  return toExamEvent(event);
 }
 
 export function listExamEvents() {
   return cachedRead(
-    { name: "list-exam-events", key: [], tags: [CACHE_TAGS.examEvents], revalidate: 60 },
+    { name: "list-exam-events", key: [], tags: [CACHE_TAGS.events], revalidate: 60 },
     async () => {
       const { tables, config } = createAppwriteAdminClient();
-      return (await tables.listRows<ExamEvent>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examEvents, queries: [Query.orderDesc("event_date"), Query.limit(100)] })).rows;
+      return (await tables.listRows<Event>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.events, queries: [Query.equal("event_type", ["belt_exam"]), Query.orderDesc("starts_at"), Query.limit(100)] })).rows.map(toExamEvent);
     }
   );
 }
@@ -61,14 +69,14 @@ export type ExamsOverview = {
 
 export function getExamsOverview(): Promise<ExamsOverview> {
   return cachedRead(
-    { name: "get-exams-overview", key: [], tags: [CACHE_TAGS.examEvents], revalidate: 60 },
+    { name: "get-exams-overview", key: [], tags: [CACHE_TAGS.events], revalidate: 60 },
     async () => {
       const { tables, config } = createAppwriteAdminClient();
       const [eventsResult, participantsResult] = await Promise.all([
-        tables.listRows<ExamEvent>({
+        tables.listRows<Event>({
           databaseId: config.databaseId,
-          tableId: APPWRITE_IDS.tables.examEvents,
-          queries: [Query.orderDesc("event_date"), Query.limit(100)],
+          tableId: APPWRITE_IDS.tables.events,
+          queries: [Query.equal("event_type", ["belt_exam"]), Query.orderDesc("starts_at"), Query.limit(100)],
         }),
         tables.listRows<ExamParticipant>({
           databaseId: config.databaseId,
@@ -77,7 +85,7 @@ export function getExamsOverview(): Promise<ExamsOverview> {
         }),
       ]);
 
-      const events = eventsResult.rows;
+      const events = eventsResult.rows.map(toExamEvent);
       const nonCancelledParticipants = participantsResult.rows.filter((p) => p.status !== "cancelled");
 
       const participantsByEvent = new Map<string, ExamParticipant[]>();
@@ -132,10 +140,10 @@ export function getExamsOverview(): Promise<ExamsOverview> {
 
 export function getExamEvent(eventId: string) {
   return cachedRead(
-    { name: "get-exam-event", key: [eventId], tags: [CACHE_TAGS.examEvents, CACHE_TAGS.examEvent(eventId)], revalidate: 60 },
+    { name: "get-exam-event", key: [eventId], tags: [CACHE_TAGS.events, CACHE_TAGS.event(eventId)], revalidate: 60 },
     async () => {
       const { tables, config } = createAppwriteAdminClient();
-      return tables.getRow<ExamEvent>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examEvents, rowId: eventId });
+      return toExamEvent(await getExamEventRow(tables, config.databaseId, eventId));
     }
   );
 }
@@ -144,24 +152,25 @@ export async function cancelExamEvent(actor: Profile, eventId: string) {
   if (actor.role !== "admin") throw new Error("admin_required");
   const { tables, config } = createAppwriteAdminClient();
   const [event, activeParticipants] = await Promise.all([
-    tables.getRow<ExamEvent>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examEvents, rowId: eventId }),
+    getExamEventRow(tables, config.databaseId, eventId),
     tables.listRows<ExamParticipant>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examParticipants, queries: [Query.equal("event_id", [eventId]), Query.equal("status", ["registered"]), Query.limit(1)] })
   ]);
-  if (event.status === "cancelled") return event;
+  if (event.status === "cancelled") return toExamEvent(event);
   if (event.status === "completed") throw new Error("exam_event_completed");
   if (activeParticipants.total > 0) throw new Error("exam_event_has_active_participants");
-  const updated = await tables.updateRow<ExamEvent>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examEvents, rowId: eventId, data: { status: "cancelled", updated_at: new Date().toISOString() } });
-  invalidateTags(CACHE_TAGS.examEvents, CACHE_TAGS.examEvent(eventId));
-  await writeAuditEvent("exam.event.cancelled", actor.account_id, "exam_event", eventId);
-  return updated;
+  const now = new Date().toISOString();
+  const updated = await tables.updateRow<Event>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.events, rowId: eventId, data: { status: "cancelled", cancelled_at: now, updated_at: now } });
+  invalidateTags(CACHE_TAGS.events, CACHE_TAGS.event(eventId));
+  await writeAuditEvent("event.cancelled", actor.account_id, "event", eventId, { event_type: "belt_exam" });
+  return toExamEvent(updated);
 }
 
 export function getExamEventBundle(eventId: string) {
   return cachedRead(
-    { name: "get-exam-event-bundle", key: [eventId], tags: [CACHE_TAGS.examEvents, CACHE_TAGS.examEvent(eventId), CACHE_TAGS.billingCharges, CACHE_TAGS.enrollments, CACHE_TAGS.studentsAll], revalidate: 60 },
+    { name: "get-exam-event-bundle", key: [eventId], tags: [CACHE_TAGS.events, CACHE_TAGS.event(eventId), CACHE_TAGS.billingCharges, CACHE_TAGS.enrollments, CACHE_TAGS.studentsAll], revalidate: 60 },
     async () => {
       const { tables, config } = createAppwriteAdminClient();
-      const event = await tables.getRow<ExamEvent>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examEvents, rowId: eventId });
+      const event = toExamEvent(await getExamEventRow(tables, config.databaseId, eventId));
       const participants = (await tables.listRows<ExamParticipant>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examParticipants, queries: [Query.equal("event_id", [eventId]), Query.limit(500)] })).rows;
       const participantStudentIds = participants.map((participant) => participant.student_id);
       const activeEnrollments = (await tables.listRows<Enrollment>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, queries: [Query.equal("status", ["active"]), Query.limit(500)] })).rows;
@@ -193,7 +202,7 @@ export async function addExamParticipant(actor: Profile, raw: unknown) {
   const [ranks, examPolicy, event, student, enrollments] = await Promise.all([
     getBeltRanks(),
     getPolicy("exam"),
-    tables.getRow<ExamEvent>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examEvents, rowId: input.eventId }),
+    getExamEventRow(tables, config.databaseId, input.eventId).then(toExamEvent),
     tables.getRow<Student>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, rowId: input.studentId }),
     tables.listRows<Enrollment>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, queries: [Query.equal("student_id", [input.studentId]), Query.equal("status", ["active"]), Query.limit(1)] })
   ]);
@@ -215,8 +224,9 @@ export async function addExamParticipant(actor: Profile, raw: unknown) {
   if (participant.status === "cancelled") throw new Error("exam_participant_cancelled");
   const charge = await createExamCharge({ enrollment, participantId: participant.$id, eventName: event.name, eventDate: event.event_date, amountCents: participant.fee_cents });
   if (participant.charge_id !== charge.$id) participant = await tables.updateRow<ExamParticipant>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examParticipants, rowId: participant.$id, data: { charge_id: charge.$id, updated_at: now } });
-  if (event.status === "planned") await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examEvents, rowId: event.$id, data: { status: "confirmed", updated_at: now } });
-  invalidateTags(CACHE_TAGS.examEvents, CACHE_TAGS.examEvent(event.$id), CACHE_TAGS.exams(student.$id), CACHE_TAGS.billingCharges, CACHE_TAGS.charges(student.$id));
+  // Banca montada: com inscritos a data está confirmada (`registration_closed` = "confirmed" na visão de exame).
+  if (event.status === "planned") await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.events, rowId: event.$id, data: { status: "registration_closed", updated_at: now } });
+  invalidateTags(CACHE_TAGS.events, CACHE_TAGS.event(event.$id), CACHE_TAGS.exams(student.$id), CACHE_TAGS.billingCharges, CACHE_TAGS.charges(student.$id));
   await writeAuditEvent("exam.participant.added", actor.account_id, "exam_participant", participant.$id, { charge_id: charge.$id });
   await notifyStudentEvent({
     studentId: student.$id,
@@ -248,7 +258,7 @@ export async function cancelExamParticipant(actor: Profile, participantId: strin
   }
   const now = new Date().toISOString();
   const updated = await tables.updateRow<ExamParticipant>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examParticipants, rowId: participant.$id, data: { status: "cancelled", financial_decision: financialDecision, updated_at: now } });
-  invalidateTags(CACHE_TAGS.examEvents, CACHE_TAGS.examEvent(participant.event_id), CACHE_TAGS.exams(participant.student_id), CACHE_TAGS.billingCharges, CACHE_TAGS.charges(participant.student_id));
+  invalidateTags(CACHE_TAGS.events, CACHE_TAGS.event(participant.event_id), CACHE_TAGS.exams(participant.student_id), CACHE_TAGS.billingCharges, CACHE_TAGS.charges(participant.student_id));
   await writeAuditEvent("exam.participant.cancelled", actor.account_id, "exam_participant", participant.$id, { financial_decision: financialDecision });
   return updated;
 }
@@ -263,7 +273,7 @@ export async function recordExamResult(actor: Profile, raw: unknown) {
   const [ranks, student, event, openParticipants] = await Promise.all([
     getBeltRanks(),
     tables.getRow<Student>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, rowId: participant.student_id }),
-    tables.getRow<ExamEvent>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examEvents, rowId: participant.event_id }),
+    getExamEventRow(tables, config.databaseId, participant.event_id).then(toExamEvent),
     tables.listRows<ExamParticipant>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examParticipants, queries: [Query.equal("event_id", [participant.event_id]), Query.equal("status", ["registered"]), Query.limit(500)] })
   ]);
   if (event.status === "cancelled") throw new Error("exam_event_cancelled");
@@ -277,15 +287,15 @@ export async function recordExamResult(actor: Profile, raw: unknown) {
       await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, rowId: student.$id, transactionId: transaction.$id, data: { rank_key: participant.target_rank_key, updated_at: now } });
     }
     await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examParticipants, rowId: participant.$id, transactionId: transaction.$id, data: { status: input.result, result_notes: input.notes, graded_at: now, updated_at: now } });
-    if (openParticipants.total === 1) await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examEvents, rowId: event.$id, transactionId: transaction.$id, data: { status: "completed", updated_at: now } });
+    if (openParticipants.total === 1) await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.events, rowId: event.$id, transactionId: transaction.$id, data: { status: "completed", updated_at: now } });
     await tables.updateTransaction({ transactionId: transaction.$id, commit: true });
   } catch (error) {
     await tables.updateTransaction({ transactionId: transaction.$id, rollback: true }).catch(() => undefined);
     throw error;
   }
   invalidateTags(
-    CACHE_TAGS.examEvents,
-    CACHE_TAGS.examEvent(event.$id),
+    CACHE_TAGS.events,
+    CACHE_TAGS.event(event.$id),
     CACHE_TAGS.exams(student.$id),
     CACHE_TAGS.student(student.$id),
     CACHE_TAGS.studentsAll,

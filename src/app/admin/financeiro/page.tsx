@@ -205,9 +205,9 @@ async function BillingResults({ params }: { params: BillingQuery }) {
   const status = allowedStatuses.has(params.status as ChargeStatus)
     ? (params.status as ChargeStatus)
     : undefined;
-  const types = new Set(["monthly_fee", "enrollment_fee", "exam_fee", "exit_fee"] as const);
+  const types = new Set(["monthly_fee", "enrollment_fee", "exam_fee", "exit_fee", "event_fee"] as const);
   const type = types.has(params.type as never)
-    ? (params.type as "monthly_fee" | "enrollment_fee" | "exam_fee" | "exit_fee")
+    ? (params.type as "monthly_fee" | "enrollment_fee" | "exam_fee" | "exit_fee" | "event_fee")
     : undefined;
   const trainingClass = params.trainingClass === "all" ? undefined : params.trainingClass;
   const page = /^\d+$/.test(params.page ?? "") ? Math.max(1, Number(params.page)) : 1;

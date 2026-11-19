@@ -35,6 +35,7 @@ const CATEGORY_ORDER: Array<{ type: ChargeType; label: string }> = [
   { type: "monthly_fee", label: "Mensalidades" },
   { type: "enrollment_fee", label: "Taxas de matrícula" },
   { type: "exam_fee", label: "Exames de faixa" },
+  { type: "event_fee", label: "Eventos" },
   { type: "exit_fee", label: "Taxas de rescisão" },
 ];
 

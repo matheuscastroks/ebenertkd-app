@@ -16,7 +16,7 @@ import { getStudentExams } from "./student-exams-service";
 const rowsByTable: Record<string, unknown[]> = {
   students: [{ $id: "student-1", profile_id: "minor-1" }],
   exam_participants: [{ $id: "p-1", event_id: "event-1", student_id: "student-1", status: "registered", charge_id: "charge-1" }],
-  exam_events: [{ $id: "event-1", event_date: "2026-12-01T12:00:00.000Z", status: "confirmed" }],
+  events: [{ $id: "event-1", event_type: "belt_exam", title: "Exame", starts_at: "2026-12-01T12:00:00.000Z", status: "registration_closed" }],
   charges: [{ $id: "charge-1", status: "pending", amount_cents: 8000 }]
 };
 

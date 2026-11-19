@@ -1,5 +1,6 @@
 import "server-only";
 
+import { createHash } from "node:crypto";
 import { AppwriteException, Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import { writeAuditEvent } from "@/features/auth/service";
@@ -110,6 +111,37 @@ export async function cancelUnpaidExamCharge(charge: Charge, participantId: stri
   const { tables, config } = createAppwriteAdminClient();
   const now = new Date().toISOString();
   const updated = await tables.updateRow<Charge>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: charge.$id, data: { status: "cancelled", cancelled_at: now, cancellation_reason: `Participação em exame cancelada: ${participantId}`, updated_at: now } });
+  invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(charge.student_id));
+  return updated;
+}
+
+export type EventChargeItem = "academy" | "federation";
+
+/**
+ * Cobrança de evento (`event_fee`): idempotente por inscrição + item (`academy` = custos da academia,
+ * `federation` = taxa da federação). A origem é o hash de `registration_id:item`.
+ */
+export async function createEventCharge(input: { enrollment: Enrollment; registrationId: string; item: EventChargeItem; eventTitle: string; eventDate: string; amountCents: number }) {
+  const originId = createHash("sha256").update(`${input.registrationId}:${input.item}`).digest("hex").slice(0, 36);
+  const suffix = input.item === "federation" ? " · Taxa da federação" : "";
+  return createCharge({
+    enrollmentId: input.enrollment.$id,
+    studentId: input.enrollment.student_id,
+    type: "event_fee",
+    competence: input.eventDate.slice(0, 7),
+    originId,
+    amountCents: input.amountCents,
+    dueDate: input.eventDate.slice(0, 10),
+    description: `Evento · ${input.eventTitle}${suffix}`.slice(0, 255)
+  });
+}
+
+export async function cancelUnpaidEventCharge(charge: Charge, reason: string) {
+  if (!["pending", "overdue", "cancelled"].includes(charge.status)) throw new Error("event_charge_not_cancellable");
+  if (charge.status === "cancelled") return charge;
+  const { tables, config } = createAppwriteAdminClient();
+  const now = new Date().toISOString();
+  const updated = await tables.updateRow<Charge>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: charge.$id, data: { status: "cancelled", cancelled_at: now, cancellation_reason: reason.slice(0, 500), updated_at: now } });
   invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(charge.student_id));
   return updated;
 }

@@ -26,7 +26,7 @@ function loadAnnualDataset() {
         CACHE_TAGS.billingCharges,
         CACHE_TAGS.contracts,
         CACHE_TAGS.cancellations,
-        CACHE_TAGS.examEvents,
+        CACHE_TAGS.events,
         CACHE_TAGS.studentsAll,
       ],
       revalidate: 120,
