@@ -128,7 +128,7 @@ export function SignaturePad({ contractId, content }: { contractId: string; cont
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold flex items-center gap-2">
-            <FileSignature className="size-4 text-primary-text" />
+            <FileSignature className="size-4 text-muted-foreground" />
             Assinatura manuscrita digital
           </span>
           <Button
@@ -143,7 +143,7 @@ export function SignaturePad({ contractId, content }: { contractId: string; cont
           </Button>
         </div>
 
-        <div className="relative rounded-xl border-2 border-dashed border-border/80 bg-white overflow-hidden">
+        <div className="relative rounded-xl border-2 border-dashed border-border/80 bg-white overflow-hidden dark:brightness-90">
           <canvas
             ref={canvasRef}
             aria-label="Área para desenhar sua assinatura"

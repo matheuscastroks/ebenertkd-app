@@ -264,7 +264,7 @@ export function AttendanceHistory({
           <div className="flex items-start justify-between gap-2">
             <div className="space-y-0.5">
               <h2 id="attendance-calendar-title" className="flex items-center gap-2 text-base font-semibold leading-snug text-foreground">
-                <CalendarDays className="size-4 shrink-0 text-primary-text" aria-hidden="true" />
+                <CalendarDays className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                 Calendário de treinos
               </h2>
               <p className="text-xs text-muted-foreground">

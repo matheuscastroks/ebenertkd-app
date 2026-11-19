@@ -143,7 +143,7 @@ export default async function AdminLocationsPage({
               <div className="space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary-text">
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                       <MapPin className="size-4.5" aria-hidden="true" />
                     </span>
                     <div>

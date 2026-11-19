@@ -50,7 +50,7 @@ export function EditStudentDialog({
       <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-xl">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2 text-lg font-semibold">
-            <SquarePenIcon className="size-5 text-primary-text" aria-hidden="true" />
+            <SquarePenIcon className="size-5 text-muted-foreground" aria-hidden="true" />
             Editar Dados do Aluno
           </SheetTitle>
           <SheetDescription>

@@ -72,7 +72,7 @@ export async function UrgentTasksSection() {
               className="t-interactive-row flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-muted/40 sm:px-5"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary-text">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                   <FileText className="size-4" aria-hidden="true" />
                 </span>
                 <div className="min-w-0">
