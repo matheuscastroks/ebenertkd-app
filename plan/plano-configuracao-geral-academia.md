@@ -468,17 +468,19 @@ Sem editar os arquivos do outro plano enquanto ele estiver em execução; integr
 - **Adiado / não feito nesta etapa:** (1) `infra:apply` (adiciona `belt_rank_settings`, `rank_key` e os nomes do histórico; as colunas obrigatórias novas exigem banco vazio ou recriado); (2) a Function `daily-operations` não lê graduações nem a política `exam` (não usa faixas hoje); (3) catálogo de estudos por preset (Etapa 6): o guia continua com conteúdo Taegeuk e mostra a forma configurada ao lado; (4) a gravação de várias graduações é sequencial, com revisão por linha (um conflito no meio deixa as anteriores salvas; a tela recarrega); (5) `min_age_years` vale para prestar exame **para** a graduação (interpretação adotada), só quando o nascimento do aluno é conhecido.
 
 ### Etapa 4 — Regras operacionais e Function (média)
-- [ ] Seções `retention`, `compliance`, `notifications`, `gamification`; tela `/admin/academia/regras`
-- [ ] Migrar O1–O5
-- [ ] `daily-operations` lendo `academy_policies` + `policy-defaults.js` + teste de paridade; deploy da Function
-- [ ] Testes: régua de lembretes customizada; validade de PAR-Q diferente de 365; paridade Next × Function
+- [x] Seções `retention`, `compliance`, `notifications`, `gamification`; tela `/admin/academia/regras` (abas Retenção, Documentos, Lembretes, Conquistas; avisos de impacto: alunos que ficam irregulares e nova contagem por nível de risco; editor de conquistas com título, descrição e meta, métrica fixa). `access` continua em Financeiro, com link na tela
+- [x] Migrar O1–O5, B8/B9/B10 e C5; `charge_lead_days` e `renewal_reminder_days` ganharam campos em Financeiro e Contratos. A validade do PAR-Q passou a valer a partir da data da assinatura (política atual), não da data gravada
+- [x] `daily-operations` lendo `academy_policies` uma vez por execução + `policy-defaults.js` + teste de paridade. **Código apenas: a Function NÃO foi implantada (`appwrite:deploy-function` pendente)**
+- [x] Testes: régua de lembretes customizada; validade de PAR-Q diferente de 365; paridade Next × Function; contagens de impacto
+- **Não feito:** as faixas da esteira de renovação (7/30/60/90 dias, só visual) continuam fixas; só os dias de aviso (`renewal_reminder_days`) são configuráveis.
 
 ### Etapa 5 — Locais, assistente e histórico (média)
-- [ ] `training_locations` + importação única de `data/locations.json`
-- [ ] Assistente `/admin/academia/primeiros-passos` e cartão em `/admin`
-- [ ] `/admin/academia/historico` com diferença e restauração
-- [ ] Integração com Ferramentas Financeiras (§5.4), após o merge daquele plano
-- [ ] Testes de interação: assistente salva por passo; restaurar revisão cria nova revisão
+- [x] `training_locations` (decisão 8: sem importar o JSON; `data/locations.json` e os endereços de exemplo foram removidos; seed de demonstração cria dois locais). **`infra:apply` pendente**
+- [x] Assistente `/admin/academia/primeiros-passos` (cada passo salva sozinho) e cartão "Configure sua academia" em `/admin` enquanto `setup_completed_at` está vazio
+- [x] `/admin/academia/historico` com diferença campo a campo (sem dados pessoais da identidade) e restauração que gera nova revisão respeitando a concorrência
+- [x] Integração com Ferramentas Financeiras (§5.4): calculadora mostra a mensalidade padrão com atalho "Usar como mensalidade padrão" (com confirmação) e o reajuste oferece atualizar a mensalidade padrão (identidade e `adjustment_min_notice_days` já estavam integrados)
+- [x] Testes: assistente salva por passo; restaurar revisão cria nova revisão; CRUD de locais com `admin_required`; renderização da diferença
+- **Não feito:** a taxa de meio de pagamento (`billing.payment_fee_bps`) não foi criada; o seed de usuários de teste não precisou de locais.
 
 ### Etapa 6 — Catálogo de estudos por preset (baixa)
 - [ ] Separar `study-catalog.ts` por preset; ITF com tul e terminologia própria (conteúdo revisado pelo professor)
