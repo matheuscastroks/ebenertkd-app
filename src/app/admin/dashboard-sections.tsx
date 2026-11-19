@@ -3,6 +3,7 @@ import { ArrowRightIcon } from "@/components/ui/arrow-right";
 import { ClipboardCheckIcon } from "@/components/ui/clipboard-check";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { BillingOverviewChart } from "@/features/billing/components/billing-overview-chart";
 import { getAcademyIdentity } from "@/features/academy/config-service";
@@ -21,15 +22,19 @@ export async function SetupCardSection() {
   const identity = await getAcademyIdentity();
   if (identity.setup_completed_at) return null;
   return (
-    <Alert>
-      <AlertTitle>Configure sua academia</AlertTitle>
-      <AlertDescription>
-        Em cinco passos curtos você confirma nome, graduações, mensalidade, PIX e contrato. Tudo já funciona com os valores atuais; ajuste quando quiser.
-        <Button asChild className="min-h-11 mt-2">
+    <Card className="rounded-xl border border-primary/25 bg-primary/5 p-5 sm:p-6 shadow-xs">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1.5">
+          <CardTitle className="text-base font-semibold text-foreground">Configure sua academia</CardTitle>
+          <CardDescription className="text-sm leading-relaxed text-muted-foreground">
+            Em cinco passos curtos você confirma nome, graduações, mensalidade, PIX e contrato. Tudo já funciona com os valores atuais; ajuste quando quiser.
+          </CardDescription>
+        </div>
+        <Button asChild className="min-h-11 shrink-0">
           <Link href={ROUTES.adminAcademySetup}>Começar configuração</Link>
         </Button>
-      </AlertDescription>
-    </Alert>
+      </div>
+    </Card>
   );
 }
 
