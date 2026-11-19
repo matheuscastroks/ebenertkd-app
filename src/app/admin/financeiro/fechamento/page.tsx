@@ -9,6 +9,8 @@ import { BillingOverviewChart } from "@/features/billing/components/billing-over
 import { ClosingBreakdownChart } from "@/features/billing/components/closing-breakdown-chart";
 import { ClosingCompetencePicker } from "@/features/billing/components/closing-competence-picker";
 import { formatCompetence } from "@/features/billing/format-competence";
+import { EventsSummaryCard } from "@/features/events/components/events-summary-card";
+import { getEventsSummary } from "@/features/events/summary-service";
 import { getMonthlyClosingOverview } from "@/features/billing/report-service";
 import { requireProfile } from "@/lib/auth/session";
 import { formatBusinessDateBr } from "@/lib/dates";
@@ -23,6 +25,7 @@ async function MonthlyClosingContent({ searchParams }: { searchParams: SearchPar
   const data = await getMonthlyClosingOverview(params.competence);
   const { report, competences, monthlySeries, openCharges } = data;
   const label = formatCompetence(report.competence);
+  const eventsSummary = await getEventsSummary(report.competence);
 
   return (
     <div className="space-y-6">
@@ -271,6 +274,8 @@ async function MonthlyClosingContent({ searchParams }: { searchParams: SearchPar
           </ul>
         </section>
       ) : null}
+
+      <EventsSummaryCard summary={eventsSummary} periodLabel={label} />
     </div>
   );
 }

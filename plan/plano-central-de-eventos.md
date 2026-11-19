@@ -266,17 +266,17 @@ Backup antes da migração (Fase 7) e ensaio em ambiente de desenvolvimento com 
 - [x] Cobrança `event_fee` e cancelamento com decisão financeira
 
 ### Etapa E3 — Campeonatos
-- [ ] Prazos (filiação, inscrição, troca de categoria, pesagem) com lembretes
-- [ ] Categorias com presets por modalidade e classe de idade; sugestão automática e motivos de inelegibilidade
-- [ ] Autorização do responsável, termo, documentos e revisão
-- [ ] Fluxo interesse → confirmação → enviado à federação; exportação CSV
-- [ ] Resultados e medalhas no histórico do aluno
-- [ ] Badges de conquista no perfil (participação, medalhas, exame, seminário)
+- [x] Prazos (filiação, inscrição, troca de categoria, pesagem) com lembretes
+- [x] Categorias com presets por modalidade e classe de idade; sugestão automática e motivos de inelegibilidade
+- [x] Autorização do responsável, termo, documentos e revisão
+- [x] Fluxo interesse → confirmação → enviado à federação; exportação CSV
+- [x] Resultados e medalhas no histórico do aluno
+- [x] Badges de conquista no perfil (participação, medalhas, exame, seminário)
 
 ### Etapa E4 — Central de inscrições e leituras unificadas
-- [ ] `/admin/eventos/inscricoes` com filas por pendência e ações em lote
-- [ ] Calendário do aluno, relatório anual e fechamento lendo `events`
-- [ ] Telas do aluno e do responsável
+- [x] `/admin/eventos/inscricoes` com filas por pendência e ações em lote
+- [x] Calendário do aluno, relatório anual e fechamento lendo `events`
+- [x] Telas do aluno e do responsável
 
 ### Gate final
 - [ ] Testes de autorização (aluno, responsável, menor, admin) para cada action

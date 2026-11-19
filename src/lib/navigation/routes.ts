@@ -12,6 +12,7 @@ export const ROUTES = {
   adminLocations: "/admin/locais",
   adminEvents: "/admin/eventos",
   adminEventNew: "/admin/eventos/novo",
+  adminEventHub: "/admin/eventos/inscricoes",
   adminExams: "/admin/eventos/exames",
   adminExamEligibility: "/admin/eventos/exames/elegibilidade",
   studentAttendance: "/aluno/frequencia",
@@ -126,8 +127,10 @@ export function navigationForProfile(
         group: "Academia",
         children: [
           { label: "Agenda de eventos", href: ROUTES.adminEvents, exact: true },
+          { label: "Central de inscrições", href: ROUTES.adminEventHub },
           { label: "Exames de faixa", href: ROUTES.adminExams, exact: true },
-          { label: "Elegibilidade", href: ROUTES.adminExamEligibility }
+          { label: "Elegibilidade", href: ROUTES.adminExamEligibility },
+          { label: "Campeonatos", href: `${ROUTES.adminEvents}?tipo=championship`, exact: true }
         ]
       },
       {

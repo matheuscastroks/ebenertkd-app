@@ -17,9 +17,12 @@ describe("navigationForProfile", () => {
     expect(items.find((item) => item.href === ROUTES.adminEvents)).toMatchObject({ label: "Eventos", group: "Academia", icon: "exams" });
     expect(items.find((item) => item.href === ROUTES.adminEvents)?.children?.map((item) => item.href)).toEqual([
       ROUTES.adminEvents,
+      ROUTES.adminEventHub,
       ROUTES.adminExams,
       ROUTES.adminExamEligibility,
+      `${ROUTES.adminEvents}?tipo=championship`,
     ]);
+    expect(ROUTES.adminEventHub).toBe("/admin/eventos/inscricoes");
     expect(ROUTES.adminExams).toBe("/admin/eventos/exames");
     expect(ROUTES.adminExamEligibility).toBe("/admin/eventos/exames/elegibilidade");
     expect(items.find((item) => item.href === ROUTES.adminBilling)?.children?.map((item) => item.href)).toEqual([
@@ -73,6 +76,8 @@ describe("navigationForProfile", () => {
         ROUTES.adminClasses,
         ROUTES.adminLocations,
         ROUTES.adminEvents,
+        ROUTES.adminEventHub,
+        `${ROUTES.adminEvents}?tipo=championship`,
         ROUTES.adminExams,
         ROUTES.adminExamEligibility,
         ROUTES.adminBilling,

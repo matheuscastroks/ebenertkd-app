@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { MetricCardsSkeleton, TableRowsSkeleton } from "@/components/skeletons";
+import { EventsSummaryCard } from "@/features/events/components/events-summary-card";
+import { getEventsSummary } from "@/features/events/summary-service";
 import { getAnnualExecutiveOverview } from "@/features/operations/annual-analytics-service";
 import {
   AnnualRevenueAreaChart,
@@ -20,6 +22,7 @@ async function AnnualReportContent({ searchParams }: { searchParams: SearchParam
     params.year && /^\d{4}$/.test(params.year) ? Number(params.year) : undefined;
 
   const { report, years } = await getAnnualExecutiveOverview(requestedYear);
+  const eventsSummary = await getEventsSummary(String(report.year));
   const netSign = report.netGrowth > 0 ? "+" : "";
 
   return (
@@ -90,6 +93,8 @@ async function AnnualReportContent({ searchParams }: { searchParams: SearchParam
         <AnnualSeasonalityBarChart series={report.monthlySeries} />
         <BeltPyramidChart distribution={report.beltDistribution} />
       </div>
+
+      <EventsSummaryCard summary={eventsSummary} periodLabel={String(report.year)} />
 
       <section
         aria-labelledby="quarterly-summary-heading"
