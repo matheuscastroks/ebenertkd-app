@@ -16,7 +16,7 @@ export default async function AdminAcademyExamsPage() {
       subtitle="Taxa padrão, bloqueio por inadimplência, elegibilidade e inscrição em graduações acima."
       breadcrumbs={[{ label: "Configurações da academia", href: ROUTES.adminAcademy }, { label: "Exames" }]}
     >
-      <div className="mx-auto w-full max-w-4xl">
+      <div className="w-full">
         <ExamPolicyForm policy={policy} revision={revision} />
       </div>
     </PortalShell>

@@ -20,7 +20,7 @@ export default async function AdminAcademyFinancePage() {
       subtitle="Mensalidade padrão, taxa de matrícula, vencimentos, PIX e a regra de acesso ao aplicativo."
       breadcrumbs={[{ label: "Configurações da academia", href: ROUTES.adminAcademy }, { label: "Financeiro" }]}
     >
-      <div className="mx-auto w-full max-w-4xl space-y-8">
+      <div className="w-full space-y-8">
         <BillingPolicyForm policy={billing.policy} revision={billing.revision} />
         <PixSettingsForm settings={toClientData(pix)} />
         <AccessPolicyForm policy={access.policy} revision={access.revision} />

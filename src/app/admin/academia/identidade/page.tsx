@@ -18,7 +18,7 @@ export default async function AdminAcademyIdentityPage() {
       subtitle="Nomes, documento, contato e professor usados no aplicativo, nos contratos e nas mensagens."
       breadcrumbs={[{ label: "Configurações da academia", href: ROUTES.adminAcademy }, { label: "Identidade" }]}
     >
-      <div className="mx-auto w-full max-w-4xl">
+      <div className="w-full">
         <IdentityForm identity={toClientData(identity)} revision={revision} />
       </div>
     </PortalShell>

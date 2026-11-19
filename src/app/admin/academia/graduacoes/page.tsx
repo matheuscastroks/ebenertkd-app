@@ -30,7 +30,7 @@ export default async function AdminAcademyGradesPage() {
         </Button>
       }
     >
-      <div className="mx-auto w-full max-w-4xl space-y-6">
+      <div className="w-full space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>Modelos de federação</CardTitle>

@@ -19,7 +19,7 @@ export default async function AdminAcademyContractsPage() {
       subtitle="Regras de vigência, cancelamento e rematrícula que entram nos contratos novos."
       breadcrumbs={[{ label: "Configurações da academia", href: ROUTES.adminAcademy }, { label: "Contratos" }]}
     >
-      <div className="mx-auto w-full max-w-4xl">
+      <div className="w-full">
         <ContractPolicyForm policy={policy} revision={revision} templateUsesVariables={templateUsesVariables} />
       </div>
     </PortalShell>
