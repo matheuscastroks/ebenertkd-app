@@ -54,7 +54,7 @@ export function BillingPolicyForm({ policy, revision }: { policy: BillingPolicy;
           <CardTitle>Mensalidade e matrícula</CardTitle>
           <CardDescription>
             Valores sugeridos ao aprovar uma matrícula. Para mudar o valor dos alunos atuais, use o{" "}
-            <Link href={ROUTES.adminBillingAdjustment} className="font-medium text-foreground underline underline-offset-4">reajuste de mensalidade</Link>.
+            <Link href={ROUTES.adminBillingAdjustment} className="relative inline-block leading-6 font-medium text-foreground underline underline-offset-4 after:absolute after:-inset-x-1 after:-inset-y-2.5">reajuste de mensalidade</Link>.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">

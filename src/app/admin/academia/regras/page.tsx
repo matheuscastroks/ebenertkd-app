@@ -47,7 +47,7 @@ export default async function AdminAcademyRulesPage() {
         </Tabs>
         <p className="text-sm text-muted-foreground">
           O bloqueio do aplicativo por mensalidade em atraso continua em{" "}
-          <Link href={ROUTES.adminAcademyFinance} className="font-medium text-foreground underline underline-offset-4">Financeiro</Link>.
+          <Link href={ROUTES.adminAcademyFinance} className="relative inline-block leading-6 font-medium text-foreground underline underline-offset-4 after:absolute after:-inset-x-1 after:-inset-y-2.5">Financeiro</Link>.
         </p>
       </div>
     </PortalShell>

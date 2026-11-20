@@ -1,12 +1,10 @@
 import { getAcademyIdentity, getPolicyForEdit } from "@/features/academy/config-service";
 import { professorSignature } from "@/features/academy/identity-rules";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { AppwriteException } from "node-appwrite";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { TableRowsSkeleton } from "@/components/skeletons";
-import { Button } from "@/components/ui/button";
 import { getAdjustmentSendList } from "@/features/billing/adjustment-service";
 import { AdjustmentSendList } from "@/features/billing/components/adjustment-send-list";
 import { requireProfile } from "@/lib/auth/session";
@@ -33,11 +31,6 @@ export default async function AdminBillingAdjustmentDetailPage({ params }: { par
       profile={admin} back={{ label: "Reajuste", href: ROUTES.adminBillingAdjustment }}
       title="Lista de envio do reajuste"
       subtitle="Copie a mensagem, abra o WhatsApp de cada pagador e marque quem já foi avisado."
-      headerActions={
-        <Button asChild variant="outline" className="min-h-11">
-          <Link href={ROUTES.adminBillingAdjustment}>Voltar ao reajuste</Link>
-        </Button>
-      }
     >
       <div className="w-full min-w-0 space-y-6">
         <Suspense fallback={<TableRowsSkeleton columns={3} rows={6} />}>

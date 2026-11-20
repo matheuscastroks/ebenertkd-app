@@ -115,7 +115,7 @@ export function ExamPolicyForm({ policy, revision }: { policy: ExamPolicy; revis
           <CardTitle>Elegibilidade</CardTitle>
           <CardDescription>
             O tempo e as presenças de cada graduação ficam em{" "}
-            <Link href={ROUTES.adminAcademyGrades} className="font-medium text-foreground underline underline-offset-4">
+            <Link href={ROUTES.adminAcademyGrades} className="relative inline-block leading-6 font-medium text-foreground underline underline-offset-4 after:absolute after:-inset-x-1 after:-inset-y-2.5">
               Graduações
             </Link>
             . Aqui ficam o padrão para quem não tem tempo definido e as regras gerais.

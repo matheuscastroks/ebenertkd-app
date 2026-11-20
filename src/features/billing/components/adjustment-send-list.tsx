@@ -230,11 +230,11 @@ export function AdjustmentSendList({ data, professorName, academyName, billingDe
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 lg:shrink-0">
-                  <Button type="button" size="sm" variant="outline" className="min-h-10" onClick={() => copy(row)} aria-label={`Copiar mensagem para ${row.payerName}`}>
+                  <Button type="button" size="sm" variant="outline" className="min-h-11" onClick={() => copy(row)} aria-label={`Copiar mensagem para ${row.payerName}`}>
                     {copiedId === row.enrollmentId ? "Copiada" : "Copiar mensagem"}
                   </Button>
                   {link ? (
-                    <Button asChild size="sm" variant="outline" className="min-h-10">
+                    <Button asChild size="sm" variant="outline" className="min-h-11">
                       <a href={link} target="_blank" rel="noopener noreferrer" aria-label={`Abrir no WhatsApp: ${row.payerName}`}>
                         <MessageCircle className="size-3.5" aria-hidden="true" />
                         Abrir no WhatsApp
@@ -243,7 +243,7 @@ export function AdjustmentSendList({ data, professorName, academyName, billingDe
                   ) : (
                     <span className="text-xs text-muted-foreground">Sem telefone válido</span>
                   )}
-                  <label className="flex min-h-10 items-center gap-2 text-sm">
+                  <label className="flex min-h-11 items-center gap-2 text-sm">
                     <Checkbox checked={done} onCheckedChange={(checked) => setDone(row, checked === true)} aria-label={`Avisado: ${row.payerName}`} />
                     Avisado
                   </label>

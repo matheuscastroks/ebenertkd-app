@@ -86,7 +86,7 @@ export function ContractPolicyForm({
           <CardTitle>Cancelamento</CardTitle>
           <CardDescription>
             Cada contrato guarda a regra do dia em que foi emitido. Mudar aqui vale só para os próximos contratos.{" "}
-            <Link href={ROUTES.adminContractTemplate} className="font-medium text-foreground underline underline-offset-4">Editar texto do contrato</Link>
+            <Link href={ROUTES.adminContractTemplate} className="relative inline-block leading-6 font-medium text-foreground underline underline-offset-4 after:absolute after:-inset-x-1 after:-inset-y-2.5">Editar texto do contrato</Link>
           </CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
