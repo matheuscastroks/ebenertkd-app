@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText } from "lucide-react";
+import { FileText } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -17,8 +17,11 @@ const statusView = {
  * Contratos do aluno ou do dependente, em uma lista. Só o primeiro contrato aguardando
  * assinatura recebe a ação laranja; quem não pode assinar (menor) apenas lê.
  */
-export function PortalContractList({ contracts, hrefFor, canSign, emptyDescription }: {
-  contracts: Contract[] | null; hrefFor: (contractId: string) => string; canSign: boolean; emptyDescription: string;
+export function PortalContractList({ contracts, hrefFor, canSign, canOpen = true, emptyDescription }: {
+  contracts: Contract[] | null; hrefFor: (contractId: string) => string; canSign: boolean;
+  /** Menores não abrem o contrato (a tela de detalhe os redireciona): a lista só informa o status. */
+  canOpen?: boolean;
+  emptyDescription: string;
 }) {
   if (contracts === null) return <p role="alert" className="rounded-xl border border-border bg-card p-4 text-sm">Não foi possível carregar os contratos. Atualize a página para tentar de novo.</p>;
   if (!contracts.length) return <EmptyState icon={<FileText className="size-5" aria-hidden="true" />} title="Nenhum contrato emitido" description={emptyDescription} />;
@@ -37,9 +40,9 @@ export function PortalContractList({ contracts, hrefFor, canSign, emptyDescripti
             </div>
             <p className="text-sm text-muted-foreground tabular-nums">Vigente até {new Date(contract.ends_at).toLocaleDateString("pt-BR", { timeZone: "UTC" })}</p>
           </div>
-          <Button asChild variant={contract.$id === firstPending ? "default" : "outline"} className="min-h-11 w-full shrink-0 sm:w-auto">
+          {canOpen ? <Button asChild variant={contract.$id === firstPending ? "default" : "outline"} className="min-h-11 w-full shrink-0 sm:w-auto">
             <Link href={hrefFor(contract.$id)} aria-label={`${label === "Assinar" ? "Assinar contrato" : label} versão ${contract.version_number}`}>{label}</Link>
-          </Button>
+          </Button> : null}
         </li>;
       })}
     </ul>

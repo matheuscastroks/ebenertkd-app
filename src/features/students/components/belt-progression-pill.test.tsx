@@ -3,43 +3,37 @@ import { describe, expect, it } from "vitest";
 import { BeltProgressionPill } from "@/features/students/components/belt-progression-pill";
 
 describe("BeltProgressionPill", () => {
-  it("renders single belt correctly", () => {
-    render(<BeltProgressionPill belt="Amarela" gub={8} />);
-    expect(screen.getByText("Faixa Amarela")).toBeInTheDocument();
-    expect(screen.getByText("8º GUB")).toBeInTheDocument();
+  it("renders a single graduation", () => {
+    render(<BeltProgressionPill toRankKey="gub-8" />);
+    expect(screen.getByText("Amarela")).toBeInTheDocument();
+    expect(screen.getByText("8º Gub")).toBeInTheDocument();
   });
 
-  it("renders progression from current belt to target belt", () => {
-    render(
-      <BeltProgressionPill
-        fromBelt="Branca"
-        fromGub={10}
-        toBelt="Ponta Amarela"
-        toGub={9}
-      />
-    );
-    expect(screen.getByText("Faixa Branca")).toBeInTheDocument();
-    expect(screen.getByText("10º GUB")).toBeInTheDocument();
-    expect(screen.getByText("Faixa Ponta Amarela")).toBeInTheDocument();
-    expect(screen.getByText("9º GUB")).toBeInTheDocument();
+  it("renders progression from the current graduation to the target", () => {
+    render(<BeltProgressionPill fromRankKey="gub-10" toRankKey="gub-9" />);
+    expect(screen.getByText("Branca")).toBeInTheDocument();
+    expect(screen.getByText("10º Gub")).toBeInTheDocument();
+    expect(screen.getByText("Ponta Amarela")).toBeInTheDocument();
+    expect(screen.getByText("9º Gub")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Progressão de faixa: Branca, 10º Gub para Ponta Amarela, 9º Gub/)).toBeInTheDocument();
   });
 
-  it("renders black belt progression to 1º Dan", () => {
-    render(
-      <BeltProgressionPill
-        fromBelt="Ponta Preta"
-        fromGub={1}
-        toBelt="Preta"
-        toGub={0}
-      />
-    );
-    expect(screen.getByText("Faixa Ponta Preta")).toBeInTheDocument();
-    expect(screen.getByText("Faixa Preta")).toBeInTheDocument();
+  it("renders the progression to the first Dan", () => {
+    render(<BeltProgressionPill fromRankKey="gub-1" toRankKey="dan-1" />);
+    expect(screen.getByText("Ponta Preta")).toBeInTheDocument();
+    expect(screen.getByText("Preta")).toBeInTheDocument();
     expect(screen.getByText("1º Dan")).toBeInTheDocument();
   });
 
-  it("handles missing belt information gracefully", () => {
+  it("shows the name recorded in the history instead of the current configured name", () => {
+    render(<BeltProgressionPill fromRankKey="gub-9" toRankKey="gub-8" fromName="Nome antigo" toName="Outro nome antigo" />);
+    expect(screen.getByText("Nome antigo")).toBeInTheDocument();
+    expect(screen.getByText("Outro nome antigo")).toBeInTheDocument();
+    expect(screen.queryByText("Ponta Amarela")).not.toBeInTheDocument();
+  });
+
+  it("handles missing graduation gracefully", () => {
     render(<BeltProgressionPill />);
-    expect(screen.getByText("Faixa Não informada")).toBeInTheDocument();
+    expect(screen.getByText("Não informada")).toBeInTheDocument();
   });
 });

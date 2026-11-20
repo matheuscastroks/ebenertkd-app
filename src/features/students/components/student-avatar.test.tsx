@@ -20,4 +20,17 @@ describe("StudentAvatar", () => {
     render(<StudentAvatar name="João Pedro Santos" />);
     expect(screen.getByText("JP")).toBeInTheDocument();
   });
+
+  it("applies enlarged responsive avatar dimensions by size", () => {
+    render(
+      <>
+        <StudentAvatar name="Ana Silva" size="sm" />
+        <StudentAvatar name="Bruno Costa" size="md" />
+        <StudentAvatar name="Clara Dias" size="lg" />
+      </>
+    );
+    expect(screen.getByLabelText("Foto de Ana Silva")).toHaveClass("size-10");
+    expect(screen.getByLabelText("Foto de Bruno Costa")).toHaveClass("size-12");
+    expect(screen.getByLabelText("Foto de Clara Dias")).toHaveClass("size-20");
+  });
 });

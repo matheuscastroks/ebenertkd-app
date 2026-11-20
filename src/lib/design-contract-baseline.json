@@ -1,1 +1,24 @@
-{}
+{
+  "src/app/admin/contratos/modelo/page.tsx": {
+    "tinyText": 2
+  },
+  "src/app/admin/locais/page.tsx": {
+    "tinyText": 1
+  },
+  "src/app/configuracoes/profile-editor.tsx": {
+    "heavyFont": 1
+  },
+  "src/components/pwa/install-app-card.tsx": {
+    "rawColor": 3
+  },
+  "src/components/pwa/install-modal.tsx": {
+    "heavyFont": 4,
+    "rawColor": 4
+  },
+  "src/features/notifications/components/notification-item.tsx": {
+    "tinyText": 1
+  },
+  "src/features/students/components/review-panel.tsx": {
+    "heavyFont": 1
+  }
+}

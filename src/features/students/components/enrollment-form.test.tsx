@@ -26,8 +26,7 @@ describe("EnrollmentForm", () => {
     emergency_contact_relationship: "Mãe",
     emergency_contact_phone: "11988888888",
     started_at_tkd: "2020-01-10",
-    current_belt: "Amarela",
-    gub: 8,
+    rank_key: "gub-8",
     status: "draft"
   } as Student;
 
@@ -151,7 +150,7 @@ describe("EnrollmentForm", () => {
     render(<EnrollmentForm bundle={{ ...bundle, student: {
       ...student,
       address: JSON.stringify({ street: "Rua Central", number: "10", neighborhood: "Centro", city: "Rio de Janeiro", state: "RJ", cep: "20000000" }),
-      health_condition: "no", training_class_id: "class-1",
+      health_condition: "no", training_class_id: "class-1", sex: "feminino",
     } }} targetProfileId="profile-integration" classes={classes} />);
     await user.click(screen.getByRole("button", { name: "Avançar" }));
     expect(screen.getByText("Passo 2 de 4 · Saúde")).toBeInTheDocument();
@@ -175,5 +174,58 @@ describe("EnrollmentForm", () => {
     expect(payload.get("birth_date")).toBe("2010-05-15");
     expect(payload.get("started_at_tkd")).toBe("2020-01-10");
     expect((payload.get("profile_photo") as File).name).toBe("aluno.png");
+  });
+
+  it("exibe tela de status da matrícula quando a ficha já foi enviada e permite abrir edição", async () => {
+    const user = userEvent.setup();
+    render(
+      <EnrollmentForm
+        bundle={{
+          ...bundle,
+          enrollment: {
+            ...enrollment,
+            status: "submitted",
+            submitted_at: "2026-11-18T12:00:00Z",
+          },
+        }}
+        targetProfileId="profile-1"
+        classes={classes}
+        contractsHref="/aluno/contratos"
+      />
+    );
+
+    expect(screen.getByText("Matrícula enviada para análise")).toBeInTheDocument();
+    expect(screen.queryByText("Passo 1 de 4 · Dados pessoais")).not.toBeInTheDocument();
+    expect(screen.getByText("Documento precisa de correção")).toBeInTheDocument();
+
+    // Clicar em Corrigir documentos abre direto no passo 4
+    await user.click(screen.getByRole("button", { name: "Corrigir documentos" }));
+    expect(screen.getByText("Passo 4 de 4 · Documentos")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Salvar alterações" })).toBeInTheDocument();
+
+    // Voltar ao resumo retorna à tela de status
+    await user.click(screen.getByRole("button", { name: /voltar ao resumo/i }));
+    expect(screen.getByText("Matrícula enviada para análise")).toBeInTheDocument();
+  });
+
+  it("exibe atalho para assinar contrato quando a matrícula aguarda assinatura", () => {
+    render(
+      <EnrollmentForm
+        bundle={{
+          ...bundle,
+          enrollment: { ...enrollment, status: "awaiting_signature" },
+          documents: [documents[0]],
+        }}
+        targetProfileId="profile-1"
+        classes={classes}
+        contractsHref="/aluno/contratos"
+      />
+    );
+
+    expect(screen.getByText("Ficha aprovada · Falta assinar o contrato")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /assinar contrato/i })).toHaveAttribute(
+      "href",
+      "/aluno/contratos"
+    );
   });
 });

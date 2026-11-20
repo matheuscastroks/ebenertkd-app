@@ -20,8 +20,7 @@ export default async function StudentBillingPage({
   return (
     <PortalShell
       profile={profile}
-      activePath={ROUTES.studentBilling}
-      title="Financeiro e mensalidades"
+      title="Pagamentos"
       subtitle="Consulte suas cobranças, copie a chave PIX da academia e envie seus comprovantes."
     >
       <div className="w-full min-w-0 space-y-4">

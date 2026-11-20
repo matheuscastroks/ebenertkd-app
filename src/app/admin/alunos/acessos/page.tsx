@@ -4,11 +4,12 @@ import { OperationToast } from "@/components/shared/operation-toast";
 import { SearchField } from "@/components/shared/search-field";
 import { Button } from "@/components/ui/button";
 import { listStudentAccessProfiles } from "@/features/students/access-service";
+import { listProfilePhotoDocumentIds } from "@/features/students/service";
 import { StudentAccessTable } from "@/features/students/components/student-access-table";
 import { requireProfile } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
 import { ROUTES } from "@/lib/navigation/routes";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown } from "@/components/ui/icons";
 
 export default async function StudentAccessPage({
   searchParams,
@@ -19,17 +20,13 @@ export default async function StudentAccessPage({
   const query = await searchParams;
   const page = Math.max(1, Number.parseInt(query.page ?? "1", 10) || 1);
   const result = await listStudentAccessProfiles(query.q, page);
+  const photoIds = await listProfilePhotoDocumentIds(result.rows.map((row) => row.$id)).catch(() => new Map<string, string>());
 
   return (
     <PortalShell
       profile={actor}
-      activePath={ROUTES.adminStudentAccess}
-      title="Acessos dos alunos"
-      subtitle="Consulte contas de acesso, transição de maioridade e permissões individuais."
-      breadcrumbs={[
-        { label: "Matrículas", href: ROUTES.adminEnrollments },
-        { label: "Acessos dos alunos" },
-      ]}
+      title="Alunos"
+      subtitle="Login de cada aluno e a passagem para o acesso próprio."
     >
       <div className="w-full min-w-0 space-y-6">
         {query.promoted ? (
@@ -66,6 +63,7 @@ export default async function StudentAccessPage({
 
         <StudentAccessTable
           profiles={toClientData(result.rows)}
+          photoIds={Object.fromEntries(photoIds)}
           currentQuery={{ q: query.q, page: query.page }}
         />
 
@@ -80,7 +78,7 @@ export default async function StudentAccessPage({
         <details className="group rounded-xl border border-border bg-card p-4 text-sm">
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 font-medium [&::-webkit-details-marker]:hidden">
             Como funciona o acesso de alunos menores
-            <ChevronDown className="size-4 text-muted-foreground transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none" aria-hidden="true" />
+            <ChevronDown className="size-4 text-muted-foreground transition-transform duration-(--duration-fast) ease-(--ease-smooth-out) group-open:-scale-y-100 motion-reduce:transition-none" aria-hidden="true" />
           </summary>
           <div className="space-y-2 pt-2 text-muted-foreground">
             <p>Alunos menores entram com nome de usuário e senha simples, gerenciados pelo responsável legal.</p>

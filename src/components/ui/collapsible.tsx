@@ -1,5 +1,6 @@
 "use client"
 
+import { cn } from "@/lib/utils"
 import { Collapsible as CollapsiblePrimitive } from "radix-ui"
 
 function Collapsible({
@@ -20,11 +21,16 @@ function CollapsibleTrigger({
 }
 
 function CollapsibleContent({
+  className,
   ...props
 }: React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleContent>) {
   return (
     <CollapsiblePrimitive.CollapsibleContent
       data-slot="collapsible-content"
+      className={cn(
+        "overflow-hidden duration-(--duration-fast) ease-(--ease-smooth-out) motion-reduce:animate-none data-open:animate-collapsible-down data-closed:animate-collapsible-up",
+        className
+      )}
       {...props}
     />
   )

@@ -4,8 +4,15 @@ import { describe, expect, it } from "vitest";
 const css = readFileSync("src/app/globals.css", "utf8");
 type RGB = [number, number, number];
 
+/** Opacidade de uma cor (`oklch(L C H / 12%)`); cores sem alfa são opacas. */
+function alpha(value: string) {
+  const match = value.match(/\/\s*([\d.]+)(%?)\s*\)/);
+  if (!match) return 1;
+  return match[2] ? Number(match[1]) / 100 : Number(match[1]);
+}
+
 function color(value: string): RGB {
-  const values = value.match(/[\d.]+/g)!.map(Number);
+  const values = value.replace(/\/.*$/, "").match(/[\d.]+/g)!.map(Number);
   if (value.startsWith("rgb(")) return values.map((v) => v / 255) as RGB;
   if (value.startsWith("hsl(")) {
     const [h, s, l] = [values[0] / 360, values[1] / 100, values[2] / 100];
@@ -33,12 +40,37 @@ function luminance(rgb: RGB) {
   return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
 }
 
-describe.each([":root", ".dark"])("contraste AA %s", (theme) => {
-  const block = css.slice(css.indexOf(`${theme} {`)).split("}")[0];
-  const token = (name: string) => {
-    const value = block.match(new RegExp(`--${name}: ([^;]+);`))?.[1];
+/** Tokens do primeiro bloco `:root { … }` após o marcador (ex.: uma media query). */
+function tokensAfter(marker: string) {
+  const start = css.indexOf(marker);
+  if (start < 0) throw new Error(`Missing block ${marker}`);
+  const body = css.slice(css.indexOf(":root {", start)).split("}")[0];
+  return Object.fromEntries([...body.matchAll(/--([\w-]+): ([^;]+);/g)].map((m) => [m[1], m[2]]));
+}
+
+const light = tokensAfter("@custom-variant dark");
+const dark = { ...light, ...tokensAfter("@media (prefers-color-scheme: dark) {") };
+const modes: Array<[string, Record<string, string>]> = [
+  ["claro", light],
+  ["escuro", dark],
+  ["claro + alto contraste", { ...light, ...tokensAfter("@media (prefers-contrast: more) and (prefers-color-scheme: light)") }],
+  ["escuro + alto contraste", { ...dark, ...tokensAfter("@media (prefers-contrast: more) and (prefers-color-scheme: dark)") }],
+];
+
+describe.each(modes)("contraste AA — %s", (theme, tokens) => {
+  const raw = (name: string) => {
+    const value = tokens[name];
     if (!value) throw new Error(`Missing ${name} in ${theme}`);
-    return luminance(color(value));
+    return value;
+  };
+  // Tokens translúcidos (fills e *-soft) são compostos sobre o cartão, onde aparecem.
+  const token = (name: string) => {
+    const value = raw(name);
+    const a = alpha(value);
+    const rgb = color(value);
+    if (a === 1) return luminance(rgb);
+    const base = color(raw("card"));
+    return luminance(rgb.map((v, i) => v * a + base[i] * (1 - a)) as RGB);
   };
   it.each([
     ["primary", "primary-foreground"],
@@ -47,7 +79,11 @@ describe.each([":root", ".dark"])("contraste AA %s", (theme) => {
     ["success-soft", "success-foreground"],
     ["warning-soft", "warning-foreground"],
     ["info-soft", "info-foreground"],
-    ["danger-soft", "danger-text"]
+    ["danger-soft", "danger-text"],
+    ["card", "muted-foreground"],
+    ["muted", "muted-foreground"],
+    ["popover", "muted-foreground"],
+    ["destructive", "destructive-foreground"]
   ])("%s / %s tem contraste de pelo menos 4,5:1", (background, foreground) => {
     const a = token(background);
     const b = token(foreground);

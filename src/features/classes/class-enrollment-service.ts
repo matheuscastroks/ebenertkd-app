@@ -5,6 +5,8 @@ import type { Enrollment, Student } from "@/features/students/types";
 import type { ClassEnrollment, TrainingClass } from "@/features/classes/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { invalidateTags } from "@/lib/cache/invalidate";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 export async function ensureActiveClassEnrollment(enrollment: Enrollment, student: Student) {
   if (enrollment.status !== "active") throw new Error("active_enrollment_required");
@@ -29,23 +31,30 @@ export async function ensureActiveClassEnrollment(enrollment: Enrollment, studen
     tableId: APPWRITE_IDS.tables.classEnrollments,
     queries: [Query.equal("training_class_id", [trainingClass.$id]), Query.equal("enrollment_id", [enrollment.$id]), Query.limit(1)]
   });
-  if (existing.rows[0]) return tables.updateRow<ClassEnrollment>({
-    databaseId: config.databaseId,
-    tableId: APPWRITE_IDS.tables.classEnrollments,
-    rowId: existing.rows[0].$id,
-    data: { status: "active", ended_at: null, updated_at: now }
-  });
-  return tables.createRow<ClassEnrollment>({
+  if (existing.rows[0]) {
+    const updated = await tables.updateRow<ClassEnrollment>({
+      databaseId: config.databaseId,
+      tableId: APPWRITE_IDS.tables.classEnrollments,
+      rowId: existing.rows[0].$id,
+      data: { status: "active", ended_at: null, updated_at: now }
+    });
+    invalidateTags(CACHE_TAGS.classEnrollments, CACHE_TAGS.attendance(student.$id));
+    return updated;
+  }
+  const created = await tables.createRow<ClassEnrollment>({
     databaseId: config.databaseId,
     tableId: APPWRITE_IDS.tables.classEnrollments,
     rowId: ID.unique(),
     permissions: [],
     data: { training_class_id: trainingClass.$id, enrollment_id: enrollment.$id, student_id: student.$id, status: "active", started_at: now, created_at: now, updated_at: now }
   });
+  invalidateTags(CACHE_TAGS.classEnrollments, CACHE_TAGS.attendance(student.$id));
+  return created;
 }
 
 export async function endClassEnrollment(enrollmentId: string, endedAt = new Date().toISOString()) {
   const { tables, config } = createAppwriteAdminClient();
   const rows = await tables.listRows<ClassEnrollment>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.classEnrollments, queries: [Query.equal("enrollment_id", [enrollmentId]), Query.equal("status", ["active"]), Query.limit(100)] });
   await Promise.all(rows.rows.map((row) => tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.classEnrollments, rowId: row.$id, data: { status: "ended", ended_at: endedAt, updated_at: endedAt } })));
+  invalidateTags(CACHE_TAGS.classEnrollments, ...rows.rows.map((row) => CACHE_TAGS.attendance(row.student_id)));
 }

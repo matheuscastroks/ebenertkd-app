@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronsUpDown, Settings, Shield } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ChevronsUpDownIcon } from "@/components/ui/chevrons-up-down";
+import { SettingsIcon } from "@/components/ui/settings";
+import { ShieldCheckIcon } from "@/components/ui/shield-check";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -57,32 +60,32 @@ export function AccountMenu({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="size-8">
+              <Avatar className="size-9">
                 {avatarUrl ? <AvatarImage src={avatarUrl} alt={name} /> : null}
                 <AvatarFallback className="text-xs font-medium">{initials}</AvatarFallback>
               </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="grid grid-cols-1 flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{name}</span>
                 <span className="truncate text-xs text-muted-foreground">
                   {displaySubtitle}
                 </span>
               </div>
-              <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" aria-hidden="true" />
+              <ChevronsUpDownIcon className="ml-auto size-4 text-muted-foreground" aria-hidden="true" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-xl"
+            className={cn("w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-xl", isMobile && "[&_[role=menuitem]]:min-h-12 [&_[role=menuitem]]:text-base [&_[role=menuitem]_svg]:size-5 [&_form_button]:min-h-12 [&_form_button]:text-base [&_form_button_svg]:size-5")}
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="size-8">
+                <Avatar className="size-9">
                   {avatarUrl ? <AvatarImage src={avatarUrl} alt={name} /> : null}
                   <AvatarFallback className="text-xs font-medium">{initials}</AvatarFallback>
                 </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
+                <div className="grid grid-cols-1 flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold text-foreground">{name}</span>
                   <span className="truncate text-xs text-muted-foreground">
                     {displaySubtitle}
@@ -97,13 +100,13 @@ export function AccountMenu({
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
                 <Link href={ROUTES.settings} className="cursor-pointer">
-                  <Settings className="size-4" aria-hidden="true" />
+                  <SettingsIcon className="size-4" aria-hidden="true" />
                   <span>Configurações</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={ROUTES.privacy} className="cursor-pointer">
-                  <Shield className="size-4" aria-hidden="true" />
+                  <ShieldCheckIcon className="size-4" aria-hidden="true" />
                   <span>Privacidade</span>
                 </Link>
               </DropdownMenuItem>

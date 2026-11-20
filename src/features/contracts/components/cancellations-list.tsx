@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronDown } from "@/components/ui/icons";
 import { decideCancellationAction } from "@/app/actions/cancellations";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -46,7 +46,7 @@ function PendingRequest({ request, contract }: Row) {
 
         <ConfirmationForm id={`cancel-${request.$id}`} action={decideCancellationAction} className="space-y-4 border-t border-border pt-4">
           <input type="hidden" name="request_id" value={request.$id} />
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Field>
               <FieldLabel htmlFor={`fee-${request.$id}`}>Taxa decidida (R$)</FieldLabel>
               <Input
@@ -135,7 +135,7 @@ export async function CancellationsList() {
       {decided.length ? (
         <details className="group space-y-3">
           <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden">
-            <ChevronDown className="size-4 transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none" aria-hidden="true" />
+            <ChevronDown className="size-4 transition-transform duration-(--duration-fast) ease-(--ease-smooth-out) group-open:-scale-y-100 motion-reduce:transition-none" aria-hidden="true" />
             Pedidos decididos ({decided.length})
           </summary>
           <DecidedList rows={decided} />

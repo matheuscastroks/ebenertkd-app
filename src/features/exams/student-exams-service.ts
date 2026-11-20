@@ -4,7 +4,8 @@ import { Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import type { Charge } from "@/features/billing/types";
 import { groupStudentExams, type StudentExamEntry } from "@/features/exams/rules";
-import type { ExamEvent, ExamParticipant } from "@/features/exams/types";
+import type { Event } from "@/features/events/types";
+import { toExamEvent, type ExamEvent, type ExamParticipant } from "@/features/exams/types";
 import { resolveStudentProfile } from "@/features/students/access";
 import type { Student } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
@@ -29,7 +30,7 @@ export async function getStudentExams(actor: Profile, requestedProfileId?: strin
   const eventIds = [...new Set(participants.rows.map((row) => row.event_id))];
   const chargeIds = showFinancial ? participants.rows.flatMap((row) => (row.charge_id ? [row.charge_id] : [])) : [];
   const [events, charges] = await Promise.all([
-    eventIds.length ? tables.listRows<ExamEvent>({ databaseId, tableId: APPWRITE_IDS.tables.examEvents, queries: [Query.equal("$id", eventIds), Query.limit(100)] }) : { rows: [] as ExamEvent[] },
+    eventIds.length ? tables.listRows<Event>({ databaseId, tableId: APPWRITE_IDS.tables.events, queries: [Query.equal("$id", eventIds), Query.limit(100)] }).then((result) => ({ rows: result.rows.filter((row) => row.event_type === "belt_exam").map(toExamEvent) })) : { rows: [] as ExamEvent[] },
     chargeIds.length ? tables.listRows<Charge>({ databaseId, tableId: APPWRITE_IDS.tables.charges, queries: [Query.equal("$id", chargeIds), Query.limit(100)] }) : { rows: [] as Charge[] }
   ]);
 

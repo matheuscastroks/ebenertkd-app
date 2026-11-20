@@ -4,7 +4,6 @@ import { OperationToast } from "@/components/shared/operation-toast";
 import { ListItemsSkeleton } from "@/components/skeletons";
 import { CancellationsList } from "@/features/contracts/components/cancellations-list";
 import { requireProfile } from "@/lib/auth/session";
-import { ROUTES } from "@/lib/navigation/routes";
 
 export default async function CancellationsPage({
   searchParams,
@@ -19,13 +18,8 @@ export default async function CancellationsPage({
   return (
     <PortalShell
       profile={admin}
-      activePath={ROUTES.adminContracts}
-      title="Solicitações de cancelamento"
-      subtitle="Decida os pedidos de saída e a taxa de cada um."
-      breadcrumbs={[
-        { label: "Contratos", href: ROUTES.adminContracts },
-        { label: "Cancelamentos" },
-      ]}
+      title="Contratos"
+      subtitle="Decida os pedidos de rescisão e a taxa de cada um."
     >
       <OperationToast
         tone="success"

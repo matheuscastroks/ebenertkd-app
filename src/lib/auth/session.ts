@@ -7,14 +7,14 @@ import { resolveDashboardPath } from "@/lib/auth/auth-utils";
 import { createAppwriteSessionClient } from "@/lib/appwrite/session";
 import type { Profile } from "@/features/auth/types";
 import { hasCapability } from "@/features/auth/permissions";
-import { getProfileByAccountId } from "@/features/profiles/profile-read";
+import { readProfileByAccountId } from "@/features/profiles/profile-read";
 
 export type ProfileRecord = Profile;
 
 /**
- * `account.get()` roda a cada requisição, SEM cache: logout e revogação de sessão valem na hora.
- * Só a busca do perfil por `account_id` é cacheada (60 s, tag `profile-account:<id>`); o status
- * `active` e a conta dona da linha são conferidos aqui, fora do cache.
+ * Sessão e campos de autorização são relidos a cada requisição: logout, desativação,
+ * alteração de papel e revogação de capacidade não dependem da invalidação do cache.
+ * `cache` do React só deduplica chamadas dentro da mesma renderização no servidor.
  */
 export const getCurrentProfile = cache(async function getCurrentProfile() {
   const appwrite = await createAppwriteSessionClient();
@@ -22,7 +22,7 @@ export const getCurrentProfile = cache(async function getCurrentProfile() {
 
   try {
     const account = await appwrite.account.get();
-    const profile = await getProfileByAccountId(account.$id);
+    const profile = await readProfileByAccountId(account.$id);
     if (!profile || profile.account_id !== account.$id) return null;
     return profile.status === "active" ? profile : null;
   } catch {

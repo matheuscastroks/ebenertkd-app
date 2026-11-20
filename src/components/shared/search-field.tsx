@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Search, X } from "lucide-react";
+import { SearchIcon } from "@/components/ui/search";
+import { XIcon } from "@/components/ui/x";
 import { Field, FieldLabel } from "@/components/ui/field";
 import {
   InputGroup,
@@ -30,7 +31,7 @@ export function SearchField({
     <Field>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
       <InputGroup>
-        <InputGroupAddon><Search aria-hidden="true" /></InputGroupAddon>
+        <InputGroupAddon><SearchIcon aria-hidden="true" /></InputGroupAddon>
         <InputGroupInput ref={inputRef} id={id} name={name} type="search" value={value} onChange={(event) => setValue(event.target.value)} placeholder={placeholder} />
         {value ? (
           <InputGroupAddon align="inline-end">
@@ -44,7 +45,7 @@ export function SearchField({
                 inputRef.current.form?.requestSubmit();
               }}
             >
-              <X aria-hidden="true" />
+              <XIcon aria-hidden="true" />
             </InputGroupButton>
           </InputGroupAddon>
         ) : null}

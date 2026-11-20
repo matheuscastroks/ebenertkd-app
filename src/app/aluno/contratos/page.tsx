@@ -11,7 +11,7 @@ import { ROUTES, studentContractPath } from "@/lib/navigation/routes";
 async function StudentContractsList({ profile }: { profile: Profile }) {
   const contracts = await listStudentContracts(profile).catch(() => null);
   const minor = profile.role === "minor_student";
-  return <PortalContractList contracts={contracts} hrefFor={studentContractPath} canSign={!minor}
+  return <PortalContractList contracts={contracts} hrefFor={studentContractPath} canSign={!minor} canOpen={!minor}
     emptyDescription={minor ? "Quando a matrícula for confirmada, o contrato aparece aqui para você ler. Quem assina é o seu responsável." : "Quando a matrícula for confirmada pela academia, o contrato aparece aqui para você ler e assinar."} />;
 }
 
@@ -22,10 +22,8 @@ export default async function StudentContractsPage() {
   return (
     <PortalShell
       profile={profile}
-      activePath={ROUTES.studentContracts}
-      title="Contratos"
+      title="Cadastro"
       subtitle={profile.role === "minor_student" ? "Seu contrato de matrícula. Quem assina é o seu responsável." : "Contratos para assinar e documentos já assinados."}
-      breadcrumbs={[{ label: "Contratos" }]}
     >
       <Suspense fallback={<ListItemsSkeleton count={2} />}>
         <StudentContractsList profile={profile} />

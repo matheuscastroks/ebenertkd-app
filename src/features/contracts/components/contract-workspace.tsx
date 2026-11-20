@@ -1,8 +1,18 @@
-import { ChevronDown, FileCheck, FileDown, FileText, AlertCircle } from "lucide-react";
+import { ChevronDown, FileCheck, FileDown, AlertCircle } from "@/components/ui/icons";
 import { requestCancellationAction } from "@/app/actions/cancellations";
 import { OperationToast } from "@/components/shared/operation-toast";
-import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { StatusBadge } from "@/components/shared/status-badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -113,29 +123,29 @@ export function ContractWorkspace({
 
       {contract.status === "signed" ? (
         <Collapsible>
-          <Card className="border-border/80 shadow-sm">
+          <Card className="border-border shadow-xs">
             <CardHeader className="pb-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <CardTitle className="text-base">Solicitar encerramento / rescisão</CardTitle>
-                  <CardDescription className="text-xs sm:text-sm mt-0.5">
+                  <CardDescription className="mt-0.5 text-sm">
                     Notificações realizadas até o dia 20 do mês anterior isentam mensalidade extra. Após essa data, o sistema sugere 1 mensalidade de aviso prévio.
                   </CardDescription>
                 </div>
                 <CollapsibleTrigger asChild>
-                  <Button variant="outline" className="h-10 shrink-0 font-medium">
+                  <Button variant="outline" className="group h-10 shrink-0 font-medium">
                     Opções de encerramento
-                    <ChevronDown className="ml-2 size-4 transition-transform duration-200" aria-hidden="true" />
+                    <ChevronDown className="ml-2 size-4 transition-transform duration-(--duration-fast) ease-(--ease-smooth-out) group-data-[state=open]:-scale-y-100 motion-reduce:transition-none" aria-hidden="true" />
                   </Button>
                 </CollapsibleTrigger>
               </div>
             </CardHeader>
             <CollapsibleContent>
-              <CardContent className="pt-2 border-t border-border/40">
-                <form action={requestCancellationAction} className="grid gap-4 sm:grid-cols-2 pt-4">
+              <CardContent className="border-t border-border pt-4">
+                <form id="contract-cancellation-form" action={requestCancellationAction} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <input type="hidden" name="contract_id" value={contract.$id} />
                   <Field>
-                    <FieldLabel htmlFor="cancellation-month" className="text-xs sm:text-sm font-semibold">
+                    <FieldLabel htmlFor="cancellation-month" className="text-sm font-semibold">
                       Mês pretendido de saída
                     </FieldLabel>
                     <Input
@@ -149,7 +159,7 @@ export function ContractWorkspace({
                     />
                   </Field>
                   <Field className="sm:col-span-2">
-                    <FieldLabel htmlFor="cancellation-reason" className="text-xs sm:text-sm font-semibold">
+                    <FieldLabel htmlFor="cancellation-reason" className="text-sm font-semibold">
                       Motivo (opcional)
                     </FieldLabel>
                     <Textarea
@@ -157,17 +167,31 @@ export function ContractWorkspace({
                       name="reason"
                       maxLength={2000}
                       placeholder="Descreva o motivo da saída se desejar..."
-                      className="min-h-[80px] rounded-xl text-sm resize-none"
+                      className="min-h-20 resize-none rounded-xl text-sm"
                     />
                   </Field>
                   <div className="sm:col-span-2">
-                    <FormSubmitButton
-                      variant="outline"
-                      className="h-11 w-full sm:w-auto font-medium border-destructive/40 text-destructive hover:bg-destructive/10"
-                      pendingLabel="Enviando solicitação…"
-                    >
-                      Enviar pedido de cancelamento
-                    </FormSubmitButton>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button type="button" variant="outline" className="min-h-11 w-full sm:w-auto font-medium text-destructive">
+                          Enviar pedido de cancelamento
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Solicitar encerramento do contrato?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            A administração analisará o mês pretendido de saída e eventual cobrança de aviso prévio antes de concluir a rescisão.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel type="button">Voltar</AlertDialogCancel>
+                          <AlertDialogAction type="submit" form="contract-cancellation-form" variant="destructive">
+                            Confirmar pedido de encerramento
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </form>
               </CardContent>

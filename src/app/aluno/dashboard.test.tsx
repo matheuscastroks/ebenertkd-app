@@ -15,7 +15,7 @@ import { listChargesForStudent } from "@/features/billing/charge-service";
 import { listStudentContracts } from "@/features/contracts/contract-service";
 import { StudentDashboardDynamic } from "@/features/students/components/student-dashboard";
 const profile = { $id: "student", role: "adult_student", full_name: "Ana", capabilities: ["student"] } as Profile;
-const activeStudent = { status: "active", current_belt: "Amarela", gub: 8 };
+const activeStudent = { status: "active", rank_key: "gub-8" };
 beforeEach(() => {
   vi.mocked(getAttendanceHistory).mockResolvedValue({ profile, student: null, entries: [], summary: { total: 0, attended: 0, rate: 0 } });
   vi.mocked(listChargesForStudent).mockReset().mockResolvedValue([]);
@@ -56,4 +56,15 @@ it("mostra estado em dia quando não há pendências", async () => {
   render(await StudentDashboardDynamic({ profile, minor: false }));
   expect(screen.getByText(/Tudo em dia/)).toBeInTheDocument();
   expect(screen.getByText(/Frequência 75% · 3 de 4 aulas/)).toBeInTheDocument();
+});
+it("abre pelas pendências, resume a frequência numa linha e não repete o menu", async () => {
+  vi.mocked(getAttendanceHistory).mockResolvedValue({ profile, student: activeStudent, entries: [], summary: { total: 4, attended: 3, rate: 75 } } as never);
+  vi.mocked(listChargesForStudent).mockResolvedValue([{ status: "overdue", due_date: "2026-11-05", amount_cents: 15000 } as Charge]);
+  render(await StudentDashboardDynamic({ profile, minor: false }));
+  const pendencies = screen.getByRole("heading", { name: "Pendências" });
+  const next = screen.getByRole("heading", { name: "Próximo treino" });
+  expect(pendencies.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(screen.getByRole("link", { name: /Frequência 75%/ })).toHaveAttribute("href", "/aluno/frequencia");
+  expect(screen.queryByText("Dados e documentos")).not.toBeInTheDocument();
+  expect(screen.queryByRole("img", { name: /frequência/i })).not.toBeInTheDocument();
 });

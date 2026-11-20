@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canSignContract, hashContent, privacyIpFingerprint, renderContractTemplate, renewalEvent } from "@/features/contracts/rules";
+import { canSignContract, classifyContractRenewalBucket, hashContent, privacyIpFingerprint, renderContractTemplate, renewalEvent } from "@/features/contracts/rules";
 import { calculateExitFee, requiresRematricula } from "@/lib/domain/billing-rules";
 
 describe("contract templates", () => {
@@ -38,6 +38,15 @@ describe("renewal rules", () => {
     expect(renewalEvent("2027-01-31", "2027-01-01")).toEqual({ kind: "reminder", days: 30 });
     expect(renewalEvent("2027-01-31", "2027-01-24")).toEqual({ kind: "reminder", days: 7 });
     expect(renewalEvent("2027-01-31", "2027-02-01")?.kind).toBe("expired");
+  });
+
+  it("classifies contract renewal buckets across expired, 7d, 30d, 60d, 90d and healthy", () => {
+    expect(classifyContractRenewalBucket("2026-11-17", "2026-11-18")).toEqual({ bucket: "expired", daysRemaining: -1 });
+    expect(classifyContractRenewalBucket("2026-11-25", "2026-11-18")).toEqual({ bucket: "due_7d", daysRemaining: 7 });
+    expect(classifyContractRenewalBucket("2026-12-10", "2026-11-18")).toEqual({ bucket: "due_30d", daysRemaining: 22 });
+    expect(classifyContractRenewalBucket("2027-01-05", "2026-11-18")).toEqual({ bucket: "due_60d", daysRemaining: 48 });
+    expect(classifyContractRenewalBucket("2027-02-10", "2026-11-18")).toEqual({ bucket: "due_90d", daysRemaining: 84 });
+    expect(classifyContractRenewalBucket("2027-05-01", "2026-11-18").bucket).toBe("healthy");
   });
 });
 

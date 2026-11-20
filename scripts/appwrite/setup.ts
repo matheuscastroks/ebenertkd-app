@@ -18,7 +18,7 @@ loadEnvConfig(process.cwd());
 
 const mode = process.argv[2];
 if (mode !== "plan" && mode !== "apply") {
-  throw new Error("Use: tsx scripts/appwrite/setup.ts <plan|apply>");
+  throw new Error("Use: tsx scripts/appwrite/setup.ts <plan|apply> [--skip-functions]");
 }
 
 let config: ServerAppwriteConfig;
@@ -80,6 +80,14 @@ async function createColumn(tableId: string, column: ColumnDefinition) {
       max: column.max
     });
   }
+  if (column.kind === "float") {
+    return tablesDb.createFloatColumn({
+      ...common,
+      required: column.required,
+      min: column.min,
+      max: column.max
+    });
+  }
   return tablesDb.createTextColumn({ ...common, required: column.required });
 }
 
@@ -132,6 +140,25 @@ async function reconcile() {
           await waitForColumn(table.id, column.key);
         }
         continue;
+      }
+      if (column.kind === "enum") {
+        // Aditivo: só acrescenta valores novos ao enum remoto (nunca remove).
+        const remoteElements = (remoteColumn as typeof remoteColumn & { elements?: string[] }).elements ?? [];
+        const missing = column.elements.filter((element) => !remoteElements.includes(element));
+        if (missing.length > 0) {
+          changes.push(`update enum ${table.id}.${column.key} (+${missing.join(", ")})`);
+          if (mode === "apply") {
+            await tablesDb.updateEnumColumn({
+              databaseId: config.databaseId,
+              tableId: table.id,
+              key: column.key,
+              elements: [...remoteElements, ...missing],
+              required: column.required,
+              xdefault: null as unknown as string
+            });
+            await waitForColumn(table.id, column.key);
+          }
+        }
       }
       if (column.kind === "integer") {
         const current = remoteColumn as typeof remoteColumn & { min?: number | bigint; max?: number | bigint };
@@ -192,7 +219,7 @@ async function reconcile() {
     }
   }
 
-  for (const fn of functions) {
+  for (const fn of process.argv.includes("--skip-functions") ? [] : functions) {
     const remoteFunction = await getOrNull(() => functionsApi.get({ functionId: fn.id }));
     if (remoteFunction) continue;
     changes.push(`create function ${fn.id} (${fn.schedule})`);

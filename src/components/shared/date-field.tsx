@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { format, isValid, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarDays } from "lucide-react";
+import { CalendarDaysIcon } from "@/components/ui/calendar-days";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
@@ -45,7 +45,7 @@ export function DateField({ id, name, label, defaultValue, min, max, required = 
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button id={id} type="button" variant="outline" aria-required={required} className={cn("w-full justify-start text-left font-normal", !selected && "text-muted-foreground")}>
-            <CalendarDays aria-hidden="true" />
+            <CalendarDaysIcon aria-hidden="true" />
             {selected ? format(selected, "dd/MM/yyyy", { locale: ptBR }) : "Selecione uma data"}
           </Button>
         </PopoverTrigger>

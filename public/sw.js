@@ -1,10 +1,15 @@
 const CACHE_PREFIX = "ebenertkd-public-shell";
-const CACHE_VERSION = `${CACHE_PREFIX}-v1`;
+const CACHE_VERSION = `${CACHE_PREFIX}-v2`;
 const OFFLINE_URL = "/offline.html";
 const PUBLIC_ASSETS = [
   OFFLINE_URL,
   "/manifest.webmanifest",
   "/brand-icon.png",
+  "/icon-192.png",
+  "/icon-512.png",
+  "/icon-maskable-192.png",
+  "/icon-maskable-512.png",
+  "/apple-touch-icon.png",
 ];
 
 self.addEventListener("install", (event) => {

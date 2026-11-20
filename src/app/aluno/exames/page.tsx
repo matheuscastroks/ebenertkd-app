@@ -13,8 +13,7 @@ async function StudentExamsContent({ profile }: { profile: Profile }) {
   return (
     <StudentExamsView
       hasStudent={Boolean(exams.student)}
-      currentBelt={exams.student?.current_belt}
-      currentGub={exams.student?.gub}
+      currentRankKey={exams.student?.rank_key}
       upcoming={toClientData(exams.upcoming)}
       past={toClientData(exams.past)}
       showFinancial={exams.showFinancial}
@@ -29,8 +28,7 @@ export default async function StudentExamsPage() {
   return (
     <PortalShell
       profile={profile}
-      activePath={ROUTES.studentExams}
-      title="Meus exames"
+      title="Faixa"
       subtitle="Acompanhe seus exames de faixa agendados e os resultados anteriores."
     >
       <div className="w-full min-w-0">

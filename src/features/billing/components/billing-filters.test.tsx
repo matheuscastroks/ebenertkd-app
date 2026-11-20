@@ -4,7 +4,6 @@ import { BillingFilters } from "./billing-filters";
 
 const state = vi.hoisted(() => ({ query: "", replace: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: state.replace }), usePathname: () => "/admin/financeiro", useSearchParams: () => new URLSearchParams(state.query) }));
-vi.mock("@/features/billing/components/pix-settings-dialog", () => ({ PixSettingsDialog: () => null }));
 
 it("esconde limpar quando não há filtros ativos e recolhe os filtros raros", () => {
   state.query = "";
@@ -23,20 +22,11 @@ it("abre os filtros raros quando um deles está ativo e mostra a competência le
   expect(screen.getByRole("button", { name: "Remover filtro competência" })).toHaveTextContent("out/2026");
 });
 
-it("mostra filtros ativos e permite removê-los", () => {
-  state.query = "status=proof_under_review";
-  render(<BillingFilters classes={[]} />);
-  expect(screen.getByRole("button", { name: "Remover filtro situação" })).toHaveTextContent("Em análise");
+it("mostra filtros ativos e limpa sem perder a situação escolhida nos chips", () => {
+  state.query = "status=overdue&trainingClass=t1";
+  render(<BillingFilters classes={[{ $id: "t1", name: "Adulto" } as never]} />);
+  expect(screen.getByRole("button", { name: "Remover filtro turma" })).toHaveTextContent("Adulto");
+  expect(screen.queryByLabelText("Situação")).not.toBeInTheDocument();
   fireEvent.click(screen.getByText("Limpar filtros"));
-  expect(state.replace).toHaveBeenCalledWith("/admin/financeiro", { scroll: false });
-});
-
-it("o campo Situação mostra o texto escolhido sem precisar abrir a lista", () => {
-  state.query = "";
-  const { unmount } = render(<BillingFilters classes={[]} />);
-  expect(screen.getByLabelText("Situação")).toHaveTextContent("Todas");
-  unmount();
-  state.query = "status=overdue";
-  render(<BillingFilters classes={[]} />);
-  expect(screen.getByLabelText("Situação")).toHaveTextContent("Inadimplente");
+  expect(state.replace).toHaveBeenCalledWith("/admin/financeiro?status=overdue", { scroll: false });
 });

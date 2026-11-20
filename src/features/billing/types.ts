@@ -1,6 +1,6 @@
 import type { Models } from "node-appwrite";
 
-export type ChargeType = "monthly_fee" | "enrollment_fee" | "exam_fee" | "exit_fee";
+export type ChargeType = "monthly_fee" | "enrollment_fee" | "exam_fee" | "exit_fee" | "event_fee";
 export type ChargeStatus = "pending" | "proof_under_review" | "paid" | "overdue" | "cancelled";
 
 export type Charge = Models.Row & {
@@ -25,3 +25,22 @@ export type Payment = Models.Row & {
 
 export type PaymentReversal = Models.Row & { payment_id: string; charge_id: string; reason: string; reversed_by_account_id: string; reversed_at: string; created_at: string };
 export type BillingSettings = Models.Row & { pix_key: string; pix_key_type: "cpf" | "cnpj" | "email" | "phone" | "random"; beneficiary_name: string; instructions?: string | null; updated_by_account_id: string; created_at: string; updated_at: string };
+
+export type FinanceScenario = Models.Row & {
+  name: string; fixed_costs_json: string; variable_cost_cents: number; payment_fee_bps: number; pro_labore_cents: number;
+  reserve_cents: number; default_rate_bps: number; created_by_account_id: string; created_at: string; updated_at: string;
+};
+
+export type TuitionAdjustmentStatus = "draft" | "applied" | "cancelled";
+
+export type TuitionAdjustment = Models.Row & {
+  status: TuitionAdjustmentStatus; mode: "percent" | "fixed" | "rounded"; percent_bps?: number | null;
+  reference_index_label?: string | null; effective_from: string; message_template: string;
+  total_monthly_impact_cents: number; item_count: number; applied_at?: string | null; applied_by_account_id?: string | null;
+  notice_published_at?: string | null; created_by_account_id: string; created_at: string; updated_at: string;
+};
+
+export type TuitionAdjustmentItem = Models.Row & {
+  adjustment_id: string; enrollment_id: string; student_id: string; previous_fee_cents: number; new_fee_cents: number;
+  excluded: boolean; applied_at?: string | null; notified_at?: string | null;
+};

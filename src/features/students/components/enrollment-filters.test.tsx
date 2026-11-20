@@ -47,7 +47,7 @@ describe("EnrollmentFilters", () => {
   });
 
   it("recolhe filtros secundários e informa quantos estão ativos", () => {
-    mockSearchParams = new URLSearchParams("status=submitted&belt=Azul");
+    mockSearchParams = new URLSearchParams("status=submitted&rank=gub-4");
     render(<EnrollmentFilters classes={dummyClasses} />);
     const toggle = screen.getByRole("button", { name: "Filtros (2)" });
     expect(toggle).toHaveAttribute("aria-expanded", "false");

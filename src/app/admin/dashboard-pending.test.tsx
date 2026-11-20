@@ -9,7 +9,8 @@ vi.mock("@/features/exams/service", () => ({ listExamEvents: vi.fn() }));
 import { getBillingOverview } from "@/features/billing/report-service";
 import { listEnrollmentsForReview } from "@/features/students/service";
 import { listTrainingClasses } from "@/features/classes/service";
-import { UrgentTasksSection, TodayClassesSection } from "./dashboard-sections";
+vi.mock("@/app/actions/dashboard", () => ({ dismissSetupBannerAction: vi.fn() }));
+import { OverdueSection, UrgentTasksSection, TodayClassesSection } from "./dashboard-sections";
 
 describe("dashboard do professor", () => {
   it("não mascara falha de pendências como tudo em dia", async () => {
@@ -44,5 +45,17 @@ describe("dashboard do professor", () => {
     render(await TodayClassesSection());
     const links = screen.getAllByRole("link", { name: "Fazer chamada" });
     expect(links.filter((link) => link.dataset.variant === "default")).toHaveLength(1);
+  });
+  it("resume o dinheiro numa linha que leva às cobranças em atraso", async () => {
+    vi.mocked(getBillingOverview).mockResolvedValue({ summary: { overdueCents: 25000 } } as never);
+    render(await OverdueSection());
+    const link = screen.getByRole("link", { name: /Em atraso: R\$\s?250,00/ });
+    expect(link).toHaveAttribute("href", "/admin/financeiro?status=overdue");
+    expect(screen.queryByText(/Comparativo financeiro/)).not.toBeInTheDocument();
+  });
+  it("diz que está tudo em dia quando não há atraso", async () => {
+    vi.mocked(getBillingOverview).mockResolvedValue({ summary: { overdueCents: 0 } } as never);
+    render(await OverdueSection());
+    expect(screen.getByRole("link", { name: "Nenhuma mensalidade em atraso. Ver cobranças" })).toBeInTheDocument();
   });
 });

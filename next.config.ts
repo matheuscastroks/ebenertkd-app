@@ -25,7 +25,9 @@ const nextConfig: NextConfig = {
   },
   devIndicators: false,
   experimental: {
-    optimizePackageImports: ["lucide-react", "radix-ui", "date-fns"]
+    optimizePackageImports: ["lucide-react", "radix-ui", "date-fns"],
+    // Documentos de inscrição e matrícula chegam até 5 MB (mais o multipart).
+    serverActions: { bodySizeLimit: "6mb" }
   }
 };
 

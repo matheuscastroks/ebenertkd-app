@@ -7,17 +7,29 @@ import { PageHeaderSkeleton } from "@/components/shared/page-skeleton";
  */
 export function RouteLoading() {
   return (
-    <div role="status" aria-label="Carregando página" aria-busy="true" className="flex flex-col gap-6">
+    <div
+      role="status"
+      aria-label="Carregando página"
+      aria-busy="true"
+      className="flex min-h-0 flex-1 flex-col bg-sidebar md:overflow-hidden"
+    >
       <span className="sr-only">Carregando página…</span>
       <PageHeaderSkeleton />
-      <div aria-hidden="true" className="space-y-4 rounded-xl border border-border bg-card p-4 md:p-5">
-        <Skeleton className="h-5 w-40" />
-        <div className="space-y-3">
-          <Skeleton className="h-14 w-full" />
-          <Skeleton className="h-14 w-full" />
-          <Skeleton className="h-14 w-full" />
+      <main
+        data-slot="dashboard-content"
+        className="relative flex min-h-0 flex-1 flex-col border-t border-border/60 bg-background md:mb-2 md:mr-2 md:overflow-y-auto md:rounded-xl md:border md:border-border/60 md:shadow-sm"
+      >
+        <div className="min-w-0 flex-1 p-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:p-6 md:pb-8">
+          <div aria-hidden="true" className="space-y-4 rounded-xl border border-border bg-card p-4 md:p-5">
+            <Skeleton className="h-5 w-40" />
+            <div className="space-y-3">
+              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-14 w-full" />
+            </div>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

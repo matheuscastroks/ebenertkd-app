@@ -1,6 +1,5 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
 import { ID, Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import { effectiveChargeStatus } from "@/features/billing/rules";
@@ -8,7 +7,11 @@ import { manualPaymentSchema, proofDecisionSchema, reversalSchema } from "@/feat
 import type { Charge, Payment, PaymentProof, PaymentReversal } from "@/features/billing/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { cachedRead } from "@/lib/cache/cached-read";
+import { invalidateTags } from "@/lib/cache/invalidate";
 import { CACHE_TAGS } from "@/lib/cache/tags";
+import { getPolicy } from "@/features/academy/config-service";
+import { accessGrantedSentence } from "@/features/billing/access-lock-rules";
 import { notifyStudentFinancial } from "@/features/notifications/notification-service";
 
 async function confirmedPayment(chargeId: string) {
@@ -43,15 +46,17 @@ export async function decidePaymentProof(actor: Profile, raw: unknown) {
       const row = await tables.updateRow<PaymentProof>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.paymentProofs, rowId: proof.$id, data: { status: "rejected", rejection_reason: input.reason, reviewed_by_account_id: actor.account_id, reviewed_at: now, updated_at: now }, transactionId });
       await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: charge.$id, data: { status: effectiveChargeStatus("pending", charge.due_date, now), updated_at: now }, transactionId });
       await tables.createRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.auditEvents, rowId: ID.unique(), data: { actor_account_id: actor.account_id, event_type: "billing.proof.rejected", entity_type: "payment_proof", entity_id: proof.$id, metadata: JSON.stringify({ charge_id: charge.$id, reason: input.reason }), created_at: now }, permissions: [], transactionId });
-      await notifyStudentFinancial({ studentId: charge.student_id, title: "Comprovante recusado", body: `O comprovante de ${charge.description} não foi aceito. Motivo: ${input.reason}`, dedupeKey: `payment-proof-rejected:${proof.$id}:${proof.version}`, actionUrl: "/avisos" }).catch(() => undefined);
+      await notifyStudentFinancial({ studentId: charge.student_id, title: "Comprovante precisa ser reenviado", body: `O comprovante de ${charge.description} não pôde ser aceito. Motivo: ${input.reason}. Envie um novo comprovante no financeiro.`, dedupeKey: `payment-proof-rejected:${proof.$id}:${proof.version}` }).catch(() => undefined);
       return row;
     });
+    invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(charge.student_id));
     return { proof: updated, payment: null };
   }
   const existing = await confirmedPayment(charge.$id);
   if (existing) {
     await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.paymentProofs, rowId: proof.$id, data: { status: "approved", reviewed_by_account_id: actor.account_id, reviewed_at: proof.reviewed_at ?? now, updated_at: now } });
     await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: charge.$id, data: { status: "paid", updated_at: now } });
+    invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(charge.student_id));
     return { proof, payment: existing };
   }
   const paidAt = input.paidAt ? `${input.paidAt}T12:00:00.000Z` : now;
@@ -62,6 +67,16 @@ export async function decidePaymentProof(actor: Profile, raw: unknown) {
     await tables.createRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.auditEvents, rowId: ID.unique(), data: { actor_account_id: actor.account_id, event_type: "billing.payment.confirmed", entity_type: "payment", entity_id: row.$id, metadata: JSON.stringify({ charge_id: charge.$id, method: "pix_proof" }), created_at: now }, permissions: [], transactionId });
     return row;
   });
+  invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(charge.student_id));
+  const accessPolicy = await getPolicy("access");
+  await notifyStudentFinancial({
+    studentId: charge.student_id,
+    title: `Pagamento confirmado · ${charge.description}`,
+    body: charge.charge_type === "monthly_fee"
+      ? `O professor confirmou seu comprovante de ${charge.description}.${accessGrantedSentence(accessPolicy)}`
+      : `O professor confirmou o pagamento de ${charge.description}.`,
+    dedupeKey: `payment-confirmed:${payment.$id}`
+  }).catch(() => undefined);
   return { proof, payment };
 }
 
@@ -72,7 +87,10 @@ export async function recordManualPayment(actor: Profile, raw: unknown) {
   const charge = await tables.getRow<Charge>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: input.chargeId });
   const existing = await confirmedPayment(input.chargeId);
   if (existing) {
-    if (charge.status !== "paid") await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: charge.$id, data: { status: "paid", updated_at: new Date().toISOString() } });
+    if (charge.status !== "paid") {
+      await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: charge.$id, data: { status: "paid", updated_at: new Date().toISOString() } });
+      invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(charge.student_id));
+    }
     return existing;
   }
   if (["cancelled", "paid"].includes(charge.status)) throw new Error("charge_not_payable");
@@ -85,6 +103,16 @@ export async function recordManualPayment(actor: Profile, raw: unknown) {
     await tables.createRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.auditEvents, rowId: ID.unique(), data: { actor_account_id: actor.account_id, event_type: "billing.payment.confirmed", entity_type: "payment", entity_id: row.$id, metadata: JSON.stringify({ charge_id: charge.$id, method: "manual" }), created_at: now }, permissions: [], transactionId });
     return row;
   });
+  invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(charge.student_id));
+  const accessPolicy = await getPolicy("access");
+  await notifyStudentFinancial({
+    studentId: charge.student_id,
+    title: `Pagamento confirmado · ${charge.description}`,
+    body: charge.charge_type === "monthly_fee"
+      ? `O professor registrou seu pagamento de ${charge.description}.${accessGrantedSentence(accessPolicy)}`
+      : `O professor registrou o pagamento de ${charge.description}.`,
+    dedupeKey: `payment-confirmed:${payment.$id}`
+  }).catch(() => undefined);
   return payment;
 }
 
@@ -103,21 +131,29 @@ export async function reversePayment(actor: Profile, raw: unknown) {
     await tables.createRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.auditEvents, rowId: ID.unique(), data: { actor_account_id: actor.account_id, event_type: "billing.payment.reversed", entity_type: "payment", entity_id: payment.$id, metadata: JSON.stringify({ charge_id: charge.$id, reason: input.reason }), created_at: now }, permissions: [], transactionId });
     return row;
   });
+  invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(charge.student_id));
+  await notifyStudentFinancial({
+    studentId: charge.student_id,
+    title: `Pagamento estornado · ${charge.description}`,
+    body: `O pagamento de ${charge.description} foi estornado pelo professor. Motivo: ${input.reason}.`,
+    dedupeKey: `payment-reversed:${payment.$id}`
+  }).catch(() => undefined);
   return updated;
 }
 
-export const listPayments = unstable_cache(
-  async () => {
-    const { tables, config } = createAppwriteAdminClient();
-    const rows: Payment[] = [];
-    let cursor: string | undefined;
-    do {
-      const result = await tables.listRows<Payment>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.payments, queries: [Query.orderDesc("paid_at"), Query.limit(500), ...(cursor ? [Query.cursorAfter(cursor)] : [])] });
-      rows.push(...result.rows);
-      cursor = result.rows.length === 500 ? result.rows.at(-1)?.$id : undefined;
-    } while (cursor);
-    return rows;
-  },
-  ["list-payments"],
-  { tags: [CACHE_TAGS.billingCharges], revalidate: 60 }
-);
+export function listPayments() {
+  return cachedRead(
+    { name: "list-payments", key: [], tags: [CACHE_TAGS.billingCharges], revalidate: 60 },
+    async () => {
+      const { tables, config } = createAppwriteAdminClient();
+      const rows: Payment[] = [];
+      let cursor: string | undefined;
+      do {
+        const result = await tables.listRows<Payment>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.payments, queries: [Query.orderDesc("paid_at"), Query.limit(500), ...(cursor ? [Query.cursorAfter(cursor)] : [])] });
+        rows.push(...result.rows);
+        cursor = result.rows.length === 500 ? result.rows.at(-1)?.$id : undefined;
+      } while (cursor);
+      return rows;
+    }
+  );
+}

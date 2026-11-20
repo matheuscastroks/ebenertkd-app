@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Slot } from "radix-ui"
-import { ChevronRightIcon, MoreHorizontalIcon } from "lucide-react"
+import { ChevronRightIcon, MoreHorizontalIcon } from "@/components/ui/icons"
 
 function Breadcrumb({ className, ...props }: React.ComponentProps<"nav">) {
   return (
@@ -49,7 +49,7 @@ function BreadcrumbLink({
   return (
     <Comp
       data-slot="breadcrumb-link"
-      className={cn("transition-colors hover:text-foreground", className)}
+      className={cn("transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none hover:text-foreground", className)}
       {...props}
     />
   )

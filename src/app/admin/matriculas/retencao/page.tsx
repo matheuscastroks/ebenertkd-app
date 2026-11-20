@@ -1,0 +1,267 @@
+import Link from "next/link";
+import { Suspense } from "react";
+import { sendTargetedNotificationAction } from "@/app/actions/notifications";
+import { PortalShell } from "@/components/dashboard/portal-shell";
+import { EmptyState } from "@/components/shared/empty-state";
+import { FilterChips } from "@/components/shared/filter-chips";
+import { FormSubmitButton } from "@/components/shared/form-submit-button";
+import { OperationToast } from "@/components/shared/operation-toast";
+import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";
+import { MetricCardsSkeleton, TableRowsSkeleton } from "@/components/skeletons";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { RetentionCharts } from "@/features/classes/components/retention-chart";
+import { RetentionFilters } from "@/features/classes/components/retention-filters";
+import type { RetentionRiskLevel } from "@/features/classes/retention-rules";
+import { getRetentionOverview } from "@/features/classes/retention-service";
+import { listTrainingClasses } from "@/features/classes/service";
+import { BeltBadge } from "@/features/students/components/belt-badge";
+import { StudentAvatar } from "@/features/students/components/student-avatar";
+import { requireProfile } from "@/lib/auth/session";
+import { toClientData } from "@/lib/client-data";
+import { formatBusinessDateBr, whatsappLink } from "@/lib/dates";
+import { adminEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
+import { ArrowRight, Bell, ChevronDownIcon, MessageCircle } from "@/components/ui/icons";
+
+const RISK_LABELS: Record<RetentionRiskLevel, string> = {
+  critical: "Risco crítico",
+  warning: "Em atenção",
+  healthy: "Regular",
+};
+
+const RISK_TONES: Record<RetentionRiskLevel, StatusTone> = {
+  critical: "danger",
+  warning: "warning",
+  healthy: "success",
+};
+
+type SearchParams = Promise<{
+  q?: string;
+  risk?: string;
+  turma?: string;
+  notified?: string;
+  error?: string;
+}>;
+
+const allowedRisks = new Set<RetentionRiskLevel>(["critical", "warning", "healthy"]);
+
+async function RetentionContent({ searchParams }: { searchParams: SearchParams }) {
+  const params = await searchParams;
+  const risk = allowedRisks.has(params.risk as RetentionRiskLevel)
+    ? (params.risk as RetentionRiskLevel)
+    : undefined;
+  const classId = params.turma && params.turma !== "all" ? params.turma : undefined;
+
+  const data = await getRetentionOverview({
+    risk,
+    classId,
+    search: params.q,
+  });
+
+  const { summary, rows, windowDays } = data;
+  const netSign = summary.netGrowthInMonth > 0 ? "+" : "";
+  const chipHref = (next: RetentionRiskLevel | undefined) => {
+    const query = new URLSearchParams();
+    if (params.q) query.set("q", params.q);
+    if (classId) query.set("turma", classId);
+    if (next) query.set("risk", next);
+    return query.size ? `${ROUTES.adminRetention}?${query}` : ROUTES.adminRetention;
+  };
+
+  return (
+    <div className="space-y-6">
+      <FilterChips
+        label="Nível de risco"
+        items={[
+          { label: "Todos", href: chipHref(undefined), count: summary.totalActive, active: !risk },
+          { label: "Risco crítico", href: chipHref("critical"), count: summary.criticalCount, active: risk === "critical", urgent: true },
+          { label: "Em atenção", href: chipHref("warning"), count: summary.warningCount, active: risk === "warning" },
+          { label: "Regular", href: chipHref("healthy"), count: summary.healthyCount, active: risk === "healthy" },
+        ]}
+      />
+      <p className="text-sm text-muted-foreground tabular-nums">
+        Neste mês: {summary.newEnrollmentsInMonth} entrada{summary.newEnrollmentsInMonth === 1 ? "" : "s"} e {summary.cancellationsInMonth} saída{summary.cancellationsInMonth === 1 ? "" : "s"}
+        {" "}(saldo <span className={summary.netGrowthInMonth < 0 ? "font-medium text-destructive" : "font-medium text-foreground"}>{netSign}{summary.netGrowthInMonth}</span>).
+      </p>
+
+      {rows.length === 0 ? (
+        <EmptyState
+          title="Nenhum aluno encontrado neste recorte"
+          description="Ajuste os filtros acima para visualizar outros níveis de frequência ou turmas."
+          action={
+            <Button asChild variant="outline" className="min-h-11">
+              <Link href={ROUTES.adminRetention}>Limpar filtros</Link>
+            </Button>
+          }
+        />
+      ) : (
+        <section aria-labelledby="retention-list-heading" className="space-y-3">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 id="retention-list-heading" className="text-base font-semibold">
+              Monitoramento por aluno ({rows.length})
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Ordenado por prioridade de contato (críticos primeiro).
+            </p>
+          </div>
+
+          <ul className="t-stagger divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+            {rows.map((row) => {
+              const waHref = whatsappLink(row.whatsapp);
+              return (
+                <li
+                  key={row.studentId}
+                  className="t-interactive-row flex flex-col gap-3 px-4 py-3.5 hover:bg-muted/50 lg:flex-row lg:items-center lg:justify-between sm:px-5"
+                >
+                  <div className="flex min-w-0 items-start gap-3">
+                    <StudentAvatar
+                      name={row.fullName}
+                      photoDocumentId={row.photoDocumentId}
+                      size="sm"
+                    />
+                    <div className="min-w-0 space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="truncate text-sm font-medium text-foreground">
+                          {row.fullName}
+                        </p>
+                        <StatusBadge tone={RISK_TONES[row.riskLevel]}>
+                          {RISK_LABELS[row.riskLevel]}
+                        </StatusBadge>
+                        <BeltBadge rankKey={row.rankKey} size="sm" />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {row.trainingClassName}
+                        {" · "}
+                        {row.riskReason}
+                        {" · "}
+                        Última presença:{" "}
+                        <span className="tabular-nums">
+                          {formatBusinessDateBr(row.lastPresentDate)}
+                        </span>
+                        {row.total30d > 0
+                          ? ` · ${row.attended30d}/${row.total30d} aulas (${row.windowDays}d)`
+                          : ""}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 lg:shrink-0">
+                    {row.riskLevel !== "healthy" ? (
+                      <form action={sendTargetedNotificationAction}>
+                        <input type="hidden" name="profile_id" value={row.profileId} />
+                        <input type="hidden" name="return_to" value={ROUTES.adminRetention} />
+                        <input type="hidden" name="action_url" value={ROUTES.studentAttendance} />
+                        <input
+                          type="hidden"
+                          name="title"
+                          value="Sentimos sua falta no dojang!"
+                        />
+                        <input
+                          type="hidden"
+                          name="body"
+                          value={`Olá! Notamos sua ausência nos últimos treinos (${row.riskReason}). Esperamos você na próxima aula da turma ${row.trainingClassName}.`}
+                        />
+                        <FormSubmitButton
+                          size="sm"
+                          variant="outline"
+                          className="min-h-10"
+                          pendingLabel="Enviando…"
+                        >
+                          <Bell className="size-3.5" aria-hidden="true" />
+                          Incentivar no app
+                        </FormSubmitButton>
+                      </form>
+                    ) : null}
+
+                    {waHref ? (
+                      <Button asChild size="sm" variant="outline" className="min-h-10">
+                        <a href={waHref} target="_blank" rel="noopener noreferrer">
+                          <MessageCircle className="size-3.5" aria-hidden="true" />
+                          WhatsApp
+                        </a>
+                      </Button>
+                    ) : null}
+
+                    <Button asChild size="sm" variant="ghost" className="min-h-10">
+                      <Link href={adminEnrollmentPath(row.studentId)}>
+                        Ficha
+                        <ArrowRight className="size-3.5" aria-hidden="true" />
+                      </Link>
+                    </Button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
+      <Collapsible>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" className="group min-h-11 px-2">
+            Ver tendências
+            <ChevronDownIcon aria-hidden="true" className="size-4 transition-transform duration-(--duration-fast) group-data-[state=open]:-scale-y-100 motion-reduce:transition-none" />
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-3">
+          <RetentionCharts summary={summary} windowDays={windowDays} />
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
+  );
+}
+
+async function RetentionFiltersLoader() {
+  const classes = await listTrainingClasses(true);
+  return <RetentionFilters classes={toClientData(classes)} />;
+}
+
+export default async function AdminRetentionPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const [admin, params] = await Promise.all([requireProfile("admin"), searchParams]);
+
+  return (
+    <PortalShell
+      profile={admin}
+      title="Alunos"
+      subtitle="Quem está faltando e pode sair. Aja antes de perder o aluno."
+    >
+      <div className="w-full min-w-0 space-y-6">
+        {params.notified ? (
+          <OperationToast
+            tone="success"
+            title="Lembrete enviado"
+            description="O aluno e o responsável (quando aplicável) receberam o aviso no portal."
+            clearParams={["notified"]}
+          />
+        ) : null}
+        {params.error ? (
+          <OperationToast
+            tone="error"
+            title="Não foi possível enviar o lembrete"
+            description="Verifique se o usuário possui perfil ativo e tente novamente."
+            clearParams={["error"]}
+          />
+        ) : null}
+
+        <Suspense fallback={null}>
+          <RetentionFiltersLoader />
+        </Suspense>
+
+        <Suspense
+          fallback={
+            <div className="space-y-6">
+              <MetricCardsSkeleton count={4} />
+              <TableRowsSkeleton columns={4} rows={5} />
+            </div>
+          }
+        >
+          <RetentionContent searchParams={searchParams} />
+        </Suspense>
+      </div>
+    </PortalShell>
+  );
+}

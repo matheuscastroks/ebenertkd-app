@@ -1,12 +1,14 @@
 "use server";
 
 import { headers } from "next/headers";
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { safeActionUrl } from "@/features/notifications/action-url";
 import { markAllNotificationsRead, markNotificationRead, publishAnnouncement } from "@/features/notifications/notification-service";
 import { revokePushSubscription, savePushSubscription } from "@/features/notifications/push-service";
 import { setNotificationPreference, type NotificationPreferences } from "@/features/notifications/preferences-service";
 import { requireProfile } from "@/lib/auth/session";
+import { invalidateTags } from "@/lib/cache/invalidate";
 import { ROUTES } from "@/lib/navigation/routes";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 
@@ -50,5 +52,25 @@ export async function setNotificationPreferenceAction(key: keyof NotificationPre
   const actor = await requireProfile();
   if (!["announcements_enabled", "financial_enabled", "system_enabled"].includes(key) || typeof enabled !== "boolean") throw new Error("invalid_preference");
   await setNotificationPreference(actor, key, enabled);
-  updateTag(CACHE_TAGS.notificationPreferences(actor.account_id));
+  invalidateTags(CACHE_TAGS.notificationPreferences(actor.account_id));
+}
+
+export async function sendTargetedNotificationAction(formData: FormData) {
+  const actor = await requireProfile("admin");
+  const returnTo = safeActionUrl(formData.get("return_to"), ROUTES.admin);
+  const safeReturn = returnTo.startsWith("/admin") ? returnTo : ROUTES.admin;
+  const separator = safeReturn.includes("?") ? "&" : "?";
+  try {
+    await publishAnnouncement(actor, {
+      title: formData.get("title"),
+      body: formData.get("body"),
+      audience: "profile",
+      audienceId: String(formData.get("profile_id") ?? ""),
+      actionUrl: safeActionUrl(formData.get("action_url"), ROUTES.notifications),
+    });
+  } catch {
+    redirect(`${safeReturn}${separator}error=notify`);
+  }
+  revalidatePath(safeReturn);
+  redirect(`${safeReturn}${separator}notified=1`);
 }

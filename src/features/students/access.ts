@@ -13,12 +13,12 @@ export async function resolveStudentProfile(actor: Profile, requestedProfileId?:
   }
   // Só a LINHA do perfil alvo vem do cache. Papel, capacidade e vínculo abaixo rodam a cada requisição.
   const target = targetId === actor.$id ? actor : await getProfileById(targetId);
-  const { tables, config } = createAppwriteAdminClient();
 
   if (actor.role === "admin") return target;
   if (target.$id === actor.$id && actor.capabilities.includes("student")) return target;
   if (!actor.capabilities.includes("guardian")) throw new Error("student_access_denied");
 
+  const { tables, config } = createAppwriteAdminClient();
   const links = await tables.listRows({
     databaseId: config.databaseId,
     tableId: APPWRITE_IDS.tables.guardianStudentLinks,

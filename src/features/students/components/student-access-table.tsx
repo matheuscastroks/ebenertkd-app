@@ -13,8 +13,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { Profile } from "@/features/auth/types";
+import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { PromoteMinorDialog } from "@/features/students/components/promote-minor-dialog";
-import { AdminDeleteStudentDialog } from "@/features/students/components/AdminDeleteStudentDialog";
 import { useTableSort } from "@/hooks/use-table-sort";
 
 type StudentAccessSortKey = "student" | "role" | "login" | "status";
@@ -22,8 +22,11 @@ type StudentAccessSortKey = "student" | "role" | "login" | "status";
 export function StudentAccessTable({
   profiles,
   currentQuery,
+  photoIds,
 }: {
   profiles: Profile[];
+  /** Documento da foto de perfil por id de perfil. */
+  photoIds?: Record<string, string>;
   currentQuery: { q?: string; page?: string };
 }) {
   const {
@@ -84,14 +87,17 @@ export function StudentAccessTable({
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody className="t-stagger">
               {sortedItems.map((student) => (
                 <TableRow
                   key={student.$id}
-                  className="hover:bg-muted/20 transition-colors"
+                  className="t-interactive-row hover:bg-muted/20"
                 >
                   <TableCell className="font-semibold text-sm text-foreground">
-                    {student.full_name}
+                    <div className="flex items-center gap-3">
+                      <StudentAvatar name={student.full_name} photoDocumentId={photoIds?.[student.$id]} size="sm" />
+                      <span>{student.full_name}</span>
+                    </div>
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     {student.role === "minor_student"
@@ -124,10 +130,6 @@ export function StudentAccessTable({
                           currentQuery={currentQuery}
                         />
                       ) : null}
-                      <AdminDeleteStudentDialog
-                        profileId={student.$id}
-                        studentName={student.full_name}
-                      />
                     </div>
                   </TableCell>
                 </TableRow>
@@ -147,13 +149,14 @@ export function StudentAccessTable({
         </div>
       }
       mobile={
-        <div className="space-y-3">
+        <div className="t-stagger space-y-3">
           {sortedItems.length ? (
             sortedItems.map((student) => (
               <Card key={student.$id}>
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 space-y-1">
+                    <StudentAvatar name={student.full_name} photoDocumentId={photoIds?.[student.$id]} size="sm" />
+                    <div className="min-w-0 flex-1 space-y-1">
                       <p className="font-semibold text-foreground text-sm">
                         {student.full_name}
                       </p>
@@ -176,20 +179,11 @@ export function StudentAccessTable({
                     </Badge>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2 border-t border-border pt-2">
-                      {student.role === "minor_student" &&
-                        student.status === "active" && (
-                          <PromoteMinorDialog
-                            minorProfileId={student.$id}
-                            studentName={student.full_name}
-                            currentQuery={currentQuery}
-                          />
-                        )}
-                      <AdminDeleteStudentDialog
-                        profileId={student.$id}
-                        studentName={student.full_name}
-                      />
+                  {student.role === "minor_student" && student.status === "active" ? (
+                    <div className="flex flex-wrap items-center gap-2 border-t border-border pt-2">
+                      <PromoteMinorDialog minorProfileId={student.$id} studentName={student.full_name} currentQuery={currentQuery} />
                     </div>
+                  ) : null}
                 </CardContent>
               </Card>
             ))

@@ -1,3 +1,5 @@
+import { dependentSegments } from "@/features/families/paths";
+import { ROUTES } from "@/lib/navigation/routes";
 import { DependentContext } from "@/features/families/components/dependent-context";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
@@ -7,15 +9,14 @@ import { getStudentExams } from "@/features/exams/student-exams-service";
 import type { Profile } from "@/features/auth/types";
 import { requireCapability } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
-import { guardianBillingPath, ROUTES } from "@/lib/navigation/routes";
+import { guardianBillingPath } from "@/lib/navigation/routes";
 
 async function DependentExamsContent({ guardian, profileId }: { guardian: Profile; profileId: string }) {
   const exams = await getStudentExams(guardian, profileId);
   return (
     <StudentExamsView
       hasStudent={Boolean(exams.student)}
-      currentBelt={exams.student?.current_belt}
-      currentGub={exams.student?.gub}
+      currentRankKey={exams.student?.rank_key}
       upcoming={toClientData(exams.upcoming)}
       past={toClientData(exams.past)}
       showFinancial={exams.showFinancial}
@@ -29,10 +30,8 @@ export default async function DependentExamsPage({ params }: { params: Promise<{
 
   return (
     <PortalShell
-      profile={guardian}
-      activePath={ROUTES.guardianDependents}
-      breadcrumbs={[{ label: "Minha família", href: ROUTES.guardian }, { label: "Exames" }]}
-      title="Exames de faixa"
+      profile={guardian} back={{ label: "Família", href: ROUTES.guardian }} segments={dependentSegments(profileId)}
+      title="Exames"
       subtitle="Exames marcados, taxa de cada um e resultados anteriores."
     >
       <DependentContext guardian={guardian} profileId={profileId} section="exames" />

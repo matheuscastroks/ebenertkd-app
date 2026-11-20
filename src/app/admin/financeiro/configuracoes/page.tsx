@@ -4,5 +4,5 @@ import { ROUTES } from "@/lib/navigation/routes";
 
 export default async function BillingSettingsPage() {
   await requireProfile("admin");
-  redirect(`${ROUTES.adminBilling}?pix=1`);
+  redirect(ROUTES.adminAcademyFinance);
 }

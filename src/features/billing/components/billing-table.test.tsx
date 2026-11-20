@@ -31,7 +31,7 @@ describe("BillingTable", () => {
     );
     expect(screen.getAllByText("Camila Ferreira")).toHaveLength(2);
     expect(screen.getAllByText("R$ 150,00")).toHaveLength(2);
-    expect(screen.getAllByText("Inadimplente")).toHaveLength(2);
+    expect(screen.getAllByText("Em atraso")).toHaveLength(2);
     expect(screen.getByText("set/2026")).toBeVisible();
     expect(screen.getAllByText("R$ 150,00")[0].closest("td")).toHaveClass("text-right");
     expect(screen.getAllByLabelText("Foto de Camila Ferreira")).toHaveLength(2);

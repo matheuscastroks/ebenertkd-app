@@ -27,7 +27,6 @@ it("impede novos desvios do contrato sem ampliar a dívida documentada por arqui
     const source = readFileSync(path, "utf8");
     const allowed = (baseline as Record<string, Partial<Record<keyof typeof rules, number>>>)[relative] ?? {};
     for (const [name, pattern] of Object.entries(rules)) {
-      if (name === "rawColor" && relative === "src/features/students/components/belt-badge.tsx") continue;
       const count = [...source.matchAll(pattern)].length;
       const budget = allowed[name as keyof typeof rules] ?? 0;
       if (count > budget) violations.push(`${relative}: ${name} ${count} (máximo temporário ${budget})`);

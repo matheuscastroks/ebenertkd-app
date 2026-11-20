@@ -157,8 +157,8 @@ test.describe("@authenticated @lifecycle Onda 3", () => {
       await candidate.getByRole("button", { name: "Inscrever", exact: true }).click();
       await submit(admin, admin.getByRole("dialog", { name: `Inscrever ${name}` }).getByRole("button", { name: "Confirmar inscrição no exame" }), /[?&]added=1/);
       await admin.getByRole("button", { name: "Aprovar", exact: true }).click();
-      await expect(admin.getByRole("alertdialog")).toContainText(name);
-      await submit(admin, admin.getByRole("alertdialog").getByRole("button", { name: "Confirmar: aprovar" }), /[?&]graded=1/);
+      await expect(admin.getByRole("dialog")).toContainText(name);
+      await submit(admin, admin.getByRole("dialog").getByRole("button", { name: "Confirmar: aprovar" }), /[?&]graded=1/);
       await expect(admin.getByText("Graduação Homologada", { exact: true })).toBeVisible();
       await student.goto("/aluno/exames");
       await expect(student.getByText(examName, { exact: true })).toBeVisible();
@@ -190,15 +190,19 @@ test.describe("@authenticated @lifecycle Onda 3", () => {
       await expect(page).toHaveURL(/\/responsavel\/dependentes\/[^/]+\/matricula/);
       await expect(page.getByRole("heading", { name: `Matrícula · ${names[i]}` }).first()).toBeVisible();
     }
-    const selector = page.getByLabel("Trocar dependente");
-    await expect(selector.locator("option").filter({ hasText: names[0] })).toHaveCount(1);
-    await selector.selectOption({ label: names[0] });
+    const switchTo = async (label: string) => {
+      await page.getByRole("combobox", { name: "Trocar dependente" }).click();
+      await page.getByRole("option", { name: label, exact: true }).click();
+    };
+    await page.getByRole("combobox", { name: "Trocar dependente" }).click();
+    await expect(page.getByRole("option", { name: names[0], exact: true })).toHaveCount(1);
+    await page.getByRole("option", { name: names[0], exact: true }).click();
     await expect(page.getByRole("heading", { name: `Matrícula · ${names[0]}` }).first()).toBeVisible();
     await page.getByLabel(/^Nome completo/).fill(`${names[0]} Editado`);
     await submit(page, page.getByRole("button", { name: "Salvar rascunho", exact: true }), /[?&]saved=1/);
-    await page.getByLabel("Trocar dependente").selectOption({ label: names[1] });
+    await switchTo(names[1]);
     await expect(page.getByLabel(/^Nome completo/)).toHaveValue(names[1]);
-    await page.getByLabel("Trocar dependente").selectOption({ label: names[0] });
+    await switchTo(names[0]);
     await expect(page.getByLabel(/^Nome completo/)).toHaveValue(`${names[0]} Editado`);
 
     const minorContext = await browser.newContext({ baseURL });

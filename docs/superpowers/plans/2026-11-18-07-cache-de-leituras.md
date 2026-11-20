@@ -33,10 +33,10 @@
 
 ## Decisões de segurança e trade-offs (sessão)
 
-- `getCurrentProfile` continua chamando `account.get()` a cada requisição (sem cache). Só a busca do PERFIL por `account_id` é cacheada (tag `profile-account:<accountId>` e `profiles`, 60 s).
-- `status !== "active"` é verificado FORA do cache, em toda leitura, e a linha cacheada precisa ter `account_id` igual ao da conta autenticada.
+- `getCurrentProfile` chama `account.get()` e `readProfileByAccountId()` a cada requisição, sem cache persistente. A memoização do React deduplica essas chamadas dentro da mesma renderização no servidor. O custo é uma consulta atual de perfil por requisição, para que status, papel e capacidades revogados valham na próxima requisição, inclusive quando alterados fora do app.
+- `status !== "active"`, papel, capacidades e a correspondência de `account_id` são verificados sobre a leitura atual. `getProfileByAccountId` e `getProfileById` continuam disponíveis com TTL de 60 s apenas para dados de exibição, sem decidir autorização.
 - Toda gravação em `profiles` (status, papel, capacidades, vínculo, exclusão de conta, promoção de menor, ativação de responsável, dados pessoais, onboarding) invalida `profiles` (coarse de propósito: gravações de perfil são raras). Logout invalida `profile-account:<accountId>`.
-- Staleness máxima aceita: 60 s para mudanças de perfil feitas fora do app (console do Appwrite, Function). Dentro do app a invalidação é imediata.
+- Staleness máxima aceita: 60 s para dados de exibição alterados fora do app (console do Appwrite, Function). Campos que decidem autorização não dependem desse TTL. Dentro do app a invalidação da exibição é imediata.
 - Vínculo `guardian_student_links` NUNCA é cacheado (decide acesso). Também não é cacheado `listGuardianMinors`, só as linhas de perfil dos filhos.
 
 ## Tabela de leituras (status: [ ] pendente, [x] feito)
@@ -45,7 +45,7 @@ Legenda de TTL em segundos. Tags de gravação: ver "Invalidadores".
 
 | # | Leitura (arquivo / função) | Usada por | Chave | TTL | Tags | Invalidada por | Status |
 |---|---|---|---|---|---|---|---|
-| 1 | `lib/auth/session.ts` `getProfileByAccountId` | toda página (`getCurrentProfile`), API | accountId | 60 | `profiles`, `profile-account:<acc>` | toda gravação em `profiles`, logout | [ ] |
+| 1 | `lib/auth/session.ts` `readProfileByAccountId` | toda página (`getCurrentProfile`), API | accountId | sem cache persistente | — | leitura atual por requisição, deduplicada pelo React | [x] |
 | 2 | `features/profiles/profile-read.ts` `getProfileById` | `resolveStudentProfile`, `listGuardianMinors`, contratos | profileId | 60 | `profiles`, `profile:<id>` | idem 1 | [ ] |
 | 3 | `classes/service.ts` `listTrainingClasses` | painel, turmas, financeiro, responsável | includeInactive | 300 | `training-classes` | actions de turma | [ ] |
 | 4 | `classes/service.ts` `getTrainingClass` | turma, aula, painel do aluno | classId | 300 | `training-classes`, `training-class:<id>` | actions de turma | [ ] |

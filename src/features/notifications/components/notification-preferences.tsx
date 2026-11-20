@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { setNotificationPreferenceAction } from "@/app/actions/notifications";
 import { Switch } from "@/components/ui/switch";
@@ -31,18 +31,21 @@ export function NotificationPreferences({
   initial: Preferences;
   showFinancial: boolean;
 }) {
-  const [preferences, setPreferences] = useState(initial);
-  const [pending, startTransition] = useTransition();
+  const [confirmed, setConfirmed] = useState(initial);
+  const [optimisticPreferences, setOptimisticPreferences] = useOptimistic(
+    confirmed,
+    (state: Preferences, patch: Partial<Preferences>): Preferences => ({ ...state, ...patch })
+  );
+  const [, startTransition] = useTransition();
 
   function change(key: keyof Preferences, enabled: boolean) {
-    const previous = preferences;
-    setPreferences({ ...preferences, [key]: enabled });
     startTransition(async () => {
+      setOptimisticPreferences({ [key]: enabled });
       try {
         await setNotificationPreferenceAction(key, enabled);
+        setConfirmed((current) => ({ ...current, [key]: enabled }));
         toast.success("Preferência salva");
       } catch {
-        setPreferences(previous);
         toast.error("Não foi possível salvar a preferência");
       }
     });
@@ -53,9 +56,9 @@ export function NotificationPreferences({
       {options
         .filter((option) => showFinancial || option.key !== "financial_enabled")
         .map(({ key, label, description }) => (
-          <div
+          <label
             key={key}
-            className="flex min-h-14 items-center justify-between gap-4 p-4"
+            className="flex min-h-14 cursor-pointer items-center justify-between gap-4 p-4"
           >
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium">{label}</p>
@@ -63,12 +66,11 @@ export function NotificationPreferences({
             </div>
             <Switch
               aria-label={`Receber ${label.toLowerCase()} por notificação`}
-              checked={preferences[key]}
+              checked={optimisticPreferences[key]}
               onCheckedChange={(checked) => change(key, checked)}
-              disabled={pending}
               className="shrink-0"
             />
-          </div>
+          </label>
         ))}
     </div>
   );

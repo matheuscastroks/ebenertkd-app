@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy } from "lucide-react";
+import { CheckIcon } from "@/components/ui/check";
+import { CopyIcon } from "@/components/ui/copy";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
@@ -26,21 +27,15 @@ export function CopyPixButton({ value }: { value: string }) {
       type="button"
       size="sm"
       variant={copied ? "default" : "outline"}
-      className="h-9 gap-1.5 touch-manipulation font-medium transition-colors"
+      className="h-9 gap-1.5 touch-manipulation font-medium transition-[color,background-color,border-color,transform,scale] duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none"
       onClick={handleCopy}
       aria-label="Copiar chave PIX"
     >
-      {copied ? (
-        <>
-          <Check className="size-3.5 text-success-foreground" aria-hidden="true" />
-          <span>Copiado!</span>
-        </>
-      ) : (
-        <>
-          <Copy className="size-3.5 text-muted-foreground" aria-hidden="true" />
-          <span>Copiar chave</span>
-        </>
-      )}
+      <span className="t-icon-swap" data-state={copied ? "b" : "a"} aria-hidden="true">
+        <CopyIcon className="t-icon size-3.5 text-muted-foreground" data-icon="a" />
+        <CheckIcon className="t-icon size-3.5 text-success-foreground" data-icon="b" />
+      </span>
+      <span>{copied ? "Copiado!" : "Copiar chave"}</span>
     </Button>
   );
 }

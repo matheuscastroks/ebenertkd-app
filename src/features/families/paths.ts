@@ -1,17 +1,28 @@
-import { guardianAttendancePath, guardianBillingPath, guardianContractsPath, guardianEnrollmentPath, guardianExamsPath, ROUTES } from "@/lib/navigation/routes";
+import { guardianAttendancePath, guardianBillingPath, guardianContractsPath, guardianEnrollmentPath, guardianEventsPath, guardianExamsPath, guardianParqPath, ROUTES, type NavSegment } from "@/lib/navigation/routes";
 
 /** Resumo de um dependente. Rota própria do portal da família (não aparece no menu). */
 export function dependentSummaryPath(profileId: string) {
   return `${ROUTES.guardianDependents}/${encodeURIComponent(profileId)}`;
 }
 
-/** Áreas de cada dependente, na ordem de uso: rotina, documentos, dinheiro. */
-export function dependentSections(profileId: string) {
+/**
+ * Segmentos das telas de um dependente (pilha a partir de Família), na ordem de uso:
+ * rotina, documentos, dinheiro. Rótulos iguais aos do aluno.
+ */
+export function dependentSegments(profileId: string): NavSegment[] {
   return [
-    { key: "frequencia", label: "Frequência", description: "Presenças mês a mês", href: guardianAttendancePath(profileId) },
-    { key: "exames", label: "Exames", description: "Exames de faixa e resultados", href: guardianExamsPath(profileId) },
-    { key: "matricula", label: "Ficha", description: "Dados de matrícula e saúde", href: guardianEnrollmentPath(profileId) },
-    { key: "contratos", label: "Contratos", description: "Assinatura e documentos", href: guardianContractsPath(profileId) },
-    { key: "financeiro", label: "Financeiro", description: "Mensalidades e comprovantes", href: guardianBillingPath(profileId) }
-  ] as const;
+    { label: "Resumo", href: dependentSummaryPath(profileId) },
+    { label: "Frequência", href: guardianAttendancePath(profileId) },
+    { label: "Exames", href: guardianExamsPath(profileId) },
+    { label: "Eventos", href: guardianEventsPath(profileId) },
+    { label: "Ficha", href: guardianEnrollmentPath(profileId) },
+    { label: "Saúde", href: guardianParqPath(profileId) },
+    { label: "Contratos", href: guardianContractsPath(profileId) },
+    { label: "Pagamentos", href: guardianBillingPath(profileId) },
+  ];
+}
+
+/** Acesso e senha do dependente: abre o item certo na tela de acessos. */
+export function dependentAccessPath(profileId: string) {
+  return `${ROUTES.guardianDependents}?acesso=${encodeURIComponent(profileId)}#dependente-${profileId}`;
 }

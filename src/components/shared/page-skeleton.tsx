@@ -1,15 +1,15 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * Mesma geometria do cabeçalho do `DashboardShell`: barra de ferramentas (só no desktop),
+ * Mesma geometria do cabeçalho do `DashboardShell` sobre `bg-sidebar`:
  * título `text-2xl` (32px de linha) e subtítulo `text-sm` (20px de linha).
  */
 export function PageHeaderSkeleton() {
   return (
-    <div aria-hidden="true" className="flex flex-col gap-3">
-      <div className="hidden min-h-8 items-center md:flex">
-        <Skeleton className="size-6 rounded-lg" />
-      </div>
+    <div
+      aria-hidden="true"
+      className="flex shrink-0 items-center justify-between gap-4 bg-sidebar px-4 pb-3 pt-4 md:px-6 md:pb-3.5 md:pt-4"
+    >
       <div className="space-y-1">
         <div className="flex h-8 items-center">
           <Skeleton className="h-7 w-56 max-w-full rounded-lg" />
@@ -18,6 +18,7 @@ export function PageHeaderSkeleton() {
           <Skeleton className="h-4 w-80 max-w-full rounded-lg" />
         </div>
       </div>
+      <Skeleton className="size-10 shrink-0 rounded-full" />
     </div>
   );
 }
@@ -25,34 +26,48 @@ export function PageHeaderSkeleton() {
 export function PageSkeleton({
   metrics = true,
   metricCount = 4,
-  rows = 4
+  rows = 4,
 }: {
   metrics?: boolean;
   metricCount?: number;
   rows?: number;
 }) {
   return (
-    <div role="status" className="flex flex-col gap-6" aria-label="Carregando conteúdo" aria-busy="true">
+    <div
+      role="status"
+      className="flex min-h-0 flex-1 flex-col bg-sidebar md:overflow-hidden"
+      aria-label="Carregando conteúdo"
+      aria-busy="true"
+    >
       <PageHeaderSkeleton />
 
-      {metrics ? (
-        <div aria-hidden="true" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: metricCount }, (_, index) => (
-            <div key={index} className="space-y-2 rounded-xl border border-border bg-card p-5">
-              <Skeleton className="h-4 w-28" />
-              <Skeleton className="h-8 w-36" />
-              <Skeleton className="h-4 w-44" />
-            </div>
-          ))}
-        </div>
-      ) : null}
+      <main
+        data-slot="dashboard-content"
+        className="relative flex min-h-0 flex-1 flex-col border-t border-border/60 bg-background md:mb-2 md:mr-2 md:overflow-y-auto md:rounded-xl md:border md:border-border/60 md:shadow-sm"
+      >
+        <div className="min-w-0 flex-1 p-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:p-6 md:pb-8">
+          <div className="flex w-full min-w-0 flex-col gap-6">
+            {metrics ? (
+              <div aria-hidden="true" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {Array.from({ length: metricCount }, (_, index) => (
+                  <div key={index} className="space-y-2 rounded-xl border border-border bg-card p-5">
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-8 w-36" />
+                    <Skeleton className="h-4 w-44" />
+                  </div>
+                ))}
+              </div>
+            ) : null}
 
-      <div aria-hidden="true" className="space-y-3 rounded-xl border border-border bg-card p-4 md:p-5">
-        <Skeleton className="h-5 w-40" />
-        {Array.from({ length: rows }, (_, index) => (
-          <Skeleton key={index} className="h-14 w-full" />
-        ))}
-      </div>
+            <div aria-hidden="true" className="space-y-3 rounded-xl border border-border bg-card p-4 md:p-5">
+              <Skeleton className="h-5 w-40" />
+              {Array.from({ length: rows }, (_, index) => (
+                <Skeleton key={index} className="h-14 w-full" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </main>
       <span className="sr-only">Carregando conteúdo…</span>
     </div>
   );

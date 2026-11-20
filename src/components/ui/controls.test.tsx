@@ -8,7 +8,7 @@ describe("controles da fundação", () => {
   it("mantém botão e campo com altura e raio consistentes", () => {
     render(<><Button>Salvar</Button><Input aria-label="Nome" /></>);
     for (const control of [screen.getByRole("button"), screen.getByRole("textbox")]) {
-      expect(control).toHaveClass("h-10", "rounded-lg");
+      expect(control).toHaveClass("h-10", "rounded-xl");
       expect(control.className).not.toMatch(/transition-all/);
     }
   });

@@ -12,7 +12,7 @@ export function ClassStatusToggle({ classId, active }: { classId: string; active
   const [pending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<{ error?: string; message?: string }>({});
   return <div className="min-h-11 flex flex-wrap items-center gap-2">
-    <Switch checked={optimistic} disabled={pending} aria-label={optimistic ? "Desativar turma" : "Ativar turma"} className="before:absolute before:-inset-y-3 before:inset-x-0" onCheckedChange={(next) => {
+    <Switch checked={optimistic} disabled={pending} aria-label={optimistic ? "Desativar turma" : "Ativar turma"} className="before:absolute before:-inset-y-3 before:inset-x-0 disabled:opacity-95 data-disabled:opacity-95" onCheckedChange={(next) => {
       startTransition(async () => {
         setOptimistic(next);
         setFeedback({});

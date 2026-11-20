@@ -4,6 +4,7 @@ import { AppwriteException, ID, Permission, Query, Role } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
 import type { Profile } from "@/features/auth/types";
 import { writeAuditEvent } from "@/features/auth/service";
+import { getAcademyIdentity } from "@/features/academy/config-service";
 import { createFirstMonthlyCharge } from "@/features/billing/charge-service";
 import { ensureActiveClassEnrollment } from "@/features/classes/class-enrollment-service";
 import { buildSignedContractPdf } from "@/features/contracts/pdf";
@@ -11,9 +12,14 @@ import { canSignContract, hashContent, privacyIpFingerprint } from "@/features/c
 import { signatureInputSchema } from "@/features/contracts/schemas";
 import { getContractForActor } from "@/features/contracts/contract-service";
 import type { Contract, ContractSignature } from "@/features/contracts/types";
+import { notifyAdmins, notifyStudentEvent } from "@/features/notifications/notification-service";
+import { getLatestParqForStudent } from "@/features/students/parq-service";
 import type { Enrollment, Student } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { invalidateTags } from "@/lib/cache/invalidate";
+import { CACHE_TAGS } from "@/lib/cache/tags";
+import { adminEnrollmentPath, guardianParqPath, ROUTES } from "@/lib/navigation/routes";
 
 type SignatureContext = { ip?: string | null; userAgent?: string | null };
 
@@ -50,9 +56,54 @@ export async function signContract(actor: Profile, raw: unknown, context: Signat
   const existing = await tables.listRows<ContractSignature>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contractSignatures, queries: [Query.equal("contract_id", [contract.$id]), Query.limit(1)] });
   const now = new Date().toISOString();
   const signature = existing.rows[0] ?? await tables.createRow<ContractSignature>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contractSignatures, rowId: ID.unique(), data: { contract_id: contract.$id, signer_profile_id: actor.$id, signer_account_id: actor.account_id, signer_name: actor.full_name, signature_data_url: input.signatureDataUrl, content_hash: contract.content_hash, ip_fingerprint: privacyIpFingerprint(context.ip), user_agent: context.userAgent?.slice(0, 512), accepted_at: now, created_at: now }, permissions: [] });
-  const pdf = await buildSignedContractPdf(contract, signature.signer_name, signature.signature_data_url, signature.accepted_at);
+  const identity = await getAcademyIdentity();
+  const pdf = await buildSignedContractPdf(contract, signature.signer_name, signature.signature_data_url, signature.accepted_at, identity.short_name);
   const result = await reconcileSignedContract(contract, signature, pdf);
+  invalidateTags(
+    CACHE_TAGS.contracts,
+    CACHE_TAGS.contract(contract.$id),
+    CACHE_TAGS.enrollments,
+    CACHE_TAGS.studentsAll,
+    CACHE_TAGS.student(bundle.student.$id),
+    CACHE_TAGS.studentProfile(bundle.student.profile_id),
+    CACHE_TAGS.billingCharges,
+    CACHE_TAGS.charges(bundle.student.$id),
+    CACHE_TAGS.classEnrollments
+  );
   await writeAuditEvent("contract.signed", actor.account_id, "contract", contract.$id, { signer_profile_id: actor.$id, pdf_hash: result.pdfHash });
+
+  const latestParq = await getLatestParqForStudent(bundle.student.$id).catch(() => null);
+  await Promise.all([
+    notifyAdmins({
+      title: `Contrato assinado · ${bundle.student.full_name}`,
+      body: `${signature.signer_name} assinou o contrato de matrícula. O aluno já está ativo na turma.`,
+      dedupeKey: `contract-signed:${contract.$id}`,
+      actionUrl: adminEnrollmentPath(bundle.student.$id)
+    }).catch(() => undefined),
+    notifyStudentEvent({
+      studentId: bundle.student.$id,
+      audience: "family",
+      title: "Matrícula confirmada! Tudo pronto para treinar",
+      body: `Seu contrato foi assinado e sua matrícula na ${identity.display_name} está ativa.`,
+      dedupeKey: `enrollment-activated:${contract.$id}`,
+      studentActionUrl: ROUTES.student,
+      guardianActionUrl: ROUTES.guardian,
+      actorAccountId: actor.account_id
+    }).catch(() => undefined),
+    !latestParq
+      ? notifyStudentEvent({
+          studentId: bundle.student.$id,
+          audience: "signer",
+          title: "Falta responder o questionário de saúde",
+          body: "Responda 10 perguntas rápidas sobre sua saúde para completar sua ficha anual.",
+          dedupeKey: `pending:parq-missing:${bundle.student.$id}`,
+          studentActionUrl: ROUTES.studentParq,
+          guardianActionUrl: guardianParqPath,
+          actorAccountId: actor.account_id
+        }).catch(() => undefined)
+      : Promise.resolve()
+  ]);
+
   return { contractId: contract.$id, ...result };
 }
 

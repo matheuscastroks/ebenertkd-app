@@ -1,3 +1,5 @@
+import { DEFAULT_ACADEMY_IDENTITY } from "@/features/academy/defaults";
+import { professorLabel } from "@/features/academy/identity-rules";
 import type { AppRole } from "@/lib/auth/auth-utils";
 
 export type OnboardingRole = AppRole;
@@ -39,9 +41,9 @@ export type RoleOnboardingConfig = {
 
 export const ONBOARDING_CONFIGS: Record<OnboardingRole, RoleOnboardingConfig> = {
   admin: {
-    welcomeTitle: "Bem-vindo à Ebener TKD",
+    welcomeTitle: `Bem-vindo à ${DEFAULT_ACADEMY_IDENTITY.short_name}`,
     welcomeSubtitle: "Gerencie turmas, matrículas, exames de faixa e cobranças em um só lugar.",
-    welcomeHighlight: "Mestre Ebener Santos",
+    welcomeHighlight: professorLabel(DEFAULT_ACADEMY_IDENTITY),
     ahaMomentDescription: "Faça a chamada, confira comprovantes PIX e organize os exames de faixa.",
     benefitBullets: [
       { title: "Chamada das aulas", desc: "Registre a presença de uma turma inteira em poucos toques." },
@@ -74,12 +76,12 @@ export const ONBOARDING_CONFIGS: Record<OnboardingRole, RoleOnboardingConfig> = 
     primaryActionHref: "/admin"
   },
   adult_student: {
-    welcomeTitle: "Bem-vindo à Ebener TKD",
+    welcomeTitle: `Bem-vindo à ${DEFAULT_ACADEMY_IDENTITY.short_name}`,
     welcomeSubtitle: "Acompanhe seus treinos, sua frequência e a evolução das suas faixas.",
     welcomeHighlight: "Praticante de Taekwondo",
     ahaMomentDescription: "Veja seu próximo treino, sua faixa atual e o que falta para o próximo exame.",
     benefitBullets: [
-      { title: "Minha faixa", desc: "Veja sua graduação atual, o poomsae e o próximo exame." },
+      { title: "Faixa", desc: "Veja sua graduação atual, o poomsae e o próximo exame." },
       { title: "Frequência", desc: "Histórico das suas presenças e próximos treinos." },
       { title: "Financeiro e contratos", desc: "Pague mensalidades por PIX e assine contratos pelo app." }
     ],
@@ -110,12 +112,12 @@ export const ONBOARDING_CONFIGS: Record<OnboardingRole, RoleOnboardingConfig> = 
     primaryActionHref: "/aluno"
   },
   minor_student: {
-    welcomeTitle: "Bem-vindo à Ebener TKD",
+    welcomeTitle: `Bem-vindo à ${DEFAULT_ACADEMY_IDENTITY.short_name}`,
     welcomeSubtitle: "Aqui você acompanha seus treinos e a evolução das suas faixas.",
     welcomeHighlight: "Jovem Atleta",
     ahaMomentDescription: "Veja sua faixa atual e as aulas de que você participou.",
     benefitBullets: [
-      { title: "Minha faixa", desc: "Veja a cor da sua faixa e o próximo poomsae." },
+      { title: "Faixa", desc: "Veja a cor da sua faixa e o próximo poomsae." },
       { title: "Presenças", desc: "Confira as aulas de que você participou." },
       { title: "Mensagens da academia", desc: "Veja os avisos do professor e da secretaria." }
     ],
@@ -137,7 +139,7 @@ export const ONBOARDING_CONFIGS: Record<OnboardingRole, RoleOnboardingConfig> = 
   },
   guardian: {
     welcomeTitle: "Portal da família",
-    welcomeSubtitle: "Acompanhe a presença, as faixas e as mensalidades de quem você acompanha.",
+    welcomeSubtitle: "Acompanhe a presença, as faixas e as mensalidades dos seus filhos em um só lugar.",
     welcomeHighlight: "Responsável pelo Aluno",
     ahaMomentDescription: "Veja as presenças, a faixa e as pendências de cada dependente.",
     benefitBullets: [
@@ -170,3 +172,12 @@ export const ONBOARDING_CONFIGS: Record<OnboardingRole, RoleOnboardingConfig> = 
     primaryActionHref: "/responsavel"
   }
 };
+
+/** Troca o nome da academia e o professor padrão pelos configurados (títulos e destaque de boas-vindas). */
+export function personalizeOnboardingConfig(config: RoleOnboardingConfig, academy: { shortName: string; professorLabel: string }): RoleOnboardingConfig {
+  return {
+    ...config,
+    welcomeTitle: config.welcomeTitle.split(DEFAULT_ACADEMY_IDENTITY.short_name).join(academy.shortName),
+    welcomeHighlight: config.welcomeHighlight === professorLabel(DEFAULT_ACADEMY_IDENTITY) ? academy.professorLabel : config.welcomeHighlight
+  };
+}

@@ -18,7 +18,7 @@ export async function createExamEventAction(formData: FormData) {
   } catch {
     redirect(`${ROUTES.adminExams}?error=create`);
   }
-  updateTag(CACHE_TAGS.examEvents);
+  updateTag(CACHE_TAGS.events);
   revalidatePath(ROUTES.adminExams);
   redirect(adminExamPath(eventId));
 }
@@ -27,11 +27,16 @@ export async function addExamParticipantAction(formData: FormData) {
   const admin = await requireProfile("admin");
   const eventId = String(formData.get("event_id") ?? "");
   try {
-    await addExamParticipant(admin, { eventId, studentId: formData.get("student_id"), targetBelt: formData.get("target_belt"), targetGub: formData.get("target_gub"), feeCents: reaisToCents(formData.get("fee_reais")) });
+    await addExamParticipant(admin, {
+      eventId,
+      studentId: formData.get("student_id"),
+      targetRankKey: String(formData.get("target_rank_key") ?? ""),
+      feeCents: reaisToCents(formData.get("fee_reais"))
+    });
   } catch {
     redirect(`${adminExamPath(eventId)}?error=participant`);
   }
-  updateTag(CACHE_TAGS.examEvents);
+  updateTag(CACHE_TAGS.events);
   updateTag(CACHE_TAGS.billingCharges);
   revalidatePath(adminExamPath(eventId));
   redirect(`${adminExamPath(eventId)}?added=1`);
@@ -45,7 +50,7 @@ export async function recordExamResultAction(formData: FormData) {
   } catch {
     redirect(`${adminExamPath(eventId)}?error=result`);
   }
-  updateTag(CACHE_TAGS.examEvents);
+  updateTag(CACHE_TAGS.events);
   revalidatePath(adminExamPath(eventId));
   redirect(`${adminExamPath(eventId)}?graded=1`);
 }
@@ -59,7 +64,7 @@ export async function cancelExamParticipantAction(formData: FormData) {
   } catch {
     redirect(`${adminExamPath(eventId)}?error=cancel`);
   }
-  updateTag(CACHE_TAGS.examEvents);
+  updateTag(CACHE_TAGS.events);
   updateTag(CACHE_TAGS.billingCharges);
   revalidatePath(adminExamPath(eventId));
   redirect(`${adminExamPath(eventId)}?cancelled=1`);
@@ -73,7 +78,28 @@ export async function cancelExamEventAction(formData: FormData) {
   } catch {
     redirect(`${adminExamPath(eventId)}?error=event-cancel`);
   }
-  updateTag(CACHE_TAGS.examEvents);
+  updateTag(CACHE_TAGS.events);
   revalidatePath(ROUTES.adminExams);
   redirect(`${ROUTES.adminExams}?cancelled=1`);
+}
+
+export async function enrollEligibleStudentAction(formData: FormData) {
+  const admin = await requireProfile("admin");
+  const eventId = String(formData.get("event_id") ?? "");
+  const studentId = String(formData.get("student_id") ?? "");
+  try {
+    // Sem taxa informada: o serviço usa a taxa da graduação alvo ou a padrão da banca.
+    await addExamParticipant(admin, {
+      eventId,
+      studentId,
+      targetRankKey: String(formData.get("target_rank_key") ?? ""),
+    });
+  } catch {
+    redirect(`${ROUTES.adminExamEligibility}?error=enroll`);
+  }
+  updateTag(CACHE_TAGS.events);
+  updateTag(CACHE_TAGS.billingCharges);
+  revalidatePath(ROUTES.adminExamEligibility);
+  revalidatePath(adminExamPath(eventId));
+  redirect(`${ROUTES.adminExamEligibility}?enrolled=1`);
 }

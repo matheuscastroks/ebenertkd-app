@@ -11,18 +11,21 @@ import { CACHE_TAGS } from "@/lib/cache/tags";
 const PROFILE_TTL_SECONDS = 60;
 
 /**
- * Perfil de uma conta. SÓ a linha do perfil é cacheada: o chamador continua obrigado a
- * chamar `account.get()` (sem cache) e a checar `status`/`account_id` fora daqui.
+ * Perfil de uma conta para exibição. Não usar esta leitura persistente para autorizar:
+ * status, papel e capacidades podem mudar antes da expiração do cache.
  */
 export function getProfileByAccountId(accountId: string): Promise<Profile | null> {
   return cachedRead(
     { name: "profile-by-account", key: [accountId], tags: [CACHE_TAGS.profiles, CACHE_TAGS.profileAccount(accountId)], revalidate: PROFILE_TTL_SECONDS },
-    async () => {
-      const { tables, config } = createAppwriteAdminClient();
-      const result = await tables.listRows<Profile>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.profiles, queries: [Query.equal("account_id", [accountId]), Query.limit(1)] });
-      return result.rows[0] ?? null;
-    }
+    () => readProfileByAccountId(accountId)
   );
+}
+
+/** Estado atual da conta para autorização; nunca passa pelo cache persistente. */
+export async function readProfileByAccountId(accountId: string): Promise<Profile | null> {
+  const { tables, config } = createAppwriteAdminClient();
+  const result = await tables.listRows<Profile>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.profiles, queries: [Query.equal("account_id", [accountId]), Query.limit(1)] });
+  return result.rows[0] ?? null;
 }
 
 /** Perfil por id (alvo de uma autorização, filho de um responsável). Não decide acesso sozinho. */

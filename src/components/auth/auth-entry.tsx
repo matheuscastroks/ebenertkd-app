@@ -5,11 +5,10 @@ import { LoginCard } from "@/components/auth/login-card";
 import { RegisterCard } from "@/components/auth/register-card";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 // A regra global `* { border-color }` vence `border-transparent`; por isso a aba inativa zera a cor explicitamente.
-const triggerClass = "min-h-11 data-[state=active]:bg-card data-[state=inactive]:border-transparent!";
+const triggerClass = "min-h-11 data-[state=active]:bg-card data-[state=inactive]:border-transparent! group-data-[pill-ready=true]/tabs-list:data-[state=active]:bg-transparent!";
 
 type Notice = { title: string; description: string; clearParams: string[] };
 
@@ -21,7 +20,7 @@ export function AuthEntry({ minorError, adultError, registrationError, registere
   const [minor, setMinor] = useState(Boolean(minorError));
 
   return (
-    <Card className="gap-5 p-4 sm:p-5">
+    <div className="space-y-4">
       {registered ? (
         <OperationToast
           tone="success"
@@ -31,14 +30,16 @@ export function AuthEntry({ minorError, adultError, registrationError, registere
         />
       ) : null}
       {notice ? <OperationToast tone="success" {...notice} /> : null}
-      <Tabs value={tab} onValueChange={setTab} className="gap-5">
+      <Tabs value={tab} onValueChange={setTab} className="gap-4">
         <TabsList className="grid h-auto w-full grid-cols-2" aria-label="Opções de acesso">
           <TabsTrigger value="login" className={triggerClass}>Entrar</TabsTrigger>
           <TabsTrigger value="register" className={triggerClass}>Criar conta</TabsTrigger>
         </TabsList>
-        <TabsContent value="login" className="space-y-4">
-          <LoginCard type={minor ? "minor" : "adult"} errorMessage={minor ? minorError : adultError} />
-          <div className="border-t border-border pt-4">
+        <TabsContent value="login" className="space-y-3">
+          <div key={minor ? "minor" : "adult"} className="t-panel-enter">
+            <LoginCard type={minor ? "minor" : "adult"} errorMessage={minor ? minorError : adultError} />
+          </div>
+          <div className="border-t border-border pt-2.5">
             <Button
               type="button"
               variant="ghost"
@@ -53,6 +54,6 @@ export function AuthEntry({ minorError, adultError, registrationError, registere
           <RegisterCard errorMessage={registrationError} />
         </TabsContent>
       </Tabs>
-    </Card>
+    </div>
   );
 }

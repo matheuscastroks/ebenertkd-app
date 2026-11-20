@@ -239,7 +239,7 @@ export async function promoteMinorToAdult(
       data: { status: "revoked", updated_at: new Date().toISOString() }
     })));
   }
-  invalidateTags(CACHE_TAGS.profiles, CACHE_TAGS.profileAccount(minor.account_id), CACHE_TAGS.studentAccess);
+  invalidateTags(CACHE_TAGS.profiles, CACHE_TAGS.profile(minor.$id), CACHE_TAGS.profileAccount(minor.account_id), CACHE_TAGS.studentAccess);
   await requestPasswordRecovery(email);
   await writeAuditEvent("auth.minor.promoted", actorAccountId, "profile", minor.$id, {
     email,

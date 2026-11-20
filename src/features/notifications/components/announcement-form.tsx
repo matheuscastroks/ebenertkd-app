@@ -14,7 +14,7 @@ type ClassOption = { id: string; name: string; startTime: string };
 export function AnnouncementForm({ profiles, classes }: { profiles: ProfileOption[]; classes: ClassOption[] }) {
   const [audience, setAudience] = useState("all");
   return (
-        <form action={publishAnnouncementAction} className="grid gap-4 md:grid-cols-2">
+        <form action={publishAnnouncementAction} className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Field className="md:col-span-2"><FieldLabel htmlFor="notice-title">Título</FieldLabel><Input id="notice-title" name="title" maxLength={128} required /></Field>
           <Field><FieldLabel htmlFor="notice-audience">Destinatários</FieldLabel><Select name="audience" value={audience} onValueChange={setAudience}><SelectTrigger id="notice-audience" className="w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todos os usuários ativos</SelectItem><SelectItem value="class">Uma turma</SelectItem><SelectItem value="profile">Uma pessoa</SelectItem></SelectContent></Select></Field>
           {audience === "class" ? <Field><FieldLabel htmlFor="notice-class">Turma</FieldLabel><Select name="class_id" required><SelectTrigger id="notice-class" className="w-full"><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{classes.map((item) => <SelectItem key={item.id} value={item.id}>{item.name} · {item.startTime}</SelectItem>)}</SelectContent></Select></Field> : null}

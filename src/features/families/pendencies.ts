@@ -2,6 +2,7 @@ import type { StatusTone } from "@/components/shared/status-badge";
 import type { Charge } from "@/features/billing/types";
 import { getOutstandingCharge, outstandingLabel } from "@/features/billing/outstanding";
 import type { Contract } from "@/features/contracts/types";
+import type { ParqStatus } from "@/features/students/parq-rules";
 import type { Student } from "@/features/students/types";
 import { formatBrl } from "@/lib/money";
 
@@ -10,7 +11,7 @@ import { formatBrl } from "@/lib/money";
  * `priority` menor = mais urgente; apenas a mais urgente com ação recebe o botão laranja.
  */
 export type Pendency = {
-  id: "enrollment" | "enrollment_review" | "charge" | "charges_error" | "contract" | "contracts_error";
+  id: "enrollment" | "enrollment_review" | "charge" | "charges_error" | "contract" | "contracts_error" | "parq" | "access_locked";
   title: string;
   status: string;
   tone: StatusTone;
@@ -29,15 +30,33 @@ export type PendencyInput = {
   /** `null` = falha na consulta; `"hidden"` = o perfil não pode ver (menor). */
   charges: Source<Charge>;
   contracts: Source<Contract>;
-  links: { enrollment: string; billing: string; contracts: string; contract: (contractId: string) => string };
+  parqStatus?: ParqStatus | null;
+  parqExpiresAt?: string | null;
+  accessLocked?: boolean;
+  /** Janela de acesso da política da academia (padrão 30). */
+  accessWindowDays?: number;
+  links: { enrollment: string; billing: string; contracts: string; contract: (contractId: string) => string; parq?: string };
   /** Quem assina: o aluno adulto ou o responsável. O menor só lê. */
   canSign: boolean;
 };
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "UTC" });
 
-export function buildPendencies({ studentStatus, charges, contracts, links, canSign }: PendencyInput): Pendency[] {
+export function buildPendencies({ studentStatus, charges, contracts, parqStatus, parqExpiresAt, accessLocked, accessWindowDays = 30, links, canSign }: PendencyInput): Pendency[] {
   const items: Pendency[] = [];
+
+  if (accessLocked && charges !== "hidden") {
+    items.push({
+      id: "access_locked",
+      title: "Acesso ao aplicativo pausado",
+      status: `Ciclo de ${accessWindowDays} dias expirado`,
+      tone: "danger",
+      detail: "Regularize a mensalidade no financeiro para reabrir todas as áreas do aplicativo.",
+      href: links.billing,
+      actionLabel: "Regularizar acesso",
+      priority: -1
+    });
+  }
 
   if (!studentStatus || studentStatus === "draft") {
     items.push({ id: "enrollment", title: "Ficha de matrícula", status: "Incompleta", tone: "warning",
@@ -45,6 +64,25 @@ export function buildPendencies({ studentStatus, charges, contracts, links, canS
   } else if (studentStatus === "submitted") {
     items.push({ id: "enrollment_review", title: "Ficha de matrícula", status: "Em análise", tone: "info",
       detail: "O professor está analisando a matrícula. Não é preciso fazer nada.", priority: 6 });
+  }
+
+  if (studentStatus === "active" && parqStatus && parqStatus !== "valid") {
+    const expired = parqStatus === "expired";
+    const expiring = parqStatus === "expiring_soon";
+    items.push({
+      id: "parq",
+      title: "Questionário de saúde",
+      status: expired ? "Precisa renovar" : expiring ? "Vence em breve" : "Falta preencher",
+      tone: expired ? "danger" : "warning",
+      detail: canSign
+        ? expiring && parqExpiresAt
+          ? `Vence em ${dateFormatter.format(new Date(`${parqExpiresAt.slice(0, 10)}T12:00:00Z`))}. Responda novamente em menos de 2 minutos.`
+          : "Responda 10 perguntas rápidas sobre sua saúde para treinar com segurança."
+        : "Seu responsável precisa responder o questionário anual de saúde.",
+      href: canSign ? links.parq : undefined,
+      actionLabel: canSign && links.parq ? (expired || expiring ? "Renovar agora" : "Responder agora") : undefined,
+      priority: expired ? 1.5 : 3.5
+    });
   }
 
   if (charges === null) {

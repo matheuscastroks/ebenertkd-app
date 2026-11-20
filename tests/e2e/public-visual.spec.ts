@@ -2,7 +2,7 @@ import { expect, test } from "./public-fixture";
 
 test("entrada, cadastro e recuperação em 375px e nos dois temas", async ({ page }, testInfo) => {
   for (const theme of ["light", "dark"] as const) {
-    await page.addInitScript((value) => localStorage.setItem("theme", value), theme);
+    await page.emulateMedia({ colorScheme: theme });
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/");
     await expect(page.getByRole("heading", { name: "Acesse sua conta" })).toBeVisible();

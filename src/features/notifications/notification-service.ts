@@ -12,6 +12,9 @@ import { inboxItemView, notificationView } from "@/features/notifications/notifi
 import type { Student } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { cachedRead } from "@/lib/cache/cached-read";
+import { invalidateTags } from "@/lib/cache/invalidate";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 const publishSchema = z.object({
   title: z.string().trim().min(3).max(128),
@@ -69,15 +72,27 @@ export async function createNotification(input: { kind: NotificationKind; title:
     notification = existing.rows[0];
   }
 
+  let anyCreated = false;
   for (const profile of input.recipientProfiles) {
     const rowId = stableId(notification.$id, profile.$id);
     let recipient: NotificationRecipient;
+    let created = false;
     try {
       recipient = await tables.createRow<NotificationRecipient>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationRecipients, rowId, permissions: [], data: { notification_id: notification.$id, profile_id: profile.$id, account_id: profile.account_id, created_at: now, updated_at: now } });
+      created = true;
+      anyCreated = true;
     } catch {
       recipient = await tables.getRow<NotificationRecipient>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationRecipients, rowId });
     }
-    await deliverNotificationPush(notification, recipient).catch(() => undefined);
+    if (created) {
+      await deliverNotificationPush(notification, recipient).catch(() => undefined);
+    }
+  }
+  if (anyCreated) {
+    invalidateTags(
+      input.kind === "announcement" && CACHE_TAGS.announcements,
+      ...input.recipientProfiles.map((profile) => CACHE_TAGS.notifications(profile.$id))
+    );
   }
   return notification;
 }
@@ -111,10 +126,20 @@ export async function listInbox(profile: Profile): Promise<InboxItem[]> {
   });
 }
 
-export async function countUnreadNotifications(profile: Profile) {
-  const { tables, config } = createAppwriteAdminClient();
-  const result = await tables.listRows<NotificationRecipient>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationRecipients, queries: [Query.equal("profile_id", [profile.$id]), Query.isNull("read_at"), Query.limit(1)] });
-  return result.total;
+export function countUnreadNotifications(profile: Profile) {
+  const profileId = profile.$id;
+  return cachedRead(
+    { name: "count-unread-notifications", key: [profileId], tags: [CACHE_TAGS.notifications(profileId)], revalidate: 20 },
+    async () => {
+      const { tables, config } = createAppwriteAdminClient();
+      const result = await tables.listRows<NotificationRecipient>({
+        databaseId: config.databaseId,
+        tableId: APPWRITE_IDS.tables.notificationRecipients,
+        queries: [Query.equal("profile_id", [profileId]), Query.isNull("read_at"), Query.limit(1)]
+      });
+      return result.total;
+    }
+  );
 }
 
 export async function listSentAnnouncements(profile: Profile) {
@@ -135,6 +160,7 @@ export async function markNotificationRead(profile: Profile, recipientId: string
   const recipient = await tables.getRow<NotificationRecipient>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationRecipients, rowId: recipientId });
   if (recipient.profile_id !== profile.$id) throw new Error("notification_access_denied");
   if (!recipient.read_at) await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationRecipients, rowId: recipient.$id, data: { read_at: new Date().toISOString(), updated_at: new Date().toISOString() } });
+  invalidateTags(CACHE_TAGS.notifications(profile.$id));
 }
 
 export async function markAllNotificationsRead(profile: Profile) {
@@ -155,6 +181,7 @@ export async function markAllNotificationsRead(profile: Profile) {
       })
     )
   );
+  invalidateTags(CACHE_TAGS.notifications(profile.$id));
 }
 
 export async function listNotificationAudienceOptions() {
@@ -182,7 +209,87 @@ export async function notifyAdmins(input: { title: string; body: string; dedupeK
 }
 
 export async function notifyStudentFinancial(input: { studentId: string; title: string; body: string; dedupeKey: string; actionUrl?: string }) {
-  const recipients = await notificationProfilesForStudent(input.studentId, true);
-  if (!recipients.length) return;
-  return createNotification({ kind: "payment_reminder", title: input.title, body: input.body, audience: "system", actionUrl: input.actionUrl ?? "/avisos", dedupeKey: input.dedupeKey, recipientProfiles: recipients });
+  return notifyStudentEvent({
+    studentId: input.studentId,
+    audience: "financial",
+    kind: "payment_reminder",
+    title: input.title,
+    body: input.body,
+    dedupeKey: input.dedupeKey,
+    studentActionUrl: input.actionUrl ?? "/aluno/financeiro",
+    guardianActionUrl: (profileId) => `/responsavel/dependentes/${encodeURIComponent(profileId)}/financeiro`
+  });
+}
+
+/**
+ * Envia notificação direcionada para o aluno e/ou seus responsáveis, respeitando:
+ * - `financial`: somente aluno adulto ou responsável do menor (NUNCA notifica menor sobre dinheiro/cobrança).
+ * - `signer`: somente quem pode assinar (aluno adulto ou responsável do menor; ex.: contrato, PAR-Q).
+ * - `family`: aluno adulto, ou responsável + aluno menor (com URL e texto adequados a cada perfil).
+ */
+export async function notifyStudentEvent(input: {
+  studentId: string;
+  audience: "family" | "financial" | "signer";
+  kind?: NotificationKind;
+  title: string;
+  body: string;
+  minorTitle?: string;
+  minorBody?: string;
+  dedupeKey: string;
+  studentActionUrl: string;
+  guardianActionUrl?: string | ((studentProfileId: string) => string);
+  actorAccountId?: string;
+}) {
+  const { tables, config } = createAppwriteAdminClient();
+  const student = await tables.getRow<Student>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, rowId: input.studentId });
+  const profile = await tables.getRow<Profile>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.profiles, rowId: student.profile_id });
+  const kind = input.kind ?? (input.audience === "financial" ? "payment_reminder" : "system");
+
+  if (profile.role !== "minor_student") {
+    if (profile.status !== "active") return;
+    await createNotification({
+      kind,
+      title: input.title,
+      body: input.body,
+      audience: "system",
+      actionUrl: input.studentActionUrl,
+      dedupeKey: input.dedupeKey,
+      actorAccountId: input.actorAccountId,
+      recipientProfiles: [profile]
+    });
+    return;
+  }
+
+  const family = await addGuardians([profile]);
+  const guardians = family.filter((item) => item.role !== "minor_student" && item.status === "active");
+  const resolvedGuardianUrl =
+    typeof input.guardianActionUrl === "function"
+      ? input.guardianActionUrl(profile.$id)
+      : input.guardianActionUrl ?? input.studentActionUrl;
+
+  if (guardians.length > 0) {
+    await createNotification({
+      kind,
+      title: input.title,
+      body: input.body,
+      audience: "system",
+      actionUrl: resolvedGuardianUrl,
+      dedupeKey: `${input.dedupeKey}:guardian`,
+      actorAccountId: input.actorAccountId,
+      recipientProfiles: guardians
+    });
+  }
+
+  if (input.audience === "family" && profile.status === "active") {
+    await createNotification({
+      kind: "system",
+      title: input.minorTitle ?? input.title,
+      body: input.minorBody ?? input.body,
+      audience: "system",
+      actionUrl: input.studentActionUrl,
+      dedupeKey: `${input.dedupeKey}:minor`,
+      actorAccountId: input.actorAccountId,
+      recipientProfiles: [profile]
+    });
+  }
 }

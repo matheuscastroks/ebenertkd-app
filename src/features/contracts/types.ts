@@ -29,6 +29,10 @@ export type Contract = Models.Row & {
   status: ContractStatus;
   content_snapshot: string;
   content_hash: string;
+  /** Regras de cancelamento/encargo vigentes na emissão (obrigatório). */
+  policy_snapshot_json: string;
+  academy_legal_name: string;
+  academy_document?: string | null;
   student_name: string;
   guardian_name?: string | null;
   monthly_fee_cents: number;

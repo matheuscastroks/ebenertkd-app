@@ -1,3 +1,5 @@
+import { dependentSegments } from "@/features/families/paths";
+import { ROUTES } from "@/lib/navigation/routes";
 import { DependentContext } from "@/features/families/components/dependent-context";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
@@ -5,7 +7,6 @@ import { OperationToast } from "@/components/shared/operation-toast";
 import { PayerBilling } from "@/features/billing/components/payer-billing";
 import { PayerBillingSkeleton } from "@/features/billing/components/payer-billing-skeleton";
 import { requireCapability } from "@/lib/auth/session";
-import { ROUTES } from "@/lib/navigation/routes";
 
 export default async function GuardianBillingPage({
   params,
@@ -19,10 +20,8 @@ export default async function GuardianBillingPage({
 
   return (
     <PortalShell
-      profile={actor}
-      activePath={ROUTES.guardianDependents}
-      breadcrumbs={[{ label: "Minha família", href: ROUTES.guardian }, { label: "Financeiro" }]}
-      title="Financeiro"
+      profile={actor} back={{ label: "Família", href: ROUTES.guardian }} segments={dependentSegments(profileId)}
+      title="Pagamentos"
       subtitle="Mensalidades e envio de comprovantes do dependente."
     >
       <div className="w-full min-w-0 space-y-6">

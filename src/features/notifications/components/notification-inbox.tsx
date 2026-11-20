@@ -1,14 +1,29 @@
 "use client";
 
 import { useMemo, useRef, useState, useTransition } from "react";
+import { BellOff, CheckCheck } from "@/components/ui/icons";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import { NotificationItem } from "./notification-item";
 import type { InboxItem, NotificationKind } from "../types";
 
-export function NotificationInbox({ items: initialItems }: { items: InboxItem[] }) {
+const KIND_FILTERS: Array<{ value: "all" | NotificationKind; label: string }> = [
+  { value: "all", label: "Todos" },
+  { value: "announcement", label: "Avisos" },
+  { value: "payment_reminder", label: "Financeiro" },
+  { value: "system", label: "Sistema" },
+];
+
+export function NotificationInbox({
+  items: initialItems,
+  compact = false,
+  onNavigate,
+}: {
+  items: InboxItem[];
+  compact?: boolean;
+  onNavigate?: () => void;
+}) {
   const [items, setItems] = useState<InboxItem[]>(initialItems);
   const [activeTab, setActiveTab] = useState<"unread" | "history">("unread");
   const [kindFilter, setKindFilter] = useState<"all" | NotificationKind>("all");
@@ -35,7 +50,6 @@ export function NotificationInbox({ items: initialItems }: { items: InboxItem[] 
     marking.current.add(recipientId);
 
     const now = new Date().toISOString();
-    // Optimistic update: mark read immediately so it moves to history tab
     setItems((prev) =>
       prev.map((item) =>
         item.recipient.$id === recipientId
@@ -48,16 +62,15 @@ export function NotificationInbox({ items: initialItems }: { items: InboxItem[] 
       const response = await fetch("/api/notifications/inbox", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recipient_id: recipientId })
+        body: JSON.stringify({ recipient_id: recipientId }),
       });
       if (!response.ok) throw new Error("failed");
       window.dispatchEvent(new Event("notifications:changed"));
       toast.success("Aviso movido para o histórico.");
     } catch {
       toast.error("Não foi possível marcar o aviso como lido", {
-        description: "Tente novamente em instantes."
+        description: "Tente novamente em instantes.",
       });
-      // Revert optimistic update
       setItems((prev) =>
         prev.map((item) =>
           item.recipient.$id === recipientId
@@ -77,7 +90,7 @@ export function NotificationInbox({ items: initialItems }: { items: InboxItem[] 
     setItems((prev) =>
       prev.map((item) => ({
         ...item,
-        recipient: { ...item.recipient, read_at: item.recipient.read_at ?? now }
+        recipient: { ...item.recipient, read_at: item.recipient.read_at ?? now },
       }))
     );
 
@@ -86,7 +99,7 @@ export function NotificationInbox({ items: initialItems }: { items: InboxItem[] 
         const response = await fetch("/api/notifications/inbox", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ all: true })
+          body: JSON.stringify({ all: true }),
         });
         if (!response.ok) throw new Error("failed");
         window.dispatchEvent(new Event("notifications:changed"));
@@ -98,30 +111,150 @@ export function NotificationInbox({ items: initialItems }: { items: InboxItem[] 
     });
   };
 
-  const kinds = new Set(items.map((item) => item.notification.kind));
-  const list = (entries: InboxItem[], empty: { title: string; hint: string }) => entries.length
-    ? <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">{entries.map((item) => <NotificationItem key={item.recipient.$id} notification={item} onMarkRead={handleMarkAsRead} />)}</div>
-    : <div className="rounded-xl border border-border bg-card px-4 py-8 text-center"><p className="text-sm font-medium">{empty.title}</p><p className="mt-1 text-sm text-muted-foreground">{empty.hint}</p></div>;
+  const availableKinds = useMemo(
+    () => new Set(items.map((item) => item.notification.kind)),
+    [items]
+  );
 
-  return <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "unread" | "history")} className="space-y-4">
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <TabsList className="h-auto" aria-label="Caixa de avisos">
-        <TabsTrigger value="unread" className="min-h-11 tabular-nums">Novos ({totalUnread})</TabsTrigger>
-        <TabsTrigger value="history" className="min-h-11 tabular-nums">Histórico ({totalHistory})</TabsTrigger>
-      </TabsList>
-      <div className="flex flex-wrap items-center gap-2">
-        {kinds.size > 1 || kindFilter !== "all" ? <Select value={kindFilter} onValueChange={(value) => setKindFilter(value as "all" | NotificationKind)}>
-          <SelectTrigger aria-label="Tipo de aviso" className="h-11 w-44"><SelectValue /></SelectTrigger>
-          <SelectContent><SelectItem value="all">Todos os tipos</SelectItem><SelectItem value="announcement">Avisos</SelectItem><SelectItem value="payment_reminder">Financeiro</SelectItem><SelectItem value="system">Sistema</SelectItem></SelectContent>
-        </Select> : null}
-        {totalUnread > 1 && activeTab === "unread" ? <Button type="button" variant="ghost" className="h-11" onClick={handleMarkAllRead}>Marcar todos como lidos</Button> : null}
+  const visibleFilters = useMemo(
+    () =>
+      KIND_FILTERS.filter(
+        (filter) =>
+          filter.value === "all" ||
+          availableKinds.has(filter.value) ||
+          kindFilter === filter.value
+      ),
+    [availableKinds, kindFilter]
+  );
+
+  const renderList = (entries: InboxItem[], empty: { title: string; hint: string }) =>
+    entries.length ? (
+      <div className="t-stagger space-y-2.5">
+        {entries.map((item) => (
+          <NotificationItem
+            key={item.recipient.$id}
+            notification={item}
+            compact={compact}
+            onMarkRead={handleMarkAsRead}
+            onNavigate={onNavigate}
+          />
+        ))}
       </div>
-    </div>
-    <TabsContent value="unread">
-      {list(unreadItems, { title: "Nenhum aviso novo", hint: "Avisos lidos ficam no Histórico." })}
-    </TabsContent>
-    <TabsContent value="history">
-      {list(historyItems, { title: "Histórico vazio", hint: "Os avisos aparecem aqui depois de lidos." })}
-    </TabsContent>
-  </Tabs>;
+    ) : (
+      <div className="t-panel-enter flex flex-col items-center justify-center gap-3 px-6 py-14 text-center">
+        <div className="flex size-12 items-center justify-center rounded-full bg-muted/80 text-muted-foreground">
+          <BellOff className="size-5 stroke-[1.75]" aria-hidden="true" />
+        </div>
+        <div className="space-y-1">
+          <p className="text-sm font-semibold text-foreground">{empty.title}</p>
+          <p className="max-w-xs text-xs leading-relaxed text-muted-foreground">
+            {empty.hint}
+          </p>
+        </div>
+      </div>
+    );
+
+  return (
+    <Tabs
+      value={activeTab}
+      onValueChange={(value) => setActiveTab(value as "unread" | "history")}
+      className="space-y-3.5"
+    >
+      <div className="space-y-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <TabsList
+            className={cn(
+              "grid h-auto grid-cols-2 rounded-xl bg-muted/80 p-1",
+              compact ? "w-full" : "w-full sm:w-auto sm:min-w-64"
+            )}
+            aria-label="Caixa de avisos"
+          >
+            <TabsTrigger
+              value="unread"
+              className="min-h-11 rounded-lg px-4 text-sm font-medium tabular-nums"
+            >
+              Novos ({totalUnread})
+            </TabsTrigger>
+            <TabsTrigger
+              value="history"
+              className="min-h-11 rounded-lg px-4 text-sm font-medium tabular-nums"
+            >
+              Histórico ({totalHistory})
+            </TabsTrigger>
+          </TabsList>
+
+          {!compact && totalUnread > 1 && activeTab === "unread" ? (
+            <button
+              type="button"
+              onClick={handleMarkAllRead}
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 text-xs font-medium text-primary-text transition-colors duration-(--duration-quick) hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <CheckCheck className="size-3.5" aria-hidden="true" />
+              Marcar todos como lidos
+            </button>
+          ) : null}
+        </div>
+
+        {availableKinds.size > 1 ||
+        kindFilter !== "all" ||
+        (compact && totalUnread > 1 && activeTab === "unread") ? (
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            {availableKinds.size > 1 || kindFilter !== "all" ? (
+              <div
+                role="group"
+                aria-label="Filtrar por tipo de aviso"
+                className="flex flex-wrap items-center gap-1.5"
+              >
+                {visibleFilters.map((filter) => {
+                  const selected = kindFilter === filter.value;
+                  return (
+                    <button
+                      key={filter.value}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => setKindFilter(filter.value)}
+                      className={cn(
+                        "relative rounded-full px-3 py-1 text-xs font-medium transition-colors duration-(--duration-quick) after:absolute after:inset-x-0 after:-inset-y-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        selected
+                          ? "bg-foreground text-background shadow-xs"
+                          : "bg-card text-muted-foreground ring-1 ring-border/70 hover:text-foreground"
+                      )}
+                    >
+                      {filter.label}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <span />
+            )}
+
+            {compact && totalUnread > 1 && activeTab === "unread" ? (
+              <button
+                type="button"
+                onClick={handleMarkAllRead}
+                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary-text transition-colors duration-(--duration-quick) hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <CheckCheck className="size-3.5" aria-hidden="true" />
+                Ler todos
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+
+      <TabsContent value="unread" className="mt-0">
+        {renderList(unreadItems, {
+          title: "Nenhum aviso novo",
+          hint: "Avisos lidos ficam no Histórico.",
+        })}
+      </TabsContent>
+      <TabsContent value="history" className="mt-0">
+        {renderList(historyItems, {
+          title: "Histórico vazio",
+          hint: "Os avisos aparecem aqui depois de lidos.",
+        })}
+      </TabsContent>
+    </Tabs>
+  );
 }

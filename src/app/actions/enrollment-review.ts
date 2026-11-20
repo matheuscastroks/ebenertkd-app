@@ -1,10 +1,11 @@
 "use server";
 
+import type { RankKey } from "@/features/academy/ranks";
 import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
+import { setStudentAccessOverride } from "@/features/billing/access-lock-service";
 import { reviewStudentDocument } from "@/features/students/document-service";
 import { advanceToSignature, adminUpdateStudent, saveFinancialReview } from "@/features/students/enrollment-service";
-import type { BeltOption } from "@/features/students/options";
 import { requireProfile } from "@/lib/auth/session";
 import { reaisToCents } from "@/lib/money";
 import { adminEnrollmentPath } from "@/lib/navigation/routes";
@@ -94,8 +95,8 @@ export async function adminUpdateStudentAction(formData: FormData) {
       emergencyContactRelationship: String(formData.get("emergency_contact_relationship") ?? "") || undefined,
       emergencyContactPhone: String(formData.get("emergency_contact_phone") ?? "") || undefined,
       startedAtTkd: String(formData.get("started_at_tkd") ?? "") || undefined,
-      currentBelt: (String(formData.get("current_belt") ?? "") || undefined) as BeltOption | undefined,
-      gub: formData.get("gub") !== null && formData.get("gub") !== "" ? Number(formData.get("gub")) : undefined,
+      rankKey: (String(formData.get("rank_key") ?? "") || undefined) as RankKey | undefined,
+      sex: (String(formData.get("sex") ?? "") || undefined) as "feminino" | "masculino" | undefined,
       trainingClassId: String(formData.get("training_class_id") ?? "") || undefined,
       healthCondition: (String(formData.get("health_condition") ?? "") || undefined) as "yes" | "no" | undefined,
       healthDetails: String(formData.get("health_details") ?? "") || undefined,
@@ -110,4 +111,19 @@ export async function adminUpdateStudentAction(formData: FormData) {
   updateTag(CACHE_TAGS.enrollments);
   revalidatePath(reviewPath(studentId));
   redirect(reviewPath(studentId, "?updated=student"));
+}
+
+export async function setAccessOverrideAction(formData: FormData) {
+  const admin = await requireProfile("admin");
+  const studentId = String(formData.get("student_id") ?? "");
+  const clear = formData.get("clear_override") === "1";
+  const overrideUntil = clear ? null : String(formData.get("access_override_until") ?? "").trim() || null;
+  try {
+    await setStudentAccessOverride(admin, studentId, overrideUntil);
+  } catch {
+    redirect(reviewPath(studentId, "?error=access_override"));
+  }
+  updateTag(CACHE_TAGS.enrollments);
+  revalidatePath(reviewPath(studentId));
+  redirect(reviewPath(studentId, "?updated=access_override"));
 }

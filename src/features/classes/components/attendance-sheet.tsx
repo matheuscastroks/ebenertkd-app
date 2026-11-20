@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, CircleSlash2, ShieldCheck } from "lucide-react";
+import { Check, CircleSlash2, ShieldCheck } from "@/components/ui/icons";
 import { saveAttendanceAction } from "@/app/actions/attendance";
 import { EmptyState } from "@/components/shared/empty-state";
 import { OperationToast } from "@/components/shared/operation-toast";
@@ -9,7 +9,6 @@ import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,10 +18,11 @@ import { cn } from "@/lib/utils";
 type AttendanceRow = {
   classEnrollmentId: string;
   studentName: string;
-  belt?: string | null;
-  gub?: number | null;
+  rankKey?: string | null;
   photoDocumentId?: string | null;
   status?: AttendanceStatus;
+  /** Origem do registro atual (check-in, justificativa do aluno, falta automática). */
+  note?: string | null;
 };
 
 const options: { value: AttendanceStatus; label: string; icon: typeof Check; active: string }[] = [
@@ -67,22 +67,41 @@ export function AttendanceSheet({ classId, lessonId, lessonCompleted, rows, noti
       <Progress value={rows.length ? (selectedCount / rows.length) * 100 : 0} aria-label={`${selectedCount} de ${rows.length} alunos marcados`} />
     </div>
 
-    {rows.length === 0 ? <EmptyState title="Turma sem alunos ativos" description="Ative uma matrícula vinculada a esta turma antes de realizar a chamada." /> : rows.map((row) => <Card key={row.classEnrollmentId}>
-      <CardContent className="space-y-3 p-4">
-        <div className="flex items-center gap-3">
-          <StudentAvatar name={row.studentName} photoDocumentId={row.photoDocumentId} size="md" />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-base font-medium">{row.studentName}</p>
-            <div className="mt-0.5">
-              <BeltBadge belt={row.belt} gub={row.gub} size="sm" />
+    {rows.length === 0 ? (
+      <EmptyState title="Turma sem alunos ativos" description="Ative uma matrícula vinculada a esta turma antes de realizar a chamada." />
+    ) : (
+      <ul className="t-stagger divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        {rows.map((row) => (
+          <li key={row.classEnrollmentId} className="flex flex-col gap-3 px-4 py-3.5 lg:flex-row lg:items-center lg:justify-between sm:px-5">
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              <StudentAvatar name={row.studentName} photoDocumentId={row.photoDocumentId} size="md" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-base font-medium text-foreground">{row.studentName}</p>
+                <div className="mt-0.5">
+                  <BeltBadge rankKey={row.rankKey} size="sm" />
+                </div>
+                {row.note ? <p className="mt-1 text-sm text-muted-foreground break-words">{row.note}</p> : null}
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="grid grid-cols-3 gap-2" role="group" aria-label={`Presença de ${row.studentName}`}>
-          {options.map(({ value, label, icon: Icon, active }) => <Button key={value} type="button" variant="outline" className={cn("h-11 touch-manipulation px-1 text-sm max-[389px]:[&_svg]:hidden", statuses[row.classEnrollmentId] === value && active)} aria-pressed={statuses[row.classEnrollmentId] === value} onClick={() => setStatuses((current) => ({ ...current, [row.classEnrollmentId]: value }))}><Icon aria-hidden="true" />{label}</Button>)}
-        </div>
-      </CardContent>
-    </Card>)}
+            <div className="grid grid-cols-3 gap-2 lg:flex lg:shrink-0 lg:items-center" role="group" aria-label={`Presença de ${row.studentName}`}>
+              {options.map(({ value, label, icon: Icon, active }) => (
+                <Button
+                  key={value}
+                  type="button"
+                  variant="outline"
+                  className={cn("h-11 touch-manipulation px-1.5 sm:px-3 text-sm max-[389px]:[&_svg]:hidden", statuses[row.classEnrollmentId] === value && active)}
+                  aria-pressed={statuses[row.classEnrollmentId] === value}
+                  onClick={() => setStatuses((current) => ({ ...current, [row.classEnrollmentId]: value }))}
+                >
+                  <Icon aria-hidden="true" />
+                  {label}
+                </Button>
+              ))}
+            </div>
+          </li>
+        ))}
+      </ul>
+    )}
 
     {lessonCompleted && changed ? <Field><FieldLabel htmlFor="correction-reason">Motivo da correção</FieldLabel><Textarea id="correction-reason" name="correction_reason" required minLength={3} placeholder="Ex.: presença corrigida após conferência com o professor." /><FieldDescription>Este motivo fica registrado na trilha de auditoria.</FieldDescription></Field> : null}
     <div className="sticky bottom-20 z-10 rounded-xl border bg-background p-3 shadow-xs md:bottom-3"><FormSubmitButton className="h-11 w-full sm:w-auto" disabled={!complete || (lessonCompleted && changed === false)} pendingLabel="Salvando chamada…">{lessonCompleted ? "Salvar correção" : "Concluir chamada"}</FormSubmitButton></div>

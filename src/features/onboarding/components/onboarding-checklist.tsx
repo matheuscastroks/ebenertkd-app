@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, ChevronDown, ChevronUp, Circle } from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp, Circle } from "@/components/ui/icons";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -76,13 +76,13 @@ export function OnboardingChecklist({
 
       {!collapsed && (
         <CardContent className="p-4 pt-1 border-t border-border">
-          <div className="grid gap-2 sm:grid-cols-2 pt-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 pt-2">
             {items.map((item) => (
               <Link
                 key={item.id}
                 href={item.href}
                 className={cn(
-                  "flex min-h-11 items-center gap-2.5 rounded-lg border p-2.5 text-sm transition-colors",
+                  "flex min-h-11 items-center gap-2.5 rounded-lg border p-2.5 text-sm transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none",
                   item.completed
                     ? "border-border bg-success-soft text-muted-foreground line-through"
                     : "border-border bg-card hover:bg-muted text-foreground font-medium"

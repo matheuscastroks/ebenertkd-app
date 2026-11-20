@@ -3,6 +3,9 @@ import "server-only";
 import { ID, Query, type Models } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
 import { writeAuditEvent } from "@/features/auth/service";
+import { getAcademyIdentity, getAcademyPolicies } from "@/features/academy/config-service";
+import { buildAcademyContractVariables, buildContractPolicySnapshot } from "@/features/academy/contract-policy";
+import { identityDocumentLabel } from "@/features/academy/identity-rules";
 import { renderContractTemplate, hashContent } from "@/features/contracts/rules";
 import { getPublishedContractVersion } from "@/features/contracts/template-service";
 import type { Contract } from "@/features/contracts/types";
@@ -10,6 +13,8 @@ import { resolveStudentProfile } from "@/features/students/access";
 import { getEnrollmentBundleByStudentId } from "@/features/students/service";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
+import { invalidateTags } from "@/lib/cache/invalidate";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 const dateLabel = (value: string) => new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(new Date(value));
 const moneyLabel = (cents: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
@@ -29,9 +34,11 @@ export async function issueContractForEnrollment(actor: Profile, studentId: stri
   const existing = await tables.listRows<Contract>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contracts, queries: [Query.equal("enrollment_id", [enrollment.$id]), Query.equal("status", ["pending_signature"]), Query.orderDesc("$createdAt"), Query.limit(1)] });
   if (existing.rows[0]) return existing.rows[0];
 
-  const [version, studentProfile] = await Promise.all([
+  const [version, studentProfile, identity, policies] = await Promise.all([
     getPublishedContractVersion(),
-    tables.getRow<Profile>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.profiles, rowId: student.profile_id })
+    tables.getRow<Profile>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.profiles, rowId: student.profile_id }),
+    getAcademyIdentity(),
+    getAcademyPolicies()
   ]);
   const guardian = studentProfile.role === "minor_student" ? await guardianForStudentProfile(student.profile_id) : null;
   if (studentProfile.role === "minor_student" && !guardian) throw new Error("guardian_required_for_contract");
@@ -39,14 +46,15 @@ export async function issueContractForEnrollment(actor: Profile, studentId: stri
     "student.full_name": student.full_name,
     "student.cpf": student.cpf ?? "não informado",
     "guardian.full_name": guardian?.full_name ?? "não se aplica",
-    "academy.name": "Ebenert KD",
+    ...buildAcademyContractVariables({ identity, contractPolicy: policies.contract, billingPolicy: policies.billing }),
     "financial.monthly_fee": moneyLabel(enrollment.monthly_fee_cents - (enrollment.discount_cents ?? 0)),
     "financial.due_day": String(enrollment.approved_due_day),
     "contract.starts_at": dateLabel(enrollment.contract_start),
     "contract.ends_at": dateLabel(enrollment.contract_end)
   });
   const now = new Date().toISOString();
-  const contract = await tables.createRow<Contract>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contracts, rowId: ID.unique(), data: { enrollment_id: enrollment.$id, student_id: student.$id, version_id: version.$id, version_number: version.version, status: "pending_signature", content_snapshot: snapshot, content_hash: hashContent(snapshot), student_name: student.full_name, guardian_name: guardian?.full_name, monthly_fee_cents: enrollment.monthly_fee_cents - (enrollment.discount_cents ?? 0), starts_at: enrollment.contract_start, ends_at: enrollment.contract_end, created_by_account_id: actor.account_id, created_at: now, updated_at: now }, permissions: [] });
+  const contract = await tables.createRow<Contract>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.contracts, rowId: ID.unique(), data: { enrollment_id: enrollment.$id, student_id: student.$id, version_id: version.$id, version_number: version.version, status: "pending_signature", content_snapshot: snapshot, content_hash: hashContent(snapshot), policy_snapshot_json: JSON.stringify(buildContractPolicySnapshot(policies.contract)), academy_legal_name: identity.legal_name, academy_document: identityDocumentLabel(identity) ?? undefined, student_name: student.full_name, guardian_name: guardian?.full_name, monthly_fee_cents: enrollment.monthly_fee_cents - (enrollment.discount_cents ?? 0), starts_at: enrollment.contract_start, ends_at: enrollment.contract_end, created_by_account_id: actor.account_id, created_at: now, updated_at: now }, permissions: [] });
+  invalidateTags(CACHE_TAGS.contracts, CACHE_TAGS.contract(contract.$id), CACHE_TAGS.student(student.$id));
   await writeAuditEvent("contract.issued", actor.account_id, "contract", contract.$id, { enrollment_id: enrollment.$id, version: version.version });
   return contract;
 }

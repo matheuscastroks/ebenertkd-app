@@ -18,11 +18,11 @@ const money = (value: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value / 100);
 
 const statuses: Record<string, { label: string; tone: StatusTone }> = {
-  pending: { label: "Pendente", tone: "warning" },
-  proof_under_review: { label: "Em análise", tone: "info" },
-  paid: { label: "Pago", tone: "success" },
-  overdue: { label: "Inadimplente", tone: "danger" },
-  cancelled: { label: "Cancelado", tone: "neutral" },
+  pending: { label: "A vencer", tone: "warning" },
+  proof_under_review: { label: "Para conferir", tone: "info" },
+  paid: { label: "Paga", tone: "success" },
+  overdue: { label: "Em atraso", tone: "danger" },
+  cancelled: { label: "Cancelada", tone: "neutral" },
 };
 
 function BillingStatus({ value }: { value: string }) {
@@ -135,9 +135,9 @@ export function BillingTable({
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody className="t-stagger">
               {sortedItems.map((charge) => (
-                <TableRow id={`cobranca-${charge.$id}`} key={charge.$id} className="hover:bg-muted/20 transition-colors">
+                <TableRow id={`cobranca-${charge.$id}`} key={charge.$id} className="t-interactive-row hover:bg-muted/20">
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <StudentAvatar
@@ -171,7 +171,7 @@ export function BillingTable({
         </div>
       }
       mobile={
-        <div className="space-y-3">
+        <div className="t-stagger space-y-3">
           {sortedItems.map((charge) => (
             <Card id={`cobranca-mobile-${charge.$id}`} key={charge.$id}>
               <CardContent className="space-y-4 p-4">

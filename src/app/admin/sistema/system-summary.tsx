@@ -1,4 +1,4 @@
-import { CheckCircle2, TriangleAlert } from "lucide-react";
+import { CheckCircle2, TriangleAlert } from "@/components/ui/icons";
 import type { HealthLevel } from "@/features/operations/health-rules";
 
 type HealthSnapshot = {

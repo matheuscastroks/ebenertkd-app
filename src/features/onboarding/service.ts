@@ -8,7 +8,7 @@ import { invalidateTags } from "@/lib/cache/invalidate";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { OnboardingPreferences } from "./types";
 
-const profileChanged = (actor: Profile) => invalidateTags(CACHE_TAGS.profiles, CACHE_TAGS.profileAccount(actor.account_id), CACHE_TAGS.studentAccess);
+const profileChanged = (actor: Profile) => invalidateTags(CACHE_TAGS.profiles, CACHE_TAGS.profile(actor.$id), CACHE_TAGS.profileAccount(actor.account_id), CACHE_TAGS.studentAccess);
 
 const COOKIE_NAME = "ebener_onboarding_completed";
 

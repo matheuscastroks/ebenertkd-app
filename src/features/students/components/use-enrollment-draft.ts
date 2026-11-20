@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 
-const fields = new Set(["full_name", "cpf", "birth_date", "whatsapp", "guardian_contact", "address", "address_street", "address_number", "address_complement", "address_neighborhood", "address_city", "address_state", "address_cep", "emergency_contact_name", "emergency_contact_relationship", "emergency_contact_phone", "started_at_tkd", "current_belt", "training_class_id", "gub", "health_condition", "health_details", "medications", "allergies", "injuries", "requested_due_day"]);
+const fields = new Set(["full_name", "cpf", "birth_date", "whatsapp", "guardian_contact", "address", "address_street", "address_number", "address_complement", "address_neighborhood", "address_city", "address_state", "address_cep", "emergency_contact_name", "emergency_contact_relationship", "emergency_contact_phone", "started_at_tkd", "rank_key", "sex", "training_class_id", "health_condition", "health_details", "medications", "allergies", "injuries", "requested_due_day"]);
 const changeEvent = "enrollment-draft:changed";
 const serverSnapshot = () => null;
 const safeValues = (values: Record<string, unknown>) => Object.fromEntries(Object.entries(values).filter(([name, value]) => fields.has(name) && typeof value === "string")) as Record<string, string>;

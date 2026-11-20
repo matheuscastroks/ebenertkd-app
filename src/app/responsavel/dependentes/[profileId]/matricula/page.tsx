@@ -1,6 +1,7 @@
 import { resolveStudentProfile } from "@/features/students/access";
 import { EnrollmentWorkspace } from "@/features/students/components/enrollment-workspace";
 import { requireCapability } from "@/lib/auth/session";
+import { dependentSegments } from "@/features/families/paths";
 import { ROUTES } from "@/lib/navigation/routes";
 
 export default async function DependentEnrollmentPage({
@@ -16,5 +17,5 @@ export default async function DependentEnrollmentPage({
     searchParams
   ]);
   const target = await resolveStudentProfile(guardian, profileId);
-  return <EnrollmentWorkspace actor={guardian} target={target} query={query} activePath={ROUTES.guardianDependents} />;
+  return <EnrollmentWorkspace actor={guardian} target={target} query={query} back={{ label: "Família", href: ROUTES.guardian }} segments={dependentSegments(profileId)} />;
 }

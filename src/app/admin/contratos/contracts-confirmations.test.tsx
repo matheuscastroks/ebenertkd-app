@@ -2,7 +2,6 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import { CancellationsList } from "@/features/contracts/components/cancellations-list";
 import ContractTemplatePage from "./modelo/page";
-import { ContractLinks } from "@/features/contracts/components/contract-links";
 
 const actions = vi.hoisted(() => ({ cancellation: vi.fn(), template: vi.fn() }));
 vi.mock("@/app/actions/cancellations", () => ({ decideCancellationAction: actions.cancellation }));
@@ -41,9 +40,3 @@ it("publicar versão informa efeito sobre contratos e mantém rascunho sem publi
   expect(screen.getByText("10 caracteres")).toBeVisible();
 });
 
-it("hub mostra pendências e navegação com lista simples sem caixas de ícones", async () => {
-  const { container } = render(await ContractLinks());
-  expect(screen.getByRole("link", { name: /Modelo de contrato/ })).toHaveAttribute("href", "/admin/contratos/modelo");
-  expect(screen.getByText("1 pedido aguardando análise")).toBeVisible();
-  expect(container.querySelector("svg")).not.toBeInTheDocument();
-});

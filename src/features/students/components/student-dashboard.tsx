@@ -1,7 +1,6 @@
-import { Suspense, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronRightIcon } from "@/components/ui/chevron-right";
 import type { Profile } from "@/features/auth/types";
 import { listChargesForStudent } from "@/features/billing/charge-service";
 import { getAttendanceHistory } from "@/features/classes/attendance-history-service";
@@ -11,60 +10,84 @@ import { formatNextTraining } from "@/features/families/next-training";
 import { listStudentContracts } from "@/features/contracts/contract-service";
 import { buildPendencies, primaryPendency } from "@/features/families/pendencies";
 import { PendencyList } from "@/features/families/components/pendency-list";
-import { OnboardingTrigger } from "@/features/onboarding/components/onboarding-trigger";
+import { getPolicy } from "@/features/academy/config-service";
+import { evaluateParqStatus } from "@/features/students/parq-rules";
+import { getLatestParqForStudent } from "@/features/students/parq-service";
+import { saoPauloToday } from "@/lib/dates";
 import { GraduationCard } from "./graduation-card";
 import { ROUTES, studentContractPath } from "@/lib/navigation/routes";
 
 /**
- * Visão geral do aluno. Primário: próximo treino. Secundário: pendências e faixa.
- * Terciário: atalhos para dados e documentos (`aside`). O menor nunca consulta nem vê financeiro.
+ * Início do aluno, em uma coluna: pendências (só quando houver) → próximo treino com a
+ * frequência em uma linha → faixa. O menor nunca consulta nem vê financeiro.
  */
-export async function StudentDashboardDynamic({ profile, minor, aside }: { profile: Profile; minor: boolean; aside?: ReactNode }) {
+export async function StudentDashboardDynamic({ profile, minor, footer }: { profile: Profile; minor: boolean; footer?: ReactNode }) {
   const [attendance, charges, contracts] = await Promise.all([
     getAttendanceHistory(profile),
     minor ? Promise.resolve("hidden" as const) : listChargesForStudent(profile).catch(() => null),
     minor ? Promise.resolve("hidden" as const) : listStudentContracts(profile).catch(() => null)
   ]);
   const student = attendance.student;
-  const trainingClass = student?.training_class_id ? await getTrainingClass(student.training_class_id).catch(() => null) : null;
+  const [trainingClass, latestParq, compliancePolicy] = await Promise.all([
+    student?.training_class_id ? getTrainingClass(student.training_class_id).catch(() => null) : Promise.resolve(null),
+    student?.$id ? getLatestParqForStudent(student.$id).catch(() => null) : Promise.resolve(null),
+    getPolicy("compliance"),
+  ]);
+  const parqAssessment = student?.$id ? evaluateParqStatus(latestParq, saoPauloToday(), compliancePolicy) : null;
   const next = trainingClass ? getNextClassSchedule(trainingClass) : null;
   const pendencies = buildPendencies({
-    studentStatus: student?.status, charges, contracts, canSign: !minor,
-    links: { enrollment: ROUTES.studentEnrollment, billing: ROUTES.studentBilling, contracts: ROUTES.studentContracts, contract: studentContractPath }
+    studentStatus: student?.status,
+    charges,
+    contracts,
+    parqStatus: parqAssessment?.status,
+    parqExpiresAt: parqAssessment?.expiresAt,
+    canSign: !minor,
+    links: {
+      enrollment: ROUTES.studentEnrollment,
+      billing: ROUTES.studentBilling,
+      contracts: ROUTES.studentContracts,
+      contract: studentContractPath,
+      parq: ROUTES.studentParq,
+    }
   });
   const primary = primaryPendency(pendencies);
   const { summary } = attendance;
 
-  return <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start">
-    <Suspense fallback={null}><OnboardingTrigger role={profile.role} userName={profile.full_name} hasCompletedOnboarding={Boolean(profile.onboarding_completed_at)} /></Suspense>
+  // Celular: uma coluna na ordem de prioridade. Desktop: rotina à esquerda, faixa à direita.
+  return <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
     <div className="min-w-0 space-y-6">
-      <Card aria-labelledby="next-training-title">
-        <CardHeader><CardTitle id="next-training-title" className="text-sm font-medium text-muted-foreground">Próximo treino</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-1">
-            <p className="text-2xl font-semibold tracking-tight tabular-nums">{formatNextTraining(next)}</p>
-            <p className="text-sm text-muted-foreground">
-              {trainingClass || student?.training_class
-                ? `${trainingClass?.name ?? student?.training_class} · ${trainingClass?.location || "Local não informado"}`
-                : "A turma é definida pelo professor ao aprovar a matrícula."}
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 border-t border-border pt-4 text-sm sm:flex-row sm:items-center sm:justify-between">
-            <p className="tabular-nums">{summary.total ? `Frequência ${summary.rate}% · ${summary.attended} de ${summary.total} aulas` : "Ainda sem aulas registradas"}</p>
-            <Button asChild variant="outline" className="min-h-11"><Link href={ROUTES.studentAttendance}>Ver frequência</Link></Button>
-          </div>
-        </CardContent>
-      </Card>
-      <section aria-labelledby="pendencies-title" className="space-y-3">
+    {pendencies.length > 0 ? (
+      <section aria-labelledby="pendencies-title" className="space-y-2.5">
         <h2 id="pendencies-title" className="text-base font-semibold">Pendências</h2>
-        <Card><CardContent>
-          <PendencyList items={pendencies} primaryKey={primary?.id} emptyLabel="Tudo em dia. Nada precisa da sua atenção agora." />
-        </CardContent></Card>
+        <div className="overflow-hidden rounded-xl border border-border bg-card px-4 py-3 shadow-xs">
+          <PendencyList items={pendencies} primaryKey={primary?.id} />
+        </div>
       </section>
+    ) : null}
+
+    <section aria-labelledby="next-training-title" className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+      <div className="space-y-1.5 p-5">
+        <h2 id="next-training-title" className="text-sm font-medium text-muted-foreground">Próximo treino</h2>
+        <p className="text-2xl font-semibold tracking-tight tabular-nums">{formatNextTraining(next)}</p>
+        <p className="text-sm text-muted-foreground">
+          {trainingClass || student?.training_class
+            ? `${trainingClass?.name ?? student?.training_class} · ${trainingClass?.location || "Local não informado"}`
+            : "A turma é definida pelo professor ao aprovar a matrícula."}
+        </p>
+      </div>
+      <Link
+        href={ROUTES.studentAttendance}
+        className="flex min-h-12 items-center justify-between gap-3 px-5 py-3 text-sm transition-colors duration-(--duration-quick) hover:bg-muted motion-reduce:transition-none"
+      >
+        <span className="tabular-nums">{summary.total ? `Frequência ${summary.rate}% · ${summary.attended} de ${summary.total} aulas` : "Ainda sem aulas registradas"}</span>
+        <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+      </Link>
+    </section>
+
+    {pendencies.length === 0 ? <p className="text-sm text-muted-foreground">Tudo em dia. Nada precisa da sua atenção agora.</p> : null}
     </div>
-    <div className="min-w-0 space-y-6">
-      <GraduationCard currentBelt={student?.current_belt} gub={student?.gub} startedAtTkd={student?.started_at_tkd} />
-      {aside}
-    </div>
+
+    <GraduationCard rankKey={student?.rank_key} startedAtTkd={student?.started_at_tkd} />
+    {footer ? <div className="lg:col-span-2">{footer}</div> : null}
   </div>;
 }

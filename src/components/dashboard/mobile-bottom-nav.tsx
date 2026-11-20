@@ -1,11 +1,13 @@
 "use client";
 
+import type { ComponentType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, type LucideIcon } from "lucide-react";
+import { Menu } from "@/components/ui/icons";
 import { NAV_ICONS } from "@/lib/navigation/nav-icons";
 import { useSidebar } from "@/components/ui/sidebar";
 import type { AppSidebarNavItem } from "@/components/dashboard/app-sidebar";
+import { resolveNavLocation } from "@/lib/navigation/routes";
 import { cn } from "@/lib/utils";
 
 const HOME_PATHS = ["/admin", "/aluno", "/responsavel"];
@@ -13,18 +15,21 @@ const HOME_PATHS = ["/admin", "/aluno", "/responsavel"];
 const FALLBACK_ICONS: Array<keyof typeof NAV_ICONS> = ["attendance", "classes", "billing", "family", "students", "enrollment"];
 const MAX_MIDDLE_TABS = 2;
 
+type TabIconComponent = ComponentType<{
+  className?: string;
+  size?: number;
+  strokeWidth?: number;
+  "aria-hidden"?: boolean | "true" | "false";
+}>;
+
 type BottomTab = {
   key: string;
   label: string;
   href?: string;
-  icon: LucideIcon;
+  icon: TabIconComponent;
   badge?: number;
   active?: boolean;
 };
-
-function matches(pathname: string, item: Pick<AppSidebarNavItem, "href" | "exact">) {
-  return item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
-}
 
 function pickMiddleItems(navItems: AppSidebarNavItem[], excluded: Set<string>) {
   const eligible = navItems.filter((item) => !excluded.has(item.href));
@@ -40,7 +45,7 @@ function pickMiddleItems(navItems: AppSidebarNavItem[], excluded: Set<string>) {
 }
 
 /**
- * Barra inferior do mobile: Início, até dois destinos frequentes do perfil, Avisos e Menu.
+ * Barra inferior do mobile: a seção inicial do perfil (Hoje, Início ou Família), até dois destinos frequentes do perfil, Avisos e Menu.
  * O menu completo (sidebar em folha) continua acessível pelo último botão.
  */
 export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] }) {
@@ -55,15 +60,17 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
   );
 
   const tabs: BottomTab[] = [];
-  const middleActive = middleItems.some((item) => matches(pathname, item));
+  // A aba fica ativa em qualquer tela da seção, inclusive no detalhe em pilha.
+  const { section } = resolveNavLocation(navItems, pathname);
+  const isActive = (item: AppSidebarNavItem) => section === item || (!section && pathname === item.href);
 
   if (homeItem) {
     tabs.push({
       key: homeItem.href,
-      label: "Início",
+      label: homeItem.shortLabel ?? homeItem.label,
       href: homeItem.href,
       icon: NAV_ICONS[homeItem.icon ?? "dashboard"],
-      active: matches(pathname, { ...homeItem, exact: homeItem.exact ?? true }) && !middleActive
+      active: isActive(homeItem)
     });
   }
 
@@ -74,7 +81,7 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
       href: item.href,
       icon: NAV_ICONS[item.icon ?? "dashboard"],
       badge: item.badge,
-      active: matches(pathname, item)
+      active: isActive(item)
     });
   }
 
@@ -85,21 +92,23 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
       href: notificationsItem.href,
       icon: NAV_ICONS.notifications,
       badge: notificationsItem.badge,
-      active: matches(pathname, notificationsItem)
+      active: pathname === notificationsItem.href || pathname.startsWith(`${notificationsItem.href}/`)
     });
   }
 
-  const itemClass = "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-0.5 py-1.5 touch-manipulation transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+  const itemClass = "flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-0.5 py-1.5 touch-manipulation transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+  const menuActive = Boolean(section) && !tabs.some((tab) => tab.active);
 
   function renderContent(tab: BottomTab) {
     const Icon = tab.icon;
     return (
       <>
         <span className="relative">
-          <Icon className="size-5" strokeWidth={2} aria-hidden="true" />
+          <Icon className="size-6" strokeWidth={2} aria-hidden="true" />
           {tab.badge && tab.badge > 0 ? (
             <span
-              className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-semibold leading-none text-destructive-foreground tabular-nums"
+              className="t-badge-pop absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-semibold leading-none text-destructive-foreground tabular-nums"
               aria-label={`${tab.badge} notificações`}
             >
               {tab.badge > 9 ? "9+" : tab.badge}
@@ -134,7 +143,12 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
           type="button"
           onClick={() => setOpenMobile(true)}
           aria-label="Abrir menu completo"
-          className={cn(itemClass, "font-medium text-muted-foreground hover:text-foreground")}
+          // Seções sem aba própria (Alunos, Eventos…) acendem o Menu, para a barra sempre mostrar onde se está.
+          data-active={menuActive || undefined}
+          className={cn(
+            itemClass,
+            menuActive ? "font-semibold text-primary-text" : "font-medium text-muted-foreground hover:text-foreground"
+          )}
         >
           {renderContent({ key: "menu", label: "Menu", icon: Menu })}
         </button>
