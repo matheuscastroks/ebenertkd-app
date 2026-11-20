@@ -20,11 +20,11 @@ async function StudentParqContent({ profile }: { profile: Profile }) {
   if (!student) {
     return (
       <EmptyState
-        title="Complete sua matrícula primeiro"
-        description="Depois de preencher seus dados de matrícula, você poderá responder o questionário de saúde anual."
+        title="Preencha a ficha primeiro"
+        description="Com a ficha preenchida, você pode responder o questionário de saúde."
         action={
           <Button asChild className="min-h-11">
-            <Link href={ROUTES.studentEnrollment}>Ir para matrícula</Link>
+            <Link href={ROUTES.studentEnrollment}>Preencher ficha</Link>
           </Button>
         }
       />

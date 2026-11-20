@@ -80,13 +80,13 @@ export function StudentAccessGate({
             </div>
             <div className="space-y-2">
               <h1 className="text-xl font-semibold tracking-tight text-foreground">
-                Ciclo mensal expirado · Acesso pausado
+                Acesso pausado
               </h1>
               <p className="text-sm leading-relaxed text-muted-foreground">
                 {accessValidUntil
                   ? `Seu acesso de 30 dias referente ao último pagamento venceu em ${formatBusinessDateBr(accessValidUntil)}. `
                   : "Há uma mensalidade pendente fora da janela de 30 dias. "}
-                Envie o comprovante PIX no financeiro para liberar o aplicativo imediatamente enquanto o professor confirma.
+                Envie o comprovante em Pagamentos para liberar o aplicativo imediatamente enquanto o professor confirma.
               </p>
             </div>
 
@@ -94,7 +94,7 @@ export function StudentAccessGate({
               <Button asChild className="min-h-11">
                 <Link href={ROUTES.studentBilling}>
                   <Wallet className="size-4" aria-hidden="true" />
-                  Regularizar no Financeiro (PIX)
+                  Ir para Pagamentos
                 </Link>
               </Button>
               <Button asChild variant="outline" className="min-h-11">
@@ -121,8 +121,12 @@ export function StudentAccessGate({
     accessStatus === "expiring_soon" &&
     accessValidUntil &&
     !pathname.startsWith(ROUTES.studentBilling);
+  // Início e Carteirinha já mostram o PAR-Q vencido nas próprias pendências; o aviso global ficaria repetido.
   const showExpiredParqBanner =
-    parqStatus === "expired" && !pathname.startsWith(ROUTES.studentParq);
+    parqStatus === "expired" &&
+    pathname !== ROUTES.student &&
+    !pathname.startsWith(ROUTES.studentParq) &&
+    !pathname.startsWith(ROUTES.studentCard);
 
   return (
     <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col">
@@ -150,11 +154,11 @@ export function StudentAccessGate({
             </AlertTitle>
             <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
               <span>
-                Acesso válido até {formatBusinessDateBr(accessValidUntil)} (30 dias após o pagamento). Envie o comprovante no financeiro para evitar a pausa do aplicativo.
+                Acesso válido até {formatBusinessDateBr(accessValidUntil)} (30 dias após o pagamento). Envie o comprovante em Pagamentos para evitar a pausa do aplicativo.
               </span>
               <Button asChild size="sm" variant="outline" className="min-h-9">
                 <Link href={ROUTES.studentBilling}>
-                  Abrir financeiro
+                  Abrir Pagamentos
                   <ArrowRight className="size-3.5" aria-hidden="true" />
                 </Link>
               </Button>

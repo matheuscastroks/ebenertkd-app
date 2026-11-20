@@ -5,10 +5,8 @@ import { PortalShell } from "@/components/dashboard/portal-shell";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";
 import { CardGridSkeleton } from "@/components/skeletons";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import type { Profile } from "@/features/auth/types";
-import { getStudentAppAccessByStudentId } from "@/features/billing/access-lock-service";
 import type { MedicalComplianceStatus } from "@/features/students/compliance-rules";
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
@@ -42,17 +40,26 @@ const PARQ_TONES: Record<ParqStatus, StatusTone> = {
   missing: "warning",
 };
 
+function RowLink({ href, label, children }: { href: string; label: string; children: string }) {
+  return (
+    <Link href={href} aria-label={label} className="inline-flex min-h-10 items-center gap-1 text-sm font-medium text-primary hover:underline">
+      {children}
+      <ArrowRight className="size-3.5" aria-hidden="true" />
+    </Link>
+  );
+}
+
 async function StudentCardContent({ profile }: { profile: Profile }) {
   const [snapshot, identity] = await Promise.all([getStudentJourneySnapshot(profile), getAcademyIdentity()]);
 
   if (!snapshot.student || !snapshot.compliance) {
     return (
       <EmptyState
-        title="Carteirinha disponível após preencher sua matrícula"
-        description="Envie seus dados e foto na matrícula para gerar sua carteirinha digital do dojang."
+        title="Preencha sua ficha para gerar a carteirinha"
+        description="Com seus dados e foto, a carteirinha digital aparece aqui."
         action={
           <Button asChild className="min-h-11">
-            <Link href={ROUTES.studentEnrollment}>Preencher matrícula</Link>
+            <Link href={ROUTES.studentEnrollment}>Preencher ficha</Link>
           </Button>
         }
       />
@@ -61,9 +68,6 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
 
   const { student, enrollment, trainingClass, compliance } = snapshot;
   const isMinor = profile.role === "minor_student";
-  const accessState = isMinor
-    ? null
-    : await getStudentAppAccessByStudentId(student.$id).catch(() => null);
   const studentCode = student.$id.slice(0, 8).toUpperCase();
   const isActive =
     student.status === "active" ||
@@ -82,48 +86,6 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
 
   return (
     <div className="space-y-6">
-      {needsMedicalAction ? (
-        <Alert>
-          <AlertTitle>{MEDICAL_LABELS[compliance.medicalStatus]}</AlertTitle>
-          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
-            <span>
-              {compliance.medicalStatus === "expiring_soon"
-                ? `Seu atestado médico vence em ${formatBusinessDateBr(compliance.medicalExpiresAt)}. Envie a renovação anual na área de matrícula.`
-                : "Mantenha seu atestado médico atualizado (validade de 12 meses) para treinar com segurança."}
-            </span>
-            <Button asChild size="sm" variant="outline" className="min-h-9">
-              <Link href={ROUTES.studentEnrollment}>
-                Atualizar atestado
-                <ArrowRight className="size-3.5" aria-hidden="true" />
-              </Link>
-            </Button>
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
-      {needsParqAction ? (
-        <Alert>
-          <AlertTitle>Questionário de saúde · {PARQ_STATUS_LABELS[compliance.parqStatus]}</AlertTitle>
-          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
-            <span>
-              {isMinor
-                ? "Seu questionário de saúde anual precisa ser respondido pelo seu responsável no portal da família."
-                : compliance.parqStatus === "expiring_soon"
-                  ? `Seu questionário de saúde vence em ${formatBusinessDateBr(compliance.parqExpiresAt)}. Responda novamente em menos de 2 minutos.`
-                  : "Responda 10 perguntas rápidas sobre sua saúde uma vez por ano para treinar com segurança."}
-            </span>
-            {!isMinor ? (
-              <Button asChild size="sm" variant="outline" className="min-h-9">
-                <Link href={ROUTES.studentParq}>
-                  Responder agora
-                  <ArrowRight className="size-3.5" aria-hidden="true" />
-                </Link>
-              </Button>
-            ) : null}
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
         <section
           aria-labelledby="digital-passport-heading"
@@ -191,7 +153,7 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-2">
               <h2 id="health-compliance-heading" className="text-base font-semibold">
-                Regularidade e ficha de saúde
+                Saúde e documentos
               </h2>
               <StatusBadge tone={MEDICAL_TONES[compliance.medicalStatus]}>
                 {MEDICAL_LABELS[compliance.medicalStatus]}
@@ -200,33 +162,25 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
 
             <dl className="divide-y divide-border text-sm">
               <div className="flex items-center justify-between gap-3 py-2.5">
-                <dt className="text-muted-foreground">Validade do atestado (12 meses)</dt>
-                <dd className="font-medium tabular-nums text-foreground">
+                <dt className="text-muted-foreground">Atestado válido até</dt>
+                <dd className="flex items-center gap-2 font-medium tabular-nums text-foreground">
                   {compliance.medicalExpiresAt
                     ? formatBusinessDateBr(compliance.medicalExpiresAt)
                     : "Aguardando aprovação"}
+                  {needsMedicalAction ? <RowLink href={ROUTES.studentEnrollment} label="Enviar novo atestado">Enviar</RowLink> : null}
                 </dd>
               </div>
               <div className="flex items-center justify-between gap-3 py-2.5">
-                <dt className="text-muted-foreground">Questionário de saúde anual</dt>
+                <dt className="text-muted-foreground">Questionário de saúde (PAR-Q)</dt>
                 <dd className="flex items-center gap-2">
                   <StatusBadge tone={PARQ_TONES[compliance.parqStatus]}>
                     {compliance.parqExpiresAt
                       ? `Até ${formatBusinessDateBr(compliance.parqExpiresAt)}`
                       : PARQ_STATUS_LABELS[compliance.parqStatus]}
                   </StatusBadge>
+                  {needsParqAction && !isMinor ? <RowLink href={ROUTES.studentParq} label="Responder o questionário de saúde">Responder</RowLink> : null}
                 </dd>
               </div>
-              {!isMinor && accessState && accessState.status !== "not_applicable" ? (
-                <div className="flex items-center justify-between gap-3 py-2.5">
-                  <dt className="text-muted-foreground">Acesso mensal ao app</dt>
-                  <dd className="font-medium tabular-nums text-foreground">
-                    {accessState.accessValidUntil
-                      ? `Válido até ${formatBusinessDateBr(accessState.accessValidUntil)}`
-                      : "Ativo"}
-                  </dd>
-                </div>
-              ) : null}
               <div className="flex items-center justify-between gap-3 py-2.5">
                 <dt className="text-muted-foreground">Foto de identificação</dt>
                 <dd>
@@ -251,21 +205,6 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
               </div>
             </dl>
           </div>
-
-          <div className="grid gap-2 sm:grid-cols-2">
-            <Button asChild variant="outline" className="min-h-11 w-full">
-              <Link href={ROUTES.studentParq}>
-                Questionário de saúde
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="min-h-11 w-full">
-              <Link href={ROUTES.studentEnrollment}>
-                Atualizar ficha médica
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
-            </Button>
-          </div>
         </section>
       </div>
     </div>
@@ -279,7 +218,7 @@ export default async function StudentCardPage() {
     <PortalShell
       profile={profile}
       title="Cadastro"
-      subtitle="Seu passaporte digital do dojang, validade anual do atestado médico e contatos de emergência."
+      subtitle="Sua carteirinha, a validade dos documentos de saúde e o contato de emergência."
     >
       <div className="w-full min-w-0 space-y-6">
         <Suspense fallback={<CardGridSkeleton count={2} columns={2} />}>

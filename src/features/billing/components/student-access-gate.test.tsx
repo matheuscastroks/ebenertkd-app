@@ -27,8 +27,8 @@ describe("StudentAccessGate", () => {
       </StudentAccessGate>
     );
 
-    expect(screen.getByText(/Ciclo mensal expirado/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Regularizar no Financeiro/ })).toHaveAttribute(
+    expect(screen.getByText("Acesso pausado")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Ir para Pagamentos/ })).toHaveAttribute(
       "href",
       "/aluno/financeiro"
     );
@@ -96,5 +96,15 @@ describe("StudentAccessGate", () => {
       "href",
       "/aluno/parq"
     );
+  });
+
+  it("não repete o aviso de PAR-Q em telas que já o mostram", () => {
+    mockPathname.mockReturnValue("/aluno/carteirinha");
+    render(
+      <StudentAccessGate isMinor={false} locked={false} accessStatus="active" parqStatus="expired">
+        <div>Carteirinha</div>
+      </StudentAccessGate>
+    );
+    expect(screen.queryByText("Hora de renovar seu questionário de saúde")).not.toBeInTheDocument();
   });
 });
