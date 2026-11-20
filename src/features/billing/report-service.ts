@@ -6,7 +6,7 @@ import { availableClosingCompetences, buildMonthlyClosingReport } from "@/featur
 import { billingSummary, csvCell } from "@/features/billing/rules";
 import { listCharges } from "@/features/billing/charge-service";
 import { listPayments } from "@/features/billing/payment-service";
-import type { Charge, PaymentProof, PaymentReversal } from "@/features/billing/types";
+import type { Charge, ChargeStatus, PaymentProof, PaymentReversal } from "@/features/billing/types";
 import type { Student, StudentDocument } from "@/features/students/types";
 import { listAllRows } from "@/lib/appwrite/all-rows";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
@@ -69,14 +69,6 @@ export async function getBillingTrend(count = 6) {
   return buildBillingMonthlySeries(charges, count);
 }
 
-export async function getBillingSummary() {
-  const [charges, payments] = await loadBillingLedger();
-  const now = new Date();
-  const start = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-01`;
-  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)).toISOString().slice(0, 10);
-  return { ...billingSummary(charges, payments, start, end), monthlySeries: buildBillingMonthlySeries(charges, 6, now) };
-}
-
 async function allRows<Row extends { $id: string }>(tableId: string, queries: string[] = []) {
   const { tables, config } = createAppwriteAdminClient();
   const rows: Row[] = [];
@@ -96,13 +88,22 @@ function listBillingStudents() {
   );
 }
 
+function countChargesByStatus(charges: Array<{ status: ChargeStatus }>): Record<ChargeStatus, number> {
+  const counts: Record<ChargeStatus, number> = { pending: 0, proof_under_review: 0, paid: 0, overdue: 0, cancelled: 0 };
+  for (const charge of charges) counts[charge.status] = (counts[charge.status] ?? 0) + 1;
+  return counts;
+}
+
 export async function getBillingOverview(filters: BillingFilters = {}) {
   const [[allCharges, payments], students] = await Promise.all([loadBillingLedger(), listBillingStudents()]);
-  const rawCharges = allCharges.filter((charge) => (!filters.status || charge.status === filters.status) && (!filters.competence || charge.competence === filters.competence) && (!filters.type || charge.charge_type === filters.type));
+  const scopedCharges = allCharges.filter((charge) => (!filters.competence || charge.competence === filters.competence) && (!filters.type || charge.charge_type === filters.type));
   const allNames = new Map(students.map((student) => [student.$id, student.full_name]));
   const normalizedSearch = filters.student?.trim().toLocaleLowerCase("pt-BR");
   const allowedStudents = new Set(students.filter((student) => (!normalizedSearch || student.full_name.toLocaleLowerCase("pt-BR").includes(normalizedSearch)) && (!filters.trainingClass || student.training_class_id === filters.trainingClass)).map((student) => student.$id));
-  const filteredCharges = rawCharges.filter((charge) => allowedStudents.has(charge.student_id));
+  // Contagem por situação ignora o filtro de situação: alimenta os chips da tela de Cobranças.
+  const chargesInScope = scopedCharges.filter((charge) => allowedStudents.has(charge.student_id));
+  const statusCounts = countChargesByStatus(chargesInScope);
+  const filteredCharges = filters.status ? chargesInScope.filter((charge) => charge.status === filters.status) : chargesInScope;
   const requestedPage = filters.page ? Math.max(1, Math.trunc(filters.page)) : undefined;
   const totalPages = Math.ceil(filteredCharges.length / BILLING_PAGE_SIZE);
   const page = requestedPage ? Math.min(requestedPage, Math.max(1, totalPages)) : undefined;
@@ -133,6 +134,7 @@ export async function getBillingOverview(filters: BillingFilters = {}) {
     proofsByCharge,
     summary: billingSummary(allCharges, payments, start, end),
     monthlySeries: buildBillingMonthlySeries(allCharges, 6, now),
+    statusCounts,
     pagination: { page: page ?? 1, pageSize: BILLING_PAGE_SIZE, total: filteredCharges.length, totalPages }
   };
 }

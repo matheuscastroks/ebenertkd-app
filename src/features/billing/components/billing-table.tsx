@@ -18,11 +18,11 @@ const money = (value: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value / 100);
 
 const statuses: Record<string, { label: string; tone: StatusTone }> = {
-  pending: { label: "Pendente", tone: "warning" },
-  proof_under_review: { label: "Em análise", tone: "info" },
-  paid: { label: "Pago", tone: "success" },
-  overdue: { label: "Inadimplente", tone: "danger" },
-  cancelled: { label: "Cancelado", tone: "neutral" },
+  pending: { label: "A vencer", tone: "warning" },
+  proof_under_review: { label: "Para conferir", tone: "info" },
+  paid: { label: "Paga", tone: "success" },
+  overdue: { label: "Em atraso", tone: "danger" },
+  cancelled: { label: "Cancelada", tone: "neutral" },
 };
 
 function BillingStatus({ value }: { value: string }) {

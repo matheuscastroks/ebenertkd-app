@@ -9,28 +9,24 @@ import {
   DownloadIcon,
   ReceiptText,
   SearchIcon,
-  SlidersHorizontal,
   UsersRound,
   XIcon,
 } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PixSettingsDialog } from "@/features/billing/components/pix-settings-dialog";
 import { formatCompetence } from "@/features/billing/format-competence";
-import type { BillingSettings } from "@/features/billing/types";
 import type { TrainingClass } from "@/features/classes/types";
 import { ROUTES } from "@/lib/navigation/routes";
 
-const statusLabels = { pending: "Pendente", proof_under_review: "Em análise", paid: "Pago", overdue: "Inadimplente", cancelled: "Cancelado" } as const;
 const typeLabels = { monthly_fee: "Mensalidade", enrollment_fee: "Matrícula", exam_fee: "Exame", event_fee: "Evento", exit_fee: "Saída" } as const;
-const filterNames = { student: "aluno", competence: "competência", trainingClass: "turma", type: "tipo", status: "situação" } as const;
+const filterNames = { student: "aluno", competence: "competência", trainingClass: "turma", type: "tipo" } as const;
 /** Filtros usados com menos frequência ficam recolhidos até o professor pedir. */
 const secondaryKeys = ["competence", "trainingClass", "type"] as const;
 
-type BillingFilterKey = "student" | "competence" | "trainingClass" | "type" | "status";
+/** A situação da cobrança é filtrada pelos chips da página, não aqui. */
+type BillingFilterKey = "student" | "competence" | "trainingClass" | "type";
 type BillingFilterState = Record<BillingFilterKey, string>;
 
 const isSet = (value: string) => Boolean(value && value !== "all");
@@ -44,7 +40,6 @@ export function BillingFilters({ classes }: { classes: TrainingClass[] }) {
   const [pending, startTransition] = useTransition();
 
   const currentFilters: BillingFilterState = {
-    status: searchParams.get("status") ?? "",
     trainingClass: searchParams.get("trainingClass") ?? "",
     type: searchParams.get("type") ?? "",
     competence: searchParams.get("competence") ?? "",
@@ -83,18 +78,18 @@ export function BillingFilters({ classes }: { classes: TrainingClass[] }) {
     if (timer.current) clearTimeout(timer.current);
     if (studentInput.current) studentInput.current.value = "";
     startTransition(() => {
-      setOptimisticFilters({ student: "", competence: "", trainingClass: "", type: "", status: "" });
-      router.replace(ROUTES.adminBilling, { scroll: false });
+      setOptimisticFilters({ student: "", competence: "", trainingClass: "", type: "" });
+      const status = searchParams.get("status");
+      router.replace(status ? `${ROUTES.adminBilling}?status=${status}` : ROUTES.adminBilling, { scroll: false });
     });
   };
   const onStudentChange = (value: string) => {
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => update("student", value.trim()), 300);
   };
-  const active = (["student", "competence", "trainingClass", "type", "status"] as const).filter((key) => isSet(optimisticFilters[key]));
+  const active = (["student", "competence", "trainingClass", "type"] as const).filter((key) => isSet(optimisticFilters[key]));
   const chipLabel = (key: (typeof active)[number]) => {
     const value = optimisticFilters[key];
-    if (key === "status") return statusLabels[value as keyof typeof statusLabels] ?? value;
     if (key === "type") return typeLabels[value as keyof typeof typeLabels] ?? value;
     if (key === "trainingClass") return classes.find((item) => item.$id === value)?.name ?? value;
     if (key === "competence") return formatCompetence(value) === "—" ? value : formatCompetence(value);
@@ -102,9 +97,8 @@ export function BillingFilters({ classes }: { classes: TrainingClass[] }) {
   };
 
   return <div role="search" aria-label="Filtrar cobranças" aria-busy={pending} className="space-y-3 transition-opacity duration-(--duration-quick) motion-reduce:transition-none aria-busy:opacity-80">
-    <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_auto] sm:items-end">
+    <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
       <Field><FieldLabel htmlFor="billing-student">Aluno</FieldLabel><InputGroup className="h-10"><InputGroupAddon><SearchIcon className="size-4" aria-hidden="true" /></InputGroupAddon><InputGroupInput ref={studentInput} id="billing-student" placeholder="Buscar pelo nome" defaultValue={searchParams.get("student") ?? ""} onChange={(event) => onStudentChange(event.target.value)} /></InputGroup></Field>
-      <Field><FieldLabel htmlFor="billing-status">Situação</FieldLabel><Select value={optimisticFilters.status || "all"} onValueChange={(value) => update("status", value)}><SelectTrigger id="billing-status" className="h-10 w-full" leadingIcon={<SlidersHorizontal className="size-4" />}><SelectValue>{statusLabels[optimisticFilters.status as keyof typeof statusLabels] ?? "Todas"}</SelectValue></SelectTrigger><SelectContent><SelectItem value="all">Todas</SelectItem>{Object.entries(statusLabels).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select></Field>
       <Button type="button" variant="ghost" className="min-h-10 justify-start sm:min-h-10" aria-expanded={showSecondary} aria-controls="billing-secondary-filters" onClick={() => setExpanded(!showSecondary)} disabled={secondaryActive > 0}>
         <ChevronDownIcon className={`size-4 transition-transform duration-(--duration-fast) ease-(--ease-smooth-out) motion-reduce:transition-none ${showSecondary ? "-scale-y-100" : ""}`} aria-hidden="true" />
         Mais filtros{secondaryActive ? ` (${secondaryActive})` : ""}
@@ -122,15 +116,13 @@ export function BillingFilters({ classes }: { classes: TrainingClass[] }) {
   </div>;
 }
 
-export function BillingToolbar({ settings }: { settings: BillingSettings | null }) {
+export function BillingToolbar() {
   const searchParams = useSearchParams();
   const query = new URLSearchParams(searchParams.toString());
   query.delete("page");
-  query.delete("pix");
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <PixSettingsDialog settings={settings} />
       <Button asChild variant="outline" className="min-h-11">
         <Link href={`${ROUTES.adminBilling}/exportar?${query}`}>
           <DownloadIcon aria-hidden="true" />
