@@ -20,6 +20,8 @@ export type HubRow = {
 };
 
 type Props = {
+  /** Âncora usada pelo resumo de filas no topo da página. */
+  id?: string;
   title: string;
   hint: string;
   rows: HubRow[];
@@ -33,7 +35,7 @@ type Props = {
 };
 
 /** Fila da central de inscrições: lista por pendência com seleção e ação em lote. */
-export function HubQueue({ title, hint, rows, action, fieldName = "registration_id", actionLabel, returnTo, hiddenFields }: Props) {
+export function HubQueue({ id, title, hint, rows, action, fieldName = "registration_id", actionLabel, returnTo, hiddenFields }: Props) {
   const [selected, setSelected] = useState<string[]>([]);
   const allSelected = rows.length > 0 && selected.length === rows.length;
   const selectable = Boolean(action);
@@ -61,7 +63,7 @@ export function HubQueue({ title, hint, rows, action, fieldName = "registration_
   );
 
   return (
-    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-xs" aria-label={title}>
+    <section id={id} className="scroll-mt-24 overflow-hidden rounded-xl border border-border bg-card shadow-xs" aria-label={title}>
       <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3 sm:px-5">
         <div className="space-y-0.5">
           <h2 className="flex items-center gap-2 text-base font-semibold">

@@ -14,7 +14,7 @@ export type FilterChip = {
  * Linha de filtros por URL com contagem: substitui faixas de KPIs que só servem para filtrar a lista.
  * Cada chip é um link, então o voltar do navegador desfaz o filtro.
  */
-export function FilterChips({ label, items }: { label: string; items: FilterChip[] }) {
+export function FilterChips({ label, items, scroll = false }: { label: string; items: FilterChip[]; /** true para chips que levam a âncoras na própria página. */ scroll?: boolean }) {
   return (
     <nav aria-label={label} className="-mx-1 overflow-x-auto px-1">
       <ul className="flex w-max gap-2">
@@ -22,7 +22,7 @@ export function FilterChips({ label, items }: { label: string; items: FilterChip
           <li key={item.href}>
             <Link
               href={item.href}
-              scroll={false}
+              scroll={scroll}
               aria-current={item.active ? "page" : undefined}
               className={cn(
                 "inline-flex min-h-10 items-center gap-2 rounded-xl border px-3.5 text-sm font-medium transition-colors duration-(--duration-quick) motion-reduce:transition-none",
