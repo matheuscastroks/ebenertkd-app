@@ -490,7 +490,7 @@ function CalculatorBody({
                 <SectionTitle>Suas metas</SectionTitle>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <FieldHeading htmlFor="calc-prolabore" label="Meta de pró-labore" help="Salário que você deseja tirar por mês." />
+                    <FieldHeading htmlFor="calc-prolabore" label="Meta de pró-labore" />
                     <AffixInput id="calc-prolabore" prefix="R$" value={proLabore} onChange={setProLabore} />
                   </div>
                   <div className="space-y-1.5">
@@ -527,9 +527,9 @@ function CalculatorBody({
               <div className="flex items-center gap-1">
                 <Button type="button" variant="ghost" size="sm" className="min-h-10 text-muted-foreground" onClick={resetDraft}>
                   <Eraser className="size-4" aria-hidden="true" />
-                  Limpar custos e metas
+                  Limpar rascunho
                 </Button>
-                <InfoTip label="Sobre o rascunho">Apaga o rascunho guardado neste navegador. Os números reais da academia não mudam.</InfoTip>
+                <span className="text-xs text-muted-foreground">Só o rascunho deste navegador.</span>
               </div>
             </CardContent>
           </Card>
@@ -580,14 +580,12 @@ function CalculatorBody({
                   <CardHeader>
                     <div className="flex items-center gap-1">
                       <CardTitle>Alunos necessários a {formatBrl(feeCents)}</CardTitle>
-                      <InfoTip label="Como comparar valores">Altere a mensalidade média em “Seus números” para comparar valores.</InfoTip>
                     </div>
                   </CardHeader>
                   <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                       <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
-                        Ponto de equilíbrio
-                        <InfoTip label="Sobre o ponto de equilíbrio">Só os custos fixos.</InfoTip>
+                        Ponto de equilíbrio · só custos fixos
                       </div>
                       <p data-testid="students-break-even" className="mt-1 text-2xl font-semibold tabular-nums">
                         {breakEven.ok ? breakEven.value : "—"}
@@ -596,8 +594,7 @@ function CalculatorBody({
                     </div>
                     <div>
                       <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
-                        Meta completa
-                        <InfoTip label="Sobre a meta completa">Custos fixos, pró-labore e reserva.</InfoTip>
+                        Meta completa · com pró-labore e reserva
                       </div>
                       <p data-testid="students-goal" className="mt-1 text-2xl font-semibold tabular-nums">
                         {needed.ok ? needed.value : "—"}
@@ -619,7 +616,7 @@ function CalculatorBody({
                   <CardHeader>
                     <div className="flex items-center gap-1">
                       <CardTitle>E se...?</CardTitle>
-                      <InfoTip label="Sobre o modo E se">Simule mudanças sem alterar seus números reais.</InfoTip>
+                      <span className="text-sm text-muted-foreground">Simule sem alterar seus números reais.</span>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-6">
@@ -636,14 +633,14 @@ function CalculatorBody({
 
                     <div className="space-y-3">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <SectionTitle help="Somam um custo extra só neste cenário.">Atalhos</SectionTitle>
+                        <SectionTitle>Atalhos</SectionTitle>
                         <Button type="button" variant="outline" size="sm" className="min-h-10" onClick={() => setStudentsDelta(-5)}>
                           Perdi 5 alunos
                         </Button>
                       </div>
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                         <div className="space-y-1.5">
-                          <FieldHeading htmlFor="shortcut-instructor" label="Contratar instrutor" help="Custo mensal do novo instrutor." />
+                          <FieldHeading htmlFor="shortcut-instructor" label="Contratar instrutor" />
                           <AffixInput id="shortcut-instructor" prefix="R$" value={instructorCost} onChange={setInstructorCost} />
                           <Button type="button" variant="outline" size="sm" className="min-h-10 w-full" disabled={parseMoneyInput(instructorCost) <= 0} onClick={() => { addExtra("Instrutor", parseMoneyInput(instructorCost)); setInstructorCost(""); }}>
                             Aplicar
