@@ -9,6 +9,7 @@ import { CardGridSkeleton, ListItemsSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import type { Profile } from "@/features/auth/types";
 import { AddToCalendarButton } from "@/features/classes/components/add-to-calendar-button";
+import { CheckInSection } from "@/features/classes/components/check-in-section";
 import { findFirstOccurrenceDate } from "@/features/classes/student-calendar-rules";
 import { getStudentCalendarData } from "@/features/classes/student-calendar-service";
 import { requireCapability } from "@/lib/auth/session";
@@ -207,6 +208,9 @@ export default async function StudentCalendarPage() {
       subtitle="Seus horários e os próximos treinos."
     >
       <div className="w-full min-w-0 space-y-6">
+        <Suspense fallback={null}>
+          <CheckInSection profile={profile} />
+        </Suspense>
         <Suspense
           fallback={
             <div className="space-y-6">

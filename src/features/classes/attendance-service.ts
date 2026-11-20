@@ -13,7 +13,7 @@ import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { invalidateTags } from "@/lib/cache/invalidate";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 
-const attendanceId = (lessonId: string, classEnrollmentId: string) => createHash("sha256").update(`${lessonId}:${classEnrollmentId}`).digest("hex").slice(0, 36);
+export const attendanceId = (lessonId: string, classEnrollmentId: string) => createHash("sha256").update(`${lessonId}:${classEnrollmentId}`).digest("hex").slice(0, 36);
 
 export async function getAttendanceSheet(lessonId: string) {
   const { tables, config } = createAppwriteAdminClient();
@@ -77,7 +77,11 @@ export async function saveAttendanceBatch(actor: Profile, raw: unknown) {
     await Promise.all(input.records.map((record) => {
       const row = sheet.rows.find((item) => item.classEnrollment.$id === record.classEnrollmentId)!;
       const current = row.attendance;
-      const data = { status: record.status, recorded_by_account_id: actor.account_id, correction_reason: current && current.status !== record.status ? input.correctionReason : current?.correction_reason, updated_at: now };
+      const changed = !current || current.status !== record.status;
+      // Registro sem mudança (ex.: check-in confirmado) mantém autor e origem; mudança vira registro do professor.
+      const data = changed
+        ? { status: record.status, recorded_by_account_id: actor.account_id, source: "admin" as const, correction_reason: current ? input.correctionReason : undefined, updated_at: now }
+        : { updated_at: now };
       return current
         ? tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.attendanceRecords, rowId: current.$id, data, transactionId: transaction.$id })
         : tables.createRow<AttendanceRecord>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.attendanceRecords, rowId: attendanceId(sheet.lesson.$id, row.classEnrollment.$id), permissions: [], transactionId: transaction.$id, data: { lesson_id: sheet.lesson.$id, class_enrollment_id: row.classEnrollment.$id, enrollment_id: row.classEnrollment.enrollment_id, student_id: row.classEnrollment.student_id, ...data, created_at: now } });

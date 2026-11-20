@@ -3,6 +3,7 @@ import "server-only";
 import { AppwriteException, ID, Query, type Models } from "node-appwrite";
 import { writeAuditEvent } from "@/features/auth/service";
 import type { Profile } from "@/features/auth/types";
+import { DEFAULT_CHECK_IN_RADIUS_M } from "@/features/classes/check-in-rules";
 import { locationInputSchema, sortLocations, toTrainingLocation, type LocationRow } from "@/features/locations/locations-rules";
 import type { TrainingLocation } from "@/features/locations/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
@@ -26,7 +27,7 @@ const activeRows = () =>
       tableId: APPWRITE_IDS.tables.trainingLocations,
       queries: [Query.equal("status", ["active"]), Query.limit(200)]
     });
-    return result.rows.map(({ $id, name, address, complement, notes, is_default, status, created_at, $createdAt }) => ({ $id, name, address, complement, notes, is_default, status, created_at, $createdAt }));
+    return result.rows.map(({ $id, name, address, complement, notes, is_default, latitude, longitude, check_in_radius_m, status, created_at, $createdAt }) => ({ $id, name, address, complement, notes, is_default, latitude, longitude, check_in_radius_m, status, created_at, $createdAt }));
   });
 
 /** Locais ativos (padrão primeiro). Nunca lança: sem tabela ou com falha de leitura devolve lista vazia. */
@@ -62,6 +63,9 @@ export async function saveLocation(actor: Profile, raw: unknown): Promise<Traini
     complement: input.complement ?? null,
     notes: input.notes ?? null,
     is_default: makeDefault,
+    latitude: input.latitude ?? null,
+    longitude: input.longitude ?? null,
+    check_in_radius_m: input.latitude === undefined ? null : Math.round(input.check_in_radius_m ?? DEFAULT_CHECK_IN_RADIUS_M),
     updated_by_account_id: actor.account_id,
     updated_at: now
   };
@@ -81,7 +85,7 @@ export async function saveLocation(actor: Profile, raw: unknown): Promise<Traini
   }
   invalidateTags(CACHE_TAGS.trainingLocations);
   // Auditoria sem endereço nem texto livre: só o identificador e o tipo da operação.
-  await writeAuditEvent(existing ? "training_location.updated" : "training_location.created", actor.account_id, "training_location", saved.$id, { is_default: makeDefault });
+  await writeAuditEvent(existing ? "training_location.updated" : "training_location.created", actor.account_id, "training_location", saved.$id, { is_default: makeDefault, has_coordinates: input.latitude !== undefined });
   return toTrainingLocation({ ...saved, status: "active" });
 }
 

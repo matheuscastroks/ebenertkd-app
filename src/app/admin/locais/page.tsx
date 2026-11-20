@@ -1,4 +1,4 @@
-import { MapPin, Plus, Trash2 } from "@/components/ui/icons";
+import { MapPin, Pencil, Plus, Trash2 } from "@/components/ui/icons";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
@@ -22,6 +22,40 @@ import {
 import { requireProfile } from "@/lib/auth/session";
 import { listLocations } from "@/features/locations/locations-service";
 import { deleteLocationAction, saveLocationAction } from "@/app/actions/locations";
+import { LocationCoordinatesFields } from "@/features/locations/components/location-coordinates-fields";
+import type { TrainingLocation } from "@/features/locations/types";
+
+/** Formulário de local (criação e edição). Inputs sem `text-sm`: 16px no celular evita o zoom do iOS. */
+function LocationForm({ location }: { location?: TrainingLocation }) {
+  const prefix = location ? `loc-${location.id}` : "loc-new";
+  return (
+    <form action={saveLocationAction} className="space-y-4 pt-2">
+      {location ? <input type="hidden" name="id" value={location.id} /> : null}
+      <Field>
+        <FieldLabel htmlFor={`${prefix}-name`}>Nome do local</FieldLabel>
+        <Input id={`${prefix}-name`} name="name" defaultValue={location?.name} placeholder="Ex.: Dojang Principal, Tatame 2, Ginásio Municipal" className="h-11" required />
+      </Field>
+      <Field>
+        <FieldLabel htmlFor={`${prefix}-address`}>Endereço completo</FieldLabel>
+        <Input id={`${prefix}-address`} name="address" defaultValue={location?.address} placeholder="Ex.: Rua das Flores, 123 — Centro" className="h-11" />
+      </Field>
+      <Field>
+        <FieldLabel htmlFor={`${prefix}-complement`}>Complemento / Espaço</FieldLabel>
+        <Input id={`${prefix}-complement`} name="complement" defaultValue={location?.complement} placeholder="Ex.: Sala 2, Tatame Olímpico, 2º Andar" className="h-11" />
+      </Field>
+      <Field>
+        <FieldLabel htmlFor={`${prefix}-notes`}>Observações</FieldLabel>
+        <Textarea id={`${prefix}-notes`} name="notes" defaultValue={location?.notes} placeholder="Ex.: Estacionamento no local, vestiários com chuveiro" className="min-h-20" />
+      </Field>
+      <LocationCoordinatesFields idPrefix={prefix} latitude={location?.latitude} longitude={location?.longitude} radius={location?.check_in_radius_m} />
+      <div className="pt-2">
+        <FormSubmitButton className="min-h-11 w-full" pendingLabel="Salvando local…">
+          Salvar local
+        </FormSubmitButton>
+      </div>
+    </form>
+  );
+}
 
 export default async function AdminLocationsPage({
   searchParams,
@@ -51,54 +85,7 @@ export default async function AdminLocationsPage({
           title="Cadastrar Novo Local"
           description="Adicione um dojang, tatame ou espaço esportivo para vincular a turmas e exames."
         >
-          <form action={saveLocationAction} className="space-y-4 pt-2">
-            <Field>
-              <FieldLabel htmlFor="loc-name">Nome do local</FieldLabel>
-              <Input
-                id="loc-name"
-                name="name"
-                placeholder="Ex.: Dojang Principal, Tatame 2, Ginásio Municipal"
-                className="h-11 text-sm"
-                required
-              />
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="loc-address">Endereço completo</FieldLabel>
-              <Input
-                id="loc-address"
-                name="address"
-                placeholder="Ex.: Rua das Flores, 123 — Centro"
-                className="h-11 text-sm"
-              />
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="loc-complement">Complemento / Espaço</FieldLabel>
-              <Input
-                id="loc-complement"
-                name="complement"
-                placeholder="Ex.: Sala 2, Tatame Olímpico, 2º Andar"
-                className="h-11 text-sm"
-              />
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="loc-notes">Observações</FieldLabel>
-              <Textarea
-                id="loc-notes"
-                name="notes"
-                placeholder="Ex.: Estacionamento no local, vestiários com chuveiro"
-                className="min-h-20 text-sm"
-              />
-            </Field>
-
-            <div className="pt-2">
-              <FormSubmitButton className="min-h-11 w-full" pendingLabel="Salvando local…">
-                Salvar local
-              </FormSubmitButton>
-            </div>
-          </form>
+          <LocationForm />
         </ResponsiveDialog>
       }
     >
@@ -123,7 +110,7 @@ export default async function AdminLocationsPage({
           <OperationToast
             tone="error"
             title="Não foi possível salvar o local"
-            description="Confira se o nome do local foi preenchido corretamente."
+            description="Confira o nome e as coordenadas (latitude e longitude juntas, raio entre 25 e 2000 m)."
             clearParams={["error"]}
           />
         ) : null}
@@ -167,6 +154,10 @@ export default async function AdminLocationsPage({
                   <p className="text-xs text-muted-foreground">{loc.complement}</p>
                 ) : null}
 
+                <p className="text-xs text-muted-foreground">
+                  {loc.latitude !== undefined ? `Check-in num raio de ${loc.check_in_radius_m} m` : "Sem coordenadas: check-in pelo app desativado"}
+                </p>
+
                 {loc.notes ? (
                   <p className="rounded-lg bg-muted/40 p-2 text-xs text-muted-foreground italic">
                     {loc.notes}
@@ -174,15 +165,28 @@ export default async function AdminLocationsPage({
                 ) : null}
               </div>
 
+              <div className="mt-4 flex flex-wrap justify-end gap-2 border-t border-border/60 pt-3">
+                <ResponsiveDialog
+                  size="lg"
+                  trigger={
+                    <Button type="button" variant="ghost" size="sm" className="min-h-11 text-sm">
+                      <Pencil className="mr-1 size-3.5" aria-hidden="true" />
+                      Editar
+                    </Button>
+                  }
+                  title={`Editar ${loc.name}`}
+                  description="Atualize o endereço e as coordenadas usadas no check-in dos alunos."
+                >
+                  <LocationForm location={loc} />
+                </ResponsiveDialog>
               {!loc.is_default ? (
-                <div className="mt-4 flex justify-end border-t border-border/60 pt-3">
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-8 text-xs text-destructive hover:bg-destructive/10"
+                        className="min-h-11 text-sm text-destructive hover:bg-destructive/10"
                       >
                         <Trash2 className="mr-1 size-3.5" aria-hidden="true" />
                         Excluir
@@ -206,8 +210,8 @@ export default async function AdminLocationsPage({
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
-                </div>
               ) : null}
+              </div>
             </div>
           ))}
         </div>

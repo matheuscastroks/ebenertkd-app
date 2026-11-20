@@ -47,6 +47,11 @@ export type AttendanceRecord = Models.Row & {
   status: "present" | "absent" | "excused";
   recorded_by_account_id: string;
   correction_reason?: string | null;
+  /** Quem originou o registro: chamada do professor, check-in, justificativa do aluno ou falta automática. */
+  source?: "admin" | "check_in" | "justification" | "auto" | null;
+  justification?: string | null;
+  check_in_distance_m?: number | null;
+  checked_in_at?: string | null;
   created_at: string;
   updated_at: string;
 };

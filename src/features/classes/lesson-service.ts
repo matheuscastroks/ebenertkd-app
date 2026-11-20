@@ -12,8 +12,8 @@ import { createAppwriteAdminClient } from "@/lib/appwrite/server";
 import { invalidateTags } from "@/lib/cache/invalidate";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 
-const lessonDateTime = (date: string) => `${canonicalLessonDate(date)}T12:00:00.000Z`;
-const lessonId = (classId: string, date: string, startTime: string) => createHash("sha256").update(`${classId}:${date}:${startTime}`).digest("hex").slice(0, 36);
+export const lessonDateTime = (date: string) => `${canonicalLessonDate(date)}T12:00:00.000Z`;
+export const lessonId = (classId: string, date: string, startTime: string) => createHash("sha256").update(`${classId}:${date}:${startTime}`).digest("hex").slice(0, 36);
 
 export async function createLesson(actor: Profile, raw: unknown) {
   if (actor.role !== "admin") throw new Error("admin_required");

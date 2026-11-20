@@ -24,7 +24,8 @@ async function DependentSummary({ guardian, minor }: { guardian: Profile; minor:
   const [snapshot] = await loadDependentSnapshots(guardian, [minor]);
   const { student, summary, next, trainingClass, pendencies } = snapshot;
   const firstName = minor.full_name.split(" ")[0];
-  return <div className="mx-auto max-w-3xl space-y-6">
+  return <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+    <div className="min-w-0 space-y-6">
     {pendencies.length > 0 ? (
       <section aria-labelledby="dependent-pendencies" className="space-y-2.5">
         <h2 id="dependent-pendencies" className="text-base font-semibold">Pendências</h2>
@@ -45,8 +46,9 @@ async function DependentSummary({ guardian, minor }: { guardian: Profile; minor:
       </Link>
     </section>
     {pendencies.length === 0 ? <p className="text-sm text-muted-foreground">Nada pendente para {firstName}.</p> : null}
+    </div>
     <GraduationCard title="Faixa" rankKey={student?.rank_key} startedAtTkd={student?.started_at_tkd} />
-    <Link href={dependentAccessPath(minor.$id)} className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-primary hover:underline">
+    <Link href={dependentAccessPath(minor.$id)} className="inline-flex w-fit lg:col-span-2 min-h-11 items-center gap-1 text-sm font-medium text-primary hover:underline">
       Acesso e senha de {firstName}
       <ChevronRightIcon className="size-4" aria-hidden="true" />
     </Link>
@@ -54,9 +56,11 @@ async function DependentSummary({ guardian, minor }: { guardian: Profile; minor:
 }
 
 function SummarySkeleton() {
-  return <div role="status" aria-label="Carregando resumo" className="mx-auto max-w-3xl space-y-6">
-    <Skeleton className="h-24 w-full rounded-xl" />
-    <Skeleton className="h-36 w-full rounded-xl" />
+  return <div role="status" aria-label="Carregando resumo" className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+    <div className="space-y-6">
+      <Skeleton className="h-24 w-full rounded-xl" />
+      <Skeleton className="h-36 w-full rounded-xl" />
+    </div>
     <Skeleton className="h-52 w-full rounded-xl" />
   </div>;
 }

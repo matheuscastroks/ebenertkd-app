@@ -53,7 +53,9 @@ export async function StudentDashboardDynamic({ profile, minor, footer }: { prof
   const primary = primaryPendency(pendencies);
   const { summary } = attendance;
 
-  return <div className="mx-auto max-w-3xl space-y-6">
+  // Celular: uma coluna na ordem de prioridade. Desktop: rotina à esquerda, faixa à direita.
+  return <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+    <div className="min-w-0 space-y-6">
     {pendencies.length > 0 ? (
       <section aria-labelledby="pendencies-title" className="space-y-2.5">
         <h2 id="pendencies-title" className="text-base font-semibold">Pendências</h2>
@@ -83,8 +85,9 @@ export async function StudentDashboardDynamic({ profile, minor, footer }: { prof
     </section>
 
     {pendencies.length === 0 ? <p className="text-sm text-muted-foreground">Tudo em dia. Nada precisa da sua atenção agora.</p> : null}
+    </div>
 
     <GraduationCard rankKey={student?.rank_key} startedAtTkd={student?.started_at_tkd} />
-    {footer}
+    {footer ? <div className="lg:col-span-2">{footer}</div> : null}
   </div>;
 }

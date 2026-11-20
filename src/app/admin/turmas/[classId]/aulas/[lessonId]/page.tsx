@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { AttendanceSheet } from "@/features/classes/components/attendance-sheet";
+import { attendanceSourceNote } from "@/features/classes/check-in-labels";
 import { getAttendanceSheet } from "@/features/classes/attendance-service";
 import { getTrainingClass } from "@/features/classes/service";
 import { requireProfile } from "@/lib/auth/session";
@@ -58,7 +59,8 @@ export default async function LessonAttendancePage({
             studentName: row.student!.full_name,
             rankKey: row.student!.rank_key,
             photoDocumentId: row.photoDocumentId,
-            status: row.attendance?.status
+            status: row.attendance?.status,
+            note: attendanceSourceNote(row.attendance)
           }))}
         />
       </div>

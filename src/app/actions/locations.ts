@@ -29,6 +29,9 @@ export async function saveLocationAction(formData: FormData) {
       address: formData.get("address")?.toString(),
       complement: formData.get("complement")?.toString(),
       notes: formData.get("notes")?.toString(),
+      latitude: formData.get("latitude")?.toString(),
+      longitude: formData.get("longitude")?.toString(),
+      check_in_radius_m: formData.get("check_in_radius_m")?.toString(),
       ...(formData.has("is_default") ? { is_default: formData.get("is_default") === "on" } : {})
     });
   } catch (error) {

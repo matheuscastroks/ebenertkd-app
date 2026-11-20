@@ -21,6 +21,8 @@ type AttendanceRow = {
   rankKey?: string | null;
   photoDocumentId?: string | null;
   status?: AttendanceStatus;
+  /** Origem do registro atual (check-in, justificativa do aluno, falta automática). */
+  note?: string | null;
 };
 
 const options: { value: AttendanceStatus; label: string; icon: typeof Check; active: string }[] = [
@@ -78,6 +80,7 @@ export function AttendanceSheet({ classId, lessonId, lessonCompleted, rows, noti
                 <div className="mt-0.5">
                   <BeltBadge rankKey={row.rankKey} size="sm" />
                 </div>
+                {row.note ? <p className="mt-1 text-sm text-muted-foreground break-words">{row.note}</p> : null}
               </div>
             </div>
             <div className="grid grid-cols-3 gap-2 lg:flex lg:shrink-0 lg:items-center" role="group" aria-label={`Presença de ${row.studentName}`}>

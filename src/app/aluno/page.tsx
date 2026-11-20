@@ -3,15 +3,18 @@ import { redirect } from "next/navigation";
 import { enableGuardianAction } from "@/app/actions/family";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CheckInSection } from "@/features/classes/components/check-in-section";
 import { StudentDashboardDynamic } from "@/features/students/components/student-dashboard";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
 
 function DashboardSkeleton() {
   return (
-    <div role="status" aria-label="Carregando início" className="mx-auto max-w-3xl space-y-6">
-      <Skeleton className="h-24 w-full rounded-xl" />
-      <Skeleton className="h-40 w-full rounded-xl" />
+    <div role="status" aria-label="Carregando início" className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+      <div className="space-y-6">
+        <Skeleton className="h-24 w-full rounded-xl" />
+        <Skeleton className="h-40 w-full rounded-xl" />
+      </div>
       <Skeleton className="h-52 w-full rounded-xl" />
     </div>
   );
@@ -33,9 +36,15 @@ export default async function StudentPage() {
   );
   return (
     <PortalShell profile={profile} title="Início" subtitle="Seu próximo treino, pendências e faixa.">
-      <Suspense fallback={<DashboardSkeleton />}>
-        <StudentDashboardDynamic profile={profile} minor={minor} footer={becomeGuardian} />
-      </Suspense>
+      <div className="space-y-6">
+        {/* Check-in só aparece no dia do treino; carrega à parte para não atrasar o resto. */}
+        <Suspense fallback={null}>
+          <CheckInSection profile={profile} />
+        </Suspense>
+        <Suspense fallback={<DashboardSkeleton />}>
+          <StudentDashboardDynamic profile={profile} minor={minor} footer={becomeGuardian} />
+        </Suspense>
+      </div>
     </PortalShell>
   );
 }
