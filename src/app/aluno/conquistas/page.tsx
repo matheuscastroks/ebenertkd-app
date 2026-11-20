@@ -24,11 +24,11 @@ async function StudentAchievementsContent({ profile }: { profile: Profile }) {
   if (!snapshot.student) {
     return (
       <EmptyState
-        title="Sua jornada começa no primeiro treino"
-        description="Complete sua matrícula para acompanhar suas sequências, medalhas e mapa de constância."
+        title="Preencha sua ficha para começar"
+        description="Depois que o professor aprovar a ficha, sua sequência, medalhas e presenças aparecem aqui."
         action={
           <Button asChild className="min-h-11">
-            <Link href={ROUTES.studentEnrollment}>Ir para minha matrícula</Link>
+            <Link href={ROUTES.studentEnrollment}>Preencher ficha</Link>
           </Button>
         }
       />
@@ -95,7 +95,7 @@ async function StudentAchievementsContent({ profile }: { profile: Profile }) {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
         <section className="rounded-xl border border-border bg-card p-5 shadow-xs">
-          <h2 className="mb-3 text-base font-semibold">Constância no dojang</h2>
+          <h2 className="mb-3 text-base font-semibold">Mapa de presenças</h2>
           <ConsistencyHeatmap weeks={report.heatmapWeeks} />
         </section>
 
@@ -105,12 +105,12 @@ async function StudentAchievementsContent({ profile }: { profile: Profile }) {
         </section>
       </div>
 
-      <EarnedBadges badges={toClientData(snapshot.earnedBadges)} />
+      <EarnedBadges badges={toClientData(snapshot.earnedBadges)} heading="Eventos e exames" />
 
       <section aria-labelledby="badges-heading" className="space-y-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 id="badges-heading" className="text-base font-semibold">
-            Marcos e conquistas
+            Medalhas
           </h2>
           <p className="text-xs text-muted-foreground">
             Faltas justificadas por saúde ou imprevistos não quebram sua sequência.
@@ -159,7 +159,7 @@ export default async function StudentAchievementsPage() {
     <PortalShell
       profile={profile}
       title="Faixa"
-      subtitle="Acompanhe sua sequência semanal de treinos, o mapa de presenças e seus marcos no Taekwondo."
+      subtitle="Sua sequência de treinos, medalhas e presenças."
     >
       <div className="w-full min-w-0 space-y-6">
         <Suspense

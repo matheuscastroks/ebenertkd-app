@@ -10,11 +10,8 @@ import { getBeltContext } from "@/features/academy/config-service";
 import type { Profile } from "@/features/auth/types";
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import { BeltProgressionPill } from "@/features/students/components/belt-progression-pill";
-import { StudentMonthlyProgressChart } from "@/features/students/components/journey-charts";
 import { getStudentJourneySnapshot } from "@/features/students/journey-service";
-import { EarnedBadges } from "@/features/students/components/earned-badges";
 import { requireCapability } from "@/lib/auth/session";
-import { toClientData } from "@/lib/client-data";
 import { formatBusinessDateBr } from "@/lib/dates";
 import { ROUTES } from "@/lib/navigation/routes";
 import { ArrowRight, BookOpen, CheckCircle2 } from "@/components/ui/icons";
@@ -25,18 +22,18 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
   if (!snapshot.student) {
     return (
       <EmptyState
-        title="Complete sua matrícula para acompanhar sua faixa"
-        description="Assim que sua ficha for aprovada, o caminho da faixa e o progresso para o próximo exame aparecerão aqui."
+        title="Preencha sua ficha para acompanhar a faixa"
+        description="Depois que o professor aprovar a ficha, o progresso para o próximo exame aparece aqui."
         action={
           <Button asChild className="min-h-11">
-            <Link href={ROUTES.studentEnrollment}>Ir para minha matrícula</Link>
+            <Link href={ROUTES.studentEnrollment}>Preencher ficha</Link>
           </Button>
         }
       />
     );
   }
 
-  const { readiness, roadmap, beltHistory, monthlySeries } = snapshot;
+  const { readiness, roadmap, beltHistory } = snapshot;
 
   return (
     <div className="space-y-6">
@@ -47,7 +44,7 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
         <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
             <p id="readiness-heading" className="text-sm font-medium text-muted-foreground">
-              Seu momento no Caminho da Faixa
+              Próxima faixa
             </p>
             {readiness.targetRankKey ? (
               <BeltProgressionPill
@@ -63,7 +60,7 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge tone={readiness.isPedagogicallyReady ? "success" : "info"}>
               {readiness.isBlackBelt
-                ? "Graduação Dan"
+                ? "Faixa preta"
                 : readiness.isPedagogicallyReady
                   ? "Critérios mínimos atingidos"
                   : `${readiness.overallProgressPct}% da meta técnica`}
@@ -89,14 +86,14 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
               <Progress value={readiness.presenceProgressPct} className="h-2.5" />
               <p className="text-xs text-muted-foreground">
                 {readiness.remainingPresences === 0
-                  ? "Meta mínima de presenças cumprida!"
-                  : `Faltam ${readiness.remainingPresences} presença${readiness.remainingPresences === 1 ? "" : "s"} para atingir a referência do exame.`}
+                  ? "Presenças mínimas cumpridas."
+                  : `Faltam ${readiness.remainingPresences} presença${readiness.remainingPresences === 1 ? "" : "s"} para o exame.`}
               </p>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-baseline justify-between gap-2 text-sm">
-                <span className="font-medium text-foreground">Tempo de carência na faixa</span>
+                <span className="font-medium text-foreground">Tempo na faixa atual</span>
                 <span className="font-semibold tabular-nums text-foreground">
                   {readiness.monthsInCurrentBelt} de {readiness.minMonthsRequired} meses
                 </span>
@@ -104,7 +101,7 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
               <Progress value={readiness.timeProgressPct} className="h-2.5" />
               <p className="text-xs text-muted-foreground">
                 {readiness.remainingDays === 0
-                  ? "Tempo mínimo de permanência cumprido!"
+                  ? "Tempo mínimo cumprido."
                   : `Faltam cerca de ${readiness.remainingDays} dia${readiness.remainingDays === 1 ? "" : "s"} na faixa atual.`}
               </p>
             </div>
@@ -138,7 +135,7 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
         >
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 id="roadmap-heading" className="text-base font-semibold">
-              Trilha completa das faixas
+              Todas as faixas
             </h2>
             <span className="text-xs text-muted-foreground">Da primeira graduação à mais alta da academia</span>
           </div>
@@ -179,16 +176,6 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
         </section>
 
         <div className="space-y-6">
-          <section
-            aria-labelledby="monthly-progress-heading"
-            className="rounded-xl border border-border bg-card p-5 shadow-xs"
-          >
-            <h2 id="monthly-progress-heading" className="mb-2 text-base font-semibold">
-              Ritmo de treinos
-            </h2>
-            <StudentMonthlyProgressChart series={monthlySeries} />
-          </section>
-
           <section
             aria-labelledby="belt-history-heading"
             className="space-y-3 rounded-xl border border-border bg-card p-5 shadow-xs"
@@ -233,7 +220,6 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
           </section>
         </div>
       </div>
-      <EarnedBadges badges={toClientData(snapshot.earnedBadges)} />
     </div>
   );
 }
@@ -245,7 +231,7 @@ export default async function StudentEvolutionPage() {
     <PortalShell
       profile={profile}
       title="Faixa"
-      subtitle="Quanto falta para a próxima graduação."
+      subtitle="Quanto falta para a próxima faixa."
     >
       <div className="w-full min-w-0 space-y-6">
         <Suspense
