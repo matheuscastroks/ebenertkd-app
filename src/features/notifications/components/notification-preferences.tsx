@@ -56,9 +56,9 @@ export function NotificationPreferences({
       {options
         .filter((option) => showFinancial || option.key !== "financial_enabled")
         .map(({ key, label, description }) => (
-          <div
+          <label
             key={key}
-            className="flex min-h-14 items-center justify-between gap-4 p-4"
+            className="flex min-h-14 cursor-pointer items-center justify-between gap-4 p-4"
           >
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium">{label}</p>
@@ -70,7 +70,7 @@ export function NotificationPreferences({
               onCheckedChange={(checked) => change(key, checked)}
               className="shrink-0"
             />
-          </div>
+          </label>
         ))}
     </div>
   );

@@ -213,8 +213,8 @@ export function StudentEventsView(props: Props) {
       ) : null}
       <p className="text-sm text-muted-foreground">
         Exames de faixa ficam em{" "}
-        <Link href={props.examsHref} className="font-medium text-primary underline-offset-4 hover:underline">
-          Meus exames
+        <Link href={props.examsHref} className="inline-flex min-h-11 items-center font-medium text-primary underline-offset-4 hover:underline">
+          Faixa › Exames
         </Link>
         .
       </p>
