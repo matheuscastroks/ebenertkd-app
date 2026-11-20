@@ -2,10 +2,6 @@
   "src/app/admin/contratos/modelo/page.tsx": {
     "tinyText": 2
   },
-  "src/app/admin/dashboard-sections.tsx": {
-    "tinyText": 1,
-    "heavyFont": 2
-  },
   "src/app/admin/locais/page.tsx": {
     "tinyText": 1
   },

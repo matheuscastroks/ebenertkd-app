@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { dismissSetupBannerAction } from "@/app/actions/dashboard";
+import { SETUP_BANNER_COOKIE } from "@/features/academy/setup-banner";
 import { ArrowRightIcon } from "@/components/ui/arrow-right";
 import { ClipboardCheckIcon } from "@/components/ui/clipboard-check";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { BillingOverviewChart } from "@/features/billing/components/billing-overview-chart";
 import { getAcademyIdentity } from "@/features/academy/config-service";
 import { listEnrollmentsForReview } from "@/features/students/service";
 import { getBillingOverview } from "@/features/billing/report-service";
@@ -13,28 +14,34 @@ import { listTrainingClasses } from "@/features/classes/service";
 import { getTodayWeekday } from "@/features/classes/schedule";
 import { listExamEvents } from "@/features/exams/service";
 import { ROUTES, adminClassPath, adminEnrollmentPath } from "@/lib/navigation/routes";
-import { Calendar, FileText, MapPin, ReceiptText } from "@/components/ui/icons";
+import { Calendar, ChevronRight, FileText, MapPin, ReceiptText } from "@/components/ui/icons";
 
 const money = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value / 100);
 
-/** Cartão "Configure sua academia": aparece enquanto o assistente de primeiros passos não foi concluído. Não bloqueia o painel. */
+/**
+ * Aviso "Configure sua academia": aparece até o assistente de primeiros passos ser concluído.
+ * Fica abaixo das tarefas do dia e pode ser dispensado neste aparelho; não bloqueia o painel.
+ */
 export async function SetupCardSection() {
-  const identity = await getAcademyIdentity();
-  if (identity.setup_completed_at) return null;
+  const [identity, store] = await Promise.all([getAcademyIdentity(), cookies()]);
+  if (identity.setup_completed_at || store.get(SETUP_BANNER_COOKIE)) return null;
   return (
-    <Card className="rounded-xl border border-primary/25 bg-primary/5 p-5 sm:p-6 shadow-xs">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1.5">
-          <CardTitle className="text-base font-semibold text-foreground">Configure sua academia</CardTitle>
-          <CardDescription className="text-sm leading-relaxed text-muted-foreground">
-            Em cinco passos curtos você confirma nome, graduações, mensalidade, PIX e contrato. Tudo já funciona com os valores atuais; ajuste quando quiser.
-          </CardDescription>
-        </div>
-        <Button asChild className="min-h-11 shrink-0">
+    <section aria-label="Configuração da academia" className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-xs sm:flex-row sm:items-center sm:justify-between sm:px-5">
+      <div className="min-w-0 space-y-1">
+        <h2 className="text-sm font-semibold text-foreground">Configure sua academia</h2>
+        <p className="text-sm text-muted-foreground">
+          Cinco passos curtos: nome, graduações, mensalidade, PIX e contrato. Tudo já funciona com os valores atuais.
+        </p>
+      </div>
+      <div className="flex shrink-0 flex-wrap gap-2">
+        <form action={dismissSetupBannerAction}>
+          <Button type="submit" variant="ghost" className="min-h-11">Agora não</Button>
+        </form>
+        <Button asChild variant="outline" className="min-h-11">
           <Link href={ROUTES.adminAcademySetup}>Começar configuração</Link>
         </Button>
       </div>
-    </Card>
+    </section>
   );
 }
 
@@ -68,9 +75,9 @@ export async function UrgentTasksSection() {
   if (!enrollments.length && !proofs.length) {
     return (
       <section className="space-y-3" aria-label="Pendências">
-        <h2 className="text-base font-semibold">Aguardando sua conferência</h2>
+        <h2 className="text-base font-semibold">Aguardando você</h2>
         <div className="rounded-xl border border-border bg-card p-5 text-center text-sm text-muted-foreground shadow-xs">
-          Tudo em dia! Nenhuma matrícula ou comprovante aguardando conferência no momento.
+          Tudo em dia. Nenhuma ficha ou comprovante esperando por você.
         </div>
       </section>
     );
@@ -80,7 +87,7 @@ export async function UrgentTasksSection() {
     <section className="space-y-3" aria-label="Pendências">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <h2 className="text-base font-semibold text-foreground">Aguardando sua conferência</h2>
+          <h2 className="text-base font-semibold text-foreground">Aguardando você</h2>
           <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary-text tabular-nums">
             {totalUrgent} {totalUrgent === 1 ? "item" : "itens"}
           </span>
@@ -101,7 +108,7 @@ export async function UrgentTasksSection() {
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-foreground">{student.full_name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {enrollment?.status === "under_review" ? "Matrícula em análise" : "Nova matrícula enviada"}
+                    {enrollment?.status === "under_review" ? "Ficha em análise" : "Nova ficha enviada"}
                   </p>
                 </div>
               </div>
@@ -145,10 +152,10 @@ export async function UrgentTasksSection() {
 
         <div className="flex flex-wrap items-center justify-between gap-2 bg-muted/20 px-4 py-2.5 sm:px-5">
           <Button asChild variant="ghost" size="sm" className="min-h-9 text-xs text-muted-foreground hover:text-foreground">
-            <Link href={ROUTES.adminEnrollments}>Ver todas as matrículas ({enrollments.length})</Link>
+            <Link href={ROUTES.adminEnrollments}>Ver fichas ({enrollments.length})</Link>
           </Button>
           <Button asChild variant="ghost" size="sm" className="min-h-9 text-xs text-muted-foreground hover:text-foreground">
-            <Link href={`${ROUTES.adminBilling}?status=proof_under_review`}>Ver todos os comprovantes ({proofs.length})</Link>
+            <Link href={`${ROUTES.adminBilling}?status=proof_under_review`}>Ver comprovantes ({proofs.length})</Link>
           </Button>
         </div>
       </div>
@@ -180,58 +187,27 @@ export async function TodayClassesSection() {
   </section>;
 }
 
-export async function AdminMetricsSection() {
+/**
+ * Uma linha só sobre dinheiro: o que está em atraso, com atalho para Cobranças.
+ * O resumo completo do mês e os gráficos ficam em Financeiro.
+ */
+export async function OverdueSection() {
   const billing = await getBillingOverview({ page: 1 });
+  const overdue = billing.summary.overdueCents;
   return (
-    <section
-      aria-label="Resumo financeiro"
-      className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border"
+    <Link
+      href={`${ROUTES.adminBilling}?status=overdue`}
+      aria-label={overdue > 0 ? `Em atraso: ${money(overdue)}. Ver cobranças` : "Nenhuma mensalidade em atraso. Ver cobranças"}
+      className="t-interactive-row flex min-h-12 items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-xs transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:bg-muted motion-reduce:transition-none sm:px-5"
     >
-      <div className="grid grid-cols-1 divide-y divide-border sm:grid-cols-2 sm:divide-x sm:divide-y-0">
-        <div className="p-4 sm:px-5">
-          <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <span className="size-2 shrink-0 rounded-full bg-success" aria-hidden="true" />
-            Recebido no mês
-          </p>
-          <p className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-success-foreground">
-            {money(billing.summary.receivedCents)}
-          </p>
-        </div>
-        <div className="p-4 sm:px-5">
-          <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <span
-              className={
-                billing.summary.overdueCents > 0
-                  ? "size-2 shrink-0 rounded-full bg-destructive"
-                  : "size-2 shrink-0 rounded-full bg-muted-foreground"
-              }
-              aria-hidden="true"
-            />
-            Mensalidades em atraso
-          </p>
-          <p
-            className={
-              billing.summary.overdueCents > 0
-                ? "mt-1 text-2xl font-semibold tracking-tight tabular-nums text-destructive"
-                : "mt-1 text-2xl font-semibold tracking-tight tabular-nums text-foreground"
-            }
-          >
-            {money(billing.summary.overdueCents)}
-          </p>
-        </div>
-      </div>
-
-      <div className="p-4 sm:p-5">
-        <p className="mb-3 text-sm font-medium text-muted-foreground">Comparativo financeiro do mês</p>
-        <BillingOverviewChart
-          monthlySeries={billing.monthlySeries}
-          receivedCents={billing.summary.receivedCents}
-          pendingCents={billing.summary.pendingCents}
-          overdueCents={billing.summary.overdueCents}
-          underReviewCents={billing.summary.underReviewCents}
-        />
-      </div>
-    </section>
+      <span className="text-sm text-muted-foreground">
+        {overdue > 0 ? "Em atraso" : "Mensalidades em dia"}
+      </span>
+      <span className="flex items-center gap-1">
+        {overdue > 0 ? <span className="text-sm font-semibold tabular-nums text-danger-text">{money(overdue)}</span> : null}
+        <ChevronRight className="size-4 text-muted-foreground" aria-hidden="true" />
+      </span>
+    </Link>
   );
 }
 
@@ -247,7 +223,7 @@ export async function NextExamSection() {
         <h2 className="text-base font-semibold text-foreground">Próximo exame de faixa</h2>
         {exam ? (
           <Button asChild variant="ghost" size="sm" className="min-h-9 text-xs text-muted-foreground hover:text-foreground">
-            <Link href={ROUTES.adminExams}>Ver todas as bancas</Link>
+            <Link href={ROUTES.adminExams}>Ver exames</Link>
           </Button>
         ) : null}
       </div>
@@ -255,12 +231,12 @@ export async function NextExamSection() {
       {exam ? (
         <div className="t-interactive-row flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-xs hover:border-primary/30 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div className="flex items-center gap-4 min-w-0">
-            {/* Bloco de Data Estilo Calendário Apple */}
+            {/* Data no estilo do Calendário */}
             <div className="flex size-14 shrink-0 flex-col items-center justify-center rounded-xl border border-primary/25 bg-primary/10 text-center select-none">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-primary-text">
+              <span className="text-xs font-medium text-primary-text">
                 {new Date(exam.event_date).toLocaleDateString("pt-BR", { month: "short", timeZone: "UTC" }).replace(".", "")}
               </span>
-              <span className="text-lg font-bold leading-none tabular-nums text-foreground">
+              <span className="text-lg font-semibold leading-none tabular-nums text-foreground">
                 {new Date(exam.event_date).toLocaleDateString("pt-BR", { day: "2-digit", timeZone: "UTC" })}
               </span>
             </div>
@@ -282,7 +258,7 @@ export async function NextExamSection() {
 
           <Button asChild variant="outline" className="min-h-11 shrink-0 font-medium">
             <Link href={`${ROUTES.adminExams}/${exam.$id}`}>
-              Abrir banca de exame
+              Abrir banca
               <ArrowRightIcon className="size-4" aria-hidden="true" />
             </Link>
           </Button>
