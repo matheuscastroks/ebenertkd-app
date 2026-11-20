@@ -150,7 +150,7 @@ export async function getStudentCheckInState(actor: Profile, now = new Date()): 
     throw error;
   }
   const sessions = await todaySessions(context.trainingClass, saoPauloToday(now));
-  const current = sessions.find((session) => checkInPhase(session.slot, now) !== "ended");
+  const current = sessions.find((session) => session.lesson?.status !== "completed" && checkInPhase(session.slot, now) !== "ended");
   if (!current) return null;
   const [record, locations] = await Promise.all([readRecord(current.lessonRowId, context.link.$id), listLocations()]);
   const window = checkInWindow(current.slot);

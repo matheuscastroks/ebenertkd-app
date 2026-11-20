@@ -74,11 +74,13 @@ export type LessonSlot = { date: string; startTime: string; endTime: string };
 export function checkInWindow(slot: LessonSlot) {
   const start = lessonInstant(slot.date, slot.startTime);
   const end = lessonInstant(slot.date, slot.endTime);
+  // Uma aula curta não pode continuar aceitando registros depois do seu término.
+  const endsAt = end.getTime() > start.getTime() ? end : new Date(start.getTime() + CHECK_IN_CLOSES_AFTER_MIN * MINUTE_MS);
   return {
     opensAt: new Date(start.getTime() - CHECK_IN_OPENS_BEFORE_MIN * MINUTE_MS),
-    closesAt: new Date(start.getTime() + CHECK_IN_CLOSES_AFTER_MIN * MINUTE_MS),
+    closesAt: new Date(Math.min(start.getTime() + CHECK_IN_CLOSES_AFTER_MIN * MINUTE_MS, endsAt.getTime())),
     // Aula que termina depois da meia-noite não existe na academia; ainda assim o fim nunca vem antes do início.
-    endsAt: end.getTime() > start.getTime() ? end : new Date(start.getTime() + CHECK_IN_CLOSES_AFTER_MIN * MINUTE_MS)
+    endsAt
   };
 }
 
@@ -94,7 +96,7 @@ export type CheckInPhase = "upcoming" | "open" | "late" | "ended";
 export function checkInPhase(slot: LessonSlot, now: Date): CheckInPhase {
   const { opensAt, closesAt, endsAt } = checkInWindow(slot);
   const time = now.getTime();
-  if (time >= endsAt.getTime() && time >= closesAt.getTime()) return "ended";
+  if (time >= endsAt.getTime()) return "ended";
   if (time > closesAt.getTime()) return "late";
   if (time >= opensAt.getTime()) return "open";
   return "upcoming";

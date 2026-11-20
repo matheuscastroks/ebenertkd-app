@@ -180,6 +180,11 @@ describe("justificativa", () => {
 });
 
 describe("estado do card", () => {
+  it("não oferece check-in de uma chamada já concluída pelo professor", async () => {
+    store.tables.lessons.l1 = { $id: "l1", training_class_id: "class-1", lesson_date: "2026-11-20T12:00:00.000Z", start_time: "19:00", end_time: "20:30", lesson_type: "regular", status: "completed" };
+    expect(await getStudentCheckInState(student, at("19:10"))).toBeNull();
+  });
+
   it("mostra a aula de hoje com fase e registro; some quando a aula acaba", async () => {
     const before = await getStudentCheckInState(student, at("18:00"));
     expect(before).toMatchObject({ phase: "upcoming", placeConfigured: true, record: null, slot: { date: "2026-11-20", startTime: "19:00", endTime: "20:30" } });

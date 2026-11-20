@@ -2,6 +2,11 @@ import { describe, expect, it } from "vitest";
 import { securityHeaders } from "./headers";
 
 describe("securityHeaders", () => {
+  it.each([true, false])("permite geolocalização só na própria origem e mantém câmera e microfone bloqueados (production=%s)", (production) => {
+    const policy = securityHeaders(production).find((header) => header.key === "Permissions-Policy")?.value;
+    expect(policy).toBe("camera=(), microphone=(), geolocation=(self)");
+  });
+
   it("bloqueia framing, sniffing e origens não declaradas", () => {
     const headers = Object.fromEntries(securityHeaders(true).map((header) => [header.key, header.value]));
     expect(headers["X-Frame-Options"]).toBe("DENY");

@@ -75,6 +75,13 @@ describe("janela de check-in", () => {
     expect([canCheckIn("upcoming"), canCheckIn("open"), canCheckIn("late"), canCheckIn("ended")]).toEqual([false, true, false, false]);
     expect([canJustify("upcoming"), canJustify("open"), canJustify("late"), canJustify("ended")]).toEqual([true, true, true, false]);
   });
+
+  it("encerra as ações ao fim de uma aula com menos de 30 minutos", () => {
+    const shortSlot = { ...slot, endTime: "19:20" };
+    expect(checkInWindow(shortSlot).closesAt).toEqual(at("19:20"));
+    expect(checkInPhase(shortSlot, at("19:19"))).toBe("open");
+    expect(checkInPhase(shortSlot, at("19:20"))).toBe("ended");
+  });
 });
 
 describe("justificativa e local", () => {
