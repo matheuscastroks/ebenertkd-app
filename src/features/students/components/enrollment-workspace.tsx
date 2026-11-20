@@ -126,7 +126,6 @@ export async function EnrollmentWorkspace({
           targetProfileId={target.$id}
           classes={toClientData(classes)}
           contractsHref={contractsHref}
-          guardianSigns={target.role === "minor_student" && actor.$id === target.$id}
           feedback={feedback}
         />
       </div>

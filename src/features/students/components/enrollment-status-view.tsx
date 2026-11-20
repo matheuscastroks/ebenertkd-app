@@ -162,28 +162,18 @@ export function EnrollmentStatusView({
   bundle,
   classes,
   contractsHref,
-  guardianSigns = false,
   onEdit,
 }: {
   bundle: EnrollmentBundle;
   classes: TrainingClass[];
   contractsHref?: string;
-  /** Aluno menor vendo a própria ficha: quem assina é o responsável, então o botão só leva à leitura. */
-  guardianSigns?: boolean;
   onEdit: (initialStep?: number) => void;
 }) {
   const ranks = useBeltRanks();
   const { levelLabel } = useBeltLabels();
   const { student, enrollment, documents } = bundle;
   const status = enrollment.status === "draft" ? "submitted" : enrollment.status;
-  const meta: StatusMeta = guardianSigns && status === "awaiting_signature"
-    ? {
-        ...STATUS_META[status],
-        title: "Ficha aprovada · Falta o responsável assinar",
-        description: "Seus dados foram aprovados. Quem assina o contrato é o seu responsável.",
-        contractsCtaLabel: "Ver contrato",
-      }
-    : STATUS_META[status];
+  const meta = STATUS_META[status];
 
   const profilePhoto = documents.find(
     (doc) => doc.document_type === "profile_photo" && doc.status !== "rejected"

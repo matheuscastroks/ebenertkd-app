@@ -40,7 +40,6 @@ export function EnrollmentForm({
   targetProfileId,
   classes,
   contractsHref,
-  guardianSigns,
   message,
   feedback,
 }: {
@@ -48,7 +47,6 @@ export function EnrollmentForm({
   targetProfileId: string;
   classes: TrainingClass[];
   contractsHref?: string;
-  guardianSigns?: boolean;
   message?: string;
   feedback?: Feedback | null;
 }) {
@@ -188,7 +186,6 @@ export function EnrollmentForm({
           bundle={bundle}
           classes={classes}
           contractsHref={contractsHref}
-          guardianSigns={guardianSigns}
           onEdit={(step = 0) => {
             setError("");
             setCurrent(step);
