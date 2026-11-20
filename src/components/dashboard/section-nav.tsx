@@ -40,9 +40,19 @@ export function ScreenSegments({ label, segments }: { label: string; segments: N
   return <SegmentBar label={label} segments={segments} active={active} />;
 }
 
+/**
+ * No celular a barra rola de lado; o segmento ativo pode nascer fora da tela.
+ * Centraliza só a barra (sem rolar a página) quando o link ativo é montado.
+ */
+function centerInScroller(link: HTMLAnchorElement | null) {
+  const scroller = link?.closest("nav");
+  if (!link || !scroller || scroller.scrollWidth <= scroller.clientWidth) return;
+  scroller.scrollLeft = link.offsetLeft - (scroller.clientWidth - link.offsetWidth) / 2;
+}
+
 function SegmentBar({ label, segments, active }: { label: string; segments: NavSegment[]; active?: NavSegment }) {
   return (
-    <nav aria-label={label} className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0">
+    <nav aria-label={label} className="relative -mx-4 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0">
       <ul className="inline-flex min-h-11 items-center gap-1 rounded-xl bg-muted p-1 text-muted-foreground">
         {segments.map((item) => {
           const isActive = item === active;
@@ -51,6 +61,7 @@ function SegmentBar({ label, segments, active }: { label: string; segments: NavS
               <Link
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
+                ref={isActive ? centerInScroller : undefined}
                 className={cn(
                   "inline-flex h-9 items-center whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   isActive ? "bg-card text-foreground shadow-xs" : "hover:text-foreground"
