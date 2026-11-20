@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { ChevronsUpDownIcon } from "@/components/ui/chevrons-up-down";
 import { SettingsIcon } from "@/components/ui/settings";
 import { ShieldCheckIcon } from "@/components/ui/shield-check";
@@ -73,7 +74,7 @@ export function AccountMenu({
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-xl"
+            className={cn("w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-xl", isMobile && "[&_[role=menuitem]]:min-h-12 [&_[role=menuitem]]:text-base [&_[role=menuitem]_svg]:size-5 [&_form_button]:min-h-12 [&_form_button]:text-base [&_form_button_svg]:size-5")}
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}

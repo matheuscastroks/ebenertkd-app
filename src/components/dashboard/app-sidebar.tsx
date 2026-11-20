@@ -77,12 +77,12 @@ export function AppSidebar({
   const groups = Array.from(new Set(sidebarItems.map((item) => item.group ?? "Principal")));
   return (
     <Sidebar variant="inset">
-      <SidebarHeader className="px-3 pb-2 pt-4">
+      <SidebarHeader className="px-3 pb-2 pt-4 group-data-[mobile=true]/mobile-sidebar:px-4 group-data-[mobile=true]/mobile-sidebar:pt-[max(1.25rem,env(safe-area-inset-top))]">
         <div className="flex items-center gap-2.5">
-          <Image src="/brand-icon.png" alt="" width={36} height={36} unoptimized className="size-9 shrink-0 object-contain" />
+          <Image src="/brand-icon.png" alt="" width={36} height={36} unoptimized className="size-9 shrink-0 object-contain group-data-[mobile=true]/mobile-sidebar:size-11" />
           <div className="min-w-0 flex-1">
-            <p className="font-display text-sm font-semibold leading-5">{shortName}</p>
-            <p className="text-xs leading-4 text-muted-foreground">{badge}</p>
+            <p className="font-display text-sm font-semibold leading-5 group-data-[mobile=true]/mobile-sidebar:text-base">{shortName}</p>
+            <p className="text-xs leading-4 text-muted-foreground group-data-[mobile=true]/mobile-sidebar:text-sm group-data-[mobile=true]/mobile-sidebar:leading-5">{badge}</p>
           </div>
         </div>
       </SidebarHeader>
@@ -105,7 +105,7 @@ export function AppSidebar({
         })}
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="group-data-[mobile=true]/mobile-sidebar:pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         {footerItems.length ? (
           <SidebarMenu>
             {footerItems.map((item) => <NavigationItem key={item.href} item={item} />)}

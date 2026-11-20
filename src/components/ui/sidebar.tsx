@@ -27,7 +27,7 @@ import { PanelLeftIcon } from "@/components/ui/icons"
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_WIDTH = "16rem"
-const SIDEBAR_WIDTH_MOBILE = "18rem"
+const SIDEBAR_WIDTH_MOBILE = "min(20rem, 85vw)"
 const SIDEBAR_WIDTH_ICON = "3rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
@@ -186,7 +186,8 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+          // Celular/PWA: alvos de toque de 48px, texto de 16px e ícones de 20px (HIG: mínimo de 44pt).
+          className="group/mobile-sidebar w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden [&_[data-sidebar=menu-button]]:min-h-12 [&_[data-sidebar=menu-button]]:gap-3 [&_[data-sidebar=menu-button]]:px-3 [&_[data-sidebar=menu-button]]:text-base [&_[data-sidebar=menu-button]_svg]:size-5 [&_[data-sidebar=menu]]:gap-1 [&_[data-sidebar=group-label]]:h-9 [&_[data-sidebar=group-label]]:text-sm [&_[data-sidebar=menu-badge]]:top-3.5"
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,

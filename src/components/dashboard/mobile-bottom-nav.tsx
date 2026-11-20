@@ -96,14 +96,14 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
     });
   }
 
-  const itemClass = "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-0.5 py-1.5 touch-manipulation transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+  const itemClass = "flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-0.5 py-1.5 touch-manipulation transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
   function renderContent(tab: BottomTab) {
     const Icon = tab.icon;
     return (
       <>
         <span className="relative">
-          <Icon className="size-5" strokeWidth={2} aria-hidden="true" />
+          <Icon className="size-6" strokeWidth={2} aria-hidden="true" />
           {tab.badge && tab.badge > 0 ? (
             <span
               className="t-badge-pop absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-semibold leading-none text-destructive-foreground tabular-nums"
