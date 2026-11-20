@@ -50,7 +50,7 @@ export default async function EnrollmentReviewPage({ params, searchParams }: { p
     <PortalShell
       profile={admin} back={{ label: "Alunos", href: ROUTES.adminEnrollments }}
       title={bundle.student.full_name}
-      subtitle="Análise da matrícula: ficha, documentos e condições."
+      subtitle="Confira a ficha e decida a matrícula."
     >
       <div className="w-full min-w-0">
         <ReviewPanel

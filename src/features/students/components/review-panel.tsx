@@ -16,7 +16,6 @@ import { CheckIcon } from "@/components/ui/check";
 import { FilePenLineIcon } from "@/components/ui/file-pen-line";
 import { SheetClose } from "@/components/ui/sheet";
 import { XIcon } from "@/components/ui/x";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -64,22 +63,30 @@ import { rankFullLabel } from "@/features/academy/belt-rules";
 import type { EnrollmentBundle } from "@/features/students/types";
 import { centsToReaisInput } from "@/lib/money";
 import { formatBrazilianPhone } from "@/lib/phone";
+import { cn } from "@/lib/utils";
 import { ENROLLMENT_STATUS_LABELS } from "@/features/students/enrollment-labels";
 import {
   AlertTriangle,
-  Award,
   CheckCircle2,
   ExternalLink,
   FileText,
-  HeartPulse,
   ImageIcon,
-  Phone,
-  ShieldCheck,
-  Users,
-  Wallet
+  Users
 } from "@/components/ui/icons";
 
 const dateValue = (value?: string | null) => value?.slice(0, 10) ?? "";
+
+/** Status em que a decisão (liberar assinatura ou renovar) é a ação principal da ficha. */
+const DECISION_STATUSES = new Set<string>(["draft", "submitted", "under_review", "awaiting_renewal"]);
+
+/** Rótulos do histórico da análise; ações desconhecidas caem num texto genérico. */
+const REVIEW_ACTION_LABELS: Record<string, string> = {
+  student_updated: "Dados do aluno atualizados",
+  financial_updated: "Condições financeiras salvas",
+  awaiting_signature: "Liberada para assinatura",
+  document_approved: "Documento aprovado",
+  document_rejected: "Documento reprovado"
+};
 
 const parqToneMap: Record<ParqStatus, "success" | "warning" | "danger"> = {
   valid: "success",
@@ -140,6 +147,96 @@ export function ReviewPanel({
   const isPhotoUploaded = Boolean(profilePhoto);
   const isMedApproved = medicalCertificate?.status === "approved";
 
+  // A decisão da matrícula fica no topo enquanto a ficha espera análise ou renovação;
+  // nos demais status ela continua junto do contrato.
+  const decisionOnTop = DECISION_STATUSES.has(enrollment.status);
+  const decisionPanel = (
+    <div className="lg:col-span-5 overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
+      {enrollment.status === "awaiting_renewal" ? (
+        <section className="p-5 space-y-4">
+          <div>
+            <h2 className="text-base font-semibold text-foreground">Renovar contrato</h2>
+            <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
+              Uma nova versão será emitida mantendo o histórico anterior preservado.
+            </p>
+          </div>
+
+          <form id="renew-contract-form" action={renewContractAction} className="space-y-3">
+            <input type="hidden" name="student_id" value={student.$id} />
+            <DateField
+              id="renewal-end"
+              name="ends_at"
+              label="Nova data final"
+              min={new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" })}
+              required
+            />
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button type="button" className="min-h-11 w-full">
+                  Emitir renovação
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Emitir renovação do contrato?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Uma nova versão do contrato será emitida para assinatura de {student.full_name}, mantendo o histórico anterior preservado.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel type="button">Voltar</AlertDialogCancel>
+                  <AlertDialogAction type="submit" form="renew-contract-form">
+                    Emitir renovação
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </form>
+        </section>
+      ) : (
+        <section className="p-5 space-y-4">
+          <div>
+            <h2 className="text-base font-semibold text-foreground">Decidir matrícula</h2>
+            <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
+              A assinatura digital é liberada após conferência dos dados cadastrais e financeiros.
+            </p>
+          </div>
+
+          {/* Checklist de requisitos para liberar assinatura */}
+          <div className="divide-y divide-border border-y border-border py-1 text-sm">
+            <p className="py-1.5 text-xs font-medium text-muted-foreground">O que falta</p>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-muted-foreground">Foto cadastrada:</span>
+              <span className={isPhotoUploaded ? "font-medium text-success" : "font-medium text-warning-foreground"}>
+                {isPhotoUploaded ? "Presente" : "Não enviada"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-muted-foreground">Atestado médico:</span>
+              <span className={isMedApproved ? "font-medium text-success" : "font-medium text-muted-foreground"}>
+                {isMedApproved ? "Aprovado" : "Pendente ou opcional"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-muted-foreground">Turma vinculada:</span>
+              <span className={student.training_class ? "font-medium text-foreground" : "font-medium text-muted-foreground"}>
+                {student.training_class ? "Definida" : "Não definida"}
+              </span>
+            </div>
+          </div>
+
+          <form action={advanceToSignatureAction} className="pt-2">
+            <input type="hidden" name="student_id" value={student.$id} />
+            <FormSubmitButton className="min-h-11 w-full" pendingLabel="Liberando assinatura…">
+              <FilePenLineIcon aria-hidden="true" />
+              Liberar para assinatura
+            </FormSubmitButton>
+          </form>
+        </section>
+      )}
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       {/* 1. Cabeçalho do Aluno com Avatar e Status Geral */}
@@ -151,9 +248,7 @@ export function ReviewPanel({
             size="lg"
           />
           <div>
-            <h1 className="text-lg font-bold text-foreground sm:text-xl">
-              {student.full_name}
-            </h1>
+            <p className="text-base font-semibold text-foreground">Ficha cadastral do aluno</p>
             <p className="text-xs sm:text-sm text-muted-foreground">
               CPF {student.cpf || "não informado"} · {rankLabel}
             </p>
@@ -185,38 +280,15 @@ export function ReviewPanel({
         />
       ) : null}
 
-      {/* 2. Abas de Gestão da Ficha de Matrícula (Padrão Apple HIG) */}
-      <Tabs defaultValue="cadastro" className="space-y-4">
-        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-xl bg-muted/80 p-1 sm:grid-cols-5">
-          <TabsTrigger value="cadastro" className="min-h-11 rounded-lg text-xs sm:text-sm font-medium">
-            <Phone className="mr-1.5 size-3.5 hidden sm:inline-block" aria-hidden="true" />
-            Cadastro & Contato
-          </TabsTrigger>
-          <TabsTrigger value="saude" className="min-h-11 rounded-lg text-xs sm:text-sm font-medium">
-            <HeartPulse className="mr-1.5 size-3.5 hidden sm:inline-block" aria-hidden="true" />
-            Saúde & PAR-Q
-          </TabsTrigger>
-          <TabsTrigger value="treino" className="min-h-11 rounded-lg text-xs sm:text-sm font-medium">
-            <Award className="mr-1.5 size-3.5 hidden sm:inline-block" aria-hidden="true" />
-            Treino & Acesso
-          </TabsTrigger>
-          <TabsTrigger value="documentos" className="min-h-11 rounded-lg text-xs sm:text-sm font-medium">
-            <FileText className="mr-1.5 size-3.5 hidden sm:inline-block" aria-hidden="true" />
-            Documentos
-          </TabsTrigger>
-          <TabsTrigger value="contrato" className="min-h-11 col-span-2 sm:col-span-1 rounded-lg text-xs sm:text-sm font-medium">
-            <Wallet className="mr-1.5 size-3.5 hidden sm:inline-block" aria-hidden="true" />
-            Contrato & Financeiro
-          </TabsTrigger>
-        </TabsList>
+      {decisionOnTop ? decisionPanel : null}
 
-        {/* ABA 1: Cadastro & Contato */}
-        <TabsContent value="cadastro" className="space-y-4">
+      <div className="space-y-6">
+        <section id="dados" aria-label="Dados" className="scroll-mt-24 space-y-4">
           <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
             <div className="p-5 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-base font-semibold text-foreground">Identificação e Contato</h2>
+                  <h2 className="text-base font-semibold text-foreground">Identificação e contato</h2>
                   <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                     Dados pessoais e canais de comunicação direta com o aluno ou responsáveis.
                   </p>
@@ -225,7 +297,7 @@ export function ReviewPanel({
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 text-sm">
                 <div className="space-y-0.5">
-                  <span className="text-xs text-muted-foreground block">Data de Nascimento</span>
+                  <span className="text-xs text-muted-foreground block">Data de nascimento</span>
                   <span className="font-medium text-foreground">
                     {dateValue(student.birth_date)
                       ? new Date(`${dateValue(student.birth_date)}T12:00:00`).toLocaleDateString("pt-BR")
@@ -239,11 +311,11 @@ export function ReviewPanel({
                   </span>
                 </div>
                 <div className="space-y-0.5">
-                  <span className="text-xs text-muted-foreground block">Contato do Responsável</span>
+                  <span className="text-xs text-muted-foreground block">Contato do responsável</span>
                   <span className="font-medium text-foreground">{student.guardian_contact || "Não informado / próprio aluno"}</span>
                 </div>
                 <div className="space-y-0.5 sm:col-span-2 lg:col-span-3">
-                  <span className="text-xs text-muted-foreground block">Endereço Residencial</span>
+                  <span className="text-xs text-muted-foreground block">Endereço</span>
                   <span className="font-medium text-foreground">{student.address || "—"}</span>
                 </div>
               </div>
@@ -251,7 +323,7 @@ export function ReviewPanel({
 
             <div className="p-5 space-y-4">
               <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Users className="size-4 text-muted-foreground" aria-hidden="true" /> Contato de Emergência
+                <Users className="size-4 text-muted-foreground" aria-hidden="true" /> Contato de emergência
               </h3>
               <div className="grid gap-4 sm:grid-cols-3 text-sm">
                 <div className="space-y-0.5">
@@ -259,11 +331,11 @@ export function ReviewPanel({
                   <span className="font-medium text-foreground">{student.emergency_contact_name || "—"}</span>
                 </div>
                 <div className="space-y-0.5">
-                  <span className="text-xs text-muted-foreground block">Parentesco / Relação</span>
+                  <span className="text-xs text-muted-foreground block">Parentesco</span>
                   <span className="font-medium text-foreground">{student.emergency_contact_relationship || "—"}</span>
                 </div>
                 <div className="space-y-0.5">
-                  <span className="text-xs text-muted-foreground block">Telefone de Emergência</span>
+                  <span className="text-xs text-muted-foreground block">Telefone de emergência</span>
                   <span className="font-medium text-foreground">
                     {formatBrazilianPhone(student.emergency_contact_phone) || "—"}
                   </span>
@@ -271,15 +343,107 @@ export function ReviewPanel({
               </div>
             </div>
           </div>
-        </TabsContent>
+        </section>
 
-        {/* ABA 2: Saúde & PAR-Q */}
-        <TabsContent value="saude" className="space-y-4">
+        <section id="treino" aria-label="Treino e acesso" className="scroll-mt-24 space-y-4">
+          <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
+            <div className="p-5 space-y-4">
+              <h2 className="text-base font-semibold text-foreground">Treino e graduação</h2>
+              <div className="grid gap-4 sm:grid-cols-3 text-sm">
+                <div className="space-y-0.5">
+                  <span className="text-xs text-muted-foreground block">Turma</span>
+                  <span className="font-medium text-foreground">{student.training_class || "—"}</span>
+                </div>
+                <div className="space-y-0.5">
+                  <span className="text-xs text-muted-foreground block">Graduação atual</span>
+                  <span className="font-medium text-foreground">
+                    {student.rank_key ? rankLabel : "—"}
+                  </span>
+                </div>
+                <div className="space-y-0.5">
+                  <span className="text-xs text-muted-foreground block">Início no taekwondo</span>
+                  <span className="font-medium text-foreground">
+                    {dateValue(student.started_at_tkd)
+                      ? new Date(`${dateValue(student.started_at_tkd)}T12:00:00`).toLocaleDateString("pt-BR")
+                      : "—"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Ciclo mensal de acesso ao app */}
+            {accessState ? (
+              <div className="p-5 space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h3 className="text-base font-semibold text-foreground">Acesso ao aplicativo</h3>
+                    <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
+                      O aplicativo fecha automaticamente 30 dias após o último pagamento confirmado, salvo liberação manual.
+                    </p>
+                  </div>
+                  <StatusBadge tone={accessToneMap[accessState.status]}>
+                    {accessStatusLabel(accessState)}
+                  </StatusBadge>
+                </div>
+
+                <dl className="grid gap-3 sm:grid-cols-3 rounded-lg border border-border bg-muted/20 p-4 text-sm">
+                  <div>
+                    <dt className="text-xs text-muted-foreground">Último pagamento</dt>
+                    <dd className="mt-0.5 font-medium tabular-nums text-foreground">
+                      {accessState.lastPaidAt ? formatBusinessDateBr(accessState.lastPaidAt) : "Sem registro"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-muted-foreground">Acesso válido até</dt>
+                    <dd className="mt-0.5 font-medium tabular-nums text-foreground">
+                      {accessState.accessValidUntil ? formatBusinessDateBr(accessState.accessValidUntil) : "—"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-muted-foreground">Liberação manual</dt>
+                    <dd className="mt-0.5 font-medium tabular-nums text-foreground">
+                      {accessState.overrideUntil ? formatBusinessDateBr(accessState.overrideUntil) : "Inativa"}
+                    </dd>
+                  </div>
+                </dl>
+
+                <form action={setAccessOverrideAction} className="space-y-3 pt-2">
+                  <input type="hidden" name="student_id" value={student.$id} />
+                  <DateField
+                    id="access-override-until"
+                    name="access_override_until"
+                    label="Liberar acesso manualmente até (opcional)"
+                    defaultValue={dateValue(enrollment.access_override_until)}
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    <FormSubmitButton variant="outline" size="sm" className="min-h-10" pendingLabel="Salvando…">
+                      Salvar liberação temporária
+                    </FormSubmitButton>
+                    {enrollment.access_override_until ? (
+                      <FormSubmitButton
+                        name="clear_override"
+                        value="1"
+                        variant="ghost"
+                        size="sm"
+                        className="min-h-10 text-destructive"
+                        pendingLabel="Removendo…"
+                      >
+                        Remover liberação manual
+                      </FormSubmitButton>
+                    ) : null}
+                  </div>
+                </form>
+              </div>
+            ) : null}
+          </div>
+        </section>
+
+        <section id="saude" aria-label="Saúde" className="scroll-mt-24 space-y-4">
           <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
             <div className="p-5 space-y-4">
               <div className="flex items-center justify-between gap-2">
                 <div>
-                  <h2 className="text-base font-semibold text-foreground">Cuidados de Saúde Declarados</h2>
+                  <h2 className="text-base font-semibold text-foreground">Cuidados de saúde declarados</h2>
                   <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                     Informações fornecidas na ficha de matrícula para segurança nos treinos.
                   </p>
@@ -331,7 +495,7 @@ export function ReviewPanel({
             <div className="p-5 space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-base font-semibold text-foreground">Questionário PAR-Q Anual (CREF1)</h3>
+                  <h3 className="text-base font-semibold text-foreground">Questionário de saúde (PAR-Q)</h3>
                   <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                     Questionário de prontidão para atividade física com validade de 12 meses.
                   </p>
@@ -396,110 +560,15 @@ export function ReviewPanel({
               )}
             </div>
           </div>
-        </TabsContent>
+        </section>
 
-        {/* ABA 3: Treino & Acesso */}
-        <TabsContent value="treino" className="space-y-4">
-          <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
-            <div className="p-5 space-y-4">
-              <h2 className="text-base font-semibold text-foreground">Taekwondo e Graduação</h2>
-              <div className="grid gap-4 sm:grid-cols-3 text-sm">
-                <div className="space-y-0.5">
-                  <span className="text-xs text-muted-foreground block">Turma Escolhida</span>
-                  <span className="font-medium text-foreground">{student.training_class || "—"}</span>
-                </div>
-                <div className="space-y-0.5">
-                  <span className="text-xs text-muted-foreground block">Graduação Atual</span>
-                  <span className="font-medium text-foreground">
-                    {student.rank_key ? rankLabel : "—"}
-                  </span>
-                </div>
-                <div className="space-y-0.5">
-                  <span className="text-xs text-muted-foreground block">Início no Taekwondo</span>
-                  <span className="font-medium text-foreground">
-                    {dateValue(student.started_at_tkd)
-                      ? new Date(`${dateValue(student.started_at_tkd)}T12:00:00`).toLocaleDateString("pt-BR")
-                      : "—"}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Ciclo mensal de acesso ao app */}
-            {accessState ? (
-              <div className="p-5 space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <h3 className="text-base font-semibold text-foreground">Ciclo Mensal de Acesso ao App</h3>
-                    <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
-                      O aplicativo fecha automaticamente 30 dias após o último pagamento confirmado, salvo liberação manual.
-                    </p>
-                  </div>
-                  <StatusBadge tone={accessToneMap[accessState.status]}>
-                    {accessStatusLabel(accessState)}
-                  </StatusBadge>
-                </div>
-
-                <dl className="grid gap-3 sm:grid-cols-3 rounded-lg border border-border bg-muted/20 p-4 text-sm">
-                  <div>
-                    <dt className="text-xs text-muted-foreground">Último pagamento</dt>
-                    <dd className="mt-0.5 font-medium tabular-nums text-foreground">
-                      {accessState.lastPaidAt ? formatBusinessDateBr(accessState.lastPaidAt) : "Sem registro"}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs text-muted-foreground">Acesso válido até</dt>
-                    <dd className="mt-0.5 font-medium tabular-nums text-foreground">
-                      {accessState.accessValidUntil ? formatBusinessDateBr(accessState.accessValidUntil) : "—"}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs text-muted-foreground">Liberação manual</dt>
-                    <dd className="mt-0.5 font-medium tabular-nums text-foreground">
-                      {accessState.overrideUntil ? formatBusinessDateBr(accessState.overrideUntil) : "Inativa"}
-                    </dd>
-                  </div>
-                </dl>
-
-                <form action={setAccessOverrideAction} className="space-y-3 pt-2">
-                  <input type="hidden" name="student_id" value={student.$id} />
-                  <DateField
-                    id="access-override-until"
-                    name="access_override_until"
-                    label="Liberar acesso manualmente até (opcional)"
-                    defaultValue={dateValue(enrollment.access_override_until)}
-                  />
-                  <div className="flex flex-wrap gap-2">
-                    <FormSubmitButton variant="outline" size="sm" className="min-h-10" pendingLabel="Salvando…">
-                      Salvar liberação temporária
-                    </FormSubmitButton>
-                    {enrollment.access_override_until ? (
-                      <FormSubmitButton
-                        name="clear_override"
-                        value="1"
-                        variant="ghost"
-                        size="sm"
-                        className="min-h-10 text-destructive"
-                        pendingLabel="Removendo…"
-                      >
-                        Remover liberação manual
-                      </FormSubmitButton>
-                    ) : null}
-                  </div>
-                </form>
-              </div>
-            ) : null}
-          </div>
-        </TabsContent>
-
-        {/* ABA 4: Documentos */}
-        <TabsContent value="documentos" className="space-y-4">
+        <section id="documentos" aria-label="Documentos" className="scroll-mt-24 space-y-4">
           <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
             {/* Foto do Aluno */}
             <div className="p-5 space-y-3">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-base font-semibold text-foreground">Foto do Aluno (Identificação)</h3>
+                  <h3 className="text-base font-semibold text-foreground">Foto do aluno (identificação)</h3>
                   <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                     Utilizada na carteirinha digital, chamadas e perfil do praticante.
                   </p>
@@ -543,11 +612,11 @@ export function ReviewPanel({
               )}
             </div>
 
-            {/* Atestado Médico */}
+            {/* Atestado médico */}
             <div className="p-5 space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-base font-semibold text-foreground">Atestado Médico</h3>
+                  <h3 className="text-base font-semibold text-foreground">Atestado médico</h3>
                   <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                     Requer aprovação formal da administração para liberação de contratos e treinos.
                   </p>
@@ -670,16 +739,15 @@ export function ReviewPanel({
               ) : null}
             </div>
           </div>
-        </TabsContent>
+        </section>
 
-        {/* ABA 5: Contrato & Financeiro */}
-        <TabsContent value="contrato" className="space-y-4">
+        <section id="contrato" aria-label="Contrato" className="scroll-mt-24 space-y-4">
           <div className="grid gap-6 lg:grid-cols-12 lg:items-start">
             {/* Coluna 1: Condições Contratuais e Valores */}
-            <div className="lg:col-span-7 overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
+            <div className={cn(decisionOnTop ? "lg:col-span-12" : "lg:col-span-7", "overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border")}>
               <section className="p-5 space-y-4">
                 <div>
-                  <h2 className="text-base font-semibold text-foreground">Condições Financeiras e Contratuais</h2>
+                  <h2 className="text-base font-semibold text-foreground">Condições do contrato</h2>
                   <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                     Valores, descontos e vigência do contrato. Ajuste e salve para atualizar os termos.
                   </p>
@@ -758,7 +826,7 @@ export function ReviewPanel({
                       <DateField
                         id="review-contract-end"
                         name="contract_end"
-                        label="Fim do contrato (1 ano)"
+                        label={`Fim do contrato (${contractDurationMonths === 12 ? "1 ano" : `${contractDurationMonths} meses`})`}
                         defaultValue={contractDates.end}
                         required
                       />
@@ -786,7 +854,7 @@ export function ReviewPanel({
                       ) : (
                         reviews.map((review) => (
                           <div key={String(review.$id)} className="border-l-2 pl-3 text-sm">
-                            <p className="font-medium">{String(review.action).replaceAll("_", " ")}</p>
+                            <p className="font-medium">{REVIEW_ACTION_LABELS[String(review.action)] ?? "Alteração na ficha"}</p>
                             <p className="text-muted-foreground text-xs">
                               {new Date(String(review.created_at)).toLocaleString("pt-BR")}
                               {review.notes ? ` · ${String(review.notes)}` : ""}
@@ -800,94 +868,10 @@ export function ReviewPanel({
               </section>
             </div>
 
-            {/* Coluna 2: Emissão e Assinatura */}
-            <div className="lg:col-span-5 overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
-              {enrollment.status === "awaiting_renewal" ? (
-                <section className="p-5 space-y-4">
-                  <div>
-                    <h2 className="text-base font-semibold text-foreground">Renovar Contrato</h2>
-                    <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
-                      Uma nova versão será emitida mantendo o histórico anterior preservado.
-                    </p>
-                  </div>
-
-                  <form id="renew-contract-form" action={renewContractAction} className="space-y-3">
-                    <input type="hidden" name="student_id" value={student.$id} />
-                    <DateField
-                      id="renewal-end"
-                      name="ends_at"
-                      label="Nova data final"
-                      min={new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" })}
-                      required
-                    />
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button type="button" className="min-h-11 w-full">
-                          Emitir renovação
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Emitir renovação do contrato?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Uma nova versão do contrato será emitida para assinatura de {student.full_name}, mantendo o histórico anterior preservado.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel type="button">Voltar</AlertDialogCancel>
-                          <AlertDialogAction type="submit" form="renew-contract-form">
-                            Emitir renovação
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </form>
-                </section>
-              ) : (
-                <section className="p-5 space-y-4">
-                  <div>
-                    <h2 className="text-base font-semibold text-foreground">Concluir Análise e Emitir Contrato</h2>
-                    <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
-                      A assinatura digital é liberada após conferência dos dados cadastrais e financeiros.
-                    </p>
-                  </div>
-
-                  {/* Checklist de requisitos para liberar assinatura */}
-                  <div className="divide-y divide-border border-y border-border py-1 text-sm">
-                    <p className="py-1.5 font-medium text-xs text-muted-foreground uppercase tracking-wider">Checklist de Requisitos</p>
-                    <div className="flex items-center justify-between py-2">
-                      <span className="text-muted-foreground">Foto cadastrada:</span>
-                      <span className={isPhotoUploaded ? "font-medium text-success" : "font-medium text-warning-foreground"}>
-                        {isPhotoUploaded ? "Presente" : "Não enviada"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between py-2">
-                      <span className="text-muted-foreground">Atestado médico:</span>
-                      <span className={isMedApproved ? "font-medium text-success" : "font-medium text-muted-foreground"}>
-                        {isMedApproved ? "Aprovado" : "Pendente ou opcional"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between py-2">
-                      <span className="text-muted-foreground">Turma vinculada:</span>
-                      <span className={student.training_class ? "font-medium text-foreground" : "font-medium text-muted-foreground"}>
-                        {student.training_class ? "Definida" : "Não definida"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <form action={advanceToSignatureAction} className="pt-2">
-                    <input type="hidden" name="student_id" value={student.$id} />
-                    <FormSubmitButton className="min-h-11 w-full" pendingLabel="Liberando assinatura…">
-                      <FilePenLineIcon aria-hidden="true" />
-                      Liberar para assinatura digital
-                    </FormSubmitButton>
-                  </form>
-                </section>
-              )}
-            </div>
+            {decisionOnTop ? null : decisionPanel}
           </div>
-        </TabsContent>
-      </Tabs>
+        </section>
+      </div>
     </div>
   );
 }

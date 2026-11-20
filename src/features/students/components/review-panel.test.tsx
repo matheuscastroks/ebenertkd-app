@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/app/actions/enrollment-review", () => ({
@@ -65,8 +65,8 @@ describe("ReviewPanel", () => {
     // Structured student info check
     expect(screen.getByText("Ficha cadastral do aluno")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Editar dados" })).toBeInTheDocument();
-    expect(screen.getByText("Identificação e Contato")).toBeInTheDocument();
-    expect(screen.getByText("Sem restrições declaradas")).toBeInTheDocument();
+    expect(screen.getByText("Identificação e contato")).toBeInTheDocument();
+    expect(screen.getByText("Sem restrições")).toBeInTheDocument();
 
     // Formatted phone numbers check
     expect(screen.getByText("(11) 9 8888-7777")).toBeInTheDocument();
@@ -77,7 +77,7 @@ describe("ReviewPanel", () => {
     expect(screen.getByText("Cadastrada")).toBeInTheDocument();
 
     // Medical certificate is approved: buttons should NOT be clickable / rendered
-    expect(screen.getByText("Atestado validado pela administração.")).toBeInTheDocument();
+    expect(screen.getByText("Atestado validado e arquivado com sucesso.")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Aprovar atestado" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Reprovar" })).not.toBeInTheDocument();
 
@@ -112,5 +112,24 @@ describe("ReviewPanel", () => {
 
     expect(screen.getByRole("button", { name: "Aprovar atestado" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Reprovar" })).toBeInTheDocument();
+  });
+
+  it("puts the enrollment decision first while the record waits for review", () => {
+    render(<ReviewPanel bundle={{ student, enrollment, documents: [] }} reviews={[{ $id: "r1", action: "financial_updated", created_at: "2026-11-18T12:00:00Z" }]} />);
+    const decide = screen.getByRole("heading", { name: "Decidir matrícula" });
+    const data = screen.getByRole("heading", { name: "Identificação e contato" });
+    expect(decide.compareDocumentPosition(data) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Liberar para assinatura/ })).toBeInTheDocument();
+    expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Histórico da análise/ }));
+    expect(screen.getByText("Condições financeiras salvas")).toBeInTheDocument();
+  });
+
+  it("keeps the decision next to the contract once the enrollment is active", () => {
+    render(<ReviewPanel bundle={{ student, enrollment: { ...enrollment, status: "active" }, documents: [] }} reviews={[]} contractDurationMonths={6} />);
+    const contract = screen.getByRole("heading", { name: "Condições do contrato" });
+    const decide = screen.getByRole("heading", { name: "Decidir matrícula" });
+    expect(contract.compareDocumentPosition(decide) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByText(/Fim do contrato \(6 meses\)/)).toBeInTheDocument();
   });
 });
