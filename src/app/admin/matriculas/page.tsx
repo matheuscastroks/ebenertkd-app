@@ -11,7 +11,6 @@ import { listEnrollmentsForReview } from "@/features/students/service";
 import { requireProfile } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
 import { ROUTES } from "@/lib/navigation/routes";
-import { KeyRound } from "@/components/ui/icons";
 import { TableRowsSkeleton } from "@/components/skeletons";
 
 type SearchParamsType = Promise<{
@@ -78,26 +77,8 @@ export default async function EnrollmentsPage({
   return (
     <PortalShell
       profile={admin}
-      activePath={ROUTES.adminEnrollments}
-      title="Matrículas"
-      subtitle="Analise cadastros, documentação, atestados médicos e condições financeiras."
-      breadcrumbs={[{ label: "Matrículas" }]}
-      headerActions={
-        <div className="flex flex-wrap items-center gap-2">
-          <Button asChild variant="outline" className="min-h-11 font-medium">
-            <Link href={ROUTES.adminRetention}>Retenção</Link>
-          </Button>
-          <Button asChild variant="outline" className="min-h-11 font-medium">
-            <Link href={ROUTES.adminCompliance}>Regularidade anual</Link>
-          </Button>
-          <Button asChild variant="outline" className="min-h-11 font-medium">
-            <Link href={ROUTES.adminStudentAccess}>
-              <KeyRound aria-hidden="true" className="mr-2 size-4" />
-              Acessos dos alunos
-            </Link>
-          </Button>
-        </div>
-      }
+      title="Alunos"
+      subtitle="Fichas para analisar, documentos e condições de cada aluno."
     >
       <div className="w-full min-w-0 space-y-6">
         <EnrollmentFilters classes={toClientData(classes)} />

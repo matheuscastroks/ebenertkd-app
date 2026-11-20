@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { MapPin, Plus, Trash2 } from "@/components/ui/icons";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
@@ -21,7 +20,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { requireProfile } from "@/lib/auth/session";
-import { ROUTES } from "@/lib/navigation/routes";
 import { listLocations } from "@/features/locations/locations-service";
 import { deleteLocationAction, saveLocationAction } from "@/app/actions/locations";
 
@@ -39,13 +37,8 @@ export default async function AdminLocationsPage({
   return (
     <PortalShell
       profile={admin}
-      activePath={ROUTES.adminLocations}
-      title="Cadastro de Locais"
-      subtitle="Gerencie os dojangs, tatames e endereços utilizados nas turmas e exames de faixa."
-      breadcrumbs={[
-        { label: "Visão geral", href: ROUTES.admin },
-        { label: "Locais e Dojangs" },
-      ]}
+      title="Turmas"
+      subtitle="Locais de treino usados nas turmas e nos exames."
       headerActions={
         <ResponsiveDialog
           size="lg"

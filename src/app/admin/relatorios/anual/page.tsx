@@ -12,7 +12,6 @@ import {
 import { AnnualYearPicker } from "@/features/operations/components/annual-year-picker";
 import { requireProfile } from "@/lib/auth/session";
 import { formatBrl } from "@/lib/money";
-import { ROUTES } from "@/lib/navigation/routes";
 
 type SearchParams = Promise<{ year?: string }>;
 
@@ -153,10 +152,8 @@ export default async function AdminAnnualReportPage({
   return (
     <PortalShell
       profile={admin}
-      activePath={ROUTES.adminAnnualReport}
-      title="Balanço anual"
+      title="Relatórios"
       subtitle="Visão executiva de 12 meses: sazonalidade, receita acumulada, permanência e evolução técnica."
-      breadcrumbs={[{ label: "Balanço anual" }]}
     >
       <div className="w-full min-w-0 space-y-6">
         <Suspense

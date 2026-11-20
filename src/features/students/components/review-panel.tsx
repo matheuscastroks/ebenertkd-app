@@ -64,6 +64,7 @@ import { rankFullLabel } from "@/features/academy/belt-rules";
 import type { EnrollmentBundle } from "@/features/students/types";
 import { centsToReaisInput } from "@/lib/money";
 import { formatBrazilianPhone } from "@/lib/phone";
+import { ENROLLMENT_STATUS_LABELS } from "@/features/students/enrollment-labels";
 import {
   AlertTriangle,
   Award,
@@ -79,17 +80,6 @@ import {
 } from "@/components/ui/icons";
 
 const dateValue = (value?: string | null) => value?.slice(0, 10) ?? "";
-
-const enrollmentStatusLabels: Record<string, string> = {
-  draft: "Rascunho",
-  submitted: "Enviada",
-  under_review: "Em análise",
-  awaiting_signature: "Aguardando assinatura",
-  active: "Ativa",
-  paused: "Pausada",
-  cancelled: "Cancelada",
-  awaiting_renewal: "Aguardando renovação"
-};
 
 const parqToneMap: Record<ParqStatus, "success" | "warning" | "danger"> = {
   valid: "success",
@@ -181,7 +171,7 @@ export function ReviewPanel({
                     : "info"
             }
           >
-            {enrollmentStatusLabels[enrollment.status] ?? enrollment.status}
+            {ENROLLMENT_STATUS_LABELS[enrollment.status] ?? enrollment.status}
           </StatusBadge>
           <EditStudentDialog student={student} classes={classes} />
         </div>

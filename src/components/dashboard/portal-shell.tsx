@@ -3,7 +3,7 @@ import { DashboardFrame, DashboardShell } from "@/components/dashboard/dashboard
 import type { Profile } from "@/features/auth/types";
 import { countEnrollmentsRequiringReview } from "@/features/students/service";
 import { countUnreadNotifications } from "@/features/notifications/notification-service";
-import type { BreadcrumbEntry } from "@/components/shared/page-breadcrumb";
+import type { BackTarget } from "@/components/dashboard/section-nav";
 import { navigationForProfile } from "@/lib/navigation/routes";
 
 export async function PortalFrame({ profile, children }: { profile: Profile; children: ReactNode }) {
@@ -38,7 +38,7 @@ export async function PortalFrame({ profile, children }: { profile: Profile; chi
   );
 }
 
-export function PortalShell({ profile, title, subtitle, breadcrumbs, headerActions, children }: { profile: Profile; title: string; subtitle: string; activePath: string; breadcrumbs?: BreadcrumbEntry[]; headerActions?: ReactNode; children: ReactNode }) {
+export function PortalShell({ profile, title, subtitle, back, headerActions, children }: { profile: Profile; title: string; subtitle: string; back?: BackTarget; headerActions?: ReactNode; children: ReactNode }) {
   const badge = profile.role === "admin" ? "Professor" : profile.role === "guardian" ? "Responsável" : "Aluno";
-  return <DashboardShell title={title} subtitle={subtitle} badge={badge} breadcrumbs={breadcrumbs} headerActions={headerActions}>{children}</DashboardShell>;
+  return <DashboardShell title={title} subtitle={subtitle} badge={badge} back={back} headerActions={headerActions}>{children}</DashboardShell>;
 }

@@ -30,15 +30,9 @@ export default async function AdminBillingAdjustmentDetailPage({ params }: { par
 
   return (
     <PortalShell
-      profile={admin}
-      activePath={ROUTES.adminBillingAdjustment}
+      profile={admin} back={{ label: "Reajuste", href: ROUTES.adminBillingAdjustment }}
       title="Lista de envio do reajuste"
       subtitle="Copie a mensagem, abra o WhatsApp de cada pagador e marque quem já foi avisado."
-      breadcrumbs={[
-        { label: "Financeiro", href: ROUTES.adminBilling },
-        { label: "Reajuste de mensalidade", href: ROUTES.adminBillingAdjustment },
-        { label: "Lista de envio" },
-      ]}
       headerActions={
         <Button asChild variant="outline" className="min-h-11">
           <Link href={ROUTES.adminBillingAdjustment}>Voltar ao reajuste</Link>

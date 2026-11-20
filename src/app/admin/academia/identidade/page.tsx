@@ -12,11 +12,9 @@ export default async function AdminAcademyIdentityPage() {
 
   return (
     <PortalShell
-      profile={admin}
-      activePath={ROUTES.adminAcademyIdentity}
+      profile={admin} back={{ label: "Ajustes", href: ROUTES.adminAcademy }}
       title="Identidade da academia"
       subtitle="Nomes, documento, contato e professor usados no aplicativo, nos contratos e nas mensagens."
-      breadcrumbs={[{ label: "Configurações da academia", href: ROUTES.adminAcademy }, { label: "Identidade" }]}
     >
       <div className="w-full">
         <IdentityForm identity={toClientData(identity)} revision={revision} />

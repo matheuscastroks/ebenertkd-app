@@ -158,10 +158,8 @@ export default async function StudentAchievementsPage() {
   return (
     <PortalShell
       profile={profile}
-      activePath={ROUTES.studentAchievements}
-      title="Conquistas e constância"
+      title="Faixa"
       subtitle="Acompanhe sua sequência semanal de treinos, o mapa de presenças e seus marcos no Taekwondo."
-      breadcrumbs={[{ label: "Conquistas" }]}
     >
       <div className="w-full min-w-0 space-y-6">
         <Suspense

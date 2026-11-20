@@ -4,7 +4,7 @@ import { AttendanceSheet } from "@/features/classes/components/attendance-sheet"
 import { getAttendanceSheet } from "@/features/classes/attendance-service";
 import { getTrainingClass } from "@/features/classes/service";
 import { requireProfile } from "@/lib/auth/session";
-import { adminClassPath, ROUTES } from "@/lib/navigation/routes";
+import { adminClassPath } from "@/lib/navigation/routes";
 
 export default async function LessonAttendancePage({
   params,
@@ -43,13 +43,7 @@ export default async function LessonAttendancePage({
 
   return (
     <PortalShell
-      profile={admin}
-      activePath={ROUTES.adminClasses}
-      breadcrumbs={[
-        { label: "Turmas", href: ROUTES.adminClasses },
-        { label: trainingClass.name, href: adminClassPath(classId) },
-        { label: "Chamada" }
-      ]}
+      profile={admin} back={{ label: trainingClass.name, href: adminClassPath(classId) }}
       title={`Chamada · ${trainingClass.name}`}
       subtitle={`${date} · ${sheet.lesson.start_time} às ${sheet.lesson.end_time}`}
     >

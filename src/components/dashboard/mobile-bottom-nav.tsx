@@ -7,6 +7,7 @@ import { Menu } from "@/components/ui/icons";
 import { NAV_ICONS } from "@/lib/navigation/nav-icons";
 import { useSidebar } from "@/components/ui/sidebar";
 import type { AppSidebarNavItem } from "@/components/dashboard/app-sidebar";
+import { resolveNavLocation } from "@/lib/navigation/routes";
 import { cn } from "@/lib/utils";
 
 const HOME_PATHS = ["/admin", "/aluno", "/responsavel"];
@@ -29,10 +30,6 @@ type BottomTab = {
   badge?: number;
   active?: boolean;
 };
-
-function matches(pathname: string, item: Pick<AppSidebarNavItem, "href" | "exact">) {
-  return item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
-}
 
 function pickMiddleItems(navItems: AppSidebarNavItem[], excluded: Set<string>) {
   const eligible = navItems.filter((item) => !excluded.has(item.href));
@@ -63,7 +60,9 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
   );
 
   const tabs: BottomTab[] = [];
-  const middleActive = middleItems.some((item) => matches(pathname, item));
+  // A aba fica ativa em qualquer tela da seção, inclusive no detalhe em pilha.
+  const { section } = resolveNavLocation(navItems, pathname);
+  const isActive = (item: AppSidebarNavItem) => section === item || (!section && pathname === item.href);
 
   if (homeItem) {
     tabs.push({
@@ -71,7 +70,7 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
       label: "Início",
       href: homeItem.href,
       icon: NAV_ICONS[homeItem.icon ?? "dashboard"],
-      active: matches(pathname, { ...homeItem, exact: homeItem.exact ?? true }) && !middleActive
+      active: isActive(homeItem)
     });
   }
 
@@ -82,7 +81,7 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
       href: item.href,
       icon: NAV_ICONS[item.icon ?? "dashboard"],
       badge: item.badge,
-      active: matches(pathname, item)
+      active: isActive(item)
     });
   }
 
@@ -93,7 +92,7 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
       href: notificationsItem.href,
       icon: NAV_ICONS.notifications,
       badge: notificationsItem.badge,
-      active: matches(pathname, notificationsItem)
+      active: pathname === notificationsItem.href || pathname.startsWith(`${notificationsItem.href}/`)
     });
   }
 

@@ -12,5 +12,5 @@ export default async function StudentEnrollmentPage({
   const [actor, query] = await Promise.all([requireProfile(), searchParams]);
   if (!actor.capabilities.includes("student")) redirect(ROUTES.guardianDependents);
   const target = await resolveStudentProfile(actor, actor.$id);
-  return <EnrollmentWorkspace actor={actor} target={target} query={query} activePath={ROUTES.studentEnrollment} />;
+  return <EnrollmentWorkspace actor={actor} target={target} query={query} />;
 }

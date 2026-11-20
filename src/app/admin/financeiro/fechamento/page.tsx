@@ -290,18 +290,8 @@ export default async function AdminBillingClosingPage({
   return (
     <PortalShell
       profile={admin}
-      activePath={ROUTES.adminBillingClosing}
-      title="Fechamento mensal"
-      subtitle="DRE simplificado por competência, recuperação de inadimplência e conciliação de caixa."
-      breadcrumbs={[
-        { label: "Financeiro", href: ROUTES.adminBilling },
-        { label: "Fechamento mensal" },
-      ]}
-      headerActions={
-        <Button asChild variant="outline" className="min-h-11">
-          <Link href={ROUTES.adminBilling}>Cobranças do mês</Link>
-        </Button>
-      }
+      title="Financeiro"
+      subtitle="Feche o mês: pendências, resultado e caixa."
     >
       <div className="w-full min-w-0 space-y-6">
         <Suspense

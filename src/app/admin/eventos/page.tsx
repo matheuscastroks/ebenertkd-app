@@ -90,10 +90,8 @@ export default async function AdminEventsPage({ searchParams }: { searchParams: 
   return (
     <PortalShell
       profile={admin}
-      activePath={ROUTES.adminEvents}
       title="Eventos"
-      subtitle="Exames de faixa, aulões, seminários e confraternizações em uma só agenda."
-      breadcrumbs={[{ label: "Eventos" }]}
+      subtitle="Aulões, seminários, campeonatos e confraternizações."
       headerActions={
         <Button asChild className="min-h-11">
           <Link href={ROUTES.adminEventNew}>

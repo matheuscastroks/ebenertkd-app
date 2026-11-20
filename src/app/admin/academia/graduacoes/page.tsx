@@ -19,11 +19,9 @@ export default async function AdminAcademyGradesPage() {
 
   return (
     <PortalShell
-      profile={admin}
-      activePath={ROUTES.adminAcademyGrades}
+      profile={admin} back={{ label: "Ajustes", href: ROUTES.adminAcademy }}
       title="Graduações da academia"
       subtitle="Nome, cor, forma e requisitos de cada graduação, do 10º gub ao Dan."
-      breadcrumbs={[{ label: "Configurações da academia", href: ROUTES.adminAcademy }, { label: "Graduações" }]}
       headerActions={
         <Button asChild variant="outline" className="min-h-11">
           <Link href={ROUTES.adminAcademyExams}>Regras de exame</Link>

@@ -298,19 +298,8 @@ export default async function AdminExamEligibilityPage({
   return (
     <PortalShell
       profile={admin}
-      activePath={ROUTES.adminExamEligibility}
-      title="Elegibilidade para exames"
-      subtitle="Cruze carência mínima na faixa, presenças acumuladas e situação financeira antes de fechar a banca."
-      breadcrumbs={[
-        { label: "Eventos", href: ROUTES.adminEvents },
-        { label: "Exames de faixa", href: ROUTES.adminExams },
-        { label: "Elegibilidade" },
-      ]}
-      headerActions={
-        <Button asChild variant="outline" className="min-h-11">
-          <Link href={ROUTES.adminExams}>Bancas de exame</Link>
-        </Button>
-      }
+      title="Eventos"
+      subtitle="Quem já pode fazer exame: tempo na faixa, presenças e pagamentos em dia."
     >
       <div className="w-full min-w-0 space-y-6">
         {params.enrolled ? (

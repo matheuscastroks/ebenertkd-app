@@ -718,8 +718,7 @@ export default async function ExamDetailPage({
 
   return (
     <PortalShell
-      profile={admin}
-      activePath={ROUTES.adminExams}
+      profile={admin} back={{ label: "Exames de faixa", href: ROUTES.adminExams }}
       title={event.name}
       subtitle={`${formatExamDate(event.event_date, { weekday: "long", day: "2-digit", month: "long", year: "numeric" })} · ${event.location || "Local não informado"}`}
       headerActions={
@@ -727,11 +726,6 @@ export default async function ExamDetailPage({
           {examEventLabels[event.status]}
         </StatusBadge>
       }
-      breadcrumbs={[
-        { label: "Eventos", href: ROUTES.adminEvents },
-        { label: "Exames de faixa", href: ROUTES.adminExams },
-        { label: event.name },
-      ]}
     >
       <div className="w-full min-w-0 space-y-6">
         {notice ? (

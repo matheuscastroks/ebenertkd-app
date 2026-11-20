@@ -10,11 +10,9 @@ export default async function AdminAcademyHistoryPage() {
 
   return (
     <PortalShell
-      profile={admin}
-      activePath={ROUTES.adminAcademyHistory}
+      profile={admin} back={{ label: "Ajustes", href: ROUTES.adminAcademy }}
       title="Histórico de alterações"
       subtitle="Tudo que mudou nas configurações da academia, com a diferença de cada alteração e a opção de restaurar uma versão."
-      breadcrumbs={[{ label: "Configurações da academia", href: ROUTES.adminAcademy }, { label: "Histórico" }]}
     >
       <div className="w-full min-w-0">
         <HistoryTimeline entries={entries} />

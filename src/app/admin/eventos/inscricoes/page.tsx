@@ -42,10 +42,8 @@ export default async function EventRegistrationsHubPage({ searchParams }: { sear
   return (
     <PortalShell
       profile={admin}
-      activePath={ROUTES.adminEventHub}
-      title="Central de inscrições"
-      subtitle="Tudo que espera uma ação sua, por pendência: aprovar, confirmar a equipe, revisar documentos e enviar à federação."
-      breadcrumbs={[{ label: "Eventos", href: ROUTES.adminEvents }, { label: "Central de inscrições" }]}
+      title="Eventos"
+      subtitle="Inscrições que esperam uma ação sua."
     >
       <div className="w-full min-w-0 space-y-4">
         <EventFeedback ok={query.ok} erro={query.erro} />

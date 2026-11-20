@@ -15,7 +15,6 @@ import { listInbox, listNotificationAudienceOptions, listSentAnnouncements } fro
 import { hasActivePushSubscription } from "@/features/notifications/push-service";
 import type { Profile } from "@/features/auth/types";
 import { requireProfile } from "@/lib/auth/session";
-import { ROUTES } from "@/lib/navigation/routes";
 
 async function AsyncNotificationCenter({ profile }: { profile: Profile }) {
   const [items, sent] = await Promise.all([
@@ -81,7 +80,6 @@ export default async function NotificationsPage({
   return (
     <PortalShell
       profile={profile}
-      activePath={ROUTES.notifications}
       title="Avisos"
       subtitle="Comunicados e lembretes da academia."
       headerActions={

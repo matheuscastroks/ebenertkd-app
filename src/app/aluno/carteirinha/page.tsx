@@ -278,10 +278,8 @@ export default async function StudentCardPage() {
   return (
     <PortalShell
       profile={profile}
-      activePath={ROUTES.studentCard}
-      title="Carteirinha e saúde"
+      title="Cadastro"
       subtitle="Seu passaporte digital do dojang, validade anual do atestado médico e contatos de emergência."
-      breadcrumbs={[{ label: "Carteirinha e saúde" }]}
     >
       <div className="w-full min-w-0 space-y-6">
         <Suspense fallback={<CardGridSkeleton count={2} columns={2} />}>

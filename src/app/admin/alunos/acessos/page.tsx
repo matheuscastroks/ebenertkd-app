@@ -25,13 +25,8 @@ export default async function StudentAccessPage({
   return (
     <PortalShell
       profile={actor}
-      activePath={ROUTES.adminStudentAccess}
-      title="Acessos dos alunos"
-      subtitle="Consulte contas de acesso, transição de maioridade e permissões individuais."
-      breadcrumbs={[
-        { label: "Matrículas", href: ROUTES.adminEnrollments },
-        { label: "Acessos dos alunos" },
-      ]}
+      title="Alunos"
+      subtitle="Login de cada aluno e a passagem para o acesso próprio."
     >
       <div className="w-full min-w-0 space-y-6">
         {query.promoted ? (

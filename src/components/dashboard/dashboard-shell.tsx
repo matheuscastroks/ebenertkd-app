@@ -6,7 +6,7 @@ import {
   NotificationHeaderButton,
 } from "@/components/dashboard/notification-nav-item";
 import { HeaderActions } from "@/components/dashboard/header-actions";
-import { PageBreadcrumb, type BreadcrumbEntry } from "@/components/shared/page-breadcrumb";
+import { BackLink, NavItemsProvider, SectionSegments, type BackTarget } from "@/components/dashboard/section-nav";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 import { MobileBottomNav } from "@/components/dashboard/mobile-bottom-nav";
@@ -17,7 +17,8 @@ type DashboardShellProps = {
   title: string;
   subtitle: string;
   badge: string;
-  breadcrumbs?: BreadcrumbEntry[];
+  /** Tela de detalhe (pilha): mostra "‹ label" acima do título e esconde os segmentos. */
+  back?: BackTarget;
   headerActions?: ReactNode;
   children: ReactNode;
 };
@@ -57,7 +58,9 @@ export function DashboardFrame({
           role={role}
           avatarUrl={avatarUrl}
         />
-        <PageTransition>{children}</PageTransition>
+        <NavItemsProvider items={navItems}>
+          <PageTransition>{children}</PageTransition>
+        </NavItemsProvider>
         <MobileBottomNav navItems={navItems} />
         <MobileGestureDetector />
       </NotificationCountProvider>
@@ -67,27 +70,27 @@ export function DashboardFrame({
 
 /**
  * Moldura visual contínua em "L":
- * - Cabeçalho fixo no topo com o mesmo fundo da sidebar (`bg-sidebar`), contendo trilha,
- *   título, subtítulo, ações da tela e botão de notificações no canto superior direito.
+ * - Cabeçalho fixo no topo com o mesmo fundo da sidebar (`bg-sidebar`), contendo o voltar da
+ *   pilha (telas de detalhe), título, subtítulo, ações da tela, notificações e, abaixo, os
+ *   segmentos da seção atual.
  * - Painel de conteúdo saltado ("inset") abaixo do cabeçalho, com fundo `bg-background`,
  *   cantos arredondados e rolagem própria no desktop.
  */
 export function DashboardShell({
   title,
   subtitle,
-  breadcrumbs,
+  back,
   headerActions,
   children,
 }: DashboardShellProps) {
-  const hasBreadcrumbs = Boolean(breadcrumbs && breadcrumbs.length > 1);
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-sidebar md:overflow-hidden">
       <header className="shrink-0 bg-sidebar px-4 pb-3 pt-4 md:px-6 md:pb-3.5 md:pt-4">
         <div className="flex flex-wrap items-start gap-x-4 gap-y-3 md:flex-nowrap md:items-center md:gap-x-6">
           <div className="min-w-0 flex-1 space-y-0.5">
-            {hasBreadcrumbs ? (
+            {back ? (
               <div className="mb-1 min-w-0">
-                <PageBreadcrumb items={breadcrumbs!} />
+                <BackLink {...back} />
               </div>
             ) : null}
             <div key={title} className="t-text-reveal t-text-reveal--page space-y-0.5">
@@ -108,6 +111,11 @@ export function DashboardShell({
             <NotificationHeaderButton />
           </div>
         </div>
+        {back ? null : (
+          <div className="mt-3 empty:hidden">
+            <SectionSegments />
+          </div>
+        )}
       </header>
 
       <main

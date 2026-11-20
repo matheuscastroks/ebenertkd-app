@@ -4,10 +4,8 @@ import { useAcademyBrand } from "@/components/academy-config-provider";
 import Link from "next/link";
 import Image from "next/image";
 import { useRef } from "react";
-import { ChevronRightIcon, type ChevronRightIconHandle } from "@/components/ui/chevron-right";
 import { NAV_ICONS } from "@/lib/navigation/nav-icons";
 import type { AnimatedIconHandle } from "@/lib/use-parent-hover-animation";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Sidebar,
   SidebarContent,
@@ -17,13 +15,9 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   useSidebar
 } from "@/components/ui/sidebar";
 import { AccountMenu } from "@/components/dashboard/account-menu";
@@ -35,87 +29,30 @@ function NavigationItem({ item }: { item: AppSidebarNavItem }) {
   const { isMobile, setOpenMobile } = useSidebar();
   const Icon = NAV_ICONS[item.icon ?? "dashboard"];
   const iconRef = useRef<AnimatedIconHandle>(null);
-  const chevronRef = useRef<ChevronRightIconHandle>(null);
   const handleNavClick = () => {
     if (isMobile) {
       setOpenMobile(false);
     }
   };
-  const startIconAnimation = () => iconRef.current?.startAnimation();
-  const stopIconAnimation = () => iconRef.current?.stopAnimation();
 
-  if (!item.children?.length) {
-    return (
-      <SidebarMenuItem onMouseEnter={startIconAnimation} onMouseLeave={stopIconAnimation}>
-        <SidebarMenuButton asChild isActive={item.active} tooltip={item.label}>
-          <Link href={item.href} onClick={handleNavClick}>
-            <Icon ref={iconRef} aria-hidden="true" className="size-4 shrink-0" strokeWidth={2} />
-            <span>{item.label}</span>
-          </Link>
-        </SidebarMenuButton>
-        {item.badge ? (
-          <SidebarMenuBadge aria-label={`${item.badge} pendente${item.badge === 1 ? "" : "s"}`}>
-            {item.badge}
-          </SidebarMenuBadge>
-        ) : null}
-      </SidebarMenuItem>
-    );
-  }
-
+  // Um nível só (HIG): as subtelas da seção aparecem como segmentos dentro da própria tela.
   return (
-    <Collapsible
-      key={`${item.href}-${item.active}`}
-      asChild
-      defaultOpen={item.active}
-      className="group/collapsible"
+    <SidebarMenuItem
+      onMouseEnter={() => iconRef.current?.startAnimation()}
+      onMouseLeave={() => iconRef.current?.stopAnimation()}
     >
-      <SidebarMenuItem>
-        <SidebarMenuButton
-          asChild
-          isActive={item.active}
-          tooltip={item.label}
-          onMouseEnter={startIconAnimation}
-          onMouseLeave={stopIconAnimation}
-        >
-          <Link href={item.href} onClick={handleNavClick}>
-            <Icon ref={iconRef} aria-hidden="true" className="size-4 shrink-0" strokeWidth={2} />
-            <span>{item.label}</span>
-          </Link>
-        </SidebarMenuButton>
-        <CollapsibleTrigger asChild>
-          <SidebarMenuAction
-            aria-label={`Alternar submenu de ${item.label}`}
-            onMouseEnter={() => {
-              startIconAnimation();
-              chevronRef.current?.startAnimation();
-            }}
-            onMouseLeave={() => {
-              stopIconAnimation();
-              chevronRef.current?.stopAnimation();
-            }}
-          >
-            <ChevronRightIcon
-              ref={chevronRef}
-              aria-hidden="true"
-              className="size-4 transition-transform duration-(--duration-fast) ease-(--ease-smooth-out) motion-reduce:transition-none group-data-[state=open]/collapsible:rotate-90"
-            />
-          </SidebarMenuAction>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <SidebarMenuSub>
-            {item.children.map((child) => (
-              <SidebarMenuSubItem key={child.href}>
-                <SidebarMenuSubButton asChild isActive={child.active}>
-                  <Link href={child.href} onClick={handleNavClick}>
-                    <span>{child.label}</span>
-                  </Link>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
-            ))}
-          </SidebarMenuSub>
-        </CollapsibleContent>
-      </SidebarMenuItem>
-    </Collapsible>
+      <SidebarMenuButton asChild isActive={item.active} tooltip={item.label}>
+        <Link href={item.href} onClick={handleNavClick} aria-current={item.active ? "page" : undefined}>
+          <Icon ref={iconRef} aria-hidden="true" className="size-4 shrink-0" strokeWidth={2} />
+          <span>{item.label}</span>
+        </Link>
+      </SidebarMenuButton>
+      {item.badge ? (
+        <SidebarMenuBadge aria-label={`${item.badge} pendente${item.badge === 1 ? "" : "s"}`}>
+          {item.badge}
+        </SidebarMenuBadge>
+      ) : null}
+    </SidebarMenuItem>
   );
 }
 
@@ -135,7 +72,8 @@ export function AppSidebar({
   avatarUrl?: string;
 }) {
   const { shortName } = useAcademyBrand();
-  const sidebarItems = navItems.filter((item) => item.icon !== "notifications");
+  const sidebarItems = navItems.filter((item) => item.icon !== "notifications" && item.group !== "Rodapé");
+  const footerItems = navItems.filter((item) => item.group === "Rodapé");
   const groups = Array.from(new Set(sidebarItems.map((item) => item.group ?? "Principal")));
   return (
     <Sidebar variant="inset">
@@ -168,6 +106,11 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter>
+        {footerItems.length ? (
+          <SidebarMenu>
+            {footerItems.map((item) => <NavigationItem key={item.href} item={item} />)}
+          </SidebarMenu>
+        ) : null}
         <AccountMenu
           name={profileName}
           badge={badge}

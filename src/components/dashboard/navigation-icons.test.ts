@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { NAV_ICONS } from "@/lib/navigation/nav-icons";
 import { navigationForProfile, type SidebarNavIcon } from "@/lib/navigation/routes";
 
-const icons: SidebarNavIcon[] = ["dashboard", "notifications", "enrollment", "students", "classes", "exams", "attendance", "family", "contracts", "billing", "system", "reports"];
+const icons: SidebarNavIcon[] = ["dashboard", "notifications", "students", "classes", "events", "attendance", "belt", "enrollment", "family", "contracts", "billing", "reports", "settings"];
 
 describe("ícones de navegação", () => {
   it("mapeia todos os tipos de ícone", () => {

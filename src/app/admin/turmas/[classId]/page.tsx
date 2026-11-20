@@ -88,12 +88,7 @@ export default async function ClassLessonsPage({
 
   return (
     <PortalShell
-      profile={admin}
-      activePath={ROUTES.adminClasses}
-      breadcrumbs={[
-        { label: "Turmas", href: ROUTES.adminClasses },
-        { label: trainingClass.name }
-      ]}
+      profile={admin} back={{ label: "Turmas", href: ROUTES.adminClasses }}
       title={trainingClass.name}
       subtitle={`${trainingClass.weekdays.join(", ")} · ${trainingClass.start_time} às ${trainingClass.end_time}`}
     >

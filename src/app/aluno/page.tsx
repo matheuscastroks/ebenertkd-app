@@ -49,7 +49,7 @@ export default async function StudentPage() {
         : <form action={enableGuardianAction}><button type="submit" className={rowClass}>Cadastrar filhos ou dependentes<ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" /></button></form>}
     </nav>
   </section>;
-  return <PortalShell profile={profile} activePath={ROUTES.student} title="Meu treino" subtitle="Seu próximo treino, pendências e faixa.">
+  return <PortalShell profile={profile} title="Início" subtitle="Seu próximo treino, pendências e faixa.">
     <Suspense fallback={<DashboardSkeleton />}><StudentDashboardDynamic profile={profile} minor={minor} aside={shortcuts} /></Suspense>
   </PortalShell>;
 }

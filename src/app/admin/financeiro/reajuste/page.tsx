@@ -72,18 +72,8 @@ export default async function AdminBillingAdjustmentPage() {
   return (
     <PortalShell
       profile={admin}
-      activePath={ROUTES.adminBillingAdjustment}
-      title="Reajuste de mensalidade"
-      subtitle="Simule o novo valor, veja o impacto no caixa e envie um aviso cordial a cada família."
-      breadcrumbs={[
-        { label: "Financeiro", href: ROUTES.adminBilling },
-        { label: "Reajuste de mensalidade" },
-      ]}
-      headerActions={
-        <Button asChild variant="outline" className="min-h-11">
-          <Link href={ROUTES.adminBillingCalculator}>Calculadora de metas</Link>
-        </Button>
-      }
+      title="Financeiro"
+      subtitle="Simule o novo valor, veja o impacto no caixa e avise cada família."
     >
       <div className="w-full min-w-0 space-y-6">
         <Suspense

@@ -222,11 +222,9 @@ export function ChampionshipDetail({ admin, bundle, tab, ok, erro }: { admin: Pr
 
   return (
     <PortalShell
-      profile={admin}
-      activePath={ROUTES.adminEvents}
+      profile={admin} back={{ label: "Eventos", href: ROUTES.adminEvents }}
       title={event.title}
       subtitle={`${formatEventDay(event.starts_at)} · ${event.location_text || "Local a confirmar"}`}
-      breadcrumbs={[{ label: "Eventos", href: ROUTES.adminEvents }, { label: event.title }]}
       headerActions={
         <div className="flex flex-wrap items-center gap-2">
           <EventTypeBadge type={event.event_type} />

@@ -244,10 +244,8 @@ export default async function StudentEvolutionPage() {
   return (
     <PortalShell
       profile={profile}
-      activePath={ROUTES.studentEvolution}
-      title="Caminho da faixa"
-      subtitle="Veja seu avanço rumo à próxima graduação, o Poomsae da sua faixa e seu histórico."
-      breadcrumbs={[{ label: "Caminho da faixa" }]}
+      title="Faixa"
+      subtitle="Quanto falta para a próxima graduação."
     >
       <div className="w-full min-w-0 space-y-6">
         <Suspense

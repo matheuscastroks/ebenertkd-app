@@ -130,9 +130,6 @@ export function BillingToolbar({ settings }: { settings: BillingSettings | null 
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Button asChild variant="outline" className="min-h-11">
-        <Link href={ROUTES.adminBillingClosing}>Fechamento mensal</Link>
-      </Button>
       <PixSettingsDialog settings={settings} />
       <Button asChild variant="outline" className="min-h-11">
         <Link href={`${ROUTES.adminBilling}/exportar?${query}`}>

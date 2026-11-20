@@ -58,10 +58,8 @@ export default async function AdminBillingPage({
   return (
     <PortalShell
       profile={actor}
-      activePath={ROUTES.adminBilling}
-      title="Painel financeiro"
+      title="Financeiro"
       subtitle="Confira comprovantes, registre pagamentos e acompanhe o mês."
-      breadcrumbs={[{ label: "Financeiro" }]}
       headerActions={<Suspense fallback={<Skeleton className="h-11 w-32 rounded-lg" />}><BillingToolbarContent /></Suspense>}
     >
       <div className="w-full min-w-0 space-y-6">

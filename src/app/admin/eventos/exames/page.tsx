@@ -22,7 +22,7 @@ import { getExamsOverview } from "@/features/exams/service";
 import { LocationSelect } from "@/features/locations/components/location-select";
 import { listLocations } from "@/features/locations/locations-service";
 import { centsToReaisInput, formatBrl } from "@/lib/money";
-import { adminExamPath, ROUTES } from "@/lib/navigation/routes";
+import { adminExamPath } from "@/lib/navigation/routes";
 import { requireProfile } from "@/lib/auth/session";
 
 type ExamOverview = Awaited<ReturnType<typeof getExamsOverview>>;
@@ -201,15 +201,10 @@ export default async function ExamsPage({
   return (
     <PortalShell
       profile={admin}
-      activePath={ROUTES.adminExams}
-      title="Exames de faixa"
+      title="Eventos"
       subtitle="Agende bancas, inscreva alunos e registre as novas graduações."
-      breadcrumbs={[{ label: "Eventos", href: ROUTES.adminEvents }, { label: "Exames de faixa" }]}
       headerActions={
         <div className="flex flex-wrap items-center gap-2">
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href={ROUTES.adminExamEligibility}>Elegibilidade</Link>
-          </Button>
           <ResponsiveDialog
             size="xl"
             trigger={

@@ -1,3 +1,4 @@
+import { dependentSummaryPath } from "@/features/families/paths";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { ListItemsSkeleton } from "@/components/skeletons";
@@ -8,7 +9,7 @@ import { getStudentEvents } from "@/features/events/student-events-service";
 import { DependentContext } from "@/features/families/components/dependent-context";
 import { requireCapability } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
-import { guardianBillingPath, guardianEnrollmentPath, guardianEventsPath, guardianExamsPath, ROUTES } from "@/lib/navigation/routes";
+import { guardianBillingPath, guardianEnrollmentPath, guardianEventsPath, guardianExamsPath } from "@/lib/navigation/routes";
 
 async function DependentEventsContent({ guardian, profileId }: { guardian: Profile; profileId: string }) {
   const data = await getStudentEvents(guardian, profileId);
@@ -34,9 +35,7 @@ export default async function DependentEventsPage({ params, searchParams }: { pa
 
   return (
     <PortalShell
-      profile={guardian}
-      activePath={ROUTES.guardianDependents}
-      breadcrumbs={[{ label: "Minha família", href: ROUTES.guardian }, { label: "Eventos" }]}
+      profile={guardian} back={{ label: "Resumo", href: dependentSummaryPath(profileId) }}
       title="Eventos"
       subtitle="Inscreva o dependente, autorize campeonatos, envie documentos e acompanhe os pagamentos."
     >

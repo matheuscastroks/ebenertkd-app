@@ -10,11 +10,9 @@ export default async function AdminAcademyExamsPage() {
 
   return (
     <PortalShell
-      profile={admin}
-      activePath={ROUTES.adminAcademyExams}
+      profile={admin} back={{ label: "Ajustes", href: ROUTES.adminAcademy }}
       title="Exames da academia"
       subtitle="Taxa padrão, bloqueio por inadimplência, elegibilidade e inscrição em graduações acima."
-      breadcrumbs={[{ label: "Configurações da academia", href: ROUTES.adminAcademy }, { label: "Exames" }]}
     >
       <div className="w-full">
         <ExamPolicyForm policy={policy} revision={revision} />

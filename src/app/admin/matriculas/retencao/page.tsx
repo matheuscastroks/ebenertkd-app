@@ -259,18 +259,8 @@ export default async function AdminRetentionPage({
   return (
     <PortalShell
       profile={admin}
-      activePath={ROUTES.adminRetention}
-      title="Retenção e frequência"
-      subtitle="Acompanhe faltas consecutivas, alunos com risco de evasão e o saldo mensal da academia."
-      breadcrumbs={[
-        { label: "Matrículas", href: ROUTES.adminEnrollments },
-        { label: "Retenção e frequência" },
-      ]}
-      headerActions={
-        <Button asChild variant="outline" className="min-h-11">
-          <Link href={ROUTES.adminEnrollments}>Ver matrículas</Link>
-        </Button>
-      }
+      title="Alunos"
+      subtitle="Quem está faltando e pode sair. Aja antes de perder o aluno."
     >
       <div className="w-full min-w-0 space-y-6">
         {params.notified ? (

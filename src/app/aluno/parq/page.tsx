@@ -56,10 +56,8 @@ export default async function StudentParqPage({
   return (
     <PortalShell
       profile={profile}
-      activePath={ROUTES.studentParq}
-      title="Questionário de saúde"
+      title="Cadastro"
       subtitle="Responda 10 perguntas rápidas uma vez por ano para treinar com segurança."
-      breadcrumbs={[{ label: "Questionário de saúde" }]}
     >
       <div className="w-full min-w-0 space-y-6">
         {query.submitted ? (

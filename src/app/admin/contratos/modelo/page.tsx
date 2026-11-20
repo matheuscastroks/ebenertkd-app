@@ -12,7 +12,6 @@ import { ContractContentEditor } from "@/features/contracts/components/contract-
 import { FRIENDLY_CONTRACT_VARIABLES } from "@/features/contracts/rules";
 import { DEFAULT_CONTRACT_CONTENT, getContractTemplate, listContractVersions } from "@/features/contracts/template-service";
 import { requireProfile } from "@/lib/auth/session";
-import { ROUTES } from "@/lib/navigation/routes";
 import { Save } from "@/components/ui/icons";
 
 export default async function ContractTemplatePage({
@@ -27,13 +26,8 @@ export default async function ContractTemplatePage({
   return (
     <PortalShell
       profile={admin}
-      activePath={ROUTES.adminContracts}
-      title="Modelo de contrato"
+      title="Contratos"
       subtitle="Rascunhos podem mudar à vontade. Versões publicadas não alteram contratos já gerados."
-      breadcrumbs={[
-        { label: "Contratos", href: ROUTES.adminContracts },
-        { label: "Modelo padrão" },
-      ]}
     >
       {query.saved ? (
         <OperationToast tone="success" title="Rascunho salvo com sucesso" clearParams={["saved"]} />

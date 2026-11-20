@@ -24,11 +24,9 @@ export default async function AdminAcademySetupPage({ searchParams }: { searchPa
 
   return (
     <PortalShell
-      profile={admin}
-      activePath={ROUTES.adminAcademySetup}
+      profile={admin} back={{ label: "Ajustes", href: ROUTES.adminAcademy }}
       title="Primeiros passos"
       subtitle="Configure a academia em cinco passos curtos. Cada passo salva sozinho: você pode parar e voltar quando quiser."
-      breadcrumbs={[{ label: "Configurações da academia", href: ROUTES.adminAcademy }, { label: "Primeiros passos" }]}
     >
       <div className="w-full min-w-0">
         <SetupWizard

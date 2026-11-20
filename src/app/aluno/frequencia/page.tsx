@@ -38,8 +38,7 @@ export default async function StudentAttendancePage({
   return (
     <PortalShell
       profile={profile}
-      activePath={ROUTES.studentAttendance}
-      title="Minha frequência"
+      title="Treinos"
       subtitle="Acompanhe sua assiduidade e o histórico das aulas mês a mês."
     >
       <div className="w-full min-w-0">

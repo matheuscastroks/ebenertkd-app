@@ -20,11 +20,9 @@ export default async function AdminAcademyRulesPage() {
 
   return (
     <PortalShell
-      profile={admin}
-      activePath={ROUTES.adminAcademyRules}
+      profile={admin} back={{ label: "Ajustes", href: ROUTES.adminAcademy }}
       title="Regras operacionais"
       subtitle="Frequência, atestado e PAR-Q, lembretes de pagamento e conquistas dos alunos."
-      breadcrumbs={[{ label: "Configurações da academia", href: ROUTES.adminAcademy }, { label: "Regras operacionais" }]}
     >
       <div className="w-full min-w-0 space-y-6">
         <Tabs defaultValue="retention" className="gap-6">

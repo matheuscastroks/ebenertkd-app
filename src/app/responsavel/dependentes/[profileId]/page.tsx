@@ -46,7 +46,7 @@ async function DependentSummary({ guardian, minor }: { guardian: Profile; minor:
       <section aria-labelledby="dependent-areas-title" className="space-y-2.5">
         <h2 id="dependent-areas-title" className="text-base font-semibold">Áreas de {firstName}</h2>
         <nav aria-label={`Áreas de ${minor.full_name}`} className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card px-4 shadow-xs">
-          {[...dependentSections(minor.$id), { key: "acesso", label: "Acesso e senha", description: "Login no aplicativo", href: `${ROUTES.guardianDependents}#dependente-${minor.$id}` }].map((section) =>
+          {[...dependentSections(minor.$id), { key: "acesso", label: "Acesso e senha", description: "Login no aplicativo", href: `${ROUTES.guardianDependents}?acesso=${encodeURIComponent(minor.$id)}#dependente-${minor.$id}` }].map((section) =>
             <Link key={section.key} href={section.href} className="flex min-h-12 items-center justify-between gap-3 py-2.5 transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:text-primary-text focus-visible:outline-2 focus-visible:outline-ring motion-reduce:transition-none">
               <span className="min-w-0"><span className="block text-sm font-medium">{section.label}</span><span className="block text-sm text-muted-foreground">{section.description}</span></span>
               <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
@@ -81,8 +81,7 @@ export default async function DependentSummaryPage({ params }: { params: Promise
   const minors = await listGuardianMinors(guardian);
   const minor = minors.find((item) => item.$id === profileId);
   if (!minor) notFound();
-  return <PortalShell profile={guardian} activePath={ROUTES.guardian} title={minor.full_name} subtitle="Pendências, treino e faixa do dependente."
-    breadcrumbs={[{ label: "Minha família", href: ROUTES.guardian }, { label: minor.full_name }]}
+  return <PortalShell profile={guardian} back={{ label: "Família", href: ROUTES.guardian }} title={minor.full_name} subtitle="Pendências, treino e faixa do dependente."
     headerActions={<DependentSwitcher currentProfileId={minor.$id} section="resumo" siblings={minors.map((item) => ({ profileId: item.$id, name: item.full_name }))} />}>
     <Suspense fallback={<SummarySkeleton />}><DependentSummary guardian={guardian} minor={minor} /></Suspense>
   </PortalShell>;

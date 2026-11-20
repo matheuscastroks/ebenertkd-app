@@ -14,11 +14,9 @@ export default async function AdminAcademyFinancePage() {
 
   return (
     <PortalShell
-      profile={admin}
-      activePath={ROUTES.adminAcademyFinance}
+      profile={admin} back={{ label: "Ajustes", href: ROUTES.adminAcademy }}
       title="Financeiro da academia"
       subtitle="Mensalidade padrão, taxa de matrícula, vencimentos, PIX e a regra de acesso ao aplicativo."
-      breadcrumbs={[{ label: "Configurações da academia", href: ROUTES.adminAcademy }, { label: "Financeiro" }]}
     >
       <div className="w-full space-y-8">
         <BillingPolicyForm policy={billing.policy} revision={billing.revision} />

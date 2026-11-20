@@ -74,10 +74,8 @@ export default async function SettingsPage({
   return (
     <PortalShell
       profile={profile}
-      activePath={ROUTES.settings}
       title="Configurações"
       subtitle="Gerencie seu perfil, preferências de notificações, tema e conta."
-      breadcrumbs={[{ label: "Configurações" }]}
     >
       <div className="w-full min-w-0 space-y-6">
         {query.saved === "profile" ? (

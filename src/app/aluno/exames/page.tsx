@@ -28,8 +28,7 @@ export default async function StudentExamsPage() {
   return (
     <PortalShell
       profile={profile}
-      activePath={ROUTES.studentExams}
-      title="Meus exames"
+      title="Faixa"
       subtitle="Acompanhe seus exames de faixa agendados e os resultados anteriores."
     >
       <div className="w-full min-w-0">

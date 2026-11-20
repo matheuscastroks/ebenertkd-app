@@ -7,7 +7,6 @@ import { resolveStudentRank } from "@/features/students/journey-rules";
 import { getStudentJourneySnapshot } from "@/features/students/journey-service";
 import { getStudyModulesForRank } from "@/features/students/study-catalog";
 import { requireCapability } from "@/lib/auth/session";
-import { ROUTES } from "@/lib/navigation/routes";
 
 async function StudentStudiesContent({ profile }: { profile: Profile }) {
   const snapshot = await getStudentJourneySnapshot(profile);
@@ -22,10 +21,8 @@ export default async function StudentStudiesPage() {
   return (
     <PortalShell
       profile={profile}
-      activePath={ROUTES.studentStudies}
-      title="Guia de estudos"
+      title="Faixa"
       subtitle="Revise o Poomsae da sua faixa, comandos em coreano, princípios do Taekwondo e teste seus conhecimentos."
-      breadcrumbs={[{ label: "Guia de estudos" }]}
     >
       <div className="w-full min-w-0">
         <Suspense fallback={<CardGridSkeleton count={2} columns={2} />}>

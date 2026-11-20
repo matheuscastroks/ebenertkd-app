@@ -9,11 +9,9 @@ export default async function NewEventPage() {
 
   return (
     <PortalShell
-      profile={admin}
-      activePath={ROUTES.adminEvents}
+      profile={admin} back={{ label: "Eventos", href: ROUTES.adminEvents }}
       title="Novo evento"
       subtitle="Campeonato, aulão, seminário, confraternização ou outro evento com inscrições."
-      breadcrumbs={[{ label: "Eventos", href: ROUTES.adminEvents }, { label: "Novo evento" }]}
     >
       <div className="w-full min-w-0">
         <EventWizard locations={locations} />

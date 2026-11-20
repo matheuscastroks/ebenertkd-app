@@ -1,7 +1,7 @@
 import { resolveStudentProfile } from "@/features/students/access";
 import { EnrollmentWorkspace } from "@/features/students/components/enrollment-workspace";
 import { requireCapability } from "@/lib/auth/session";
-import { ROUTES } from "@/lib/navigation/routes";
+import { dependentSummaryPath } from "@/features/families/paths";
 
 export default async function DependentEnrollmentPage({
   params,
@@ -16,5 +16,5 @@ export default async function DependentEnrollmentPage({
     searchParams
   ]);
   const target = await resolveStudentProfile(guardian, profileId);
-  return <EnrollmentWorkspace actor={guardian} target={target} query={query} activePath={ROUTES.guardianDependents} />;
+  return <EnrollmentWorkspace actor={guardian} target={target} query={query} back={{ label: "Resumo", href: dependentSummaryPath(profileId) }} />;
 }

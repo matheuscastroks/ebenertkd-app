@@ -14,9 +14,9 @@ describe("MobileBottomNav", () => {
         <MobileBottomNav
           navItems={[
             { label: "Visão geral", href: "/admin", group: "Principal", exact: true },
-            { label: "Turmas", href: "/admin/turmas", group: "Treino", icon: "classes" },
-            { label: "Financeiro", href: "/admin/financeiro", group: "Financeiro", icon: "billing" },
-            { label: "Avisos", href: "/admin/avisos", group: "Sistema", icon: "notifications", badge: 4 }
+            { label: "Turmas", href: "/admin/turmas", group: "Rotina", icon: "classes" },
+            { label: "Financeiro", href: "/admin/financeiro", group: "Gestão", icon: "billing" },
+            { label: "Avisos", href: "/admin/avisos", group: "Principal", icon: "notifications", badge: 4 }
           ]}
         />
       </SidebarProvider>

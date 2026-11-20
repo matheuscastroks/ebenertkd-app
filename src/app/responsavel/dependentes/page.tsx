@@ -38,7 +38,7 @@ function CreateMinorDialog({ trigger, idPrefix }: { trigger: React.ReactNode; id
  * Gerenciar dependentes: cadastrar e cuidar do acesso de cada filho.
  * O acompanhamento (frequência, exames, financeiro) fica no resumo de cada um.
  */
-async function GuardianMinorsList({ minors }: { minors: Profile[] }) {
+async function GuardianMinorsList({ minors, openId }: { minors: Profile[]; openId?: string }) {
   const photoIds = await listProfilePhotoDocumentIds(minors.map((minor) => minor.$id)).catch(() => new Map<string, string>());
 
   if (minors.length === 0) {
@@ -50,7 +50,7 @@ async function GuardianMinorsList({ minors }: { minors: Profile[] }) {
   return <Card><CardContent>
     <ul className="divide-y divide-border">
       {minors.map((minor) => <li key={minor.$id} id={`dependente-${minor.$id}`} className="scroll-mt-24 py-4 first:pt-0 last:pb-0">
-        <Collapsible>
+        <Collapsible defaultOpen={minor.$id === openId}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-center gap-3">
               <StudentAvatar name={minor.full_name} photoDocumentId={photoIds.get(minor.$id)} />
@@ -107,17 +107,15 @@ async function GuardianMinorsList({ minors }: { minors: Profile[] }) {
   </CardContent></Card>;
 }
 
-export default async function DependentsPage({ searchParams }: { searchParams: Promise<{ error?: string; created?: string; reset?: string; revoked?: string }> }) {
+export default async function DependentsPage({ searchParams }: { searchParams: Promise<{ error?: string; created?: string; reset?: string; revoked?: string; acesso?: string }> }) {
   const [guardian, params] = await Promise.all([requireCapability("guardian"), searchParams]);
   const minors = await listGuardianMinors(guardian);
 
   return (
     <PortalShell
-      profile={guardian}
-      activePath={ROUTES.guardianDependents}
-      title="Gerenciar dependentes"
+      profile={guardian} back={{ label: "Família", href: ROUTES.guardian }}
+      title="Acessos dos dependentes"
       subtitle="Cadastre filhos e cuide do acesso de cada um ao aplicativo."
-      breadcrumbs={[{ label: "Minha família", href: ROUTES.guardian }, { label: "Gerenciar dependentes" }]}
       headerActions={minors.length === 0 ? undefined : <CreateMinorDialog idPrefix="minor-modal" trigger={<Button className="min-h-11"><UserPlusIcon aria-hidden="true" />Adicionar dependente</Button>} />}
     >
       {params.created ? <OperationToast tone="success" title="Dependente cadastrado" description="O acesso já está ativo. Envie o usuário e a senha para o seu filho." clearParams={["created"]} /> : null}
@@ -125,7 +123,7 @@ export default async function DependentsPage({ searchParams }: { searchParams: P
       {params.revoked ? <OperationToast tone="success" title="Acessos encerrados" description="Seu filho precisará entrar de novo em todos os aparelhos." clearParams={["revoked"]} /> : null}
       {params.error ? <OperationToast tone="error" title="Não foi possível concluir" description="Revise os dados ou tente outro nome de usuário." clearParams={["error"]} /> : null}
       <Suspense fallback={<ListItemsSkeleton count={2} />}>
-        <GuardianMinorsList minors={minors} />
+        <GuardianMinorsList minors={minors} openId={params.acesso} />
       </Suspense>
     </PortalShell>
   );

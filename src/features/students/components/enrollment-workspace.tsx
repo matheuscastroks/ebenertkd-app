@@ -8,6 +8,8 @@ import { EnrollmentForm } from "@/features/students/components/enrollment-form";
 import { getOrCreateEnrollmentBundle } from "@/features/students/service";
 import type { EnrollmentStatus } from "@/features/students/types";
 import { toClientData } from "@/lib/client-data";
+import { ENROLLMENT_STATUS_LABELS } from "@/features/students/enrollment-labels";
+import type { BackTarget } from "@/components/dashboard/section-nav";
 import { guardianContractsPath, ROUTES } from "@/lib/navigation/routes";
 
 type EnrollmentQuery = {
@@ -31,12 +33,13 @@ export async function EnrollmentWorkspace({
   actor,
   target,
   query,
-  activePath,
+  back,
 }: {
   actor: Profile;
   target: Profile;
   query: EnrollmentQuery;
-  activePath: string;
+  /** Voltar da pilha quando o responsável abre a ficha de um dependente. */
+  back?: BackTarget;
 }) {
   const bundle = await getOrCreateEnrollmentBundle(target, actor);
 
@@ -44,8 +47,8 @@ export async function EnrollmentWorkspace({
     return (
       <PortalShell
         profile={actor}
-        activePath={activePath}
-        title="Minha matrícula"
+      back={back}
+        title="Cadastro"
         subtitle="Acompanhe sua graduação e o andamento da ficha."
       >
         <div className="w-full min-w-0">
@@ -55,7 +58,7 @@ export async function EnrollmentWorkspace({
             </CardHeader>
             <CardContent className="space-y-2">
               <p>
-                <strong>Status:</strong> {bundle.enrollment.status.replaceAll("_", " ")}
+                <strong>Status:</strong> {ENROLLMENT_STATUS_LABELS[bundle.enrollment.status] ?? bundle.enrollment.status}
               </p>
               <p>
                 <strong>Faixa:</strong> <BeltBadge rankKey={bundle.student.rank_key} size="sm" />
@@ -102,8 +105,8 @@ export async function EnrollmentWorkspace({
   return (
     <PortalShell
       profile={actor}
-      activePath={activePath}
-      title={`Matrícula · ${target.full_name}`}
+      back={back}
+      title={actor.$id === target.$id ? "Cadastro" : `Ficha de ${target.full_name}`}
       subtitle={SUBTITLE_BY_STATUS[bundle.enrollment.status]}
     >
       <div className="w-full min-w-0 space-y-4">

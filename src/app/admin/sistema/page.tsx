@@ -273,11 +273,9 @@ export default async function SystemPage() {
 
   return (
     <PortalShell
-      profile={profile}
-      activePath={ROUTES.adminSystem}
-      title="Sistema e operação"
+      profile={profile} back={{ label: "Ajustes", href: ROUTES.adminAcademy }}
+      title="Sistema e backup"
       subtitle="Rotinas automáticas, backup e espaço de armazenamento."
-      breadcrumbs={[{ label: "Sistema e operação" }]}
     >
       <Suspense fallback={<SystemHealthSkeleton />}>
         <SystemHealthContent />

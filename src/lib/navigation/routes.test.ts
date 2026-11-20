@@ -1,157 +1,118 @@
+import { readdirSync } from "node:fs";
+import { join, relative, sep } from "node:path";
 import { describe, expect, it } from "vitest";
-import { guardianExamsPath, navigationForProfile, ROUTES } from "@/lib/navigation/routes";
+import { guardianExamsPath, navigationForProfile, resolveNavLocation, ROUTES, type SidebarNavItem } from "@/lib/navigation/routes";
 
-describe("navigationForProfile", () => {
-  it("builds the admin hierarchy with server-provided counts", () => {
-    const items = navigationForProfile({ role: "admin", capabilities: ["admin"] }, { enrollments: 4, notifications: 2 });
-    expect(items.find((item) => item.href === ROUTES.adminEnrollments)?.badge).toBe(4);
-    expect(items.find((item) => item.href === ROUTES.notifications)?.icon).toBe("notifications");
-    expect(items.find((item) => item.href === ROUTES.notifications)?.badge).toBe(2);
-    expect(items.find((item) => item.href === ROUTES.adminContracts)?.children?.map((item) => item.href)).toEqual([
-      ROUTES.adminContracts,
-      ROUTES.adminContractRenewals,
-      ROUTES.adminContractTemplate,
-      ROUTES.adminCancellations,
-    ]);
-    expect(items.find((item) => item.label === "Exames de faixa")).toBeUndefined();
-    expect(items.find((item) => item.href === ROUTES.adminEvents)).toMatchObject({ label: "Eventos", group: "Academia", icon: "exams" });
-    expect(items.find((item) => item.href === ROUTES.adminEvents)?.children?.map((item) => item.href)).toEqual([
-      ROUTES.adminEvents,
-      ROUTES.adminEventHub,
-      ROUTES.adminExams,
-      ROUTES.adminExamEligibility,
-      `${ROUTES.adminEvents}?tipo=championship`,
-    ]);
-    expect(ROUTES.adminEventHub).toBe("/admin/eventos/inscricoes");
-    expect(ROUTES.adminExams).toBe("/admin/eventos/exames");
-    expect(ROUTES.adminExamEligibility).toBe("/admin/eventos/exames/elegibilidade");
-    expect(items.find((item) => item.href === ROUTES.adminBilling)?.children?.map((item) => item.href)).toEqual([
+type Role = "admin" | "guardian" | "minor_student" | "adult_student";
+const nav = (role: Role, capabilities: string[] = []) =>
+  navigationForProfile({ role, capabilities: capabilities as never }, { enrollments: 4, notifications: 2 });
+const sidebar = (items: SidebarNavItem[]) => items.filter((item) => item.icon !== "notifications");
+
+/** Lista as rotas reais (`page.tsx`) de uma área, como padrões com `[param]`. */
+function pageRoutes(area: string) {
+  const root = join(process.cwd(), "src", "app");
+  const walk = (dir: string): string[] =>
+    readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
+      entry.isDirectory() ? walk(join(dir, entry.name)) : entry.name === "page.tsx" ? [dir] : []
+    );
+  return walk(join(root, area)).map((dir) => `/${relative(root, dir).split(sep).join("/")}`);
+}
+const toPath = (route: string) => route.replace(/\[[^\]]+\]/g, "x");
+
+describe("navigationForProfile (Seção → Segmento → Pilha)", () => {
+  it("keeps the sidebar at one level with at most eight sections", () => {
+    for (const [role, capabilities] of [["admin", ["admin"]], ["guardian", ["guardian"]], ["minor_student", []], ["adult_student", ["guardian"]]] as const) {
+      const items = sidebar(nav(role, [...capabilities]));
+      expect(items.length).toBeLessThanOrEqual(8);
+      for (const item of items) expect(item).not.toHaveProperty("children");
+      const labels = items.map((item) => item.label);
+      expect(new Set(labels).size).toBe(labels.length);
+      const icons = items.map((item) => item.icon);
+      expect(new Set(icons).size).toBe(icons.length);
+    }
+  });
+
+  it("builds the admin sections with server-provided counts", () => {
+    const items = nav("admin", ["admin"]);
+    expect(sidebar(items).map((item) => item.label)).toEqual(["Hoje", "Alunos", "Turmas", "Eventos", "Financeiro", "Contratos", "Relatórios", "Ajustes"]);
+    expect(items.find((item) => item.label === "Alunos")?.badge).toBe(4);
+    expect(items.find((item) => item.icon === "notifications")?.badge).toBe(2);
+    expect(items.find((item) => item.label === "Ajustes")?.group).toBe("Rodapé");
+    expect(items.find((item) => item.label === "Financeiro")?.segments?.map((segment) => segment.href)).toEqual([
       ROUTES.adminBilling,
       ROUTES.adminBillingClosing,
       ROUTES.adminBillingCalculator,
-      ROUTES.adminBillingAdjustment,
+      ROUTES.adminBillingAdjustment
     ]);
-    expect(items.find((item) => item.href === ROUTES.adminAcademy)).toMatchObject({ group: "Gestão", icon: "system" });
-    expect(items.find((item) => item.href === ROUTES.adminAcademy)?.children?.map((item) => item.href)).toEqual([
-      ROUTES.adminAcademy,
-      ROUTES.adminAcademyIdentity,
-      ROUTES.adminAcademyFinance,
-      ROUTES.adminAcademyGrades,
-      ROUTES.adminAcademyContracts,
-      ROUTES.adminAcademyExams,
-      ROUTES.adminAcademyRules,
-      ROUTES.adminAcademySetup,
-      ROUTES.adminAcademyHistory,
-    ]);
-    expect(items.find((item) => item.href === ROUTES.adminAnnualReport)).toMatchObject({ group: "Gestão", icon: "reports" });
-    expect(items.find((item) => item.href === ROUTES.adminSystem)).toMatchObject({ group: "Gestão", icon: "system" });
   });
 
-  it("keeps financial links away from minors and adds dependents only for guardians", () => {
-    const minor = navigationForProfile({ role: "minor_student", capabilities: [] });
-    expect(minor.some((item) => item.href === ROUTES.studentBilling)).toBe(false);
-    expect(minor.some((item) => item.href === ROUTES.notifications)).toBe(true);
-    const adultGuardian = navigationForProfile({ role: "adult_student", capabilities: ["guardian"] });
-    expect(adultGuardian.some((item) => item.href === ROUTES.guardianDependents)).toBe(true);
-  });
-
-  it("gives every student, minor or adult, a link to their exams", () => {
-    for (const role of ["minor_student", "adult_student"] as const) {
-      const exams = navigationForProfile({ role, capabilities: ["student"] }).find((item) => item.href === ROUTES.studentExams);
-      expect(exams).toMatchObject({ icon: "exams", group: "Treino" });
-    }
+  it("keeps money and family away from minors", () => {
+    const labels = sidebar(nav("minor_student")).map((item) => item.label);
+    expect(labels).toEqual(["Início", "Treinos", "Faixa", "Eventos", "Cadastro"]);
+    expect(sidebar(nav("adult_student", ["guardian"])).map((item) => item.label)).toEqual(["Início", "Treinos", "Faixa", "Eventos", "Cadastro", "Pagamentos", "Família"]);
+    expect(sidebar(nav("adult_student")).some((item) => item.label === "Família")).toBe(false);
     expect(guardianExamsPath("minor 1")).toBe("/responsavel/dependentes/minor%201/exames");
-  });
-
-  it("keeps every destination reachable without duplicates in each profile", () => {
-    const flatten = (items: ReturnType<typeof navigationForProfile>) => items.flatMap((item) => [item.href, ...(item.children ?? []).map((child) => child.href)]);
-    const expected = {
-      admin: [
-        ROUTES.admin,
-        ROUTES.notifications,
-        ROUTES.adminEnrollments,
-        ROUTES.adminRetention,
-        ROUTES.adminCompliance,
-        ROUTES.adminStudentAccess,
-        ROUTES.adminClasses,
-        ROUTES.adminLocations,
-        ROUTES.adminEvents,
-        ROUTES.adminEventHub,
-        `${ROUTES.adminEvents}?tipo=championship`,
-        ROUTES.adminExams,
-        ROUTES.adminExamEligibility,
-        ROUTES.adminBilling,
-        ROUTES.adminBillingClosing,
-        ROUTES.adminBillingCalculator,
-        ROUTES.adminBillingAdjustment,
-        ROUTES.adminContracts,
-        ROUTES.adminContractRenewals,
-        ROUTES.adminContractTemplate,
-        ROUTES.adminCancellations,
-        ROUTES.adminAcademy,
-        ROUTES.adminAcademyIdentity,
-        ROUTES.adminAcademyFinance,
-        ROUTES.adminAcademyGrades,
-        ROUTES.adminAcademyContracts,
-        ROUTES.adminAcademyExams,
-        ROUTES.adminAcademyRules,
-        ROUTES.adminAcademySetup,
-        ROUTES.adminAcademyHistory,
-        ROUTES.adminAnnualReport,
-        ROUTES.adminSystem,
-      ],
-      guardian: [ROUTES.guardian, ROUTES.notifications, ROUTES.guardianDependents],
-      minor_student: [
-        ROUTES.student,
-        ROUTES.notifications,
-        ROUTES.studentAttendance,
-        ROUTES.studentEvolution,
-        ROUTES.studentStudies,
-        ROUTES.studentAchievements,
-        ROUTES.studentCalendar,
-        ROUTES.studentExams,
-        ROUTES.studentEvents,
-        ROUTES.studentCard,
-        ROUTES.studentParq,
-        ROUTES.studentEnrollment,
-        ROUTES.studentContracts,
-      ],
-      adult_student: [
-        ROUTES.student,
-        ROUTES.notifications,
-        ROUTES.studentAttendance,
-        ROUTES.studentEvolution,
-        ROUTES.studentStudies,
-        ROUTES.studentAchievements,
-        ROUTES.studentCalendar,
-        ROUTES.studentExams,
-        ROUTES.studentEvents,
-        ROUTES.studentCard,
-        ROUTES.studentParq,
-        ROUTES.studentEnrollment,
-        ROUTES.studentContracts,
-        ROUTES.studentBilling,
-      ]
-    } as const;
-    for (const [role, hrefs] of Object.entries(expected)) {
-      const items = navigationForProfile({ role: role as keyof typeof expected, capabilities: [] });
-      expect(new Set(flatten(items))).toEqual(new Set(hrefs));
-      const topLevel = items.map((item) => item.href);
-      expect(new Set(topLevel).size).toBe(topLevel.length);
-    }
   });
 
   it("marks at most two short bottom-bar shortcuts per profile", () => {
     const cases = [
       { role: "admin", capabilities: ["admin"], labels: ["Turmas", "Financeiro"] },
-      { role: "guardian", capabilities: ["guardian"], labels: ["Dependentes"] },
-      { role: "minor_student", capabilities: [], labels: ["Frequência", "Exames"] },
-      { role: "adult_student", capabilities: ["guardian"], labels: ["Frequência", "Financeiro"] }
+      { role: "guardian", capabilities: ["guardian"], labels: [] },
+      { role: "minor_student", capabilities: [], labels: ["Treinos", "Faixa"] },
+      { role: "adult_student", capabilities: ["guardian"], labels: ["Treinos", "Pagamentos"] }
     ] as const;
     for (const { role, capabilities, labels } of cases) {
-      const shortcuts = navigationForProfile({ role, capabilities: [...capabilities] }).filter((item) => item.bottomNav);
+      const shortcuts = nav(role, [...capabilities]).filter((item) => item.bottomNav);
       expect(shortcuts.map((item) => item.shortLabel ?? item.label)).toEqual(labels);
       for (const label of labels) expect(label.length).toBeLessThanOrEqual(11);
     }
+  });
+
+  it("points every section and segment to a real page", () => {
+    const routes = new Set([...pageRoutes("admin"), ...pageRoutes("aluno"), ...pageRoutes("responsavel")]);
+    for (const role of ["admin", "guardian", "minor_student", "adult_student"] as const) {
+      for (const item of sidebar(nav(role, ["guardian"]))) {
+        for (const href of [item.href, ...(item.segments ?? []).map((segment) => segment.href)]) {
+          expect(routes, `${role}: ${href}`).toContain(href);
+        }
+      }
+    }
+  });
+
+  it("places every admin and student page in exactly one section", () => {
+    const cases: Array<[Role, string]> = [["admin", "admin"], ["adult_student", "aluno"], ["adult_student", "responsavel"], ["guardian", "responsavel"]];
+    for (const [role, area] of cases) {
+      const items = nav(role, ["guardian"]);
+      for (const route of pageRoutes(area)) {
+        const { section } = resolveNavLocation(items, toPath(route));
+        expect(section, `${role}: ${route}`).toBeDefined();
+      }
+    }
+  });
+});
+
+describe("resolveNavLocation", () => {
+  const admin = nav("admin", ["admin"]);
+
+  it("picks the longest matching segment", () => {
+    const location = resolveNavLocation(admin, ROUTES.adminExamEligibility);
+    expect(location.section?.label).toBe("Eventos");
+    expect(location.segment?.label).toBe("Aptidão");
+    expect(location.isDetail).toBe(false);
+  });
+
+  it("treats dynamic routes as stacked detail screens", () => {
+    expect(resolveNavLocation(admin, "/admin/eventos/exames/abc")).toMatchObject({ isDetail: true, segment: { label: "Exames de faixa" } });
+    expect(resolveNavLocation(admin, "/admin/matriculas/abc")).toMatchObject({ isDetail: true, section: { label: "Alunos" } });
+    expect(resolveNavLocation(admin, "/admin/turmas/a/aulas/b")).toMatchObject({ isDetail: true, section: { label: "Turmas" } });
+    expect(resolveNavLocation(admin, "/admin/sistema")).toMatchObject({ isDetail: true, section: { label: "Ajustes" } });
+  });
+
+  it("matches profile homes only exactly", () => {
+    expect(resolveNavLocation(admin, "/admin").section?.label).toBe("Hoje");
+    const student = nav("adult_student");
+    expect(resolveNavLocation(student, "/aluno").section?.label).toBe("Início");
+    expect(resolveNavLocation(student, "/aluno/parq")).toMatchObject({ section: { label: "Cadastro" }, segment: { label: "Saúde" } });
+    expect(resolveNavLocation(nav("guardian", ["guardian"]), "/responsavel/dependentes/x/financeiro").section?.label).toBe("Família");
   });
 });

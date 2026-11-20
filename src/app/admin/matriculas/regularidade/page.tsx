@@ -359,18 +359,8 @@ export default async function AdminCompliancePage({
   return (
     <PortalShell
       profile={admin}
-      activePath={ROUTES.adminCompliance}
-      title="Regularidade anual"
-      subtitle="Controle a validade anual de atestados médicos, questionários PAR-Q (CREF1) e pendências de ficha dos alunos ativos."
-      breadcrumbs={[
-        { label: "Matrículas", href: ROUTES.adminEnrollments },
-        { label: "Regularidade anual" },
-      ]}
-      headerActions={
-        <Button asChild variant="outline" className="min-h-11">
-          <Link href={ROUTES.adminEnrollments}>Ver matrículas</Link>
-        </Button>
-      }
+      title="Alunos"
+      subtitle="Atestados e questionários de saúde vencidos ou perto de vencer."
     >
       <div className="w-full min-w-0 space-y-6">
         {params.notified ? (

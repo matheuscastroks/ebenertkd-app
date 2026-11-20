@@ -1,3 +1,4 @@
+import { dependentSummaryPath } from "@/features/families/paths";
 import { DependentContext } from "@/features/families/components/dependent-context";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
@@ -7,7 +8,7 @@ import { getStudentExams } from "@/features/exams/student-exams-service";
 import type { Profile } from "@/features/auth/types";
 import { requireCapability } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
-import { guardianBillingPath, ROUTES } from "@/lib/navigation/routes";
+import { guardianBillingPath } from "@/lib/navigation/routes";
 
 async function DependentExamsContent({ guardian, profileId }: { guardian: Profile; profileId: string }) {
   const exams = await getStudentExams(guardian, profileId);
@@ -28,9 +29,7 @@ export default async function DependentExamsPage({ params }: { params: Promise<{
 
   return (
     <PortalShell
-      profile={guardian}
-      activePath={ROUTES.guardianDependents}
-      breadcrumbs={[{ label: "Minha família", href: ROUTES.guardian }, { label: "Exames" }]}
+      profile={guardian} back={{ label: "Resumo", href: dependentSummaryPath(profileId) }}
       title="Exames de faixa"
       subtitle="Exames marcados, taxa de cada um e resultados anteriores."
     >

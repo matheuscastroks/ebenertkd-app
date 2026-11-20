@@ -1,3 +1,4 @@
+import { dependentSummaryPath } from "@/features/families/paths";
 import Link from "next/link";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
@@ -13,7 +14,7 @@ import { evaluateParqStatus } from "@/features/students/parq-rules";
 import { getParqContextForActor } from "@/features/students/parq-service";
 import { requireCapability } from "@/lib/auth/session";
 import { formatBusinessDateBr, saoPauloToday } from "@/lib/dates";
-import { guardianEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
+import { guardianEnrollmentPath } from "@/lib/navigation/routes";
 
 async function GuardianParqContent({
   guardian,
@@ -69,9 +70,7 @@ export default async function GuardianParqPage({
 
   return (
     <PortalShell
-      profile={guardian}
-      activePath={ROUTES.guardianDependents}
-      breadcrumbs={[{ label: "Minha família", href: ROUTES.guardian }, { label: "Questionário de saúde" }]}
+      profile={guardian} back={{ label: "Resumo", href: dependentSummaryPath(profileId) }}
       title="Questionário de saúde"
       subtitle="10 perguntas rápidas preenchidas uma vez por ano pelo responsável."
     >

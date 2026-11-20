@@ -9,7 +9,7 @@ import { identityChecklist } from "@/features/academy/identity-rules";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
 
-type SectionCard = { title: string; description: string; href: string; status: { label: string; tone: StatusTone } };
+type SectionCard = { title: string; description: string; href: string; status?: { label: string; tone: StatusTone } };
 
 const sectionStatus = (customized: PolicySection[], sections: PolicySection[], any = false): { label: string; tone: StatusTone } =>
   sections[any ? "some" : "every"]((section) => customized.includes(section))
@@ -58,16 +58,19 @@ export default async function AdminAcademyOverviewPage() {
       description: "Risco de evasão, validade de atestado e PAR-Q, lembretes de pagamento e conquistas.",
       href: ROUTES.adminAcademyRules,
       status: sectionStatus(customized, ["retention", "compliance", "notifications", "gamification"], true)
+    },
+    {
+      title: "Sistema e backup",
+      description: "Rotinas automáticas, backup externo, notificações push e espaço de armazenamento.",
+      href: ROUTES.adminSystem
     }
   ];
 
   return (
     <PortalShell
       profile={admin}
-      activePath={ROUTES.adminAcademy}
-      title="Configurações da academia"
-      subtitle="Os valores que antes ficavam fixos no sistema, agora editáveis por você."
-      breadcrumbs={[{ label: "Configurações da academia" }]}
+      title="Ajustes"
+      subtitle="Dados da academia, valores, graduações e regras do app."
       headerActions={
         <div className="flex flex-wrap gap-2">
           {!identity.setup_completed_at ? (
@@ -77,9 +80,6 @@ export default async function AdminAcademyOverviewPage() {
           ) : null}
           <Button asChild variant="outline" className="min-h-11">
             <Link href={ROUTES.adminAcademyHistory}>Histórico</Link>
-          </Button>
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href={ROUTES.adminLocations}>Locais de treino</Link>
           </Button>
         </div>
       }
@@ -91,7 +91,7 @@ export default async function AdminAcademyOverviewPage() {
               <CardHeader>
                 <CardTitle className="flex flex-wrap items-center justify-between gap-2">
                   {card.title}
-                  <StatusBadge tone={card.status.tone}>{card.status.label}</StatusBadge>
+                  {card.status ? <StatusBadge tone={card.status.tone}>{card.status.label}</StatusBadge> : null}
                 </CardTitle>
                 <CardDescription>{card.description}</CardDescription>
               </CardHeader>

@@ -203,10 +203,8 @@ export default async function StudentCalendarPage() {
   return (
     <PortalShell
       profile={profile}
-      activePath={ROUTES.studentCalendar}
-      title="Calendário de treinos"
-      subtitle="Consulte sua grade semanal, próximas aulas e exames agendados e salve direto na sua agenda."
-      breadcrumbs={[{ label: "Calendário" }]}
+      title="Treinos"
+      subtitle="Seus horários e os próximos treinos."
     >
       <div className="w-full min-w-0 space-y-6">
         <Suspense

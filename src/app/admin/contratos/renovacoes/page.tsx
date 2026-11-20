@@ -249,13 +249,8 @@ export default async function AdminContractRenewalsPage({
   return (
     <PortalShell
       profile={admin}
-      activePath={ROUTES.adminContractRenewals}
-      title="Esteira de renovações"
-      subtitle="Acompanhe contratos vencidos ou próximos do término nos próximos 90 dias e emita renovações."
-      breadcrumbs={[
-        { label: "Contratos", href: ROUTES.adminContracts },
-        { label: "Renovações" },
-      ]}
+      title="Contratos"
+      subtitle="Contratos vencidos ou perto do fim, prontos para renovar."
       headerActions={
         <Button asChild variant="outline" className="min-h-11">
           <Link href={ROUTES.adminContracts}>Voltar para contratos</Link>

@@ -6,7 +6,6 @@ import { requireProfile } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { CardGridSkeleton } from "@/components/skeletons";
-import { ROUTES } from "@/lib/navigation/routes";
 
 async function ClassManagerSection({
   searchParams,
@@ -46,10 +45,8 @@ export default async function TrainingClassesPage({
   return (
     <PortalShell
       profile={admin}
-      activePath={ROUTES.adminClasses}
       title="Turmas"
-      subtitle="Defina os horários e dojangs disponíveis para treinos e matrículas."
-      breadcrumbs={[{ label: "Turmas" }]}
+      subtitle="Horários, locais e a chamada de cada turma."
     >
       <div className="w-full min-w-0">
         <Suspense fallback={<CardGridSkeleton count={4} columns={2} />}>
