@@ -4,7 +4,7 @@ import type { AttendanceRecord } from "@/features/classes/types";
 export function attendanceSourceNote(record?: Pick<AttendanceRecord, "status" | "source" | "justification" | "check_in_distance_m"> | null): string | null {
   if (!record) return null;
   if (record.source === "check_in" && record.status === "present") {
-    return typeof record.check_in_distance_m === "number" ? `Check-in pelo app · ${record.check_in_distance_m} m do local` : "Check-in pelo app";
+    return typeof record.check_in_distance_m === "number" ? `Check-in pelo app · ${record.check_in_distance_m} m do local` : "Check-in pelo app";
   }
   if (record.source === "justification" && record.status === "excused") {
     return record.justification ? `Justificou: ${record.justification}` : "Justificou pelo app";
@@ -24,7 +24,7 @@ export function checkInErrorMessage(code: string, detail?: { distanceM: number; 
     case "check_in_out_of_range":
       return {
         message: detail
-          ? `Você está a cerca de ${detail.distanceM} m do local do treino (limite de ${detail.radiusM} m). Chegue ao local e tente de novo, ou justifique a falta.`
+          ? `Você está a cerca de ${detail.distanceM} m do local do treino (limite de ${detail.radiusM} m). Chegue ao local e tente de novo, ou justifique a falta.`
           : "Você está fora do raio do local do treino. Chegue ao local e tente de novo, ou justifique a falta.",
         offerJustify: true
       };

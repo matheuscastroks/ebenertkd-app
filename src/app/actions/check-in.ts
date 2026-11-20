@@ -28,7 +28,7 @@ export async function checkInAction(input: { date: string; startTime: string; la
   try {
     const { distanceM } = await checkInStudent(profile, input);
     revalidateStudentPages();
-    return { status: "success", message: `Presença confirmada. Você estava a cerca de ${distanceM} m do local.` };
+    return { status: "success", message: `Presença confirmada. Você estava a cerca de ${distanceM} m do local.` };
   } catch (error) {
     return failure(error);
   }

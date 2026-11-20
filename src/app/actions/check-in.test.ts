@@ -35,7 +35,7 @@ describe("checkInAction", () => {
     const result = await checkInAction(input);
     expect(mocks.requireCapability).toHaveBeenCalledWith("student");
     expect(mocks.checkInStudent).toHaveBeenCalledWith(profile, input);
-    expect(result).toEqual({ status: "success", message: "Presença confirmada. Você estava a cerca de 40 m do local." });
+    expect(result).toEqual({ status: "success", message: "Presença confirmada. Você estava a cerca de 40 m do local." });
     expect(mocks.revalidatePath).toHaveBeenCalledWith("/aluno");
   });
 
@@ -43,7 +43,7 @@ describe("checkInAction", () => {
     mocks.checkInStudent.mockRejectedValue(new CheckInError("check_in_out_of_range", { distanceM: 330, radiusM: 150 }));
     const result = await checkInAction(input);
     expect(result).toMatchObject({ status: "error", code: "check_in_out_of_range", offerJustify: true });
-    expect(result.status === "error" && result.message).toContain("330 m");
+    expect(result.status === "error" && result.message).toContain("330 m");
     expect(mocks.revalidatePath).not.toHaveBeenCalled();
   });
 

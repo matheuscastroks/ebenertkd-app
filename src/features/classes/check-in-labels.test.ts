@@ -3,7 +3,7 @@ import { attendanceSourceNote, checkInErrorMessage, geolocationErrorMessage } fr
 
 describe("nota da chamada do professor", () => {
   it("descreve check-in, justificativa e falta automática", () => {
-    expect(attendanceSourceNote({ status: "present", source: "check_in", check_in_distance_m: 40 })).toBe("Check-in pelo app · 40 m do local");
+    expect(attendanceSourceNote({ status: "present", source: "check_in", check_in_distance_m: 40 })).toBe("Check-in pelo app · 40 m do local");
     expect(attendanceSourceNote({ status: "excused", source: "justification", justification: "consulta" })).toBe("Justificou: consulta");
     expect(attendanceSourceNote({ status: "absent", source: "auto" })).toBe("Falta automática: sem check-in nem justificativa");
   });
@@ -21,6 +21,6 @@ describe("mensagens ao aluno", () => {
   });
 
   it("fora do raio mostra distância e limite", () => {
-    expect(checkInErrorMessage("check_in_out_of_range", { distanceM: 330, radiusM: 150 })).toMatchObject({ offerJustify: true, message: expect.stringContaining("330 m do local do treino (limite de 150 m)") });
+    expect(checkInErrorMessage("check_in_out_of_range", { distanceM: 330, radiusM: 150 })).toMatchObject({ offerJustify: true, message: expect.stringContaining("330 m do local do treino (limite de 150 m)") });
   });
 });

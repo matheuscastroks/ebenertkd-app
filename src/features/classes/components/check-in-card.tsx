@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { checkInAction, justifyAbsenceAction } from "@/app/actions/check-in";
 import { FeedbackAlert } from "@/components/shared/feedback-alert";
@@ -40,6 +41,7 @@ export function CheckInCard({ state }: { state: StudentCheckInState }) {
   const [reason, setReason] = useState("");
   const [locating, setLocating] = useState(false);
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
   const busy = pending || locating;
   const { slot, record } = state;
   const opensAt = clock.format(new Date(state.opensAt));
@@ -60,7 +62,10 @@ export function CheckInCard({ state }: { state: StudentCheckInState }) {
     }
     const { latitude, longitude } = position.coords;
     startTransition(async () => {
-      setResult(await checkInAction({ date: slot.date, startTime: slot.startTime, latitude, longitude }));
+      const next = await checkInAction({ date: slot.date, startTime: slot.startTime, latitude, longitude });
+      setResult(next);
+      // Traz o registro novo do servidor: o card troca os botões pelo selo.
+      if (next.status === "success") router.refresh();
     });
   }
 
@@ -69,7 +74,10 @@ export function CheckInCard({ state }: { state: StudentCheckInState }) {
     startTransition(async () => {
       const next = await justifyAbsenceAction({ date: slot.date, startTime: slot.startTime, reason });
       setResult(next);
-      if (next.status === "success") setJustifying(false);
+      if (next.status === "success") {
+        setJustifying(false);
+        router.refresh();
+      }
     });
   }
 
