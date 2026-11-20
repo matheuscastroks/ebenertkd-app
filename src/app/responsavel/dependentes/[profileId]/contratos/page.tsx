@@ -1,4 +1,5 @@
-import { dependentSummaryPath } from "@/features/families/paths";
+import { dependentSegments } from "@/features/families/paths";
+import { ROUTES } from "@/lib/navigation/routes";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { ListItemsSkeleton } from "@/components/skeletons";
@@ -20,7 +21,7 @@ export default async function DependentContractsPage({ params }: { params: Promi
 
   return (
     <PortalShell
-      profile={guardian} back={{ label: "Resumo", href: dependentSummaryPath(profileId) }}
+      profile={guardian} back={{ label: "Família", href: ROUTES.guardian }} segments={dependentSegments(profileId)}
       title="Contratos"
       subtitle="Assine contratos pendentes e consulte os já assinados."
     >

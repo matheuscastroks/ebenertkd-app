@@ -6,7 +6,8 @@ import {
   NotificationHeaderButton,
 } from "@/components/dashboard/notification-nav-item";
 import { HeaderActions } from "@/components/dashboard/header-actions";
-import { BackLink, NavItemsProvider, SectionSegments, type BackTarget } from "@/components/dashboard/section-nav";
+import { BackLink, NavItemsProvider, ScreenSegments, SectionSegments, type BackTarget } from "@/components/dashboard/section-nav";
+import type { NavSegment } from "@/lib/navigation/routes";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 import { MobileBottomNav } from "@/components/dashboard/mobile-bottom-nav";
@@ -19,6 +20,8 @@ type DashboardShellProps = {
   badge: string;
   /** Tela de detalhe (pilha): mostra "‹ label" acima do título e esconde os segmentos. */
   back?: BackTarget;
+  /** Segmentos próprios da tela da pilha; aparecem mesmo com `back`. */
+  segments?: NavSegment[];
   headerActions?: ReactNode;
   children: ReactNode;
 };
@@ -80,6 +83,7 @@ export function DashboardShell({
   title,
   subtitle,
   back,
+  segments,
   headerActions,
   children,
 }: DashboardShellProps) {
@@ -111,7 +115,11 @@ export function DashboardShell({
             <NotificationHeaderButton />
           </div>
         </div>
-        {back ? null : (
+        {segments ? (
+          <div className="mt-3">
+            <ScreenSegments label={`Seções de ${title}`} segments={segments} />
+          </div>
+        ) : back ? null : (
           <div className="mt-3 empty:hidden">
             <SectionSegments />
           </div>

@@ -10,7 +10,7 @@ import type { EnrollmentStatus } from "@/features/students/types";
 import { toClientData } from "@/lib/client-data";
 import { ENROLLMENT_STATUS_LABELS } from "@/features/students/enrollment-labels";
 import type { BackTarget } from "@/components/dashboard/section-nav";
-import { guardianContractsPath, ROUTES } from "@/lib/navigation/routes";
+import { guardianContractsPath, ROUTES, type NavSegment } from "@/lib/navigation/routes";
 
 type EnrollmentQuery = {
   saved?: string;
@@ -34,12 +34,15 @@ export async function EnrollmentWorkspace({
   target,
   query,
   back,
+  segments,
 }: {
   actor: Profile;
   target: Profile;
   query: EnrollmentQuery;
   /** Voltar da pilha quando o responsável abre a ficha de um dependente. */
   back?: BackTarget;
+  /** Segmentos do dependente, quando aberto pelo responsável. */
+  segments?: NavSegment[];
 }) {
   const bundle = await getOrCreateEnrollmentBundle(target, actor);
 
@@ -106,7 +109,8 @@ export async function EnrollmentWorkspace({
     <PortalShell
       profile={actor}
       back={back}
-      title={actor.$id === target.$id ? "Cadastro" : `Ficha de ${target.full_name}`}
+      segments={segments}
+      title={actor.$id === target.$id ? "Cadastro" : segments ? "Ficha" : `Ficha de ${target.full_name}`}
       subtitle={SUBTITLE_BY_STATUS[bundle.enrollment.status]}
     >
       <div className="w-full min-w-0 space-y-4">

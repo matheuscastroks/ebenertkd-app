@@ -4,7 +4,7 @@ import { createContext, useContext, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronLeft } from "@/components/ui/icons";
-import { resolveNavLocation, type SidebarNavItem } from "@/lib/navigation/routes";
+import { resolveNavLocation, type NavSegment, type SidebarNavItem } from "@/lib/navigation/routes";
 import { cn } from "@/lib/utils";
 
 const NavItemsContext = createContext<SidebarNavItem[]>([]);
@@ -25,20 +25,35 @@ export function SectionSegments() {
   const { section, segment, isDetail } = resolveNavLocation(items, pathname);
   const segments = section?.segments ?? [];
   if (isDetail || segments.length < 2) return null;
+  return <SegmentBar label={`Seções de ${section!.label}`} segments={segments} active={segment} />;
+}
 
+/**
+ * Segmentos próprios de uma tela da pilha (ex.: as áreas de um dependente).
+ * Ativo = segmento de href mais longo que contém a rota atual.
+ */
+export function ScreenSegments({ label, segments }: { label: string; segments: NavSegment[] }) {
+  const pathname = usePathname();
+  const active = segments
+    .filter((item) => pathname === item.href || pathname.startsWith(`${item.href}/`))
+    .sort((x, y) => y.href.length - x.href.length)[0];
+  return <SegmentBar label={label} segments={segments} active={active} />;
+}
+
+function SegmentBar({ label, segments, active }: { label: string; segments: NavSegment[]; active?: NavSegment }) {
   return (
-    <nav aria-label={`Seções de ${section!.label}`} className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
+    <nav aria-label={label} className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0">
       <ul className="inline-flex min-h-11 items-center gap-1 rounded-xl bg-muted p-1 text-muted-foreground">
         {segments.map((item) => {
-          const active = item === segment;
+          const isActive = item === active;
           return (
             <li key={item.href} className="shrink-0">
               <Link
                 href={item.href}
-                aria-current={active ? "page" : undefined}
+                aria-current={isActive ? "page" : undefined}
                 className={cn(
                   "inline-flex h-9 items-center whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  active ? "bg-card text-foreground shadow-xs" : "hover:text-foreground"
+                  isActive ? "bg-card text-foreground shadow-xs" : "hover:text-foreground"
                 )}
               >
                 {item.label}

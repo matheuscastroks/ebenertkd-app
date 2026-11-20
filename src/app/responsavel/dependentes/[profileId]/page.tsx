@@ -9,12 +9,12 @@ import { DependentSwitcher } from "@/features/families/components/dependent-head
 import { PendencyList } from "@/features/families/components/pendency-list";
 import { loadDependentSnapshots } from "@/features/families/dependent-snapshot";
 import { formatNextTraining } from "@/features/families/next-training";
-import { dependentSections } from "@/features/families/paths";
+import { dependentAccessPath, dependentSegments } from "@/features/families/paths";
 import { primaryPendency } from "@/features/families/pendencies";
 import { listGuardianMinors } from "@/features/families/service";
 import { GraduationCard } from "@/features/students/components/graduation-card";
 import { requireCapability } from "@/lib/auth/session";
-import { ROUTES } from "@/lib/navigation/routes";
+import { guardianAttendancePath, ROUTES } from "@/lib/navigation/routes";
 
 /**
  * Resumo de um dependente. Tela nova: a família tinha só cartões com cinco botões por filho;
@@ -24,55 +24,40 @@ async function DependentSummary({ guardian, minor }: { guardian: Profile; minor:
   const [snapshot] = await loadDependentSnapshots(guardian, [minor]);
   const { student, summary, next, trainingClass, pendencies } = snapshot;
   const firstName = minor.full_name.split(" ")[0];
-  return <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start">
-    <div className="min-w-0 space-y-6">
+  return <div className="mx-auto max-w-3xl space-y-6">
+    {pendencies.length > 0 ? (
       <section aria-labelledby="dependent-pendencies" className="space-y-2.5">
         <h2 id="dependent-pendencies" className="text-base font-semibold">Pendências</h2>
         <div className="overflow-hidden rounded-xl border border-border bg-card px-4 py-3 shadow-xs">
-          <PendencyList items={pendencies} primaryKey={primaryPendency(pendencies)?.id} subject={minor.full_name} emptyLabel={`Nada pendente para ${firstName}.`} />
+          <PendencyList items={pendencies} primaryKey={primaryPendency(pendencies)?.id} subject={minor.full_name} />
         </div>
       </section>
-      <section aria-labelledby="dependent-next-training" className="space-y-3 rounded-xl border border-border bg-card p-5 shadow-xs">
+    ) : null}
+    <section aria-labelledby="dependent-next-training" className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+      <div className="space-y-1 p-5">
         <h2 id="dependent-next-training" className="text-sm font-medium text-muted-foreground">Próximo treino</h2>
-        <div className="space-y-1">
-          <p className="text-xl font-semibold tracking-tight tabular-nums">{formatNextTraining(next)}</p>
-          <p className="text-sm text-muted-foreground">{trainingClass ? `${trainingClass.name} · ${trainingClass.location || "Local não informado"}` : "A turma é definida pelo professor ao aprovar a matrícula."}</p>
-        </div>
-        <p className="border-t border-border pt-3 text-sm tabular-nums">{summary.total ? `Frequência ${summary.rate}% · ${summary.attended} de ${summary.total} aulas` : "Ainda sem aulas registradas"}</p>
-      </section>
-    </div>
-    <div className="min-w-0 space-y-6">
-      <GraduationCard title="Faixa" rankKey={student?.rank_key} startedAtTkd={student?.started_at_tkd} />
-      <section aria-labelledby="dependent-areas-title" className="space-y-2.5">
-        <h2 id="dependent-areas-title" className="text-base font-semibold">Áreas de {firstName}</h2>
-        <nav aria-label={`Áreas de ${minor.full_name}`} className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card px-4 shadow-xs">
-          {[...dependentSections(minor.$id), { key: "acesso", label: "Acesso e senha", description: "Login no aplicativo", href: `${ROUTES.guardianDependents}?acesso=${encodeURIComponent(minor.$id)}#dependente-${minor.$id}` }].map((section) =>
-            <Link key={section.key} href={section.href} className="flex min-h-12 items-center justify-between gap-3 py-2.5 transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:text-primary-text focus-visible:outline-2 focus-visible:outline-ring motion-reduce:transition-none">
-              <span className="min-w-0"><span className="block text-sm font-medium">{section.label}</span><span className="block text-sm text-muted-foreground">{section.description}</span></span>
-              <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-            </Link>)}
-        </nav>
-      </section>
-    </div>
+        <p className="text-xl font-semibold tracking-tight tabular-nums">{formatNextTraining(next)}</p>
+        <p className="text-sm text-muted-foreground">{trainingClass ? `${trainingClass.name} · ${trainingClass.location || "Local não informado"}` : "A turma é definida pelo professor ao aprovar a ficha."}</p>
+      </div>
+      <Link href={guardianAttendancePath(minor.$id)} className="flex min-h-12 items-center justify-between gap-3 px-5 py-3 text-sm transition-colors duration-(--duration-quick) hover:bg-muted motion-reduce:transition-none">
+        <span className="tabular-nums">{summary.total ? `Frequência ${summary.rate}% · ${summary.attended} de ${summary.total} aulas` : "Ainda sem aulas registradas"}</span>
+        <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+      </Link>
+    </section>
+    {pendencies.length === 0 ? <p className="text-sm text-muted-foreground">Nada pendente para {firstName}.</p> : null}
+    <GraduationCard title="Faixa" rankKey={student?.rank_key} startedAtTkd={student?.started_at_tkd} />
+    <Link href={dependentAccessPath(minor.$id)} className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-primary hover:underline">
+      Acesso e senha de {firstName}
+      <ChevronRightIcon className="size-4" aria-hidden="true" />
+    </Link>
   </div>;
 }
 
 function SummarySkeleton() {
-  return <div role="status" aria-label="Carregando resumo" className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-    <div className="space-y-6">
-      <div className="space-y-2.5">
-        <Skeleton className="h-5 w-28" />
-        <Skeleton className="h-24 w-full rounded-xl" />
-      </div>
-      <Skeleton className="h-36 w-full rounded-xl" />
-    </div>
-    <div className="space-y-6">
-      <Skeleton className="h-52 w-full rounded-xl" />
-      <div className="space-y-2.5">
-        <Skeleton className="h-5 w-32" />
-        <Skeleton className="h-64 w-full rounded-xl" />
-      </div>
-    </div>
+  return <div role="status" aria-label="Carregando resumo" className="mx-auto max-w-3xl space-y-6">
+    <Skeleton className="h-24 w-full rounded-xl" />
+    <Skeleton className="h-36 w-full rounded-xl" />
+    <Skeleton className="h-52 w-full rounded-xl" />
   </div>;
 }
 
@@ -81,7 +66,7 @@ export default async function DependentSummaryPage({ params }: { params: Promise
   const minors = await listGuardianMinors(guardian);
   const minor = minors.find((item) => item.$id === profileId);
   if (!minor) notFound();
-  return <PortalShell profile={guardian} back={{ label: "Família", href: ROUTES.guardian }} title={minor.full_name} subtitle="Pendências, treino e faixa do dependente."
+  return <PortalShell profile={guardian} back={{ label: "Família", href: ROUTES.guardian }} segments={dependentSegments(minor.$id)} title={minor.full_name} subtitle="Pendências, treino e faixa."
     headerActions={<DependentSwitcher currentProfileId={minor.$id} section="resumo" siblings={minors.map((item) => ({ profileId: item.$id, name: item.full_name }))} />}>
     <Suspense fallback={<SummarySkeleton />}><DependentSummary guardian={guardian} minor={minor} /></Suspense>
   </PortalShell>;

@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 const pathname = vi.hoisted(() => ({ value: "/admin/financeiro/fechamento" }));
 vi.mock("next/navigation", () => ({ usePathname: () => pathname.value }));
 
-import { BackLink, NavItemsProvider, SectionSegments } from "@/components/dashboard/section-nav";
+import { BackLink, NavItemsProvider, ScreenSegments, SectionSegments } from "@/components/dashboard/section-nav";
 import { navigationForProfile } from "@/lib/navigation/routes";
 
 const items = navigationForProfile({ role: "admin", capabilities: ["admin"] });
@@ -35,5 +35,14 @@ describe("BackLink", () => {
   it("volta para a tela anterior com rótulo acessível", () => {
     render(<BackLink label="Alunos" href="/admin/matriculas" />);
     expect(screen.getByRole("link", { name: "Voltar para Alunos" })).toHaveAttribute("href", "/admin/matriculas");
+  });
+});
+
+describe("segmentos próprios da tela", () => {
+  it("marca o segmento mais específico que contém a rota", () => {
+    pathname.value = "/responsavel/dependentes/ana/financeiro";
+    render(<ScreenSegments label="Seções de Ana" segments={[{ label: "Resumo", href: "/responsavel/dependentes/ana" }, { label: "Pagamentos", href: "/responsavel/dependentes/ana/financeiro" }]} />);
+    expect(screen.getByRole("link", { name: "Pagamentos" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Resumo" })).not.toHaveAttribute("aria-current");
   });
 });

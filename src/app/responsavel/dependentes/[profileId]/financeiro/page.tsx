@@ -1,4 +1,5 @@
-import { dependentSummaryPath } from "@/features/families/paths";
+import { dependentSegments } from "@/features/families/paths";
+import { ROUTES } from "@/lib/navigation/routes";
 import { DependentContext } from "@/features/families/components/dependent-context";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
@@ -19,8 +20,8 @@ export default async function GuardianBillingPage({
 
   return (
     <PortalShell
-      profile={actor} back={{ label: "Resumo", href: dependentSummaryPath(profileId) }}
-      title="Financeiro"
+      profile={actor} back={{ label: "Família", href: ROUTES.guardian }} segments={dependentSegments(profileId)}
+      title="Pagamentos"
       subtitle="Mensalidades e envio de comprovantes do dependente."
     >
       <div className="w-full min-w-0 space-y-6">

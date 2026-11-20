@@ -4,7 +4,7 @@ import type { Profile } from "@/features/auth/types";
 import { countEnrollmentsRequiringReview } from "@/features/students/service";
 import { countUnreadNotifications } from "@/features/notifications/notification-service";
 import type { BackTarget } from "@/components/dashboard/section-nav";
-import { navigationForProfile } from "@/lib/navigation/routes";
+import { navigationForProfile, type NavSegment } from "@/lib/navigation/routes";
 
 export async function PortalFrame({ profile, children }: { profile: Profile; children: ReactNode }) {
   const badge = profile.role === "admin" ? "Professor" : profile.role === "guardian" ? "Responsável" : "Aluno";
@@ -38,7 +38,7 @@ export async function PortalFrame({ profile, children }: { profile: Profile; chi
   );
 }
 
-export function PortalShell({ profile, title, subtitle, back, headerActions, children }: { profile: Profile; title: string; subtitle: string; back?: BackTarget; headerActions?: ReactNode; children: ReactNode }) {
+export function PortalShell({ profile, title, subtitle, back, segments, headerActions, children }: { profile: Profile; title: string; subtitle: string; back?: BackTarget; segments?: NavSegment[]; headerActions?: ReactNode; children: ReactNode }) {
   const badge = profile.role === "admin" ? "Professor" : profile.role === "guardian" ? "Responsável" : "Aluno";
-  return <DashboardShell title={title} subtitle={subtitle} badge={badge} back={back} headerActions={headerActions}>{children}</DashboardShell>;
+  return <DashboardShell title={title} subtitle={subtitle} badge={badge} back={back} segments={segments} headerActions={headerActions}>{children}</DashboardShell>;
 }

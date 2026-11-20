@@ -1,4 +1,5 @@
-import { dependentSummaryPath } from "@/features/families/paths";
+import { dependentSegments } from "@/features/families/paths";
+import { ROUTES } from "@/lib/navigation/routes";
 import { DependentContext } from "@/features/families/components/dependent-context";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
@@ -48,7 +49,7 @@ export default async function DependentAttendancePage({
 
   return (
     <PortalShell
-      profile={guardian} back={{ label: "Resumo", href: dependentSummaryPath(profileId) }}
+      profile={guardian} back={{ label: "Família", href: ROUTES.guardian }} segments={dependentSegments(profileId)}
       title="Frequência"
       subtitle="Presenças e aulas do dependente, mês a mês."
     >

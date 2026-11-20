@@ -1,4 +1,5 @@
-import { dependentSummaryPath } from "@/features/families/paths";
+import { dependentSegments } from "@/features/families/paths";
+import { ROUTES } from "@/lib/navigation/routes";
 import Link from "next/link";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
@@ -28,7 +29,7 @@ async function GuardianParqContent({
   if (!student) {
     return (
       <EmptyState
-        title="Preencha a matrícula primeiro"
+        title="Preencha a ficha primeiro"
         description="Assim que a matrícula do dependente for iniciada, o questionário de saúde anual ficará disponível aqui."
         action={
           <Button asChild className="min-h-11">
@@ -70,8 +71,8 @@ export default async function GuardianParqPage({
 
   return (
     <PortalShell
-      profile={guardian} back={{ label: "Resumo", href: dependentSummaryPath(profileId) }}
-      title="Questionário de saúde"
+      profile={guardian} back={{ label: "Família", href: ROUTES.guardian }} segments={dependentSegments(profileId)}
+      title="Saúde"
       subtitle="10 perguntas rápidas preenchidas uma vez por ano pelo responsável."
     >
       <div className="w-full min-w-0 space-y-6">

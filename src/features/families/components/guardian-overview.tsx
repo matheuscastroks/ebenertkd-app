@@ -10,13 +10,13 @@ import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import { loadDependentSnapshots, studentStatusLabel, studentStatusTone } from "@/features/families/dependent-snapshot";
 import { primaryPendency } from "@/features/families/pendencies";
-import { dependentSections, dependentSummaryPath } from "@/features/families/paths";
+import { dependentSummaryPath } from "@/features/families/paths";
 import { PendencyList } from "./pendency-list";
 import { ROUTES } from "@/lib/navigation/routes";
 
 /**
  * Painel da família: um cartão por filho. Primário: quem é e o que está pendente.
- * Secundário: próximo treino e frequência. Terciário: atalhos para as áreas do filho.
+ * Secundário: próximo treino e frequência. As áreas do filho ficam nos segmentos da tela dele.
  * A única ação laranja vai para a pendência mais urgente da família inteira.
  */
 export async function GuardianMinorsOverview({ guardian, minors }: { guardian: Profile; minors: Profile[] }) {
@@ -42,8 +42,8 @@ export async function GuardianMinorsOverview({ guardian, minors }: { guardian: P
               <StatusBadge tone={studentStatusTone(student?.status)}>{studentStatusLabel(student?.status)}</StatusBadge>
             </div>
           </div>
-          <Link href={dependentSummaryPath(minor.$id)} aria-label={`Ver resumo de ${minor.full_name}`} className="inline-flex min-h-11 shrink-0 items-center gap-1 self-start rounded-lg px-2 text-sm font-medium text-primary-text hover:underline focus-visible:outline-2 focus-visible:outline-ring">
-            Ver resumo<ChevronRight className="size-4" aria-hidden="true" />
+          <Link href={dependentSummaryPath(minor.$id)} aria-label={`Abrir ${minor.full_name}`} className="inline-flex min-h-11 shrink-0 items-center gap-1 self-start rounded-lg px-2 text-sm font-medium text-primary-text hover:underline focus-visible:outline-2 focus-visible:outline-ring">
+            Abrir<ChevronRight className="size-4" aria-hidden="true" />
           </Link>
         </div>
       </CardHeader>
@@ -55,10 +55,6 @@ export async function GuardianMinorsOverview({ guardian, minors }: { guardian: P
           <div className="space-y-0.5"><dt className="text-muted-foreground">Próximo treino</dt><dd className="font-medium tabular-nums">{formatNextTraining(next)}</dd>{trainingClass ? <dd className="text-muted-foreground">{trainingClass.name}</dd> : null}</div>
           <div className="space-y-0.5"><dt className="text-muted-foreground">Frequência</dt><dd className="font-medium tabular-nums">{summary.total ? `${summary.rate}% · ${summary.attended} de ${summary.total} aulas` : "Ainda sem aulas registradas"}</dd></div>
         </dl>
-        <nav aria-label={`Acessos de ${minor.full_name}`} className="flex flex-wrap gap-x-1 gap-y-1 border-t border-border pt-3">
-          {dependentSections(minor.$id).map((section) => <Link key={section.key} href={section.href}
-            className="inline-flex min-h-11 items-center rounded-lg px-2 font-medium text-muted-foreground transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring motion-reduce:transition-none">{section.label}</Link>)}
-        </nav>
       </CardContent>
     </Card>;
   })}</div>;

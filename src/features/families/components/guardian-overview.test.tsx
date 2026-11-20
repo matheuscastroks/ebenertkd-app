@@ -18,8 +18,9 @@ it("mantém comprovante em análise visível e ações vinculadas a cada filho",
   render(await GuardianMinorsOverview({ guardian, minors }));
   expect(screen.getAllByText("Comprovante em análise")).toHaveLength(2);
   expect(screen.queryByText("Em dia")).not.toBeInTheDocument();
-  expect(screen.getAllByRole("link", { name: "Financeiro" }).map((link) => link.getAttribute("href"))).toEqual(["/responsavel/dependentes/ana/financeiro", "/responsavel/dependentes/bia/financeiro"]);
-  expect(screen.getByRole("link", { name: "Ver resumo de Bia" })).toHaveAttribute("href", "/responsavel/dependentes/bia");
+  expect(screen.getAllByRole("link", { name: /^Abrir / }).map((link) => link.getAttribute("href"))).toEqual(["/responsavel/dependentes/ana", "/responsavel/dependentes/bia"]);
+  expect(screen.queryByRole("link", { name: "Financeiro" })).not.toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Abrir Bia" })).toHaveAttribute("href", "/responsavel/dependentes/bia");
 });
 it("nomeia o filho em cada ação e usa uma só ação principal na família", async () => {
   vi.mocked(listChargesForStudent).mockImplementation(async (_actor, profileId) => [
