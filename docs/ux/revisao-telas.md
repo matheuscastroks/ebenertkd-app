@@ -472,7 +472,7 @@ Nenhuma tela é redesenhada na entrega da fundação (sidebar, segmentos, pilha,
 
 **Plano de ação**
 - Remover "Resumo do exame".
-- "Alunos aptos" vira link para Aptidão já filtrado.
+- ~~"Alunos aptos" vira link para Aptidão já filtrado.~~ Feito de outro jeito: Aptidão só inscreve na próxima banca aberta e sem escolher graduação ou taxa. Por isso a lista ficou na Banca com o nome "Inscrever alunos", e um link leva a Aptidão filtrada. O cancelamento do exame foi para o fim da coluna principal.
 - Voltar: "‹ Exames de faixa".
 
 **Seção:** Eventos, pilha.
