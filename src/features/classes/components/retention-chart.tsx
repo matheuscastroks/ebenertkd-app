@@ -56,7 +56,7 @@ export function RetentionCharts({ summary, windowDays = 30 }: { summary: Retenti
   }));
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
       <div className="flex flex-col justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
         <div>
           <h2 className="text-sm font-medium text-muted-foreground">
@@ -121,7 +121,7 @@ export function RetentionCharts({ summary, windowDays = 30 }: { summary: Retenti
             </PieChart>
           </ChartContainer>
 
-          <dl className="grid min-w-0 flex-1 gap-2.5 text-sm">
+          <dl className="grid grid-cols-1 min-w-0 flex-1 gap-2.5 text-sm">
             {summary.riskBreakdown.map((item) => (
               <div
                 key={item.key}

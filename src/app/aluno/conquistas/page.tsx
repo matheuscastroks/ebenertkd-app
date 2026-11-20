@@ -93,7 +93,7 @@ async function StudentAchievementsContent({ profile }: { profile: Profile }) {
         </div>
       </dl>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
         <section className="rounded-xl border border-border bg-card p-5 shadow-xs">
           <h2 className="mb-3 text-base font-semibold">Mapa de presenças</h2>
           <ConsistencyHeatmap weeks={report.heatmapWeeks} />
@@ -117,7 +117,7 @@ async function StudentAchievementsContent({ profile }: { profile: Profile }) {
           </p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {report.badges.map((badge) => (
             <div
               key={badge.id}

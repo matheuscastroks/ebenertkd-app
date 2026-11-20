@@ -260,7 +260,7 @@ export function AttendanceHistory({
       {/* Grade Unificada com Calendário Compacto e Detalhes do Dia */}
       <section
         aria-labelledby="attendance-calendar-title"
-        className="grid divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs lg:grid-cols-[20rem_minmax(0,1fr)] lg:divide-x lg:divide-y-0"
+        className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs lg:grid-cols-[20rem_minmax(0,1fr)] lg:divide-x lg:divide-y-0"
       >
         {/* Coluna Esquerda: Calendário ajustado à largura natural */}
         <div className="min-w-0 space-y-3.5 p-4 sm:p-5">
@@ -429,7 +429,7 @@ export function AttendanceHistory({
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Aulas registradas em {monthLabel}
               </p>
-              <div className="grid gap-1.5 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                 {entries.slice(0, 6).map(({ record, lesson, trainingClass }) => {
                   const isoDay = lesson.lesson_date.slice(0, 10);
                   const entryDate = new Date(`${isoDay}T12:00:00`);

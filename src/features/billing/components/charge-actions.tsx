@@ -107,7 +107,7 @@ export function ChargeActions({
                     <p className="text-sm font-semibold">
                       Aprovar recebimento
                     </p>
-                    <div className="grid items-end gap-3 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2">
                       <DateField
                         id={`paid-at-${instanceId}-${proof.$id}`}
                         name="paid_at"
@@ -152,7 +152,7 @@ export function ChargeActions({
             </TabsContent>
 
             <TabsContent value="payment" className="pt-4">
-              <ConfirmationForm id={`manual-${instanceId}-${charge.$id}`} action={recordManualPaymentAction} className="grid gap-4 sm:grid-cols-2">
+              <ConfirmationForm id={`manual-${instanceId}-${charge.$id}`} action={recordManualPaymentAction} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <input type="hidden" name="charge_id" value={charge.$id} />
                 <Field>
                   <FieldLabel htmlFor={`amount-${instanceId}-${charge.$id}`}>Valor recebido (R$)</FieldLabel>
@@ -193,7 +193,7 @@ export function ChargeActions({
             </TabsContent>
 
             <TabsContent value="adjustment" className="pt-4">
-              <form action={adjustChargeAction} className="grid gap-4 sm:grid-cols-2">
+              <form action={adjustChargeAction} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <input type="hidden" name="charge_id" value={charge.$id} />
                 <Field>
                   <FieldLabel htmlFor={`adjust-amount-${instanceId}-${charge.$id}`}>Novo valor (R$)</FieldLabel>

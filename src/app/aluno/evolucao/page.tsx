@@ -75,7 +75,7 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
         </div>
 
         {!readiness.isBlackBelt ? (
-          <div className="grid gap-5 p-5 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 p-5 md:grid-cols-2">
             <div className="space-y-2">
               <div className="flex items-baseline justify-between gap-2 text-sm">
                 <span className="font-medium text-foreground">Treinos na faixa atual</span>
@@ -95,7 +95,7 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
               <div className="flex items-baseline justify-between gap-2 text-sm">
                 <span className="font-medium text-foreground">Tempo na faixa atual</span>
                 <span className="font-semibold tabular-nums text-foreground">
-                  {readiness.monthsInCurrentBelt} de {readiness.minMonthsRequired} meses
+                  {Math.floor(readiness.monthsInCurrentBelt)} de {readiness.minMonthsRequired} meses
                 </span>
               </div>
               <Progress value={readiness.timeProgressPct} className="h-2.5" />
@@ -108,7 +108,7 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
           </div>
         ) : null}
 
-        <div className="grid gap-4 bg-muted/30 p-5 text-sm sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 bg-muted/30 p-5 text-sm sm:grid-cols-3">
           <div>
             <p className="text-xs font-medium text-muted-foreground">{formLabel} atual</p>
             <p className="mt-0.5 font-semibold text-foreground">{readiness.currentForm ?? "Não definido"}</p>
@@ -128,7 +128,7 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
         </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
         <section
           aria-labelledby="roadmap-heading"
           className="space-y-3 rounded-xl border border-border bg-card p-5 shadow-xs"

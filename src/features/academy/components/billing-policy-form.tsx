@@ -57,7 +57,7 @@ export function BillingPolicyForm({ policy, revision }: { policy: BillingPolicy;
             <Link href={ROUTES.adminBillingAdjustment} className="font-medium text-foreground underline underline-offset-4">reajuste de mensalidade</Link>.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <ConfigField id="default_monthly_fee" label="Mensalidade padrão" error={fieldErrors.default_monthly_fee_cents} help="Vem preenchida na aprovação de novas matrículas. Você pode ajustar o valor de cada aluno.">
             <InputGroup>
               <InputGroupAddon><InputGroupText>R$</InputGroupText></InputGroupAddon>

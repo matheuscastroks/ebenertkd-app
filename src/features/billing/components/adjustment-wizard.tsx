@@ -287,7 +287,7 @@ export function AdjustmentWizard({
           <CardContent className="space-y-5">
             <fieldset className="space-y-2">
               <legend className="text-sm font-medium">Como calcular</legend>
-              <div className="grid gap-2 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                 {(Object.keys(MODE_LABELS) as AdjustmentMode[]).map((option) => (
                   <label key={option} className={cn("flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm", mode === option ? "border-primary bg-primary/5" : "border-border")}>
                     <input type="radio" name="adjustment-mode" value={option} checked={mode === option} onChange={() => setMode(option)} className="accent-primary" />
@@ -297,7 +297,7 @@ export function AdjustmentWizard({
               </div>
             </fieldset>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {mode !== "fixed" ? (
                 <div className="space-y-1.5">
                   <Label htmlFor="adj-percent">Percentual de reajuste (%)</Label>
@@ -365,7 +365,7 @@ export function AdjustmentWizard({
             <CardDescription>Desmarque bolsistas, irmãos ou acordos especiais, ou digite um valor manual. Descontos em reais são mantidos sobre o novo valor.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
               <div className="space-y-1.5">
                 <Label htmlFor="filter-class">Turma</Label>
                 <select id="filter-class" className={SELECT_CLASS} value={classFilter} onChange={(event) => setClassFilter(event.target.value)}>
@@ -535,7 +535,7 @@ export function AdjustmentWizard({
           <CardContent className="space-y-5">
             <fieldset className="space-y-2">
               <legend className="text-sm font-medium">Modelo</legend>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {MESSAGE_TEMPLATES.map((item) => (
                   <label key={item.id} className={cn("flex cursor-pointer items-start gap-2 rounded-lg border px-3 py-2 text-sm", templateId === item.id ? "border-primary bg-primary/5" : "border-border")}>
                     <input type="radio" name="message-template" value={item.id} checked={templateId === item.id} onChange={() => chooseTemplate(item.id)} className="mt-1 accent-primary" />
@@ -548,7 +548,7 @@ export function AdjustmentWizard({
               </div>
             </fieldset>
 
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="message-text">Texto da mensagem</Label>
                 <Textarea id="message-text" rows={12} value={template} onChange={(event) => setTemplate(event.target.value)} />

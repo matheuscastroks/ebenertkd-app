@@ -168,14 +168,14 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
             <Card key={student.$id}>
               <CardContent className="space-y-4 p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
                     <StudentAvatar name={student.full_name} photoDocumentId={profilePhotoDocumentId} />
-                    <div className="space-y-1">
+                    <div className="min-w-0 space-y-1">
                       <p className="font-semibold text-foreground text-sm">{student.full_name}</p>
                       <div className="flex flex-wrap items-center gap-1.5">
                         <BeltBadge rankKey={student.rank_key} size="sm" />
                         {student.training_class && (
-                          <span className="text-sm text-muted-foreground">· {student.training_class}</span>
+                          <span className="min-w-0 break-words text-sm text-muted-foreground">· {student.training_class}</span>
                         )}
                       </div>
                     </div>

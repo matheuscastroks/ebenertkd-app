@@ -86,7 +86,7 @@ export function ChampionshipDetail({ admin, bundle, tab, ok, erro }: { admin: Pr
         </div>
         <DeadlineTimeline deadlines={toClientData(deadlines)} />
       </section>
-      <dl className="grid gap-3 rounded-xl border border-border bg-card p-4 text-sm shadow-xs sm:grid-cols-2 sm:p-5">
+      <dl className="grid grid-cols-1 gap-3 rounded-xl border border-border bg-card p-4 text-sm shadow-xs sm:grid-cols-2 sm:p-5">
         <div>
           <dt className="text-muted-foreground">Quando</dt>
           <dd className="font-medium tabular-nums">

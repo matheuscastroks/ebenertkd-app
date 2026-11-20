@@ -41,7 +41,7 @@ export function OnboardingPreferencesStep({
                 )}
               </div>
 
-              <div className="grid gap-2.5 sm:grid-cols-1">
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-1">
                 {question.options.map((option) => {
                   const isSelected = selectedValue === option.id;
 

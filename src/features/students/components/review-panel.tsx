@@ -295,7 +295,7 @@ export function ReviewPanel({
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 text-sm">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 text-sm">
                 <div className="space-y-0.5">
                   <span className="text-xs text-muted-foreground block">Data de nascimento</span>
                   <span className="font-medium text-foreground">
@@ -325,7 +325,7 @@ export function ReviewPanel({
               <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
                 <Users className="size-4 text-muted-foreground" aria-hidden="true" /> Contato de emergência
               </h3>
-              <div className="grid gap-4 sm:grid-cols-3 text-sm">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 text-sm">
                 <div className="space-y-0.5">
                   <span className="text-xs text-muted-foreground block">Nome</span>
                   <span className="font-medium text-foreground">{student.emergency_contact_name || "—"}</span>
@@ -349,7 +349,7 @@ export function ReviewPanel({
           <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
             <div className="p-5 space-y-4">
               <h2 className="text-base font-semibold text-foreground">Treino e graduação</h2>
-              <div className="grid gap-4 sm:grid-cols-3 text-sm">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 text-sm">
                 <div className="space-y-0.5">
                   <span className="text-xs text-muted-foreground block">Turma</span>
                   <span className="font-medium text-foreground">{student.training_class || "—"}</span>
@@ -386,7 +386,7 @@ export function ReviewPanel({
                   </StatusBadge>
                 </div>
 
-                <dl className="grid gap-3 sm:grid-cols-3 rounded-lg border border-border bg-muted/20 p-4 text-sm">
+                <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3 rounded-lg border border-border bg-muted/20 p-4 text-sm">
                   <div>
                     <dt className="text-xs text-muted-foreground">Último pagamento</dt>
                     <dd className="mt-0.5 font-medium tabular-nums text-foreground">
@@ -469,7 +469,7 @@ export function ReviewPanel({
                       <p className="font-medium text-foreground mt-0.5">{student.health_details}</p>
                     </div>
                   ) : null}
-                  <div className="grid gap-3 sm:grid-cols-3 pt-1">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 pt-1">
                     <div>
                       <span className="text-xs font-medium text-muted-foreground block">Medicamentos</span>
                       <span className="text-foreground">{student.medications || "Nenhum informado"}</span>
@@ -509,7 +509,7 @@ export function ReviewPanel({
 
               {parqAssessment && parqAssessment.signedAt ? (
                 <div className="space-y-3 rounded-lg border border-border bg-muted/20 p-4 text-sm">
-                  <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     <div>
                       <span className="text-xs text-muted-foreground block">Assinado em</span>
                       <span className="font-medium tabular-nums text-foreground">
@@ -742,7 +742,7 @@ export function ReviewPanel({
         </section>
 
         <section id="contrato" aria-label="Contrato" className="scroll-mt-24 space-y-4">
-          <div className="grid gap-6 lg:grid-cols-12 lg:items-start">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
             {/* Coluna 1: Condições Contratuais e Valores */}
             <div className={cn(decisionOnTop ? "lg:col-span-12" : "lg:col-span-7", "overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border")}>
               <section className="p-5 space-y-4">
@@ -756,7 +756,7 @@ export function ReviewPanel({
                 <form action={saveFinancialReviewAction} className="space-y-4">
                   <input type="hidden" name="student_id" value={student.$id} />
 
-                  <div className="grid gap-3 sm:grid-cols-2 items-end">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 items-end">
                     <Field>
                       <FieldLabel htmlFor="review-monthly-fee">Mensalidade acordada (R$)</FieldLabel>
                       <Input
@@ -814,7 +814,7 @@ export function ReviewPanel({
                       required
                     />
 
-                    <div className="grid gap-3 sm:grid-cols-2 items-end">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 items-end">
                       <DateField
                         id="review-contract-start"
                         name="contract_start"

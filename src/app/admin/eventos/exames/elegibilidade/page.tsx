@@ -206,7 +206,7 @@ async function EligibilityContent({ searchParams }: { searchParams: SearchParams
                     ) : null}
 
                     {row.minPresencesRequired > 0 ? (
-                      <div className="grid gap-3 pt-1 sm:grid-cols-2">
+                      <div className="grid grid-cols-1 gap-3 pt-1 sm:grid-cols-2">
                         <div className="space-y-1">
                           <div className="flex items-center justify-between text-xs text-muted-foreground">
                             <span>Presenças na faixa</span>
@@ -221,7 +221,7 @@ async function EligibilityContent({ searchParams }: { searchParams: SearchParams
                           <div className="flex items-center justify-between text-xs text-muted-foreground">
                             <span>Carência de tempo</span>
                             <span className="font-medium text-foreground tabular-nums">
-                              {row.monthsInCurrentBelt}/{row.minMonthsRequired} meses
+                              {Math.floor(row.monthsInCurrentBelt)}/{row.minMonthsRequired} meses
                             </span>
                           </div>
                           <Progress value={row.timeProgressPct} className="h-2" />

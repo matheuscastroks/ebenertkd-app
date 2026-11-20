@@ -53,7 +53,7 @@ export function PersonalEnrollmentStep({ bundle, onValueChange }: StepProps) {
   return (
     <div className="divide-y divide-border">
       <Section title="Identificação e contato">
-        <div className="grid gap-3 sm:grid-cols-12">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
           <div className="sm:col-span-12 lg:col-span-6">
             <Field
               label="Nome completo"
@@ -137,7 +137,7 @@ export function HealthEnrollmentStep({ bundle }: StepProps) {
         title="Contato de emergência"
         description="Acionado apenas em caso de necessidade urgente."
       >
-        <div className="grid gap-3 sm:grid-cols-12">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
           <div className="sm:col-span-12 lg:col-span-5">
             <Field
               label="Nome do contato"
@@ -170,7 +170,7 @@ export function HealthEnrollmentStep({ bundle }: StepProps) {
         title="Saúde e bem-estar"
         description="Acesso restrito ao professor e responsáveis."
       >
-        <div className="grid gap-3 sm:grid-cols-12">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
           <div className="sm:col-span-4 lg:col-span-3">
             <FormField>
               <FieldLabel htmlFor="health-condition">Possui condição de saúde? *</FieldLabel>
@@ -249,7 +249,7 @@ export function TrainingEnrollmentStep({ bundle, classes, onValueChange }: StepP
         description="Histórico marcial, turma semanal e vencimento desejado."
       >
         <div className="space-y-3">
-          <div className="grid gap-3 sm:grid-cols-12">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
             <div className="sm:col-span-6 lg:col-span-3">
               <DateField
                 id="enrollment-tkd-start"
@@ -334,7 +334,7 @@ export function DocumentsEnrollmentStep({ bundle }: StepProps) {
         title="Documentos"
         description="Arquivos seguros de até 5 MB. Se recarregar a página, selecione novamente arquivos ainda não enviados."
       >
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="flex items-start gap-3.5">
             <StudentAvatar
               name={student.full_name}

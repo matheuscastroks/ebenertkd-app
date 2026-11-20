@@ -216,7 +216,7 @@ export default async function ExamsPage({
             title="Novo exame de faixa"
             description="A taxa informada será o valor padrão das inscrições."
           >
-          <form action={createExamEventAction} className="grid gap-4 pt-2 sm:grid-cols-2">
+          <form action={createExamEventAction} className="grid grid-cols-1 gap-4 pt-2 sm:grid-cols-2">
             <Field className="sm:col-span-2">
               <FieldLabel htmlFor="exam-name">Nome do evento</FieldLabel>
               <Input id="exam-name" name="name" placeholder="Ex.: Exame de faixas do 2º semestre" required className="h-11" />

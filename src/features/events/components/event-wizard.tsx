@@ -213,7 +213,7 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
       </ol>
 
       <div hidden={step !== 0} className="space-y-4">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {SELECTABLE_TYPES.map((item) => (
             <button key={item} type="button" onClick={() => chooseType(item)} aria-pressed={type === item} className={`rounded-xl border p-4 text-left shadow-xs transition-colors ${type === item ? "border-primary bg-accent" : "border-border bg-card hover:bg-muted"}`}>
               <span className="block text-sm font-semibold text-foreground">{EVENT_TYPE_LABEL[item]}</span>
@@ -233,7 +233,7 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
             <CardTitle>Dados e datas</CardTitle>
             <CardDescription>Horários em Brasília.</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2">
+          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field className="sm:col-span-2">
               <FieldLabel htmlFor="event-title">Nome do evento</FieldLabel>
               <Input id="event-title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={128} placeholder="Ex.: Aulão de chutes" className="h-11" />
@@ -267,7 +267,7 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
               <CardTitle>Organizador e cronograma</CardTitle>
               <CardDescription>A academia monta a equipe e envia à federação. Cada prazo gera lembretes para você e para a equipe.</CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-2">
+            <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field>
                 <FieldLabel htmlFor="event-organizer">Federação ou organizador</FieldLabel>
                 <Input id="event-organizer" value={organizerName} onChange={(event) => setOrganizerName(event.target.value)} maxLength={128} placeholder="Ex.: Federação Estadual de Taekwondo" className="h-11" />
@@ -303,7 +303,7 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
                   <p className="text-sm font-medium">Gerar categorias</p>
                   <InfoTip label="Sobre as categorias geradas">Divisões de peso de referência por classe de idade e sexo. Confira com o edital da federação: você pode editar nomes e valores depois de gerar.</InfoTip>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   <Field>
                     <FieldLabel htmlFor="preset-modality">Modalidade</FieldLabel>
                     <Select value={presetModality} onValueChange={(value) => setPresetModality(value as "kyorugi" | "poomsae")}>
@@ -400,7 +400,7 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
           <CardHeader>
             <CardTitle>Regras</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2">
+          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {!championship ? (
               <>
             <Field>
@@ -468,7 +468,7 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
             <CardDescription>Confira antes de publicar. Você pode alterar a situação do evento depois.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <dl className="grid gap-3 text-sm sm:grid-cols-2">
+            <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
               <div>
                 <dt className="text-muted-foreground">Evento</dt>
                 <dd className="font-medium">

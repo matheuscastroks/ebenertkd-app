@@ -525,7 +525,7 @@ export function ParqForm({
                 <div
                   role="radiogroup"
                   aria-label={`Resposta para a pergunta ${currentQuestion.number}`}
-                  className="grid gap-3 sm:grid-cols-2"
+                  className="grid grid-cols-1 gap-3 sm:grid-cols-2"
                 >
                   <button
                     type="button"
@@ -717,7 +717,7 @@ export function ParqForm({
                   </div>
 
                   <label
-                    className="grid gap-1.5 text-sm font-medium text-foreground"
+                    className="grid grid-cols-1 gap-1.5 text-sm font-medium text-foreground"
                     htmlFor="parq-typed-name"
                   >
                     Ou digite seu nome completo para assinar

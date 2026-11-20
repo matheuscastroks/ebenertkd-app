@@ -46,7 +46,7 @@ export function GamificationPolicyForm({ policy, revision }: { policy: Gamificat
             {drafts.map((draft) => (
               <li key={draft.id} className="space-y-3 rounded-lg border border-border p-3">
                 <p className="text-xs font-medium text-muted-foreground">Mede: {BADGE_METRIC_LABELS[draft.metric]}</p>
-                <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_8rem]">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_8rem]">
                   <ConfigField id={`badge-title-${draft.id}`} label="Título">
                     <Input id={`badge-title-${draft.id}`} value={draft.title} maxLength={48} onChange={(event) => update(draft.id, { title: event.target.value })} required />
                   </ConfigField>

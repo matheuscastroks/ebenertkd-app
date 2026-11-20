@@ -76,7 +76,7 @@ export function OnboardingChecklist({
 
       {!collapsed && (
         <CardContent className="p-4 pt-1 border-t border-border">
-          <div className="grid gap-2 sm:grid-cols-2 pt-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 pt-2">
             {items.map((item) => (
               <Link
                 key={item.id}

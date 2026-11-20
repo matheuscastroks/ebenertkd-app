@@ -57,7 +57,7 @@ export function AccessPolicyForm({ policy, revision }: { policy: AccessPolicy; r
             <Label htmlFor="access_enabled">Bloquear o acesso por mensalidade</Label>
           </div>
           {enabled ? (
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <ConfigField id="window_days" label="Dias de acesso após o pagamento" error={fieldErrors.window_days} help="Depois de um pagamento confirmado, o aluno tem esta quantidade de dias de acesso antes de o aplicativo pausar.">
                 <Input id="window_days" name="window_days" inputMode="numeric" value={windowDays} onChange={(event) => setWindowDays(event.target.value)} required />
               </ConfigField>

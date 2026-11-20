@@ -53,7 +53,7 @@ export default async function PrivacyPolicyPage() {
 
         <nav aria-labelledby="privacy-toc" className="rounded-xl border border-border bg-card p-4 sm:p-5">
           <h2 id="privacy-toc" className="mb-2 text-sm font-medium text-muted-foreground">Nesta página</h2>
-          <ol className="grid gap-x-4 sm:grid-cols-2">
+          <ol className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
             {sections.map((section) => (
               <li key={section.id}>
                 <a

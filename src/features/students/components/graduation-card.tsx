@@ -10,7 +10,7 @@ import { BeltBadge } from "./belt-badge";
  * Faixa atual em destaque, o próximo objetivo logo abaixo e os critérios do exame
  * recolhidos (progressive disclosure): quem já conhece não precisa reler.
  */
-export function GraduationCard({ rankKey, startedAtTkd, attendanceRate, title = "Minha faixa" }: {
+export function GraduationCard({ rankKey, startedAtTkd, attendanceRate, title = "Faixa" }: {
   rankKey?: string | null; startedAtTkd?: string | null; attendanceRate?: number; title?: string;
 }) {
   const ranks = useBeltRanks();

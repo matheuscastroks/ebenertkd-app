@@ -142,7 +142,7 @@ export function ContractWorkspace({
             </CardHeader>
             <CollapsibleContent>
               <CardContent className="border-t border-border pt-4">
-                <form id="contract-cancellation-form" action={requestCancellationAction} className="grid gap-4 sm:grid-cols-2">
+                <form id="contract-cancellation-form" action={requestCancellationAction} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <input type="hidden" name="contract_id" value={contract.$id} />
                   <Field>
                     <FieldLabel htmlFor="cancellation-month" className="text-sm font-semibold">

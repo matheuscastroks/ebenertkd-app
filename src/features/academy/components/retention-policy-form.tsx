@@ -79,13 +79,13 @@ export function RetentionPolicyForm({ policy, revision }: { policy: RetentionPol
         <CardContent className="space-y-6">
           <div className="space-y-3">
             <h3 className="text-sm font-medium">Risco crítico</h3>
-            <div className="grid gap-4 sm:grid-cols-2">{CRITICAL_FIELDS.map(renderField)}</div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{CRITICAL_FIELDS.map(renderField)}</div>
           </div>
           <div className="space-y-3">
             <h3 className="text-sm font-medium">Em atenção</h3>
-            <div className="grid gap-4 sm:grid-cols-2">{WARNING_FIELDS.map(renderField)}</div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{WARNING_FIELDS.map(renderField)}</div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {renderField({ key: "window_days", label: "Janela de frequência (dias)", help: "Período considerado para calcular a frequência percentual e a contagem de aulas." })}
           </div>
 

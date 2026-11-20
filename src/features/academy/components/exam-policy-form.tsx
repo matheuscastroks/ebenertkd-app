@@ -130,7 +130,7 @@ export function ExamPolicyForm({ policy, revision }: { policy: ExamPolicy; revis
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <ConfigField id="almost_ready_pct" label={'"Quase pronto" a partir de (%)'} error={fieldErrors.almost_ready_pct} help="Percentual da meta de tempo e presenças a partir do qual o aluno aparece como quase pronto.">
               <Input id="almost_ready_pct" name="almost_ready_pct" inputMode="numeric" value={almost} onChange={(event) => setAlmost(event.target.value)} required className="h-11 tabular-nums" />
             </ConfigField>

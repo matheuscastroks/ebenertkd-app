@@ -83,7 +83,7 @@ async function EventDetail({ admin, bundle, tab, ok, erro }: { admin: Profile; b
         <Stat label="Pendências" value={String(pending)} hint={`${waitlisted} na lista de espera`} />
         <Stat label="Receita" value={formatBrl(receivedCents)} hint={`${formatBrl(expectedCents)} previstos`} />
       </dl>
-      <dl className="grid gap-3 rounded-xl border border-border bg-card p-4 text-sm shadow-xs sm:grid-cols-2 sm:p-5">
+      <dl className="grid grid-cols-1 gap-3 rounded-xl border border-border bg-card p-4 text-sm shadow-xs sm:grid-cols-2 sm:p-5">
         <div>
           <dt className="text-muted-foreground">Quando</dt>
           <dd className="font-medium tabular-nums">

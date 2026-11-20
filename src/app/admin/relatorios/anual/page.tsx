@@ -88,7 +88,7 @@ async function AnnualReportContent({ searchParams }: { searchParams: SearchParam
 
       <AnnualRevenueAreaChart series={report.monthlySeries} />
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <AnnualSeasonalityBarChart series={report.monthlySeries} />
         <BeltPyramidChart distribution={report.beltDistribution} />
       </div>

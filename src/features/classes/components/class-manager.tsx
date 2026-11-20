@@ -66,7 +66,7 @@ function Fields({
   const suffix = trainingClass?.$id ?? "new";
   return (
     <div className="space-y-4 pt-2">
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field>
           <FieldLabel htmlFor={`class-name-${suffix}`}>Nome da turma</FieldLabel>
           <Input
@@ -92,7 +92,7 @@ function Fields({
 
       <WeekdayFields selected={trainingClass?.weekdays} idSuffix={suffix} />
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Field>
           <FieldLabel htmlFor={`class-start-${suffix}`}>Horário de início</FieldLabel>
           <Input

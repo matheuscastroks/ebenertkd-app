@@ -95,7 +95,7 @@ export function EligibilityFilters({ classes, almostReadyPct = 75 }: { classes: 
       aria-busy={pending}
       className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-xs transition-opacity duration-(--duration-quick) motion-reduce:transition-none aria-busy:opacity-80"
     >
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Field>
           <FieldLabel htmlFor="eligibility-search">Aluno</FieldLabel>
           <InputGroup className="h-10">

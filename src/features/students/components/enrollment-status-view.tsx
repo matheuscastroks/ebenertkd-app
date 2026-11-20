@@ -267,7 +267,7 @@ export function EnrollmentStatusView({
         {meta.stageIndex !== null ? (
           <ol
             aria-label="Etapas da matrícula"
-            className="grid gap-2 rounded-lg bg-muted/40 p-2 sm:grid-cols-3"
+            className="grid grid-cols-1 gap-2 rounded-lg bg-muted/40 p-2 sm:grid-cols-3"
           >
             {PIPELINE_STAGES.map((label, index) => {
               const done = index < meta.stageIndex!;
@@ -346,7 +346,7 @@ export function EnrollmentStatusView({
       ) : null}
 
       {/* Resumo Estruturado em 2 Colunas (sem scroll, sem excesso de cards) */}
-      <div className="grid divide-y divide-border lg:grid-cols-2 lg:divide-x lg:divide-y-0">
+      <div className="grid grid-cols-1 divide-y divide-border lg:grid-cols-2 lg:divide-x lg:divide-y-0">
         <div className="space-y-2.5 p-5">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Identificação e contato

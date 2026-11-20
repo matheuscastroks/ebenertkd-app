@@ -6,7 +6,7 @@ export function HistoryDiff({ rows }: { rows: DiffRow[] }) {
   return (
     <ul className="divide-y divide-border rounded-lg border border-border" aria-label="Campos alterados">
       {rows.map((row) => (
-        <li key={row.field} className="grid gap-1 p-3 text-sm sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)_minmax(0,1fr)] sm:gap-3">
+        <li key={row.field} className="grid grid-cols-1 gap-1 p-3 text-sm sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)_minmax(0,1fr)] sm:gap-3">
           <span className="font-medium">{row.label}</span>
           <span className="text-muted-foreground">
             <span className="sr-only">Antes: </span>

@@ -86,7 +86,7 @@ export function RetentionFilters({ classes }: { classes: TrainingClass[] }) {
       aria-busy={pending}
       className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-xs transition-opacity duration-(--duration-quick) motion-reduce:transition-none aria-busy:opacity-80"
     >
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Field>
           <FieldLabel htmlFor="retention-search">Aluno</FieldLabel>
           <InputGroup className="h-10">

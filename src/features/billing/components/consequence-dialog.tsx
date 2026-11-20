@@ -35,7 +35,7 @@ export function ConsequenceDialog({ trigger, title, summary, effect, confirmLabe
     <AlertDialogTrigger asChild data-confirmation-trigger>{trigger}</AlertDialogTrigger>
     <AlertDialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
       <AlertDialogHeader><AlertDialogTitle>{title}</AlertDialogTitle><AlertDialogDescription>{effect}</AlertDialogDescription></AlertDialogHeader>
-      <dl className="grid gap-2 text-sm">{summary.map(({ label, value, field, kind }) => {
+      <dl className="grid grid-cols-1 gap-2 text-sm">{summary.map(({ label, value, field, kind }) => {
         const raw = field ? fields[field] : undefined;
         const display = raw && kind === "money" ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(raw)) : raw && kind === "date" ? new Date(`${raw.slice(0, 10)}T12:00:00Z`).toLocaleDateString("pt-BR", { timeZone: "UTC" }) : raw ?? value;
         return <div key={label} className="flex flex-wrap justify-between gap-2"><dt className="text-muted-foreground">{label}</dt><dd className="font-medium">{display}</dd></div>;

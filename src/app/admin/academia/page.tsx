@@ -85,7 +85,7 @@ export default async function AdminAcademyOverviewPage() {
       }
     >
       <div className="w-full min-w-0 space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {cards.map((card) => (
             <Card key={card.href}>
               <CardHeader>

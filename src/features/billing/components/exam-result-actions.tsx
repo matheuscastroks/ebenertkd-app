@@ -68,7 +68,7 @@ export function ExamResultActions({
           title={`${label}: ${name}?`}
           description={effect}
         >
-          <dl className="grid gap-2 border-b border-border pb-4 text-sm">
+          <dl className="grid grid-cols-1 gap-2 border-b border-border pb-4 text-sm">
             <div className="flex flex-wrap justify-between gap-2">
               <dt className="text-muted-foreground">Aluno</dt>
               <dd className="font-medium text-foreground">{name}</dd>

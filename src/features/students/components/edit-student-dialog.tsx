@@ -67,7 +67,7 @@ export function EditStudentDialog({
               <h4 className="mb-3 text-sm font-semibold text-muted-foreground">
                 Identificação
               </h4>
-              <div className="grid items-start gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <Field>
                   <FieldLabel htmlFor="edit-full-name">Nome completo *</FieldLabel>
@@ -137,7 +137,7 @@ export function EditStudentDialog({
             <h4 className="mb-3 text-sm font-semibold text-muted-foreground">
               Graduação Marcial
             </h4>
-            <div className="grid items-start gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2">
               <GraduationFields defaultRankKey={student.rank_key} />
             </div>
           </div>
@@ -147,7 +147,7 @@ export function EditStudentDialog({
             <h4 className="mb-3 text-sm font-semibold text-muted-foreground">
               Contato e Localização
             </h4>
-            <div className="grid items-start gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2">
               <div>
                 <Field>
                   <FieldLabel htmlFor="edit-sex">Sexo</FieldLabel>
@@ -195,7 +195,7 @@ export function EditStudentDialog({
             <h4 className="mb-3 text-sm font-semibold text-muted-foreground">
               Contato de Emergência
             </h4>
-            <div className="grid items-start gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-3">
               <div>
                 <Field>
                   <FieldLabel htmlFor="edit-em-name">Nome do contato</FieldLabel>
@@ -257,7 +257,7 @@ export function EditStudentDialog({
               </div>
 
               {hasHealthCondition === "yes" && (
-                <div className="grid gap-3 pt-1 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 pt-1 sm:grid-cols-2">
                   <div>
                     <Field>
                       <FieldLabel htmlFor="edit-health-details">Detalhes da condição</FieldLabel>

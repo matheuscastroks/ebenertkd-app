@@ -63,7 +63,7 @@ export function AccountMenu({
                 {avatarUrl ? <AvatarImage src={avatarUrl} alt={name} /> : null}
                 <AvatarFallback className="text-xs font-medium">{initials}</AvatarFallback>
               </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="grid grid-cols-1 flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{name}</span>
                 <span className="truncate text-xs text-muted-foreground">
                   {displaySubtitle}
@@ -84,7 +84,7 @@ export function AccountMenu({
                   {avatarUrl ? <AvatarImage src={avatarUrl} alt={name} /> : null}
                   <AvatarFallback className="text-xs font-medium">{initials}</AvatarFallback>
                 </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
+                <div className="grid grid-cols-1 flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold text-foreground">{name}</span>
                   <span className="truncate text-xs text-muted-foreground">
                     {displaySubtitle}

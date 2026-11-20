@@ -50,7 +50,7 @@ export function NotificationsPolicyForm({ policy, revision }: { policy: Notifica
           <CardTitle>Lembretes de pagamento</CardTitle>
           <CardDescription>Quando o responsável é avisado sobre uma mensalidade. Os lembretes saem pela rotina diária.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <ConfigField id="payment_stages" label="Dias da régua" error={fieldErrors.payment_stages} help="Dias em relação ao vencimento. Número negativo é antes do vencimento, 0 é o dia e positivo é depois (atraso). Ex.: -3, 0, 3." className="sm:col-span-2">
             <Input id="payment_stages" name="payment_stages" inputMode="text" placeholder="Ex.: -3, 0, 3" value={stages} onChange={(event) => setStages(event.target.value)} />
           </ConfigField>

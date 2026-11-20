@@ -248,7 +248,7 @@ function RankRow({
       </AccordionTrigger>
       <AccordionContent>
         <div className="space-y-5 pb-3 pt-1">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <ConfigField id={`${key}-name`} label="Nome na academia" error={error("display_name")} help="Como esta graduação aparece para alunos e responsáveis. Ex.: Ponta Amarela, Laranja, Amarela listra Branca.">
               <Input id={`${key}-name`} value={draft.display_name} maxLength={64} onChange={(event) => onChange({ display_name: event.target.value })} className="h-11" />
             </ConfigField>
@@ -257,7 +257,7 @@ function RankRow({
             </ConfigField>
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_1fr]">
             <BeltColorField id={`${key}-color-primary`} label={hasStyleSecondary ? "Cor da faixa" : "Cor"} value={draft.color_primary} onChange={(hex) => onChange({ color_primary: hex })} error={error("color_primary")} />
             {hasStyleSecondary ? (
               <BeltColorField
@@ -270,7 +270,7 @@ function RankRow({
             ) : null}
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <ConfigField id={`${key}-style`} label="Estilo da faixa" error={error("color_style")}>
               <Select value={draft.color_style} onValueChange={(value) => onChange({ color_style: value as BeltColorStyle })}>
                 <SelectTrigger id={`${key}-style`} className="h-11 w-full">
@@ -297,7 +297,7 @@ function RankRow({
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <ConfigField id={`${key}-form`} label={`${formLabel} exigido`} error={error("form_name")} className="sm:col-span-2 lg:col-span-4">
               <Input id={`${key}-form`} value={draft.form_name} maxLength={96} onChange={(event) => onChange({ form_name: event.target.value })} className="h-11" />
             </ConfigField>

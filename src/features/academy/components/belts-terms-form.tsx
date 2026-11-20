@@ -23,7 +23,7 @@ export function BeltsTermsForm({ policy, revision }: { policy: BeltsPolicy; revi
           <CardTitle>Termos do sistema de faixas</CardTitle>
           <CardDescription>Palavras usadas nas telas dos alunos e do professor. Os modelos de federação já ajustam estes termos.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
           <ConfigField id="form_label" label="Termo da forma" error={fieldErrors.form_label} help="Como a academia chama a sequência técnica exigida em cada graduação: Poomsae, Tul…">
             <Input id="form_label" name="form_label" defaultValue={policy.form_label} maxLength={24} required className="h-11" />
           </ConfigField>

@@ -384,7 +384,7 @@ function CalculatorBody({
           </div>
         </section>
 
-        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
           <Card>
             <CardHeader>
               <div className="flex items-center gap-1">
@@ -397,7 +397,7 @@ function CalculatorBody({
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <SectionTitle>A academia hoje</SectionTitle>
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <FieldHeading htmlFor="calc-students" label="Alunos pagantes" help="Alunos que pagam mensalidade. Vem preenchido com os alunos ativos." />
                     <AffixInput id="calc-students" ariaLabel="Alunos que pagam mensalidade" inputMode="numeric" placeholder="0" value={students} onChange={setStudents} />
@@ -488,7 +488,7 @@ function CalculatorBody({
 
               <div className="space-y-4">
                 <SectionTitle>Suas metas</SectionTitle>
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <FieldHeading htmlFor="calc-prolabore" label="Meta de pró-labore" help="Salário que você deseja tirar por mês." />
                     <AffixInput id="calc-prolabore" prefix="R$" value={proLabore} onChange={setProLabore} />
@@ -511,7 +511,7 @@ function CalculatorBody({
                   </button>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <div className="grid gap-4 border-t border-border px-4 py-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 border-t border-border px-4 py-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
                       <FieldHeading htmlFor="calc-variable" label="Custo por aluno" help="Opcional. Gasto mensal que cresce com cada aluno, como material ou taxa da federação rateada." />
                       <AffixInput id="calc-variable" prefix="R$" value={variable} onChange={setVariable} />
@@ -583,7 +583,7 @@ function CalculatorBody({
                       <InfoTip label="Como comparar valores">Altere a mensalidade média em “Seus números” para comparar valores.</InfoTip>
                     </div>
                   </CardHeader>
-                  <CardContent className="grid gap-4 sm:grid-cols-2">
+                  <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                       <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
                         Ponto de equilíbrio
@@ -623,7 +623,7 @@ function CalculatorBody({
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="grid gap-5 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                       <div className="space-y-2">
                         <Label htmlFor="whatif-students">Alunos: {studentsDelta > 0 ? `+${studentsDelta}` : studentsDelta}</Label>
                         <input id="whatif-students" type="range" min={-10} max={20} step={1} value={studentsDelta} onChange={(event) => setStudentsDelta(Number(event.target.value))} className="w-full accent-primary" />
@@ -641,7 +641,7 @@ function CalculatorBody({
                           Perdi 5 alunos
                         </Button>
                       </div>
-                      <div className="grid gap-3 sm:grid-cols-3">
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                         <div className="space-y-1.5">
                           <FieldHeading htmlFor="shortcut-instructor" label="Contratar instrutor" help="Custo mensal do novo instrutor." />
                           <AffixInput id="shortcut-instructor" prefix="R$" value={instructorCost} onChange={setInstructorCost} />

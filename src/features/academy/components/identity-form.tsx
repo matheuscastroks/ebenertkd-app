@@ -30,7 +30,7 @@ export function IdentityForm({ identity, revision }: { identity: AcademyIdentity
           <CardTitle>Nomes</CardTitle>
           <CardDescription>Como a academia aparece no aplicativo, nos contratos e nas mensagens.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <ConfigField id="legal_name" label="Nome legal" error={fieldErrors.legal_name} help="Razão social ou nome da associação. Aparece no contrato e na política de privacidade." className="sm:col-span-2">
             <Input id="legal_name" name="legal_name" defaultValue={identity.legal_name} required maxLength={160} />
           </ConfigField>
@@ -48,7 +48,7 @@ export function IdentityForm({ identity, revision }: { identity: AcademyIdentity
           <CardTitle>Documento e endereço</CardTitle>
           <CardDescription>Opcionais. Entram no contrato e na política de privacidade quando preenchidos.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-3">
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <ConfigField id="document_type" label="Tipo de documento" error={fieldErrors.document_type}>
             <Select name="document_type" defaultValue={identity.document_type ?? "none"}>
               <SelectTrigger id="document_type" className="w-full"><SelectValue /></SelectTrigger>
@@ -88,7 +88,7 @@ export function IdentityForm({ identity, revision }: { identity: AcademyIdentity
           <CardTitle>Contato</CardTitle>
           <CardDescription>Usado para dúvidas de privacidade e para a política de privacidade pública.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <ConfigField id="phone_whatsapp" label="WhatsApp" error={fieldErrors.phone_whatsapp}>
             <Input id="phone_whatsapp" name="phone_whatsapp" inputMode="tel" defaultValue={formatBrazilianPhone(identity.phone_whatsapp)} maxLength={20} />
           </ConfigField>
@@ -112,7 +112,7 @@ export function IdentityForm({ identity, revision }: { identity: AcademyIdentity
           <CardTitle>Professor</CardTitle>
           <CardDescription>Usado nas mensagens de reajuste e no contrato.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-3">
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <ConfigField id="professor_title" label="Título" error={fieldErrors.professor_title} help="Por exemplo: Mestre, Sabumnim ou Professor.">
             <Input id="professor_title" name="professor_title" defaultValue={text(identity.professor_title)} maxLength={32} />
           </ConfigField>
@@ -130,7 +130,7 @@ export function IdentityForm({ identity, revision }: { identity: AcademyIdentity
           <CardTitle>Aparência</CardTitle>
           <CardDescription>A cor do aplicativo instalado. O fuso horário é fixo em {identity.timezone}.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-3">
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <ConfigField id="theme_color" label="Cor do aplicativo" error={fieldErrors.theme_color} help="Formato #RRGGBB. O aplicativo já instalado só atualiza nome e cor ao ser reinstalado.">
             <Input id="theme_color" name="theme_color" defaultValue={identity.theme_color} maxLength={7} />
           </ConfigField>

@@ -46,7 +46,7 @@ function PendingRequest({ request, contract }: Row) {
 
         <ConfirmationForm id={`cancel-${request.$id}`} action={decideCancellationAction} className="space-y-4 border-t border-border pt-4">
           <input type="hidden" name="request_id" value={request.$id} />
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Field>
               <FieldLabel htmlFor={`fee-${request.$id}`}>Taxa decidida (R$)</FieldLabel>
               <Input

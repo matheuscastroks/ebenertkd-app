@@ -182,7 +182,7 @@ export function FederationSubmitPanel({ rows, returnTo }: { rows: ChampionshipRo
       {ready.length === 0 ? (
         <p className="text-sm text-muted-foreground">Nenhum atleta pronto para enviar.</p>
       ) : (
-        <ul className="grid gap-2 sm:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {ready.map((row) => (
             <li key={row.registration.$id}>
               <label htmlFor={`submit-${row.registration.$id}`} className="flex min-h-11 items-center gap-3 rounded-lg border border-border px-3 text-sm">
@@ -288,7 +288,7 @@ export function ResultsEditor({ rows, returnTo }: { rows: ChampionshipRow[]; ret
             </p>
             {row.result ? <StatusBadge tone={row.result.medal === "none" ? "neutral" : "success"}>{MEDAL_LABEL[row.result.medal]}{row.result.placement ? ` · ${row.result.placement}º` : ""}</StatusBadge> : null}
           </div>
-          <form action={recordResultAction} className="grid gap-3 sm:grid-cols-[10rem_6rem_1fr_auto] sm:items-end">
+          <form action={recordResultAction} className="grid grid-cols-1 gap-3 sm:grid-cols-[10rem_6rem_1fr_auto] sm:items-end">
             <input type="hidden" name="registration_id" value={row.registration.$id} />
             <input type="hidden" name="return_to" value={returnTo} />
             <Field>

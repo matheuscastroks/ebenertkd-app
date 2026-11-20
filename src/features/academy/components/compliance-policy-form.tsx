@@ -66,7 +66,7 @@ export function CompliancePolicyForm({ policy, revision }: { policy: ComplianceP
           <CardDescription>Por quanto tempo cada documento vale e quando o aluno e o responsável são avisados. Vale também para os documentos já enviados.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <ConfigField id="medical_validity_days" label="Validade do atestado (dias)" error={fieldErrors.medical_validity_days} help="Contada da aprovação do atestado pelo professor.">
               <Input id="medical_validity_days" name="medical_validity_days" inputMode="numeric" value={medicalValidity} onChange={(event) => setMedicalValidity(event.target.value)} required />
             </ConfigField>

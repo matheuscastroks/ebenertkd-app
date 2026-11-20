@@ -39,7 +39,7 @@ export default async function ContractTemplatePage({
         <OperationToast tone="error" title="Revise o texto e as variáveis obrigatórias utilizadas" clearParams={["error"]} />
       ) : null}
 
-      <div className="w-full min-w-0 grid gap-6 lg:grid-cols-[1fr_340px] lg:items-start">
+      <div className="w-full min-w-0 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px] lg:items-start">
         {/* Editor Principal */}
         <Card>
           <CardHeader className="space-y-1">

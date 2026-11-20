@@ -81,7 +81,7 @@ export const ONBOARDING_CONFIGS: Record<OnboardingRole, RoleOnboardingConfig> = 
     welcomeHighlight: "Praticante de Taekwondo",
     ahaMomentDescription: "Veja seu próximo treino, sua faixa atual e o que falta para o próximo exame.",
     benefitBullets: [
-      { title: "Minha faixa", desc: "Veja sua graduação atual, o poomsae e o próximo exame." },
+      { title: "Faixa", desc: "Veja sua graduação atual, o poomsae e o próximo exame." },
       { title: "Frequência", desc: "Histórico das suas presenças e próximos treinos." },
       { title: "Financeiro e contratos", desc: "Pague mensalidades por PIX e assine contratos pelo app." }
     ],
@@ -117,7 +117,7 @@ export const ONBOARDING_CONFIGS: Record<OnboardingRole, RoleOnboardingConfig> = 
     welcomeHighlight: "Jovem Atleta",
     ahaMomentDescription: "Veja sua faixa atual e as aulas de que você participou.",
     benefitBullets: [
-      { title: "Minha faixa", desc: "Veja a cor da sua faixa e o próximo poomsae." },
+      { title: "Faixa", desc: "Veja a cor da sua faixa e o próximo poomsae." },
       { title: "Presenças", desc: "Confira as aulas de que você participou." },
       { title: "Mensagens da academia", desc: "Veja os avisos do professor e da secretaria." }
     ],

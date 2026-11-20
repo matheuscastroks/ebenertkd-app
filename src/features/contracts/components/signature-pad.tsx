@@ -162,7 +162,7 @@ export function SignaturePad({ contractId, content }: { contractId: string; cont
         </div>
       </div>
 
-      <label className="grid gap-2 text-sm font-medium" htmlFor={`typed-signature-${contractId}`}>Ou assine digitando seu nome completo
+      <label className="grid grid-cols-1 gap-2 text-sm font-medium" htmlFor={`typed-signature-${contractId}`}>Ou assine digitando seu nome completo
         <input id={`typed-signature-${contractId}`} aria-label="Ou assine digitando seu nome completo" value={typedName} onChange={(event) => setTypedName(event.target.value)} autoComplete="name" maxLength={150} className="h-11 rounded-lg border border-input bg-background px-3" aria-describedby={`typed-signature-help-${contractId}`} />
         <span id={`typed-signature-help-${contractId}`} className="text-sm font-normal text-muted-foreground">O nome digitado substitui o desenho e será incluído no documento assinado.</span>
       </label>

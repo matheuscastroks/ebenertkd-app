@@ -289,7 +289,7 @@ export function StudentAttendanceChart({
           </PieChart>
         </ChartContainer>
 
-        <dl className="grid min-w-0 flex-1 gap-2 text-sm">
+        <dl className="grid grid-cols-1 min-w-0 flex-1 gap-2 text-sm">
           {legendItems.map((item) => (
             <div
               key={item.key}

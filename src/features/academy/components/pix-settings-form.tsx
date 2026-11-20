@@ -39,7 +39,7 @@ export function PixSettingsForm({ settings }: { settings: BillingSettings | null
         <CardDescription>Aparecem para alunos e responsáveis na hora de pagar.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2">
+        <form onSubmit={onSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field>
             <FieldLabel htmlFor="pix-beneficiary-name">Beneficiário</FieldLabel>
             <Input id="pix-beneficiary-name" name="beneficiary_name" defaultValue={settings?.beneficiary_name} required />

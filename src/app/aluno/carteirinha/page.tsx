@@ -86,7 +86,7 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
         <section
           aria-labelledby="digital-passport-heading"
           className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border"

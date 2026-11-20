@@ -68,7 +68,7 @@ export function ContractPolicyForm({
           <CardTitle>Vigência</CardTitle>
           <CardDescription>Sugestão de duração ao aprovar a matrícula e ao renovar o contrato.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <ConfigField id="default_duration_months" label="Duração padrão (meses)" error={fieldErrors.default_duration_months} help="Só preenche a data de término sugerida. Você pode alterar as datas em cada matrícula.">
             <Input id="default_duration_months" name="default_duration_months" inputMode="numeric" value={duration} onChange={(event) => setDuration(event.target.value)} required />
           </ConfigField>
@@ -89,7 +89,7 @@ export function ContractPolicyForm({
             <Link href={ROUTES.adminContractTemplate} className="font-medium text-foreground underline underline-offset-4">Editar texto do contrato</Link>
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <ConfigField id="cancellation_notice_day" label="Dia limite do aviso" error={fieldErrors.cancellation_notice_day} help="Quem avisa a saída até este dia do mês anterior sai sem encargo. Depois dele, vale o encargo abaixo. De 1 a 28.">
             <Input id="cancellation_notice_day" name="cancellation_notice_day" inputMode="numeric" value={noticeDay} onChange={(event) => setNoticeDay(event.target.value)} required />
           </ConfigField>

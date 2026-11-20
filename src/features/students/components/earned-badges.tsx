@@ -32,7 +32,7 @@ export function EarnedBadges({ badges, heading = "Conquistas em eventos e exames
       {badges.length === 0 ? (
         <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">Participe de campeonatos, aulões e exames para conquistar medalhas e marcos que aparecem aqui.</p>
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {badges.map((badge) => (
             <li key={badge.$id} className="flex flex-col gap-1.5 rounded-xl border border-border bg-card p-4 shadow-xs">
               <div className="flex items-start justify-between gap-2">
