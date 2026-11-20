@@ -79,12 +79,11 @@ export async function saveAttendanceBatch(actor: Profile, raw: unknown) {
       const current = row.attendance;
       const changed = !current || current.status !== record.status;
       // Registro sem mudança (ex.: check-in confirmado) mantém autor e origem; mudança vira registro do professor.
-      const data = changed
-        ? { status: record.status, recorded_by_account_id: actor.account_id, source: "admin" as const, correction_reason: current ? input.correctionReason : undefined, updated_at: now }
-        : { updated_at: now };
+      const recorded = { status: record.status, recorded_by_account_id: actor.account_id, source: "admin" as const, correction_reason: current ? input.correctionReason : undefined, updated_at: now };
+      const data = changed ? recorded : { updated_at: now };
       return current
         ? tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.attendanceRecords, rowId: current.$id, data, transactionId: transaction.$id })
-        : tables.createRow<AttendanceRecord>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.attendanceRecords, rowId: attendanceId(sheet.lesson.$id, row.classEnrollment.$id), permissions: [], transactionId: transaction.$id, data: { lesson_id: sheet.lesson.$id, class_enrollment_id: row.classEnrollment.$id, enrollment_id: row.classEnrollment.enrollment_id, student_id: row.classEnrollment.student_id, ...data, created_at: now } });
+        : tables.createRow<AttendanceRecord>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.attendanceRecords, rowId: attendanceId(sheet.lesson.$id, row.classEnrollment.$id), permissions: [], transactionId: transaction.$id, data: { lesson_id: sheet.lesson.$id, class_enrollment_id: row.classEnrollment.$id, enrollment_id: row.classEnrollment.enrollment_id, student_id: row.classEnrollment.student_id, ...recorded, created_at: now } });
     }));
     await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.lessons, rowId: sheet.lesson.$id, data: { status: "completed", updated_at: now }, transactionId: transaction.$id });
     await tables.updateTransaction({ transactionId: transaction.$id, commit: true });
