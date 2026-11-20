@@ -37,7 +37,8 @@ export function InfoTip({
             setOpen((current) => !current);
           }}
           className={cn(
-            "inline-flex size-5 shrink-0 items-center justify-center rounded-full text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50",
+            // O ícone tem 20px; a área invisível chega a 44px para o toque no celular.
+            "relative inline-flex size-5 shrink-0 items-center justify-center rounded-full text-muted-foreground after:absolute after:-inset-3 outline-none transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50",
             className
           )}
         >

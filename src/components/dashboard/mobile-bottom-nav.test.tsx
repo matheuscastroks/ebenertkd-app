@@ -3,8 +3,9 @@ import { describe, expect, it, vi } from "vitest";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { MobileBottomNav } from "@/components/dashboard/mobile-bottom-nav";
 
+const route = vi.hoisted(() => ({ pathname: "/admin" }));
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/admin"
+  usePathname: () => route.pathname
 }));
 
 describe("MobileBottomNav", () => {
@@ -77,5 +78,24 @@ describe("MobileBottomNav", () => {
     expect(labels).toEqual(["Início", "Frequência", "Financeiro", "Avisos", "Menu"]);
     expect(nav.querySelector(".truncate")).toBeNull();
     expect(screen.getByRole("link", { name: "Início" })).toHaveAttribute("href", "/aluno");
+  });
+
+  it("acende o Menu quando a seção atual não tem aba própria", () => {
+    route.pathname = "/admin/eventos/inscricoes";
+    render(
+      <SidebarProvider>
+        <MobileBottomNav
+          navItems={[
+            { label: "Hoje", href: "/admin", exact: true, icon: "dashboard" },
+            { label: "Turmas", href: "/admin/turmas", icon: "classes", bottomNav: true },
+            { label: "Eventos", href: "/admin/eventos", icon: "events" },
+            { label: "Avisos", href: "/avisos", icon: "notifications" }
+          ]}
+        />
+      </SidebarProvider>
+    );
+    expect(screen.getByRole("button", { name: "Abrir menu completo" })).toHaveAttribute("data-active", "true");
+    expect(screen.getByRole("navigation", { name: "Navegação móvel principal" }).querySelector("[aria-current]")).toBeNull();
+    route.pathname = "/admin";
   });
 });

@@ -10,7 +10,7 @@ export function EventsSummaryCard({ summary, periodLabel }: { summary: EventsSum
         <h2 id="events-summary-heading" className="text-base font-semibold">
           Eventos · {periodLabel}
         </h2>
-        <Link href={ROUTES.adminEvents} className="text-sm font-medium text-primary underline-offset-4 hover:underline">
+        <Link href={ROUTES.adminEvents} className="inline-flex min-h-11 items-center text-sm font-medium text-primary underline-offset-4 hover:underline">
           Ver agenda
         </Link>
       </div>

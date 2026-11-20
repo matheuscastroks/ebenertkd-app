@@ -98,6 +98,8 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
 
   const itemClass = "flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-0.5 py-1.5 touch-manipulation transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
+  const menuActive = Boolean(section) && !tabs.some((tab) => tab.active);
+
   function renderContent(tab: BottomTab) {
     const Icon = tab.icon;
     return (
@@ -141,7 +143,12 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
           type="button"
           onClick={() => setOpenMobile(true)}
           aria-label="Abrir menu completo"
-          className={cn(itemClass, "font-medium text-muted-foreground hover:text-foreground")}
+          // Seções sem aba própria (Alunos, Eventos…) acendem o Menu, para a barra sempre mostrar onde se está.
+          data-active={menuActive || undefined}
+          className={cn(
+            itemClass,
+            menuActive ? "font-semibold text-primary-text" : "font-medium text-muted-foreground hover:text-foreground"
+          )}
         >
           {renderContent({ key: "menu", label: "Menu", icon: Menu })}
         </button>

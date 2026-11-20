@@ -1,12 +1,13 @@
 import { operationFailureSummary } from "@/features/billing/components/operation-failure-summary";
 import { Suspense } from "react";
-import { CheckCircle2, CircleHelp, TriangleAlert } from "@/components/ui/icons";
+import { CheckCircle2, TriangleAlert } from "@/components/ui/icons";
+import { InfoTip } from "@/components/shared/info-tip";
 import { SystemSummary } from "./system-summary";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
 import { formatBytes, type HealthLevel } from "@/features/operations/health-rules";
@@ -94,12 +95,7 @@ function ConfigurationItem({
           <TriangleAlert className="size-4 text-warning-foreground shrink-0" aria-hidden="true" />
         )}
         <span className="font-medium text-foreground">{label}</span>
-        <Tooltip>
-          <TooltipTrigger aria-label={`Ajuda sobre ${label}`}>
-            <CircleHelp className="size-3.5 text-muted-foreground" />
-          </TooltipTrigger>
-          <TooltipContent>{help}</TooltipContent>
-        </Tooltip>
+        <InfoTip label={`Ajuda sobre ${label}`}>{help}</InfoTip>
       </div>
       <StatusBadge tone={ready ? "success" : "warning"}>{ready ? "Pronto" : "Pendente"}</StatusBadge>
     </div>

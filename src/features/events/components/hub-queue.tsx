@@ -54,7 +54,7 @@ export function HubQueue({ id, title, hint, rows, action, fieldName = "registrat
             <p className="truncate text-sm font-medium">{row.name}</p>
             <p className="truncate text-sm text-muted-foreground">{row.detail}</p>
           </div>
-          <Link href={adminEventPath(row.eventId)} className="shrink-0 text-sm font-medium text-primary underline-offset-4 hover:underline">
+          <Link href={adminEventPath(row.eventId)} className="inline-flex min-h-11 shrink-0 items-center text-sm font-medium text-primary underline-offset-4 hover:underline">
             {row.eventTitle}
           </Link>
         </li>
