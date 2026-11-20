@@ -38,6 +38,23 @@ describe("getCurrentProfile com autorização atual", () => {
     expect(mocks.listRows).toHaveBeenCalledTimes(2);
   });
 
+  it("normaliza a linha do SDK para atravessar a fronteira de um componente cliente", async () => {
+    const preferences = JSON.stringify({ avatar_file_id: "avatar-1" });
+    const row = Object.assign(Object.create({ sdkRow: true }), profile({
+      onboarding_preferences: preferences,
+      metadata: Object.assign(Object.create({ sdkMetadata: true }), { source: "appwrite" })
+    }));
+    mocks.listRows.mockResolvedValue({ rows: [row] });
+
+    const current = await getCurrentProfile();
+
+    expect(current).toMatchObject({ $id: "p1", onboarding_preferences: preferences, metadata: { source: "appwrite" } });
+    expect(Object.getPrototypeOf(current)).toBe(Object.prototype);
+    expect(Object.getPrototypeOf((current as unknown as { metadata: object }).metadata)).toBe(Object.prototype);
+    expect(current).not.toBe(row);
+    expect(current).not.toHaveProperty("sdkRow");
+  });
+
   it("sem sessão ou com sessão revogada o perfil em cache não é usado", async () => {
     await getCurrentProfile();
     mocks.accountGet.mockRejectedValue(new Error("401"));
