@@ -85,7 +85,7 @@ export function BackLink({ label, href }: BackTarget) {
     <Link
       href={href}
       aria-label={`Voltar para ${label}`}
-      className="-ml-1 inline-flex min-h-8 max-w-full items-center gap-0.5 rounded-lg pr-2 text-sm font-medium text-primary-text transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:text-primary-hover motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="relative -ml-1 inline-flex min-h-8 max-w-full after:absolute after:inset-x-0 after:-inset-y-1.5 items-center gap-0.5 rounded-lg pr-2 text-sm font-medium text-primary-text transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:text-primary-hover motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <ChevronLeft aria-hidden="true" className="size-4 shrink-0" />
       <span className="truncate">{label}</span>

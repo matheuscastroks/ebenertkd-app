@@ -35,7 +35,7 @@ export async function GuardianMinorsOverview({ guardian, minors }: { guardian: P
           <StudentAvatar name={minor.full_name} photoDocumentId={photoDocumentId} size="md" className="size-14" />
           <div className="min-w-0 flex-1 space-y-1">
             <h2 id={`dependent-${minor.$id}`} className="truncate text-base font-semibold">
-              <Link href={dependentSummaryPath(minor.$id)} className="underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring">{minor.full_name}</Link>
+              <Link href={dependentSummaryPath(minor.$id)} className="relative underline-offset-4 after:absolute after:inset-x-0 after:-inset-y-2.5 hover:underline focus-visible:outline-2 focus-visible:outline-ring">{minor.full_name}</Link>
             </h2>
             <div className="flex flex-wrap items-center gap-2">
               <BeltBadge rankKey={student?.rank_key} />

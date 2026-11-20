@@ -214,7 +214,7 @@ export function NotificationInbox({
                       aria-pressed={selected}
                       onClick={() => setKindFilter(filter.value)}
                       className={cn(
-                        "rounded-full px-3 py-1 text-xs font-medium transition-colors duration-(--duration-quick) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        "relative rounded-full px-3 py-1 text-xs font-medium transition-colors duration-(--duration-quick) after:absolute after:inset-x-0 after:-inset-y-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                         selected
                           ? "bg-foreground text-background shadow-xs"
                           : "bg-card text-muted-foreground ring-1 ring-border/70 hover:text-foreground"
