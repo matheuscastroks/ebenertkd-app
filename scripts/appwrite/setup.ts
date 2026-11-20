@@ -80,6 +80,14 @@ async function createColumn(tableId: string, column: ColumnDefinition) {
       max: column.max
     });
   }
+  if (column.kind === "float") {
+    return tablesDb.createFloatColumn({
+      ...common,
+      required: column.required,
+      min: column.min,
+      max: column.max
+    });
+  }
   return tablesDb.createTextColumn({ ...common, required: column.required });
 }
 

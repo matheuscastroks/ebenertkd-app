@@ -6,6 +6,7 @@ export type ColumnDefinition =
   | { key: string; kind: "datetime"; required: boolean }
   | { key: string; kind: "boolean"; required: boolean }
   | { key: string; kind: "integer"; required: boolean; min?: number; max?: number }
+  | { key: string; kind: "float"; required: boolean; min?: number; max?: number }
   | { key: string; kind: "enum"; elements: string[]; required: boolean };
 
 export type IndexDefinition = {
@@ -142,6 +143,10 @@ export const tables: TableDefinition[] = [
       { key: "status", kind: "enum", elements: ["present", "absent", "excused"], required: true },
       { key: "recorded_by_account_id", kind: "varchar", size: 36, required: true },
       { key: "correction_reason", kind: "text", required: false },
+      { key: "source", kind: "enum", elements: ["admin", "check_in", "justification", "auto"], required: false },
+      { key: "justification", kind: "varchar", size: 280, required: false },
+      { key: "check_in_distance_m", kind: "integer", required: false, min: 0, max: 100000 },
+      { key: "checked_in_at", kind: "datetime", required: false },
       { key: "created_at", kind: "datetime", required: true },
       { key: "updated_at", kind: "datetime", required: true }
     ],
@@ -825,6 +830,9 @@ export const tables: TableDefinition[] = [
       { key: "address", kind: "varchar", size: 200, required: false },
       { key: "complement", kind: "varchar", size: 200, required: false },
       { key: "notes", kind: "varchar", size: 500, required: false },
+      { key: "latitude", kind: "float", required: false, min: -90, max: 90 },
+      { key: "longitude", kind: "float", required: false, min: -180, max: 180 },
+      { key: "check_in_radius_m", kind: "integer", required: false, min: 25, max: 2000 },
       { key: "is_default", kind: "boolean", required: true },
       { key: "status", kind: "enum", elements: ["active", "archived"], required: true },
       { key: "updated_by_account_id", kind: "varchar", size: 36, required: true },

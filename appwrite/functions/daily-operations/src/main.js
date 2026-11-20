@@ -3,6 +3,7 @@ import { AppwriteException, Client, Query, TablesDB } from "node-appwrite";
 import webpush from "web-push";
 import { DEFAULT_PREFERENCES, pushAllowed, pushPayload } from "./push-rules.js";
 import { safeErrorMessage } from "./safe-error.js";
+import { lessonReadyToClose, missingAttendance, saoPauloDay } from "./attendance-consolidation.js";
 import { resolvePolicies } from "./policy-defaults.js";
 import { eventDeadlineStage, parqExpiryDay, parqReminderStage, pendingReminder, processingDays, reminderCopy, renewalReminderDays, shouldGenerate } from "./reminders.js";
 
@@ -291,10 +292,34 @@ async function main({ req, res, log, error }) {
       if (!(cause instanceof AppwriteException) || cause.code !== 404) throw cause;
     }
 
+    step = "attendance-consolidation";
+    // Aulas abertas de dias anteriores: quem ficou sem registro recebe falta e a aula é concluída.
+    // Depois disso, só o professor altera, pela chamada (com motivo de correção).
+    let absencesRecorded = 0;
+    let lessonsClosed = 0;
+    const today = saoPauloDay(now);
+    const openLessons = (await listAll(tables, "lessons", [Query.equal("status", ["open"])])).filter((lesson) => lessonReadyToClose(lesson, today));
+    for (const lesson of openLessons) {
+      const [links, records] = await Promise.all([
+        listAll(tables, "class_enrollments", [Query.equal("training_class_id", [lesson.training_class_id])]),
+        listAll(tables, "attendance_records", [Query.equal("lesson_id", [lesson.$id])])
+      ]);
+      for (const link of missingAttendance(lesson, links, records)) {
+        try {
+          await tables.createRow({ databaseId, tableId: "attendance_records", rowId: eventId(`${lesson.$id}:${link.$id}`), permissions: [], data: { lesson_id: lesson.$id, class_enrollment_id: link.$id, enrollment_id: link.enrollment_id, student_id: link.student_id, status: "absent", source: "auto", recorded_by_account_id: "system", created_at: now.toISOString(), updated_at: now.toISOString() } });
+          absencesRecorded += 1;
+        } catch (cause) {
+          if (!(cause instanceof AppwriteException) || cause.code !== 409) throw cause;
+        }
+      }
+      await tables.updateRow({ databaseId, tableId: "lessons", rowId: lesson.$id, data: { status: "completed", updated_at: now.toISOString() } });
+      lessonsClosed += 1;
+    }
+
     step = "automation-run";
-    await tables.createRow({ databaseId, tableId: "automation_runs", rowId: idempotencyKey, permissions: [], data: { job: "daily-operations", idempotency_key: idempotencyKey, status: "completed", started_at: now.toISOString(), finished_at: new Date().toISOString(), details: JSON.stringify({ phase: 6, reminders, expired, charges_created: chargesCreated, marked_overdue: markedOverdue, payment_reminders: paymentReminders, parq_reminders: parqReminders, event_reminders: eventReminders, covered_days: coveredDays.length }), created_at: now.toISOString() } });
+    await tables.createRow({ databaseId, tableId: "automation_runs", rowId: idempotencyKey, permissions: [], data: { job: "daily-operations", idempotency_key: idempotencyKey, status: "completed", started_at: now.toISOString(), finished_at: new Date().toISOString(), details: JSON.stringify({ phase: 6, reminders, expired, charges_created: chargesCreated, marked_overdue: markedOverdue, payment_reminders: paymentReminders, parq_reminders: parqReminders, event_reminders: eventReminders, absences_recorded: absencesRecorded, lessons_closed: lessonsClosed, covered_days: coveredDays.length }), created_at: now.toISOString() } });
     log(`Recorded ${idempotencyKey}: ${chargesCreated} charges, ${markedOverdue} overdue, ${parqReminders} parq reminders`);
-    return res.json({ ok: true, idempotencyKey, reminders, expired, chargesCreated, markedOverdue, paymentReminders, parqReminders });
+    return res.json({ ok: true, idempotencyKey, reminders, expired, chargesCreated, markedOverdue, paymentReminders, parqReminders, absencesRecorded, lessonsClosed });
   } catch (cause) {
     if (cause instanceof AppwriteException && cause.code === 409) return res.json({ ok: true, duplicate: true, idempotencyKey });
     await notifyAdmins(tables, { title: "Falha na automação diária", body: "A rotina diária não foi concluída. Consulte os registros da função.", dedupeKey: `daily-operations-failed:${day}` }).catch(() => undefined);
