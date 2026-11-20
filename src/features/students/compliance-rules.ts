@@ -191,3 +191,23 @@ export function summarizeCompliance(rows: StudentComplianceAssessment[], policy:
     ],
   };
 }
+
+/** Situação combinada dos documentos anuais (atestado e PAR-Q), usada nos filtros da tela. */
+export type ComplianceBucket = "expired" | "expiring_soon" | "pending" | "valid";
+
+export const COMPLIANCE_BUCKETS: ComplianceBucket[] = ["expired", "expiring_soon", "pending", "valid"];
+
+/** Um aluno pode estar em mais de uma situação (ex.: atestado vencido e PAR-Q por preencher). */
+export function complianceBucketsOf(row: Pick<StudentComplianceAssessment, "medicalStatus" | "parqStatus">): ComplianceBucket[] {
+  const buckets: ComplianceBucket[] = [];
+  if (row.medicalStatus === "expired" || row.parqStatus === "expired") buckets.push("expired");
+  if (row.medicalStatus === "expiring_soon" || row.parqStatus === "expiring_soon") buckets.push("expiring_soon");
+  if (row.medicalStatus === "missing" || row.medicalStatus === "pending_review" || row.parqStatus === "missing") buckets.push("pending");
+  return buckets.length > 0 ? buckets : ["valid"];
+}
+
+export function countComplianceBuckets(rows: Array<Pick<StudentComplianceAssessment, "medicalStatus" | "parqStatus">>): Record<ComplianceBucket, number> {
+  const counts: Record<ComplianceBucket, number> = { expired: 0, expiring_soon: 0, pending: 0, valid: 0 };
+  for (const row of rows) for (const bucket of complianceBucketsOf(row)) counts[bucket] += 1;
+  return counts;
+}

@@ -6,8 +6,9 @@ import type { TrainingClass } from "@/features/classes/types";
 import {
   evaluateStudentCompliance,
   sortComplianceAssessments,
-  summarizeCompliance,
-  type MedicalComplianceStatus,
+  complianceBucketsOf,
+  countComplianceBuckets,
+  type ComplianceBucket,
 } from "@/features/students/compliance-rules";
 import type { Enrollment, Student, StudentDocument } from "@/features/students/types";
 import { listLatestParqByStudent } from "@/features/students/parq-service";
@@ -18,7 +19,7 @@ import { CACHE_TAGS } from "@/lib/cache/tags";
 import { saoPauloToday } from "@/lib/dates";
 
 export type ComplianceFilters = {
-  status?: MedicalComplianceStatus;
+  status?: ComplianceBucket;
   classId?: string;
   search?: string;
 };
@@ -95,11 +96,9 @@ export async function getAnnualComplianceOverview(filters: ComplianceFilters = {
   const [dataset, parqByStudent, policy] = await Promise.all([loadComplianceDataset(), listLatestParqByStudent(), getPolicy("compliance")]);
   const { classes } = dataset;
   const assessments = buildComplianceAssessments(dataset, parqByStudent, policy, saoPauloToday());
-  const summary = summarizeCompliance(assessments, policy);
 
   const normalizedSearch = filters.search?.trim().toLocaleLowerCase("pt-BR");
-  const filteredRows = assessments.filter((row) => {
-    if (filters.status && row.medicalStatus !== filters.status) return false;
+  const scopedRows = assessments.filter((row) => {
     if (filters.classId && row.trainingClassId !== filters.classId) return false;
     if (normalizedSearch && !row.fullName.toLocaleLowerCase("pt-BR").includes(normalizedSearch)) {
       return false;
@@ -107,9 +106,14 @@ export async function getAnnualComplianceOverview(filters: ComplianceFilters = {
     return true;
   });
 
+  const bucketCounts = countComplianceBuckets(scopedRows);
+  const filteredRows = filters.status
+    ? scopedRows.filter((row) => complianceBucketsOf(row).includes(filters.status!))
+    : scopedRows;
+
   return {
     rows: filteredRows,
-    summary,
+    bucketCounts,
     policy,
     classes: classes.filter((item) => item.status === "active"),
   };

@@ -97,3 +97,17 @@ describe("compliance-rules", () => {
     expect(summary.complianceRatePct).toBe(0);
   });
 });
+
+describe("situação combinada dos documentos anuais", () => {
+  it("põe o aluno em todas as situações que pedem ação e em dia só quando nada falta", async () => {
+    const { complianceBucketsOf, countComplianceBuckets } = await import("@/features/students/compliance-rules");
+    expect(complianceBucketsOf({ medicalStatus: "expired", parqStatus: "missing" })).toEqual(["expired", "pending"]);
+    expect(complianceBucketsOf({ medicalStatus: "valid", parqStatus: "expiring_soon" })).toEqual(["expiring_soon"]);
+    expect(complianceBucketsOf({ medicalStatus: "pending_review", parqStatus: "valid" })).toEqual(["pending"]);
+    expect(complianceBucketsOf({ medicalStatus: "valid", parqStatus: "valid" })).toEqual(["valid"]);
+    expect(countComplianceBuckets([
+      { medicalStatus: "expired", parqStatus: "expired" },
+      { medicalStatus: "valid", parqStatus: "valid" },
+    ])).toEqual({ expired: 1, expiring_soon: 0, pending: 0, valid: 1 });
+  });
+});
