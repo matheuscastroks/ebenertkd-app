@@ -45,7 +45,7 @@ function pickMiddleItems(navItems: AppSidebarNavItem[], excluded: Set<string>) {
 }
 
 /**
- * Barra inferior do mobile: Início, até dois destinos frequentes do perfil, Avisos e Menu.
+ * Barra inferior do mobile: a seção inicial do perfil (Hoje, Início ou Família), até dois destinos frequentes do perfil, Avisos e Menu.
  * O menu completo (sidebar em folha) continua acessível pelo último botão.
  */
 export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] }) {
@@ -67,7 +67,7 @@ export function MobileBottomNav({ navItems }: { navItems: AppSidebarNavItem[] })
   if (homeItem) {
     tabs.push({
       key: homeItem.href,
-      label: "Início",
+      label: homeItem.shortLabel ?? homeItem.label,
       href: homeItem.href,
       icon: NAV_ICONS[homeItem.icon ?? "dashboard"],
       active: isActive(homeItem)

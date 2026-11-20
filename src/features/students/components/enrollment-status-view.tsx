@@ -415,7 +415,7 @@ export function EnrollmentStatusView({
                 <AttachmentContent>
                   <AttachmentTitle>
                     <Link
-                      className="underline"
+                      className="inline-flex min-h-11 items-center underline"
                       href={`/api/student-documents/${document.$id}`}
                     >
                       {DOCUMENT_LABELS[document.document_type]}

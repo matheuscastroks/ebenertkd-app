@@ -13,7 +13,7 @@ describe("MobileBottomNav", () => {
       <SidebarProvider>
         <MobileBottomNav
           navItems={[
-            { label: "Visão geral", href: "/admin", group: "Principal", exact: true },
+            { label: "Hoje", href: "/admin", group: "Principal", exact: true },
             { label: "Turmas", href: "/admin/turmas", group: "Rotina", icon: "classes" },
             { label: "Financeiro", href: "/admin/financeiro", group: "Gestão", icon: "billing" },
             { label: "Avisos", href: "/admin/avisos", group: "Principal", icon: "notifications", badge: 4 }
@@ -23,7 +23,7 @@ describe("MobileBottomNav", () => {
     );
 
     expect(screen.getByRole("navigation", { name: "Navegação móvel principal" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Início/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Hoje/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Turmas/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Financeiro/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Avisos/i })).toBeInTheDocument();
@@ -39,7 +39,7 @@ describe("MobileBottomNav", () => {
           <span data-testid="drawer-state">{openMobile ? "open" : "closed"}</span>
           <MobileBottomNav
             navItems={[
-              { label: "Visão geral", href: "/admin", group: "Principal", exact: true }
+              { label: "Hoje", href: "/admin", group: "Principal", exact: true }
             ]}
           />
         </div>
@@ -62,7 +62,7 @@ describe("MobileBottomNav", () => {
       <SidebarProvider>
         <MobileBottomNav
           navItems={[
-            { label: "Visão geral", href: "/aluno", exact: true, icon: "dashboard" },
+            { label: "Início", href: "/aluno", exact: true, icon: "dashboard" },
             { label: "Avisos", href: "/avisos", icon: "notifications" },
             { label: "Minha frequência", shortLabel: "Frequência", bottomNav: true, href: "/aluno/frequencia", icon: "attendance" },
             { label: "Minha matrícula", href: "/aluno/matricula", icon: "enrollment" },

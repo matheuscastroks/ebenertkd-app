@@ -378,7 +378,7 @@ export function DocumentsEnrollmentStep({ bundle }: StepProps) {
                   <AttachmentContent>
                     <AttachmentTitle>
                       <Link
-                        className="underline"
+                        className="inline-flex min-h-11 items-center underline"
                         href={`/api/student-documents/${document.$id}`}
                       >
                         {labels[document.document_type]}

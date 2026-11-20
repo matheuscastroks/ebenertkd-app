@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useOptimistic, useTransition } from "react";
 import {
@@ -32,7 +31,7 @@ export function DependentHeader({ name, rankKey, photoDocumentId, siblings, curr
       <StudentAvatar name={name} photoDocumentId={photoDocumentId ?? undefined} size="md" className="size-14" />
       <div className="min-w-0 space-y-1">
         <h2 className="truncate text-base font-semibold">
-          {section === "resumo" ? name : <Link href={pathFor(currentProfileId, "resumo")} className="underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring">{name}</Link>}
+          {name}
         </h2>
         {rankKey ? <BeltBadge rankKey={rankKey} /> : null}
       </div>

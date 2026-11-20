@@ -79,6 +79,16 @@ describe("navigationForProfile (Seção → Segmento → Pilha)", () => {
     }
   });
 
+  it("never repeats a segment label or href inside a section", () => {
+    for (const role of ["admin", "guardian", "minor_student", "adult_student"] as const) {
+      for (const item of sidebar(nav(role, ["guardian"]))) {
+        const segments = item.segments ?? [];
+        expect(new Set(segments.map((segment) => segment.label)).size, `${role}: ${item.label}`).toBe(segments.length);
+        expect(new Set(segments.map((segment) => segment.href)).size, `${role}: ${item.label}`).toBe(segments.length);
+      }
+    }
+  });
+
   it("places every admin and student page in exactly one section", () => {
     const cases: Array<[Role, string]> = [["admin", "admin"], ["adult_student", "aluno"], ["adult_student", "responsavel"], ["guardian", "responsavel"]];
     for (const [role, area] of cases) {
