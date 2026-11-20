@@ -1,5 +1,5 @@
 import { PortalShell } from "@/components/dashboard/portal-shell";
-import { getAcademyPolicies } from "@/features/academy/config-service";
+import { getAcademyPolicies, getBeltRanks } from "@/features/academy/config-service";
 import { getStudentAppAccessByStudentId } from "@/features/billing/access-lock-service";
 import { listTrainingClasses } from "@/features/classes/service";
 import { AdminDeleteStudentDialog } from "@/features/students/components/AdminDeleteStudentDialog";
@@ -32,7 +32,7 @@ export default async function EnrollmentReviewPage({ params, searchParams }: { p
     getLatestParqForStudent(studentId).catch(() => null),
     getStudentAppAccessByStudentId(studentId).catch(() => null),
   ]);
-  const policies = await getAcademyPolicies();
+  const [policies, ranks] = await Promise.all([getAcademyPolicies(), getBeltRanks()]);
   const parqAssessment = evaluateParqStatus(latestParq, saoPauloToday(), policies.compliance);
   const notice = query.updated === "student"
     ? "Dados cadastrais do aluno atualizados com sucesso."
@@ -63,6 +63,9 @@ export default async function EnrollmentReviewPage({ params, searchParams }: { p
           notice={notice}
           defaultMonthlyFeeCents={policies.billing.default_monthly_fee_cents}
           contractDurationMonths={policies.contract.default_duration_months}
+          dueDayOptions={policies.billing.due_day_options}
+          ranks={ranks}
+          levelLabel={policies.belts.level_label}
         />
         {bundle.student.profile_id ? (
           <section aria-labelledby="delete-student-heading" className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-6">

@@ -45,8 +45,8 @@ import { Separator } from "@/components/ui/separator";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { EditStudentDialog } from "@/features/students/components/edit-student-dialog";
 import type { TrainingClass } from "@/features/classes/types";
-import { useBeltLabels, useBeltRanks, useDueDayOptions } from "@/components/academy-config-provider";
-import { DEFAULT_BILLING_POLICY, DEFAULT_CONTRACT_POLICY } from "@/features/academy/defaults";
+import { DEFAULT_PUBLIC_RANKS, type PublicRank } from "@/features/academy/belt-rules";
+import { DEFAULT_BELTS_POLICY, DEFAULT_BILLING_POLICY, DEFAULT_CONTRACT_POLICY } from "@/features/academy/defaults";
 import {
   accessStatusLabel,
   type StudentAppAccessState,
@@ -112,7 +112,10 @@ export function ReviewPanel({
   accessState,
   notice,
   defaultMonthlyFeeCents = DEFAULT_BILLING_POLICY.default_monthly_fee_cents,
-  contractDurationMonths = DEFAULT_CONTRACT_POLICY.default_duration_months
+  contractDurationMonths = DEFAULT_CONTRACT_POLICY.default_duration_months,
+  dueDayOptions = DEFAULT_BILLING_POLICY.due_day_options,
+  ranks = DEFAULT_PUBLIC_RANKS,
+  levelLabel = DEFAULT_BELTS_POLICY.level_label
 }: {
   bundle: EnrollmentBundle;
   reviews: Array<Record<string, unknown>>;
@@ -124,10 +127,14 @@ export function ReviewPanel({
   defaultMonthlyFeeCents?: number;
   /** Duração sugerida do contrato, em meses (política da academia). */
   contractDurationMonths?: number;
+  /**
+   * Configuração da academia lida no servidor pela página. O painel é componente de servidor
+   * (importa regras com `node:crypto`), então não pode usar os hooks do AcademyConfigProvider.
+   */
+  dueDayOptions?: number[];
+  ranks?: readonly PublicRank[];
+  levelLabel?: string;
 }) {
-  const dueDayOptions = useDueDayOptions();
-  const ranks = useBeltRanks();
-  const { levelLabel } = useBeltLabels();
   const { student, enrollment, documents } = bundle;
   const rankLabel = rankFullLabel(ranks, student.rank_key, levelLabel);
   const profilePhoto = documents.find((doc) => doc.document_type === "profile_photo");
