@@ -65,7 +65,10 @@ export default async function ContractTemplatePage({
                 <div className="flex items-center justify-between">
                   <FieldLabel htmlFor="template-content">Conteúdo e cláusulas</FieldLabel>
                 </div>
-                <ContractContentEditor content={template?.draft_content ?? DEFAULT_CONTRACT_CONTENT} />
+                <ContractContentEditor
+                  content={template?.draft_content ?? DEFAULT_CONTRACT_CONTENT}
+                  variables={FRIENDLY_CONTRACT_VARIABLES.map(({ ptKey, label, description }) => ({ ptKey, label, description }))}
+                />
               </Field>
 
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
@@ -85,38 +88,11 @@ export default async function ContractTemplatePage({
           </CardContent>
         </Card>
 
-        {/* Sidebar agrupada com Variáveis e Histórico */}
+        {/* Histórico de versões ao lado do editor */}
         <aside
-          aria-label="Variáveis e histórico de versões"
+          aria-label="Histórico de versões"
           className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs"
         >
-          <section className="p-5 space-y-3">
-            <div>
-              <h2 className="text-base font-semibold text-foreground">Variáveis em Português</h2>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Copie e cole no texto. O sistema preenche com os dados reais ao emitir o contrato.
-              </p>
-            </div>
-            <div className="space-y-2.5">
-              {FRIENDLY_CONTRACT_VARIABLES.map((item) => (
-                <div
-                  key={item.ptKey}
-                  className="rounded-lg border border-border bg-muted/40 p-2.5 space-y-1"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-semibold text-foreground">{item.label}</span>
-                    <code className="select-all rounded bg-background px-1.5 py-0.5 font-mono text-[11px] font-medium text-primary-text border border-border">
-                      {`{{ ${item.ptKey} }}`}
-                    </code>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground leading-snug">
-                    {item.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-
           <section className="p-5 space-y-3">
             <div>
               <h2 className="text-base font-semibold text-foreground">Histórico de versões</h2>

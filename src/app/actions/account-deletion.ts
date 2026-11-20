@@ -42,10 +42,11 @@ export async function deleteStudentAccountAction(formData: FormData) {
   try {
     await deleteStudentAccount(admin, targetId);
   } catch {
-    redirect(`${ROUTES.adminStudentAccess}?error=delete_student`);
+    redirect(`${ROUTES.adminEnrollments}?error=delete_student`);
   }
   updateTag(CACHE_TAGS.studentAccess);
   updateTag(CACHE_TAGS.enrollments);
   revalidatePath(ROUTES.adminStudentAccess);
-  redirect(`${ROUTES.adminStudentAccess}?deleted=1`);
+  revalidatePath(ROUTES.adminEnrollments);
+  redirect(`${ROUTES.adminEnrollments}?deleted=1`);
 }

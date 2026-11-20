@@ -2,6 +2,7 @@ import { PortalShell } from "@/components/dashboard/portal-shell";
 import { getAcademyPolicies } from "@/features/academy/config-service";
 import { getStudentAppAccessByStudentId } from "@/features/billing/access-lock-service";
 import { listTrainingClasses } from "@/features/classes/service";
+import { AdminDeleteStudentDialog } from "@/features/students/components/AdminDeleteStudentDialog";
 import { ReviewPanel } from "@/features/students/components/review-panel";
 import { listEnrollmentReviews } from "@/features/students/document-service";
 import { evaluateParqStatus } from "@/features/students/parq-rules";
@@ -52,7 +53,7 @@ export default async function EnrollmentReviewPage({ params, searchParams }: { p
       title={bundle.student.full_name}
       subtitle="Confira a ficha e decida a matrícula."
     >
-      <div className="w-full min-w-0">
+      <div className="w-full min-w-0 space-y-8">
         <ReviewPanel
           bundle={toClientData(bundle)}
           reviews={toClientData(reviews) as Array<Record<string, unknown>>}
@@ -63,6 +64,15 @@ export default async function EnrollmentReviewPage({ params, searchParams }: { p
           defaultMonthlyFeeCents={policies.billing.default_monthly_fee_cents}
           contractDurationMonths={policies.contract.default_duration_months}
         />
+        {bundle.student.profile_id ? (
+          <section aria-labelledby="delete-student-heading" className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-6">
+            <div className="min-w-0">
+              <h2 id="delete-student-heading" className="text-sm font-semibold">Excluir aluno</h2>
+              <p className="text-sm text-muted-foreground">Remove o perfil e todos os dados. Não dá para desfazer.</p>
+            </div>
+            <AdminDeleteStudentDialog profileId={bundle.student.profile_id} studentName={bundle.student.full_name} />
+          </section>
+        ) : null}
       </div>
     </PortalShell>
   );

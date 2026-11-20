@@ -104,18 +104,18 @@ export default async function SettingsPage({
         ) : null}
 
         <Tabs defaultValue={defaultTab} className="space-y-6">
-          <TabsList className="grid h-auto w-full grid-cols-1 sm:grid-cols-3 gap-1 rounded-xl bg-muted/80 p-1">
+          <TabsList className="grid h-auto w-full grid-cols-3 gap-1 rounded-xl bg-muted/80 p-1">
             <TabsTrigger value="profile" className="min-h-11 rounded-lg text-sm font-medium">
-              <User className="mr-2 size-4" aria-hidden="true" />
-              Meu Perfil
+              <User className="mr-2 hidden size-4 sm:inline" aria-hidden="true" />
+              Perfil
             </TabsTrigger>
             <TabsTrigger value="preferences" className="min-h-11 rounded-lg text-sm font-medium">
-              <Bell className="mr-2 size-4" aria-hidden="true" />
-              Notificações & App
+              <Bell className="mr-2 hidden size-4 sm:inline" aria-hidden="true" />
+              Notificações
             </TabsTrigger>
             <TabsTrigger value="account" className="min-h-11 rounded-lg text-sm font-medium">
-              <Shield className="mr-2 size-4" aria-hidden="true" />
-              Conta & Segurança
+              <Shield className="mr-2 hidden size-4 sm:inline" aria-hidden="true" />
+              Conta
             </TabsTrigger>
           </TabsList>
 

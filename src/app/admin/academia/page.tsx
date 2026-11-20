@@ -2,19 +2,21 @@ import Link from "next/link";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronRight } from "@/components/ui/icons";
 import { getAcademyConfigOverview } from "@/features/academy/config-service";
 import type { PolicySection } from "@/features/academy/defaults";
 import { identityChecklist } from "@/features/academy/identity-rules";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
 
-type SectionCard = { title: string; description: string; href: string; status?: { label: string; tone: StatusTone } };
+type SettingsRow = { title: string; description: string; href: string; status?: { label: string; tone: StatusTone } };
+type SettingsGroup = { title: string; rows: SettingsRow[] };
 
-const sectionStatus = (customized: PolicySection[], sections: PolicySection[], any = false): { label: string; tone: StatusTone } =>
+/** Só marca o que ainda usa o padrão; o que já foi ajustado não precisa de selo. */
+const sectionStatus = (customized: PolicySection[], sections: PolicySection[], any = false): SettingsRow["status"] =>
   sections[any ? "some" : "every"]((section) => customized.includes(section))
-    ? { label: "Configurado", tone: "success" }
-    : { label: "Usando o padrão", tone: "neutral" };
+    ? undefined
+    : { label: "Padrão", tone: "neutral" };
 
 export default async function AdminAcademyOverviewPage() {
   const admin = await requireProfile("admin");
@@ -22,47 +24,44 @@ export default async function AdminAcademyOverviewPage() {
   const checklist = identityChecklist(identity);
   const pending = checklist.filter((item) => !item.done);
 
-  const cards: SectionCard[] = [
+  const groups: SettingsGroup[] = [
     {
-      title: "Identidade",
-      description: "Nomes, documento, endereço, contato e professor.",
-      href: ROUTES.adminAcademyIdentity,
-      status: !identity.configured ? { label: "Usando o padrão", tone: "neutral" } : pending.length > 0 ? { label: "Revisar", tone: "warning" } : { label: "Completo", tone: "success" }
+      title: "Academia",
+      rows: [
+        {
+          title: "Identidade",
+          description: "Nomes, documento, endereço, contato e professor.",
+          href: ROUTES.adminAcademyIdentity,
+          status: !identity.configured ? { label: "Padrão", tone: "neutral" } : pending.length > 0 ? { label: "Revisar", tone: "warning" } : undefined
+        },
+        { title: "Contratos", description: "Duração, prazo de cancelamento, encargo de saída e rematrícula.", href: ROUTES.adminAcademyContracts, status: sectionStatus(customized, ["contract"]) }
+      ]
     },
     {
-      title: "Financeiro",
-      description: "Mensalidade padrão, taxa de matrícula, vencimentos, PIX e acesso ao aplicativo.",
-      href: ROUTES.adminAcademyFinance,
-      status: sectionStatus(customized, ["billing"])
+      title: "Dinheiro",
+      rows: [
+        { title: "Financeiro e PIX", description: "Mensalidade padrão, matrícula, vencimentos, PIX e acesso ao app.", href: ROUTES.adminAcademyFinance, status: sectionStatus(customized, ["billing"]) }
+      ]
     },
     {
-      title: "Graduações",
-      description: "Nome, cor, forma, tempo e presenças de cada graduação, com modelos CBTKD, ITF e Kukkiwon.",
-      href: ROUTES.adminAcademyGrades,
-      status: customizedRanks > 0 || customized.includes("belts") ? { label: "Configurado", tone: "success" } : { label: "Usando o padrão", tone: "neutral" }
+      title: "Graduação",
+      rows: [
+        {
+          title: "Graduações",
+          description: "Nome, cor, tempo e presenças de cada faixa.",
+          href: ROUTES.adminAcademyGrades,
+          status: customizedRanks > 0 || customized.includes("belts") ? undefined : { label: "Padrão", tone: "neutral" }
+        },
+        { title: "Exames", description: "Taxa padrão, bloqueio por atraso e quem pode se inscrever.", href: ROUTES.adminAcademyExams, status: sectionStatus(customized, ["exam"]) }
+      ]
     },
     {
-      title: "Contratos",
-      description: "Duração, prazo de cancelamento, encargo de saída e rematrícula.",
-      href: ROUTES.adminAcademyContracts,
-      status: sectionStatus(customized, ["contract"])
-    },
-    {
-      title: "Exames",
-      description: "Taxa padrão, bloqueio por inadimplência, elegibilidade e inscrição em graduações acima.",
-      href: ROUTES.adminAcademyExams,
-      status: sectionStatus(customized, ["exam"])
-    },
-    {
-      title: "Regras operacionais",
-      description: "Risco de evasão, validade de atestado e PAR-Q, lembretes de pagamento e conquistas.",
-      href: ROUTES.adminAcademyRules,
-      status: sectionStatus(customized, ["retention", "compliance", "notifications", "gamification"], true)
-    },
-    {
-      title: "Sistema e backup",
-      description: "Rotinas automáticas, backup externo, notificações push e espaço de armazenamento.",
-      href: ROUTES.adminSystem
+      title: "Sistema",
+      rows: [
+        { title: "Regras", description: "Risco de evasão, validade de atestado e PAR-Q, lembretes e conquistas.", href: ROUTES.adminAcademyRules, status: sectionStatus(customized, ["retention", "compliance", "notifications", "gamification"], true) },
+        { title: "Sistema e backup", description: "Rotinas automáticas, backup e armazenamento.", href: ROUTES.adminSystem },
+        { title: "Histórico", description: "Quem mudou o quê nos ajustes.", href: ROUTES.adminAcademyHistory }
+      ]
     }
   ];
 
@@ -72,54 +71,45 @@ export default async function AdminAcademyOverviewPage() {
       title="Ajustes"
       subtitle="Dados da academia, valores, graduações e regras do app."
       headerActions={
-        <div className="flex flex-wrap gap-2">
-          {!identity.setup_completed_at ? (
-            <Button asChild className="min-h-11">
-              <Link href={ROUTES.adminAcademySetup}>Primeiros passos</Link>
-            </Button>
-          ) : null}
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href={ROUTES.adminAcademyHistory}>Histórico</Link>
+        !identity.setup_completed_at ? (
+          <Button asChild className="min-h-11">
+            <Link href={ROUTES.adminAcademySetup}>Primeiros passos</Link>
           </Button>
-        </div>
+        ) : undefined
       }
     >
-      <div className="w-full min-w-0 space-y-6">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {cards.map((card) => (
-            <Card key={card.href}>
-              <CardHeader>
-                <CardTitle className="flex flex-wrap items-center justify-between gap-2">
-                  {card.title}
-                  {card.status ? <StatusBadge tone={card.status.tone}>{card.status.label}</StatusBadge> : null}
-                </CardTitle>
-                <CardDescription>{card.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild variant="outline" className="min-h-11">
-                  <Link href={card.href}>Abrir</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+      <div className="mx-auto w-full min-w-0 max-w-3xl space-y-6">
+        {pending.length > 0 ? (
+          <Link
+            href={ROUTES.adminAcademyIdentity}
+            className="flex min-h-11 items-center justify-between gap-3 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm"
+          >
+            <span>
+              <span className="font-medium">Cadastro incompleto:</span> {pending.map((item) => item.label).join(" · ")}.
+            </span>
+            <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+          </Link>
+        ) : null}
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Pendências do cadastro</CardTitle>
-            <CardDescription>Itens opcionais que deixam contratos e a política de privacidade mais completos.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="divide-y divide-border">
-              {checklist.map((item) => (
-                <li key={item.id} className="flex items-center justify-between gap-3 py-3 text-sm">
-                  <span>{item.label}</span>
-                  <StatusBadge tone={item.done ? "success" : "warning"}>{item.done ? "Preenchido" : "Pendente"}</StatusBadge>
+        {groups.map((group) => (
+          <section key={group.title} aria-labelledby={`ajustes-${group.title}`} className="space-y-2">
+            <h2 id={`ajustes-${group.title}`} className="px-1 text-sm font-medium text-muted-foreground">{group.title}</h2>
+            <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+              {group.rows.map((row) => (
+                <li key={row.href}>
+                  <Link href={row.href} className="t-interactive-row flex min-h-14 items-center gap-3 px-4 py-3 hover:bg-muted sm:px-5">
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-medium text-foreground">{row.title}</span>
+                      <span className="block text-sm text-muted-foreground">{row.description}</span>
+                    </span>
+                    {row.status ? <StatusBadge tone={row.status.tone}>{row.status.label}</StatusBadge> : null}
+                    <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                  </Link>
                 </li>
               ))}
             </ul>
-          </CardContent>
-        </Card>
+          </section>
+        ))}
       </div>
     </PortalShell>
   );

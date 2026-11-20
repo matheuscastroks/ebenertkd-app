@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FilterChips } from "@/components/shared/filter-chips";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@/components/ui/plus";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,13 +15,14 @@ import { EVENT_TYPES, type EventType } from "@/features/events/types";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
 
-const FILTER_LABEL: Record<EventType, string> = {
-  belt_exam: "Exames",
+const FILTER_LABEL: Record<Exclude<EventType, "belt_exam">, string> = {
   championship: "Campeonatos",
   seminar: "Aulões e seminários",
   social: "Confraternizações",
   other: "Outros"
 };
+
+const FILTER_TYPES = EVENT_TYPES.filter((item): item is Exclude<EventType, "belt_exam"> => item !== "belt_exam");
 
 function EventsSkeleton() {
   return (
@@ -103,16 +105,14 @@ export default async function AdminEventsPage({ searchParams }: { searchParams: 
     >
       <div className="w-full min-w-0 space-y-6">
         <EventFeedback ok={query.ok} erro={query.erro} />
-        <nav aria-label="Filtrar por tipo" className="flex flex-wrap gap-2">
-          <Button asChild size="sm" variant={type ? "outline" : "default"} className="min-h-9">
-            <Link href={ROUTES.adminEvents}>Todos</Link>
-          </Button>
-          {EVENT_TYPES.map((item) => (
-            <Button key={item} asChild size="sm" variant={type === item ? "default" : "outline"} className="min-h-9">
-              <Link href={`${ROUTES.adminEvents}?tipo=${item}`}>{FILTER_LABEL[item]}</Link>
-            </Button>
-          ))}
-        </nav>
+        <FilterChips
+          label="Tipo de evento"
+          items={[
+            { label: "Todos", href: ROUTES.adminEvents, active: !type },
+            // Exames de faixa têm segmento próprio; aqui ficam só os outros tipos.
+            ...FILTER_TYPES.map((item) => ({ label: FILTER_LABEL[item], href: `${ROUTES.adminEvents}?tipo=${item}`, active: type === item })),
+          ]}
+        />
         <Suspense fallback={<EventsSkeleton />}>
           <EventsContent type={type} />
         </Suspense>

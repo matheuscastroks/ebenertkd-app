@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ListPagination } from "@/components/shared/list-pagination";
+import { OperationToast } from "@/components/shared/operation-toast";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { listTrainingClasses } from "@/features/classes/service";
 import { EnrollmentFilters } from "@/features/students/components/enrollment-filters";
@@ -19,6 +20,8 @@ type SearchParamsType = Promise<{
   rank?: string;
   turma?: string;
   page?: string;
+  deleted?: string;
+  error?: string;
 }>;
 
 async function EnrollmentListContent({ searchParams }: { searchParams: SearchParamsType }) {
@@ -69,9 +72,10 @@ export default async function EnrollmentsPage({
 }: {
   searchParams: SearchParamsType;
 }) {
-  const [admin, classes] = await Promise.all([
+  const [admin, classes, query] = await Promise.all([
     requireProfile("admin"),
     listTrainingClasses(true),
+    searchParams,
   ]);
 
   return (
@@ -81,6 +85,10 @@ export default async function EnrollmentsPage({
       subtitle="Fichas para analisar, documentos e condições de cada aluno."
     >
       <div className="w-full min-w-0 space-y-6">
+        {query.deleted === "1" ? <OperationToast tone="success" title="Aluno excluído" clearParams={["deleted"]} /> : null}
+        {query.error === "delete_student" ? (
+          <OperationToast tone="error" title="Não foi possível excluir o aluno" description="Tente de novo. Se continuar, confira o Sistema." clearParams={["error"]} />
+        ) : null}
         <EnrollmentFilters classes={toClientData(classes)} />
 
         <Suspense fallback={<TableRowsSkeleton columns={6} rows={5} />}>

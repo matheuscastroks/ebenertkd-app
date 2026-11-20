@@ -3,11 +3,13 @@ import { Suspense } from "react";
 import { sendTargetedNotificationAction } from "@/app/actions/notifications";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FilterChips } from "@/components/shared/filter-chips";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";
 import { MetricCardsSkeleton, TableRowsSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { RetentionCharts } from "@/features/classes/components/retention-chart";
 import { RetentionFilters } from "@/features/classes/components/retention-filters";
 import type { RetentionRiskLevel } from "@/features/classes/retention-rules";
@@ -19,7 +21,7 @@ import { requireProfile } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
 import { formatBusinessDateBr, whatsappLink } from "@/lib/dates";
 import { adminEnrollmentPath, ROUTES } from "@/lib/navigation/routes";
-import { ArrowRight, Bell, MessageCircle } from "@/components/ui/icons";
+import { ArrowRight, Bell, ChevronDownIcon, MessageCircle } from "@/components/ui/icons";
 
 const RISK_LABELS: Record<RetentionRiskLevel, string> = {
   critical: "Risco crítico",
@@ -58,76 +60,29 @@ async function RetentionContent({ searchParams }: { searchParams: SearchParams }
 
   const { summary, rows, windowDays } = data;
   const netSign = summary.netGrowthInMonth > 0 ? "+" : "";
+  const chipHref = (next: RetentionRiskLevel | undefined) => {
+    const query = new URLSearchParams();
+    if (params.q) query.set("q", params.q);
+    if (classId) query.set("turma", classId);
+    if (next) query.set("risk", next);
+    return query.size ? `${ROUTES.adminRetention}?${query}` : ROUTES.adminRetention;
+  };
 
   return (
     <div className="space-y-6">
-      <dl
-        aria-label="Resumo mensal de retenção"
-        className="grid grid-cols-2 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs sm:grid-cols-4 sm:divide-x sm:divide-y-0"
-      >
-        <div className="p-4 sm:px-5">
-          <dt className="text-sm font-medium text-muted-foreground">Alunos ativos</dt>
-          <dd className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-foreground">
-            {summary.totalActive}
-          </dd>
-          <p className="text-xs text-muted-foreground">
-            {summary.retentionRatePct}% em frequência regular ou atenção
-          </p>
-        </div>
-
-        <Link
-          href={`${ROUTES.adminRetention}?risk=critical`}
-          className="t-interactive-row block p-4 hover:bg-muted sm:px-5"
-        >
-          <dt className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <span className="size-2 shrink-0 rounded-full bg-destructive" aria-hidden="true" />
-            Risco crítico
-          </dt>
-          <dd
-            className={
-              summary.criticalCount > 0
-                ? "mt-1 text-2xl font-semibold tracking-tight tabular-nums text-destructive"
-                : "mt-1 text-2xl font-semibold tracking-tight tabular-nums text-foreground"
-            }
-          >
-            {summary.criticalCount}
-          </dd>
-          <p className="text-xs text-muted-foreground">3+ faltas seguidas ou 21+ dias ausente</p>
-        </Link>
-
-        <Link
-          href={`${ROUTES.adminRetention}?risk=warning`}
-          className="t-interactive-row block p-4 hover:bg-muted sm:px-5"
-        >
-          <dt className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <span className="size-2 shrink-0 rounded-full bg-warning" aria-hidden="true" />
-            Em atenção
-          </dt>
-          <dd className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-foreground">
-            {summary.warningCount}
-          </dd>
-          <p className="text-xs text-muted-foreground">2 faltas seguidas ou 14–20 dias ausente</p>
-        </Link>
-
-        <div className="p-4 sm:px-5">
-          <dt className="text-sm font-medium text-muted-foreground">Saldo líquido no mês</dt>
-          <dd
-            className={
-              summary.netGrowthInMonth >= 0
-                ? "mt-1 text-2xl font-semibold tracking-tight tabular-nums text-success-foreground"
-                : "mt-1 text-2xl font-semibold tracking-tight tabular-nums text-destructive"
-            }
-          >
-            {netSign}
-            {summary.netGrowthInMonth}
-          </dd>
-          <p className="text-xs text-muted-foreground tabular-nums">
-            {summary.newEnrollmentsInMonth} entradas · {summary.cancellationsInMonth} saídas
-          </p>
-        </div>
-      </dl>
-
-      <RetentionCharts summary={summary} windowDays={windowDays} />
+      <FilterChips
+        label="Nível de risco"
+        items={[
+          { label: "Todos", href: chipHref(undefined), count: summary.totalActive, active: !risk },
+          { label: "Risco crítico", href: chipHref("critical"), count: summary.criticalCount, active: risk === "critical", urgent: true },
+          { label: "Em atenção", href: chipHref("warning"), count: summary.warningCount, active: risk === "warning" },
+          { label: "Regular", href: chipHref("healthy"), count: summary.healthyCount, active: risk === "healthy" },
+        ]}
+      />
+      <p className="text-sm text-muted-foreground tabular-nums">
+        Neste mês: {summary.newEnrollmentsInMonth} entrada{summary.newEnrollmentsInMonth === 1 ? "" : "s"} e {summary.cancellationsInMonth} saída{summary.cancellationsInMonth === 1 ? "" : "s"}
+        {" "}(saldo <span className={summary.netGrowthInMonth < 0 ? "font-medium text-destructive" : "font-medium text-foreground"}>{netSign}{summary.netGrowthInMonth}</span>).
+      </p>
 
       {rows.length === 0 ? (
         <EmptyState
@@ -240,6 +195,18 @@ async function RetentionContent({ searchParams }: { searchParams: SearchParams }
           </ul>
         </section>
       )}
+
+      <Collapsible>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" className="group min-h-11 px-2">
+            Ver tendências
+            <ChevronDownIcon aria-hidden="true" className="size-4 transition-transform duration-(--duration-fast) group-data-[state=open]:-scale-y-100 motion-reduce:transition-none" />
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-3">
+          <RetentionCharts summary={summary} windowDays={windowDays} />
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   );
 }

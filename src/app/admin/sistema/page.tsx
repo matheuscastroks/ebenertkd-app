@@ -193,7 +193,7 @@ async function SystemHealthContent() {
             </div>
             <div className="divide-y divide-border">
               <ConfigurationItem
-                label="Backup externo"
+                label="Acesso ao backup"
                 ready={health.configuration.backup}
                 help="OAuth do Drive, pasta de destino e chave de criptografia."
               />

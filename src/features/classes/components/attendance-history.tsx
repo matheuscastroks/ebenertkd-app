@@ -193,18 +193,15 @@ export function AttendanceHistory({
             <p className="text-sm text-muted-foreground">
               {summary.total
                 ? summary.rate >= 75
-                  ? "Frequência registrada no mês: pelo menos 75%."
-                  : "Frequência registrada no mês: abaixo de 75%."
+                  ? "Dentro da meta da academia."
+                  : "Abaixo da meta da academia."
                 : "Ainda sem aulas registradas"}
             </p>
           </div>
 
           {summary.total > 0 ? (
             <div className="w-full space-y-2 sm:max-w-xs">
-              <div className="flex justify-between text-sm font-medium text-muted-foreground">
-                <span>Meta da academia: 75%</span>
-                <span className="font-semibold tabular-nums text-foreground">{summary.rate}%</span>
-              </div>
+              <p className="text-sm font-medium text-muted-foreground">Meta: 75%</p>
               <Progress
                 value={summary.rate}
                 className="h-2.5"

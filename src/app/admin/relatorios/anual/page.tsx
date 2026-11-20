@@ -29,7 +29,7 @@ async function AnnualReportContent({ searchParams }: { searchParams: SearchParam
       <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-xs sm:flex-row sm:items-end sm:justify-between sm:px-5">
         <AnnualYearPicker year={report.year} years={years} />
         <p className="text-xs text-muted-foreground tabular-nums">
-          Adimplência arrecadada no exercício:{" "}
+          Pagamentos em dia no ano:{" "}
           <span className="font-semibold text-foreground">{report.collectionRatePct}%</span>
           {" · "}
           {report.activeStudentsCount} alunos ativos na base atual
@@ -68,12 +68,12 @@ async function AnnualReportContent({ searchParams }: { searchParams: SearchParam
         </div>
 
         <div className="p-4 sm:px-5">
-          <dt className="text-sm font-medium text-muted-foreground">Ticket médio mensal</dt>
+          <dt className="text-sm font-medium text-muted-foreground">Mensalidade média</dt>
           <dd className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-foreground">
             {formatBrl(report.averageTicketCents)}
           </dd>
           <p className="text-xs text-muted-foreground tabular-nums">
-            Permanência média (LTV): {report.averageTenureMonths} meses
+            Permanência média: {report.averageTenureMonths} meses
           </p>
         </div>
 
@@ -82,7 +82,7 @@ async function AnnualReportContent({ searchParams }: { searchParams: SearchParam
           <dd className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-foreground">
             {report.totalGraduationsInYear}
           </dd>
-          <p className="text-xs text-muted-foreground">promoções de faixa registradas</p>
+          <p className="text-xs text-muted-foreground">trocas de faixa registradas</p>
         </div>
       </dl>
 

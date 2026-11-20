@@ -140,9 +140,9 @@ async function StudentCalendarContent({ profile }: { profile: Profile }) {
           )}
         </section>
 
-        <section aria-labelledby="upcoming-exams-heading" className="space-y-3">
+        <section aria-labelledby="upcoming-events-heading" className="space-y-3">
           <div className="flex items-center justify-between gap-2">
-            <h2 id="upcoming-exams-heading" className="text-base font-semibold">
+            <h2 id="upcoming-events-heading" className="text-base font-semibold">
               Próximos eventos
             </h2>
             <Button asChild variant="ghost" size="sm" className="min-h-9">

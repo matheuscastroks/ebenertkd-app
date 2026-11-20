@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { enrollEligibleStudentAction } from "@/app/actions/exams";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FilterChips } from "@/components/shared/filter-chips";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";
@@ -13,7 +14,6 @@ import { getBeltRanks, getPolicy } from "@/features/academy/config-service";
 import { findRank } from "@/features/academy/belt-rules";
 import { isRankKey } from "@/features/academy/ranks";
 import { listTrainingClasses } from "@/features/classes/service";
-import { EligibilityChart } from "@/features/exams/components/eligibility-chart";
 import { EligibilityFilters } from "@/features/exams/components/eligibility-filters";
 import type { ExamEligibilityStatus } from "@/features/exams/eligibility-rules";
 import { getExamEligibilityOverview } from "@/features/exams/eligibility-service";
@@ -78,79 +78,34 @@ async function EligibilityContent({ searchParams }: { searchParams: SearchParams
 
   const { summary, rows, openEvents } = data;
   const nextOpenEvent = openEvents[0] ?? null;
+  const chipHref = (next: ExamEligibilityStatus | undefined) => {
+    const query = new URLSearchParams();
+    if (params.q) query.set("q", params.q);
+    if (classId) query.set("turma", classId);
+    if (rankKey) query.set("rank", rankKey);
+    if (next) query.set("status", next);
+    return query.size ? `${ROUTES.adminExamEligibility}?${query}` : ROUTES.adminExamEligibility;
+  };
 
   return (
     <div className="space-y-6">
-      <dl
-        aria-label="Resumo de elegibilidade para exames"
-        className="grid grid-cols-2 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs sm:grid-cols-4 sm:divide-x sm:divide-y-0"
-      >
-        <Link
-          href={`${ROUTES.adminExamEligibility}?status=eligible`}
-          className="t-interactive-row block p-4 hover:bg-muted sm:px-5"
-        >
-          <dt className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <span className="size-2 shrink-0 rounded-full bg-success" aria-hidden="true" />
-            Aptos agora
-          </dt>
-          <dd className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-success-foreground">
-            {summary.eligibleCount}
-          </dd>
-          <p className="text-xs text-muted-foreground">cumprem carência, aulas e financeiro</p>
-        </Link>
-
-        <Link
-          href={`${ROUTES.adminExamEligibility}?status=almost_ready`}
-          className="t-interactive-row block p-4 hover:bg-muted sm:px-5"
-        >
-          <dt className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <span className="size-2 shrink-0 rounded-full bg-info" aria-hidden="true" />
-            Quase prontos
-          </dt>
-          <dd className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-foreground">
-            {summary.almostReadyCount}
-          </dd>
-          <p className="text-xs text-muted-foreground">atingiram {examPolicy.almost_ready_pct}% ou mais da meta</p>
-        </Link>
-
-        <Link
-          href={`${ROUTES.adminExamEligibility}?status=financial_hold`}
-          className="t-interactive-row block p-4 hover:bg-muted sm:px-5"
-        >
-          <dt className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <span className="size-2 shrink-0 rounded-full bg-destructive" aria-hidden="true" />
-            Pendência financeira
-          </dt>
-          <dd
-            className={
-              summary.financialHoldCount > 0
-                ? "mt-1 text-2xl font-semibold tracking-tight tabular-nums text-destructive"
-                : "mt-1 text-2xl font-semibold tracking-tight tabular-nums text-foreground"
-            }
-          >
-            {summary.financialHoldCount}
-          </dd>
-          <p className="text-xs text-muted-foreground">aptos na técnica, mas com atraso</p>
-        </Link>
-
-        <Link
-          href={`${ROUTES.adminExamEligibility}?status=already_registered`}
-          className="t-interactive-row block p-4 hover:bg-muted sm:px-5"
-        >
-          <dt className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <span className="size-2 shrink-0 rounded-full bg-muted-foreground" aria-hidden="true" />
-            Inscritos na banca
-          </dt>
-          <dd className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-foreground">
-            {summary.alreadyRegisteredCount}
-          </dd>
-          <p className="text-xs text-muted-foreground">
-            {nextOpenEvent ? `Próxima: ${nextOpenEvent.name}` : "Nenhuma banca aberta"}
-          </p>
-        </Link>
-      </dl>
-
-      <EligibilityChart summary={summary} />
+      <FilterChips
+        label="Aptidão"
+        items={[
+          { label: "Todos", href: chipHref(undefined), count: summary.totalActive, active: !status },
+          { label: "Aptos", href: chipHref("eligible"), count: summary.eligibleCount, active: status === "eligible" },
+          { label: "Quase prontos", href: chipHref("almost_ready"), count: summary.almostReadyCount, active: status === "almost_ready" },
+          { label: "Pendência financeira", href: chipHref("financial_hold"), count: summary.financialHoldCount, active: status === "financial_hold", urgent: true },
+          { label: "Inscritos", href: chipHref("already_registered"), count: summary.alreadyRegisteredCount, active: status === "already_registered" },
+          { label: "Em carência", href: chipHref("in_progress"), count: summary.inProgressCount, active: status === "in_progress" },
+        ]}
+      />
+      {status === "almost_ready" ? (
+        <p className="text-sm text-muted-foreground">Quase prontos: já cumpriram {examPolicy.almost_ready_pct}% ou mais do tempo e das aulas.</p>
+      ) : null}
+      {nextOpenEvent ? (
+        <p className="text-sm text-muted-foreground">Próxima banca aberta: <span className="font-medium text-foreground">{nextOpenEvent.name}</span></p>
+      ) : null}
 
       {rows.length === 0 ? (
         <EmptyState
@@ -284,8 +239,8 @@ async function EligibilityContent({ searchParams }: { searchParams: SearchParams
 }
 
 async function EligibilityFiltersLoader() {
-  const [classes, examPolicy] = await Promise.all([listTrainingClasses(true), getPolicy("exam")]);
-  return <EligibilityFilters classes={toClientData(classes)} almostReadyPct={examPolicy.almost_ready_pct} />;
+  const classes = await listTrainingClasses(true);
+  return <EligibilityFilters classes={toClientData(classes)} />;
 }
 
 export default async function AdminExamEligibilityPage({

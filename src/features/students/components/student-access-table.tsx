@@ -15,7 +15,6 @@ import {
 import type { Profile } from "@/features/auth/types";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { PromoteMinorDialog } from "@/features/students/components/promote-minor-dialog";
-import { AdminDeleteStudentDialog } from "@/features/students/components/AdminDeleteStudentDialog";
 import { useTableSort } from "@/hooks/use-table-sort";
 
 type StudentAccessSortKey = "student" | "role" | "login" | "status";
@@ -131,10 +130,6 @@ export function StudentAccessTable({
                           currentQuery={currentQuery}
                         />
                       ) : null}
-                      <AdminDeleteStudentDialog
-                        profileId={student.$id}
-                        studentName={student.full_name}
-                      />
                     </div>
                   </TableCell>
                 </TableRow>
@@ -184,20 +179,11 @@ export function StudentAccessTable({
                     </Badge>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2 border-t border-border pt-2">
-                      {student.role === "minor_student" &&
-                        student.status === "active" && (
-                          <PromoteMinorDialog
-                            minorProfileId={student.$id}
-                            studentName={student.full_name}
-                            currentQuery={currentQuery}
-                          />
-                        )}
-                      <AdminDeleteStudentDialog
-                        profileId={student.$id}
-                        studentName={student.full_name}
-                      />
+                  {student.role === "minor_student" && student.status === "active" ? (
+                    <div className="flex flex-wrap items-center gap-2 border-t border-border pt-2">
+                      <PromoteMinorDialog minorProfileId={student.$id} studentName={student.full_name} currentQuery={currentQuery} />
                     </div>
+                  ) : null}
                 </CardContent>
               </Card>
             ))

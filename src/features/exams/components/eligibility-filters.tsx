@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useOptimistic, useRef, useTransition } from "react";
-import { Award, SearchIcon, SlidersHorizontal, UsersRound, XIcon } from "@/components/ui/icons";
+import { Award, SearchIcon, UsersRound, XIcon } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
@@ -11,21 +11,11 @@ import type { TrainingClass } from "@/features/classes/types";
 import { RankSelect } from "@/features/students/components/rank-select";
 import { ROUTES } from "@/lib/navigation/routes";
 
-const statusOptions = (almostReadyPct: number) =>
-  [
-    { value: "all", label: "Todos os status" },
-    { value: "eligible", label: "Aptos para exame" },
-    { value: "almost_ready", label: `Quase prontos (≥ ${almostReadyPct}%)` },
-    { value: "financial_hold", label: "Pendência financeira" },
-    { value: "already_registered", label: "Já inscritos" },
-    { value: "in_progress", label: "Em carência" },
-  ] as const;
-
-type FilterKey = "q" | "status" | "turma" | "rank";
+type FilterKey = "q" | "turma" | "rank";
 type FilterState = Record<FilterKey, string>;
 
-export function EligibilityFilters({ classes, almostReadyPct = 75 }: { classes: TrainingClass[]; almostReadyPct?: number }) {
-  const STATUS_OPTIONS = statusOptions(almostReadyPct);
+/** Busca, graduação e turma. A aptidão fica nos chips da página e sobrevive ao limpar. */
+export function EligibilityFilters({ classes }: { classes: TrainingClass[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -35,7 +25,6 @@ export function EligibilityFilters({ classes, almostReadyPct = 75 }: { classes: 
 
   const current: FilterState = {
     q: searchParams.get("q") ?? "",
-    status: searchParams.get("status") ?? "",
     turma: searchParams.get("turma") ?? "",
     rank: searchParams.get("rank") ?? "",
   };
@@ -73,18 +62,16 @@ export function EligibilityFilters({ classes, almostReadyPct = 75 }: { classes: 
     if (timer.current) clearTimeout(timer.current);
     if (inputRef.current) inputRef.current.value = "";
     startTransition(() => {
-      setOptimistic({ q: "", status: "", turma: "", rank: "" });
-      router.replace(ROUTES.adminExamEligibility, { scroll: false });
+      setOptimistic({ q: "", turma: "", rank: "" });
+      const status = searchParams.get("status");
+      router.replace(status ? `${ROUTES.adminExamEligibility}?status=${encodeURIComponent(status)}` : ROUTES.adminExamEligibility, { scroll: false });
     });
   };
 
   const hasFilters = Boolean(
-    optimistic.q || optimistic.status || optimistic.turma || optimistic.rank
+    optimistic.q || optimistic.turma || optimistic.rank
   );
 
-  const statusLabel =
-    STATUS_OPTIONS.find((item) => item.value === (optimistic.status || "all"))?.label ??
-    "Todos os status";
   const classLabel =
     classes.find((item) => item.$id === optimistic.turma)?.name ?? "Todas as turmas";
 
@@ -95,7 +82,7 @@ export function EligibilityFilters({ classes, almostReadyPct = 75 }: { classes: 
       aria-busy={pending}
       className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-xs transition-opacity duration-(--duration-quick) motion-reduce:transition-none aria-busy:opacity-80"
     >
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Field>
           <FieldLabel htmlFor="eligibility-search">Aluno</FieldLabel>
           <InputGroup className="h-10">
@@ -114,22 +101,6 @@ export function EligibilityFilters({ classes, almostReadyPct = 75 }: { classes: 
               }}
             />
           </InputGroup>
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="eligibility-status">Aptidão</FieldLabel>
-          <Select value={optimistic.status || "all"} onValueChange={(value) => update("status", value)}>
-            <SelectTrigger id="eligibility-status" className="h-10 w-full" leadingIcon={<SlidersHorizontal className="size-4" />}>
-              <SelectValue>{statusLabel}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {STATUS_OPTIONS.map((item) => (
-                <SelectItem key={item.value} value={item.value}>
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </Field>
 
         <Field>

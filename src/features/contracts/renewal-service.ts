@@ -266,18 +266,14 @@ export async function getContractRenewalPipeline(filters: {
   });
 
   const within30d = items.filter((item) => item.bucket === "expired" || item.bucket === "due_7d" || item.bucket === "due_30d");
-  const within90d = items.filter((item) => item.bucket !== "healthy");
 
   return {
     rows: filteredRows,
     buckets,
     summary: {
-      totalSigned: items.length,
-      expiredCount: items.filter((item) => item.bucket === "expired").length,
-      due30dCount: items.filter((item) => item.bucket === "due_7d" || item.bucket === "due_30d").length,
-      due60to90dCount: items.filter((item) => item.bucket === "due_60d" || item.bucket === "due_90d").length,
+      /** Contratos vencidos ou que vencem em até 90 dias: a janela padrão da lista. */
+      attentionCount: items.filter((item) => item.bucket !== "healthy").length,
       revenueAtRisk30dCents: within30d.reduce((sum, item) => sum + item.monthlyFeeCents, 0),
-      totalPipeline90dCount: within90d.length,
     },
   };
 }

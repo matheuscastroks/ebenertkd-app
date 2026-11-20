@@ -22,34 +22,12 @@ const STATUS_TONES = { draft: "warning", applied: "success", cancelled: "neutral
 async function AdjustmentContent({ adminName }: { adminName: string }) {
   const [candidates, scenarios, campaigns, identity, billingPolicy] = await Promise.all([listAdjustmentCandidates(), listFinanceScenarios(), listTuitionAdjustments(), getAcademyIdentity(), getPolicy("billing")]);
 
+  const drafts = campaigns.filter((campaign) => campaign.status === "draft");
+  const history = campaigns.filter((campaign) => campaign.status !== "draft");
+
   return (
     <div className="space-y-8">
-      {campaigns.length > 0 ? (
-        <section aria-labelledby="campaigns-heading" className="space-y-3">
-          <h2 id="campaigns-heading" className="text-base font-semibold">Campanhas anteriores</h2>
-          <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
-            {campaigns.map((campaign) => (
-              <li key={campaign.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-5">
-                <div className="space-y-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <StatusBadge tone={STATUS_TONES[campaign.status]}>{STATUS_LABELS[campaign.status]}</StatusBadge>
-                    <span className="text-sm">Vigência {formatBusinessDateBr(campaign.effectiveFrom)}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground tabular-nums">
-                    {campaign.itemCount} aluno{campaign.itemCount === 1 ? "" : "s"} · {formatBrl(campaign.totalMonthlyImpactCents)} por mês
-                  </p>
-                </div>
-                <Button asChild size="sm" variant="outline" className="min-h-10">
-                  <Link href={`${ROUTES.adminBillingAdjustment}/${campaign.id}`}>
-                    Abrir lista de envio
-                    <ArrowRight className="size-3.5" aria-hidden="true" />
-                  </Link>
-                </Button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      {drafts.length > 0 ? <CampaignList id="drafts-heading" title="Em rascunho" items={drafts} /> : null}
 
       <section aria-labelledby="new-adjustment-heading" className="space-y-3">
         <h2 id="new-adjustment-heading" className="text-base font-semibold">Nova campanha de reajuste</h2>
@@ -62,7 +40,40 @@ async function AdjustmentContent({ adminName }: { adminName: string }) {
           minNoticeDays={billingPolicy.adjustment_min_notice_days}
         />
       </section>
+
+      {history.length > 0 ? <CampaignList id="campaigns-heading" title="Campanhas anteriores" items={history} /> : null}
     </div>
+  );
+}
+
+type Campaign = Awaited<ReturnType<typeof listTuitionAdjustments>>[number];
+
+function CampaignList({ id, title, items }: { id: string; title: string; items: Campaign[] }) {
+  return (
+    <section aria-labelledby={id} className="space-y-3">
+      <h2 id={id} className="text-base font-semibold">{title}</h2>
+      <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        {items.map((campaign) => (
+          <li key={campaign.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-5">
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusBadge tone={STATUS_TONES[campaign.status]}>{STATUS_LABELS[campaign.status]}</StatusBadge>
+                <span className="text-sm">Vigência {formatBusinessDateBr(campaign.effectiveFrom)}</span>
+              </div>
+              <p className="text-xs text-muted-foreground tabular-nums">
+                {campaign.itemCount} aluno{campaign.itemCount === 1 ? "" : "s"} · {formatBrl(campaign.totalMonthlyImpactCents)} por mês
+              </p>
+            </div>
+            <Button asChild size="sm" variant="outline" className="min-h-10">
+              <Link href={`${ROUTES.adminBillingAdjustment}/${campaign.id}`}>
+                Abrir lista de envio
+                <ArrowRight className="size-3.5" aria-hidden="true" />
+              </Link>
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useOptimistic, useRef, useTransition } from "react";
-import { AlertTriangle, SearchIcon, UsersRound, XIcon } from "@/components/ui/icons";
+import { SearchIcon, UsersRound, XIcon } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
@@ -10,16 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { TrainingClass } from "@/features/classes/types";
 import { ROUTES } from "@/lib/navigation/routes";
 
-const RISK_OPTIONS = [
-  { value: "all", label: "Todos os níveis" },
-  { value: "critical", label: "Risco crítico" },
-  { value: "warning", label: "Em atenção" },
-  { value: "healthy", label: "Frequência regular" },
-] as const;
-
-type FilterKey = "q" | "risk" | "turma";
+type FilterKey = "q" | "turma";
 type FilterState = Record<FilterKey, string>;
 
+/** Busca e turma. O nível de risco fica nos chips da página e sobrevive ao limpar. */
 export function RetentionFilters({ classes }: { classes: TrainingClass[] }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -30,7 +24,6 @@ export function RetentionFilters({ classes }: { classes: TrainingClass[] }) {
 
   const current: FilterState = {
     q: searchParams.get("q") ?? "",
-    risk: searchParams.get("risk") ?? "",
     turma: searchParams.get("turma") ?? "",
   };
 
@@ -67,15 +60,13 @@ export function RetentionFilters({ classes }: { classes: TrainingClass[] }) {
     if (timer.current) clearTimeout(timer.current);
     if (inputRef.current) inputRef.current.value = "";
     startTransition(() => {
-      setOptimistic({ q: "", risk: "", turma: "" });
-      router.replace(ROUTES.adminRetention, { scroll: false });
+      setOptimistic({ q: "", turma: "" });
+      const risk = searchParams.get("risk");
+      router.replace(risk ? `${ROUTES.adminRetention}?risk=${encodeURIComponent(risk)}` : ROUTES.adminRetention, { scroll: false });
     });
   };
 
-  const hasFilters = Boolean(optimistic.q || optimistic.risk || optimistic.turma);
-  const riskLabel =
-    RISK_OPTIONS.find((item) => item.value === (optimistic.risk || "all"))?.label ??
-    "Todos os níveis";
+  const hasFilters = Boolean(optimistic.q || optimistic.turma);
   const classLabel =
     classes.find((item) => item.$id === optimistic.turma)?.name ?? "Todas as turmas";
 
@@ -86,7 +77,7 @@ export function RetentionFilters({ classes }: { classes: TrainingClass[] }) {
       aria-busy={pending}
       className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-xs transition-opacity duration-(--duration-quick) motion-reduce:transition-none aria-busy:opacity-80"
     >
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field>
           <FieldLabel htmlFor="retention-search">Aluno</FieldLabel>
           <InputGroup className="h-10">
@@ -105,22 +96,6 @@ export function RetentionFilters({ classes }: { classes: TrainingClass[] }) {
               }}
             />
           </InputGroup>
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="retention-risk">Nível de risco</FieldLabel>
-          <Select value={optimistic.risk || "all"} onValueChange={(value) => update("risk", value)}>
-            <SelectTrigger id="retention-risk" className="h-10 w-full" leadingIcon={<AlertTriangle className="size-4" />}>
-              <SelectValue>{riskLabel}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {RISK_OPTIONS.map((item) => (
-                <SelectItem key={item.value} value={item.value}>
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </Field>
 
         <Field>
@@ -143,17 +118,6 @@ export function RetentionFilters({ classes }: { classes: TrainingClass[] }) {
 
       {hasFilters ? (
         <div className="flex flex-wrap items-center gap-2">
-          {optimistic.risk ? (
-            <Button
-              size="sm"
-              variant="outline"
-              className="min-h-9"
-              onClick={() => update("risk", "")}
-            >
-              {riskLabel}
-              <XIcon aria-hidden="true" />
-            </Button>
-          ) : null}
           {optimistic.turma ? (
             <Button
               size="sm"
