@@ -16,7 +16,7 @@ vi.mock("@/lib/cache/cached-read", () => ({ cachedRead: (...args: Parameters<Ret
 vi.mock("@/lib/appwrite/session", () => ({ createAppwriteSessionClient: async () => (mocks.hasSession ? { account: { get: mocks.accountGet } } : null) }));
 vi.mock("@/lib/appwrite/server", () => ({ createAppwriteAdminClient: () => ({ tables: { listRows: mocks.listRows, getRow: mocks.getRow }, config: { databaseId: "db" } }) }));
 
-import { getCurrentProfile } from "@/lib/auth/session";
+import { getCurrentProfile, requireCapability, requireProfile } from "@/lib/auth/session";
 import { resolveStudentProfile } from "@/features/students/access";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 
@@ -30,12 +30,12 @@ beforeEach(() => {
   mocks.listRows.mockResolvedValue({ rows: [profile()] });
 });
 
-describe("getCurrentProfile com cache de perfil", () => {
-  it("account.get() roda em toda requisição, só a leitura do perfil é cacheada", async () => {
+describe("getCurrentProfile com autorização atual", () => {
+  it("account.get() e os campos de autorização são relidos em toda requisição", async () => {
     await getCurrentProfile();
     await getCurrentProfile();
     expect(mocks.accountGet).toHaveBeenCalledTimes(2);
-    expect(mocks.listRows).toHaveBeenCalledTimes(1);
+    expect(mocks.listRows).toHaveBeenCalledTimes(2);
   });
 
   it("sem sessão ou com sessão revogada o perfil em cache não é usado", async () => {
@@ -46,13 +46,25 @@ describe("getCurrentProfile com cache de perfil", () => {
     expect(await getCurrentProfile()).toBeNull();
   });
 
-  it("invalidar a tag do perfil faz a próxima leitura ver o status novo", async () => {
+  it("desativar o perfil bloqueia a próxima requisição sem depender da invalidação do cache", async () => {
     expect(await getCurrentProfile()).toMatchObject({ $id: "p1" });
     mocks.listRows.mockResolvedValue({ rows: [profile({ status: "disabled" })] });
-    // Antes da invalidação o status vem do cache; a checagem de status continua fora do cache.
-    expect(await getCurrentProfile()).toMatchObject({ $id: "p1" });
-    fake.current!.invalidateTags(CACHE_TAGS.profileAccount("a1"));
     expect(await getCurrentProfile()).toBeNull();
+  });
+
+  it("revogar a capacidade bloqueia a próxima requisição mesmo com o perfil já lido", async () => {
+    await expect(requireCapability("guardian")).rejects.toThrow("redirect:/aluno");
+    mocks.listRows.mockResolvedValue({ rows: [profile({ capabilities: ["student", "guardian"] })] });
+    await expect(requireCapability("guardian")).resolves.toMatchObject({ $id: "p1" });
+    mocks.listRows.mockResolvedValue({ rows: [profile()] });
+    await expect(requireCapability("guardian")).rejects.toThrow("redirect:/aluno");
+  });
+
+  it("remover o papel de administrador bloqueia a próxima requisição", async () => {
+    mocks.listRows.mockResolvedValue({ rows: [profile({ role: "admin", capabilities: ["admin"] })] });
+    await expect(requireProfile("admin")).resolves.toMatchObject({ role: "admin" });
+    mocks.listRows.mockResolvedValue({ rows: [profile()] });
+    await expect(requireProfile("admin")).rejects.toThrow("redirect:/aluno");
   });
 
   it("perfil com status diferente de active é rejeitado", async () => {
@@ -70,7 +82,7 @@ describe("getCurrentProfile com cache de perfil", () => {
     mocks.accountGet.mockResolvedValue({ $id: "a2" });
     mocks.listRows.mockResolvedValue({ rows: [profile({ $id: "p2", account_id: "a2" })] });
     expect(await getCurrentProfile()).toMatchObject({ $id: "p2" });
-    expect(fake.current!.loads).toHaveLength(2);
+    expect(mocks.listRows).toHaveBeenCalledTimes(2);
   });
 
   it("invalidar a tag global de perfis derruba todos", async () => {
