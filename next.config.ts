@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 import { securityHeaders } from "./src/lib/security/headers";
 
 const nextConfig: NextConfig = {
+  // Permite validar o build sem disputar os artefatos do servidor de desenvolvimento.
+  distDir: process.env.NEXT_BUILD_DIR || ".next",
   async headers() {
     return [{
       source: "/(.*)",
