@@ -144,7 +144,7 @@ async function notifyAdmins(tables, input) {
 
 async function main({ req, res, log, error }) {
   const now = new Date();
-  const day = now.toISOString().slice(0, 10);
+  const day = saoPauloDay(now);
   const idempotencyKey = `daily-operations-${day.replaceAll("-", "")}`;
   const executionKey = req.headers["x-appwrite-key"];
   if (!executionKey) return res.json({ ok: false, error: "missing_execution_key" }, 500);
@@ -156,8 +156,8 @@ async function main({ req, res, log, error }) {
     const policies = await loadPolicies(tables);
     step = "last-run";
     const lastRuns = await tables.listRows({ databaseId, tableId: "automation_runs", queries: [Query.equal("job", ["daily-operations"]), Query.orderDesc("$createdAt"), Query.limit(10)] });
-    const lastRun = lastRuns.rows.find((row) => row.status === "completed" && row.started_at.slice(0, 10) < day);
-    const coveredDays = processingDays(lastRun?.started_at.slice(0, 10), day);
+    const lastRun = lastRuns.rows.find((row) => row.status === "completed" && saoPauloDay(new Date(row.started_at)) < day);
+    const coveredDays = processingDays(lastRun ? saoPauloDay(new Date(lastRun.started_at)) : undefined, day);
 
     step = "contracts";
     const contracts = { rows: await listAll(tables, "contracts", [Query.equal("status", ["signed"])]) };

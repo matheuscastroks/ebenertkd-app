@@ -31,7 +31,8 @@ async function main() {
   const client = new Client().setEndpoint(config.endpoint).setProject(config.projectId).setKey(config.apiKey);
   const functions = new Functions(client);
   const source = path.join(process.cwd(), "appwrite", "functions", requested);
-  const temporary = await mkdtemp(path.join(tmpdir(), "ebenertkd-function-"));
+  const temporaryRoot = path.resolve(tmpdir());
+  const temporary = await mkdtemp(path.join(temporaryRoot, "ebenertkd-function-"));
   const archive = path.join(temporary, `${requested}.tar.gz`);
 
   try {
@@ -44,7 +45,7 @@ async function main() {
         { key: "VAPID_SUBJECT", value: process.env.VAPID_SUBJECT, secret: false },
         { key: "PUSH_SUBSCRIPTION_ENCRYPTION_KEY", value: process.env.PUSH_SUBSCRIPTION_ENCRYPTION_KEY, secret: true }
       ]);
-      await functions.update({ functionId: requested, name: definition.name, scopes: [ProjectKeyScopes.RowsRead, ProjectKeyScopes.RowsWrite] });
+      await functions.update({ functionId: requested, name: definition.name, schedule: definition.schedule, scopes: [ProjectKeyScopes.RowsRead, ProjectKeyScopes.RowsWrite] });
       process.stdout.write("Daily operations variables synchronized.\n");
     }
     if (requested === APPWRITE_IDS.functions.backup) {
@@ -59,7 +60,7 @@ async function main() {
         { key: "GOOGLE_DRIVE_FOLDER_ID", value: process.env.GOOGLE_DRIVE_FOLDER_ID, secret: true },
         { key: "BACKUP_ENCRYPTION_KEY", value: process.env.BACKUP_ENCRYPTION_KEY, secret: true }
       ]);
-      await functions.update({ functionId: requested, name: definition.name, timeout: 900, scopes: [ProjectKeyScopes.UsersRead, ProjectKeyScopes.RowsRead, ProjectKeyScopes.RowsWrite, ProjectKeyScopes.BucketsRead, ProjectKeyScopes.FilesRead] });
+      await functions.update({ functionId: requested, name: definition.name, schedule: definition.schedule, timeout: 900, scopes: [ProjectKeyScopes.UsersRead, ProjectKeyScopes.RowsRead, ProjectKeyScopes.RowsWrite, ProjectKeyScopes.BucketsRead, ProjectKeyScopes.FilesRead] });
       process.stdout.write("Backup variables synchronized.\n");
     }
     execFileSync("tar", ["-czf", archive, "-C", source, "."], { stdio: "inherit" });
@@ -78,6 +79,9 @@ async function main() {
     }
     if (!ready) throw new Error(`Timed out waiting for deployment ${deployment.$id}`);
   } finally {
+    if (path.dirname(path.resolve(temporary)) !== temporaryRoot || !path.basename(temporary).startsWith("ebenertkd-function-")) {
+      throw new Error("Refusing cleanup outside the function deployment temporary directory.");
+    }
     await rm(temporary, { recursive: true, force: true });
   }
 }

@@ -222,9 +222,9 @@ async function reconcile() {
   for (const fn of process.argv.includes("--skip-functions") ? [] : functions) {
     const remoteFunction = await getOrNull(() => functionsApi.get({ functionId: fn.id }));
     if (remoteFunction) continue;
-    changes.push(`create function ${fn.id} (${fn.schedule})`);
+    changes.push(`create function ${fn.id} (${"interval" in fn ? `every ${fn.interval} minutes` : fn.schedule})`);
     if (mode === "apply") {
-      await functionsApi.create({
+      const definition = {
         functionId: fn.id,
         name: fn.name,
         runtime: Runtime.Node22,
@@ -238,7 +238,14 @@ async function reconcile() {
         scopes: fn.id === APPWRITE_IDS.functions.backup
           ? [ProjectKeyScopes.UsersRead, ProjectKeyScopes.RowsRead, ProjectKeyScopes.RowsWrite, ProjectKeyScopes.BucketsRead, ProjectKeyScopes.FilesRead]
           : [ProjectKeyScopes.RowsRead, ProjectKeyScopes.RowsWrite]
-      });
+      };
+      if ("interval" in fn) {
+        // The installed SDK does not expose interval yet; use its authenticated HTTP client.
+        const url = new URL(`${config.endpoint.replace(/\/$/, "")}/functions`);
+        await client.call("post", url, { "content-type": "application/json", "X-Appwrite-Project": config.projectId }, { ...definition, interval: fn.interval });
+      } else {
+        await functionsApi.create(definition);
+      }
     }
   }
 }

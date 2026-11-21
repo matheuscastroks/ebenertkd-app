@@ -84,7 +84,7 @@ Legenda: `[x]` feito e mesclado, `[~]` em andamento/PR aberto, `[ ]` pendente.
 - [~] Revisão de tech lead e QA dos PRs da onda 4 (agente de revisão somente leitura em andamento).
 - [ ] Cache das leituras do Appwrite (plano a criar): agente interrompido pelo dono; o app ainda faz chamadas em sequência por página. Avaliar junto com a hospedagem do app.
 - [x] Backend do Appwrite movido para Nova York (#21): projeto novo, schema aplicado (30 tabelas e bucket). Uma chamada à API caiu de 0,6 a 1,3 s para ~0,3 s.
-- [ ] Functions `daily-operations` e `backup` no projeto novo: o plano gratuito não aceita agendamento cron; criar sem cron e disparar por agendador externo (GitHub Actions) ou subir de plano.
+- [ ] Functions no projeto novo: `daily-operations` criada e implantada em 20/11/2026, com intervalo gratuito de 24 horas; `backup` continua pendente. A conta recusa cron, mas aceita intervalo nativo, sem agendador externo ou upgrade. Consulte o [registro da implantação](../../implementation/implantacao-rotina-diaria-2026-11-20.md).
 - [ ] Contas no projeto novo: nenhuma criada; o dono cria o administrador (`npm run appwrite:create-admin`).
 
 ## Registro de progresso (mais recente primeiro)

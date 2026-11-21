@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const calls = vi.hoisted(() => ({ listed: [] as string[], created: [] as Array<{ tableId: string; data: Record<string, unknown> }>, policyRows: [] as Array<Record<string, unknown>>, contracts: [] as Array<Record<string, unknown>>, enrollments: [] as Array<Record<string, unknown>>, extra: {} as Record<string, Array<Record<string, unknown>>>, updated: [] as Array<{ tableId: string; rowId: string; data: Record<string, unknown> }> }));
 
@@ -51,6 +51,20 @@ beforeEach(() => {
   calls.updated = [];
   process.env.APPWRITE_FUNCTION_API_ENDPOINT = "https://example.test/v1";
   process.env.APPWRITE_FUNCTION_PROJECT_ID = "project";
+});
+
+afterEach(() => vi.useRealTimers());
+
+describe("daily-operations por intervalo", () => {
+  it("usa o dia de Brasília e recupera os dias locais mesmo quando UTC já virou", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-21T01:15:00.000Z"));
+    calls.extra.automation_runs = [{ status: "completed", started_at: "2026-11-18T01:15:00.000Z" }];
+    const { result } = await run();
+    expect(result).toMatchObject({ body: { ok: true, idempotencyKey: "daily-operations-20261120" } });
+    const saved = calls.created.find((row) => row.tableId === "automation_runs");
+    expect(JSON.parse(saved!.data.details as string).covered_days).toBe(3);
+  });
 });
 
 describe("daily-operations lê a política da academia", () => {

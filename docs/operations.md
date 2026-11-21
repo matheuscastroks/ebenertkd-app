@@ -14,9 +14,13 @@ A chave administrativa precisa dos escopos de banco/tabelas/colunas/índices/lin
 
 ## Functions
 
-Os recursos `daily-operations` e `backup` são criados pelo setup com cron diário. O código fica em `appwrite/functions/`. Conecte o repositório ao Appwrite ou publique cada diretório como deployment, mantendo `src/main.js` como entrypoint e `npm install` como comando de build.
+O código fica em `appwrite/functions/`. Publique cada diretório como deployment, mantendo `src/main.js` como entrypoint e `npm install` como comando de build. A rotina `daily-operations` usa intervalo de 1.440 minutos (24 horas), declarado no schema, para funcionar no plano gratuito. O horário é escolhido pelo Appwrite; não há garantia de 00h15. Na conta atual, a API recusa cron com `billing_feature_unsupported` e orienta usar intervalo.
 
-Ambas recebem uma chave dinâmica da execução e registram uma chave idempotente diária em `automation_runs`. `daily-operations` processa cobranças e lembretes às 03:15; `backup` exporta e cifra os dados às 03:45. Publique com `npm run appwrite:deploy-function -- backup` somente depois de configurar os segredos exigidos.
+Ambas recebem uma chave dinâmica da execução e registram uma chave idempotente diária em `automation_runs`. `daily-operations` processa cobranças, lembretes e faltas, considerando o dia de Brasília mesmo se UTC já estiver no dia seguinte. O script `appwrite:deploy-function` preserva o agendamento existente ao atualizar os escopos; a preservação do intervalo também foi conferida por leitura após atualização na API.
+
+A definição de `backup` ainda utiliza cron às 03h45 UTC e não foi criada nem ativada nessa implantação. No plano gratuito, essa definição precisa ser adaptada para intervalo antes da criação. Publique com `npm run appwrite:deploy-function -- backup` somente depois de revisar o agendamento e configurar os segredos exigidos.
+
+Implantação da rotina diária: [registro de 20/11/2026](implementation/implantacao-rotina-diaria-2026-11-20.md). A função não permite execução pública (`execute: []`), usa somente os escopos `rows.read`/`rows.write` e recebe os segredos de push como variáveis secretas. `npm run appwrite:run-daily` é uma execução real, com gravações e avisos; não é um smoke somente leitura.
 
 ## Backup cifrado no Google Drive
 

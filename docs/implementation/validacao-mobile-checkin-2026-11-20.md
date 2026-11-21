@@ -31,3 +31,7 @@ Retomada das alterações deixadas pela revisão de telas: concluir alvos de toq
 - Não houve implantação de função diária nem alteração das coordenadas dos locais. O cálculo de frequência para falta justificada foi preservado.
 
 As capturas e os resultados detalhados do navegador ficam em `reports/mobile-2026-11-20/` (ignorado pelo Git, pois as telas autenticadas podem conter dados privados).
+
+## Atualização posterior
+
+Após autorização do proprietário, `daily-operations` foi criada e implantada no plano gratuito com intervalo de 24 horas. A API desta conta recusou cron; portanto, o horário fixo de 00h15 foi substituído pelo horário escolhido pelo Appwrite. A rotina usa o dia de Brasília em todos os horários. Consulte o [registro da implantação](implantacao-rotina-diaria-2026-11-20.md). O backup continua fora desta implantação.

@@ -189,9 +189,9 @@ describe("Appwrite infrastructure schema", () => {
     expect(bucket.extensions).toEqual(["jpg", "jpeg", "png", "webp", "pdf"]);
   });
 
-  it("defines two daily functions with different schedules", () => {
+  it("uses a free daily interval for operations and keeps the separate backup definition", () => {
     expect(functions).toHaveLength(2);
-    expect(new Set(functions.map((fn) => fn.schedule)).size).toBe(2);
-    expect(functions.every((fn) => fn.schedule.endsWith("* * *"))).toBe(true);
+    expect(functions.find((fn) => fn.id === APPWRITE_IDS.functions.dailyOperations)).toMatchObject({ schedule: "", interval: 1440 });
+    expect(functions.find((fn) => fn.id === APPWRITE_IDS.functions.backup)).toMatchObject({ schedule: "45 3 * * *" });
   });
 });

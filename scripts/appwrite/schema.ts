@@ -1028,7 +1028,8 @@ export const functions = [
   {
     id: APPWRITE_IDS.functions.dailyOperations,
     name: "Daily operations",
-    schedule: "15 3 * * *",
+    schedule: "",
+    interval: 1440,
     root: "appwrite/functions/daily-operations"
   },
   {
