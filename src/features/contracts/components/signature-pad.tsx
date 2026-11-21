@@ -168,7 +168,7 @@ export function SignaturePad({ contractId, content }: { contractId: string; cont
       </label>
 
       {/* Termo de Concordância */}
-      <label className="flex items-start gap-3 rounded-xl border border-border/80 bg-muted/10 p-4 text-xs sm:text-sm cursor-pointer select-none">
+      <label className="flex items-start gap-3 rounded-xl bg-muted p-4 text-xs sm:text-sm cursor-pointer select-none">
         <input
           name="accepted"
           type="checkbox"

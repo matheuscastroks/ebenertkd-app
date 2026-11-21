@@ -35,7 +35,7 @@ export function RegisterCard({ errorMessage }: { errorMessage?: string }) {
             {ACCOUNT_TYPES.map((option, index) => (
               <label
                 key={option.value}
-                className="flex min-h-11 cursor-pointer flex-col justify-center gap-0.5 rounded-xl border border-input bg-card px-3.5 py-3 text-left transition-[background-color,border-color,box-shadow] duration-(--duration-quick) ease-(--ease-smooth-out) hover:bg-muted/60 has-checked:border-primary-border has-checked:ring-1 has-checked:ring-primary-border has-focus-visible:ring-2 has-focus-visible:ring-ring motion-reduce:transition-none"
+                className="flex min-h-11 cursor-pointer flex-col justify-center gap-0.5 rounded-xl bg-muted px-3.5 py-3 text-left transition-[background-color,border-color,box-shadow] duration-(--duration-quick) ease-(--ease-smooth-out) hover:bg-muted/60 has-checked:bg-primary/15 has-checked:ring-1 has-checked:ring-primary-border has-focus-visible:ring-2 has-focus-visible:ring-ring motion-reduce:transition-none"
               >
                 <input
                   type="radio"

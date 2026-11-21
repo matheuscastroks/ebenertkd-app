@@ -2,6 +2,7 @@
 
 import { useAcademyBrand } from "@/components/academy-config-provider";
 import Link from "next/link";
+import { ReadableDate } from "@/components/shared/readable-date";
 import { useEffect, useRef, useState } from "react";
 import { submitParqAction } from "@/app/actions/parq";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
@@ -25,7 +26,6 @@ import {
   type ParqQuestionId,
   type ParqStatus,
 } from "@/features/students/parq-rules";
-import { formatBusinessDateBr } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
@@ -209,15 +209,15 @@ export function ParqForm({
       <div className="space-y-5">
         <section
           aria-labelledby="health-status-heading"
-          className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border"
+          className="overflow-hidden rounded-xl bg-card shadow-xs divide-y divide-border"
         >
           <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
             <div className="flex items-center gap-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+              <span className="shrink-0 text-muted-foreground">
                 <HeartPulse className="size-5" aria-hidden="true" />
               </span>
               <div>
-                <h2 id="health-status-heading" className="text-base font-semibold text-foreground">
+                <h2 id="health-status-heading" className="text-lg font-semibold leading-snug text-foreground">
                   Questionário de saúde · {studentName}
                 </h2>
                 <p className="text-xs text-muted-foreground">
@@ -234,21 +234,24 @@ export function ParqForm({
             <div>
               <dt className="text-xs font-medium text-muted-foreground">Respondido em</dt>
               <dd className="mt-0.5 font-medium tabular-nums text-foreground">
-                {assessment.signedAt ? formatBusinessDateBr(assessment.signedAt) : "Ainda não respondido"}
+                {assessment.signedAt ? <ReadableDate value={assessment.signedAt} /> : "Ainda não respondido"}
               </dd>
             </div>
             <div>
               <dt className="text-xs font-medium text-muted-foreground">Válido até</dt>
               <dd className="mt-0.5 font-medium tabular-nums text-foreground">
-                {assessment.expiresAt
-                  ? `${formatBusinessDateBr(assessment.expiresAt)}${
-                      assessment.daysUntilExpiration != null
-                        ? assessment.daysUntilExpiration < 0
-                          ? ` (venceu há ${Math.abs(assessment.daysUntilExpiration)} dias)`
-                          : ` (faltam ${assessment.daysUntilExpiration} dias)`
-                        : ""
-                    }`
-                  : "Aguardando preenchimento"}
+                {assessment.expiresAt ? (
+                  <>
+                    <ReadableDate value={assessment.expiresAt} />
+                    {assessment.daysUntilExpiration != null ? (
+                      <span className="mt-1 block font-normal text-muted-foreground">
+                        {assessment.daysUntilExpiration < 0
+                          ? `Venceu há ${Math.abs(assessment.daysUntilExpiration)} dias`
+                          : `Faltam ${assessment.daysUntilExpiration} dias`}
+                      </span>
+                    ) : null}
+                  </>
+                ) : "Aguardando preenchimento"}
               </dd>
             </div>
             <div>
@@ -320,7 +323,7 @@ export function ParqForm({
         ) : null}
 
         {assessment.submissionId ? (
-          <section className="overflow-hidden rounded-xl border border-border bg-card px-5 shadow-xs">
+          <section className="overflow-hidden rounded-xl bg-card px-5 shadow-xs">
             <Accordion type="single" collapsible>
               <AccordionItem value="answers" className="border-b-0">
                 <AccordionTrigger className="text-sm font-medium">
@@ -370,7 +373,7 @@ export function ParqForm({
         </Alert>
       ) : null}
 
-      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+      <div className="overflow-hidden rounded-xl bg-card shadow-xs">
         {/* Cabeçalho do Stepper — segue exatamente a diretriz visual do EnrollmentForm */}
         <div className="space-y-3 border-b border-border bg-muted/20 px-5 py-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -414,7 +417,7 @@ export function ParqForm({
           {/* Trilha clicável de passos (1..10 + Assinar) */}
           <ol
             aria-label="Etapas do questionário"
-            className="flex flex-wrap items-center gap-1.5"
+            className="flex flex-wrap items-center gap-2 rounded-lg bg-muted p-3"
           >
             {PARQ_QUESTIONS.map((q, index) => {
               const value = answers[q.id];
@@ -430,14 +433,14 @@ export function ParqForm({
                     onClick={() => handleJumpToStep(index)}
                     aria-label={`Pergunta ${q.number}: ${q.topic}${isAnswered ? ` (${value === "yes" ? "Sim" : "Não"})` : ""}`}
                     className={cn(
-                      "flex size-7 items-center justify-center rounded-full border text-xs font-medium tabular-nums transition-colors duration-(--duration-quick)",
+                      "flex size-7 items-center justify-center rounded-full text-xs font-medium tabular-nums transition-colors duration-(--duration-quick)",
                       isCurrent
-                        ? "border-primary bg-primary text-primary-foreground"
+                        ? "bg-primary text-primary-foreground"
                         : isAnswered
                           ? value === "yes"
-                            ? "border-warning/60 bg-warning/15 text-foreground hover:bg-warning/25"
-                            : "border-success/50 bg-success/15 text-success-foreground hover:bg-success/25"
-                          : "border-border bg-background text-muted-foreground opacity-60"
+                            ? "bg-warning/15 text-foreground hover:bg-warning/25"
+                            : "bg-success/15 text-success-foreground hover:bg-success/25"
+                          : "bg-background text-muted-foreground opacity-60"
                     )}
                   >
                     {isAnswered && !isCurrent ? (
@@ -455,12 +458,12 @@ export function ParqForm({
                 disabled={!allAnswered}
                 onClick={() => handleJumpToStep(SIGNATURE_STEP_INDEX)}
                 className={cn(
-                  "flex h-7 items-center gap-1 rounded-full border px-2.5 text-xs font-medium transition-colors duration-(--duration-quick)",
+                  "flex h-7 items-center gap-1 rounded-full px-2.5 text-xs font-medium transition-colors duration-(--duration-quick)",
                   stepIndex === SIGNATURE_STEP_INDEX
-                    ? "border-primary bg-primary text-primary-foreground"
+                    ? "bg-primary text-primary-foreground"
                     : allAnswered
-                      ? "border-border bg-card text-foreground hover:bg-muted"
-                      : "border-border bg-background text-muted-foreground opacity-60"
+                      ? "bg-card text-foreground hover:bg-muted"
+                      : "bg-background text-muted-foreground opacity-60"
                 )}
               >
                 <FileSignature className="size-3" aria-hidden="true" />
@@ -536,7 +539,7 @@ export function ParqForm({
                       "flex min-h-16 items-center justify-between gap-3 rounded-xl border px-5 py-4 text-left transition-colors duration-(--duration-quick) focus-visible:outline-2 focus-visible:outline-ring",
                       currentAnswer === "no"
                         ? "border-success bg-success/10 text-foreground"
-                        : "border-border bg-background text-foreground hover:bg-muted/50"
+                        : "bg-background text-foreground hover:bg-muted/50"
                     )}
                   >
                     <div>
@@ -567,7 +570,7 @@ export function ParqForm({
                       "flex min-h-16 items-center justify-between gap-3 rounded-xl border px-5 py-4 text-left transition-colors duration-(--duration-quick) focus-visible:outline-2 focus-visible:outline-ring",
                       currentAnswer === "yes"
                         ? "border-warning bg-warning/10 text-foreground"
-                        : "border-border bg-background text-foreground hover:bg-muted/50"
+                        : "bg-background text-foreground hover:bg-muted/50"
                     )}
                   >
                     <div>
@@ -617,7 +620,7 @@ export function ParqForm({
                     </AlertDescription>
                   </Alert>
                 ) : (
-                  <div className="flex items-center gap-2.5 rounded-xl border border-border bg-muted/20 px-4 py-3 text-sm text-foreground">
+                  <div className="flex items-center gap-2.5 rounded-xl bg-muted/20 px-4 py-3 text-sm text-foreground">
                     <CheckCircle2
                       className="size-4 shrink-0 text-success-foreground"
                       aria-hidden="true"
@@ -674,7 +677,7 @@ export function ParqForm({
                       {displayName} · Questionário de prontidão física (PAR-Q) · {todayBr}
                     </p>
                   </div>
-                  <blockquote className="rounded-xl border border-border bg-muted/20 p-4 text-sm leading-relaxed text-foreground">
+                  <blockquote className="rounded-xl bg-muted/20 p-4 text-sm leading-relaxed text-foreground">
                     {PARQ_RESPONSIBILITY_TERM}
                   </blockquote>
                 </div>
@@ -733,7 +736,7 @@ export function ParqForm({
                   </label>
                 </div>
 
-                <label className="flex cursor-pointer select-none items-start gap-3 rounded-xl border border-border bg-muted/20 p-4 text-sm">
+                <label className="flex cursor-pointer select-none items-start gap-3 rounded-xl bg-muted p-4 text-sm">
                   <input
                     name="term_accepted"
                     type="checkbox"

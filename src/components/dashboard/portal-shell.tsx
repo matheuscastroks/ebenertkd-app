@@ -1,14 +1,14 @@
 import type { ReactNode } from "react";
 import { DashboardFrame, DashboardShell } from "@/components/dashboard/dashboard-shell";
 import type { Profile } from "@/features/auth/types";
-import { countEnrollmentsRequiringReview } from "@/features/students/service";
+import { countEnrollmentsRequiringReview, getOwnStudentAvatarSex } from "@/features/students/service";
 import { countUnreadNotifications } from "@/features/notifications/notification-service";
 import type { BackTarget } from "@/components/dashboard/section-nav";
 import { navigationForProfile, type NavSegment } from "@/lib/navigation/routes";
 
 export async function PortalFrame({ profile, children }: { profile: Profile; children: ReactNode }) {
   const badge = profile.role === "admin" ? "Professor" : profile.role === "guardian" ? "Responsável" : "Aluno";
-  const [enrollments, notifications] = await Promise.all([profile.role === "admin" ? countEnrollmentsRequiringReview().catch(() => 0) : Promise.resolve(undefined), countUnreadNotifications(profile).catch(() => 0)]);
+  const [enrollments, notifications, avatarSex] = await Promise.all([profile.role === "admin" ? countEnrollmentsRequiringReview().catch(() => 0) : Promise.resolve(undefined), countUnreadNotifications(profile).catch(() => 0), getOwnStudentAvatarSex(profile).catch(() => null)]);
   const email = profile.email || (profile.username ? `@${profile.username}` : undefined);
 
   let avatarUrl: string | undefined;
@@ -30,6 +30,7 @@ export async function PortalFrame({ profile, children }: { profile: Profile; chi
       profileEmail={email}
       role={profile.role}
       avatarUrl={avatarUrl}
+      avatarSex={avatarSex}
       navItems={navigationForProfile(profile, { enrollments, notifications })}
       unreadNotifications={notifications}
     >

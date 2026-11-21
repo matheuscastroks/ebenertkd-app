@@ -8,6 +8,18 @@ import { cachedRead } from "@/lib/cache/cached-read";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import type { Enrollment, EnrollmentBundle, Student, StudentDocument } from "@/features/students/types";
 
+/** Sexo do próprio cadastro de aluno, para escolher a ilustração quando não há foto. */
+export async function getOwnStudentAvatarSex(profile: Profile): Promise<Student["sex"]> {
+  if (!profile.capabilities.includes("student")) return null;
+  const { tables, config } = createAppwriteAdminClient();
+  const result = await tables.listRows<Student>({
+    databaseId: config.databaseId,
+    tableId: APPWRITE_IDS.tables.students,
+    queries: [Query.equal("profile_id", [profile.$id]), Query.limit(1)]
+  });
+  return result.rows[0]?.sex ?? null;
+}
+
 function ownerPermissions(target: Profile, actor: Profile) {
   const accountIds = new Set([target.account_id]);
   if (actor.account_id !== target.account_id && actor.capabilities.includes("guardian")) accountIds.add(actor.account_id);

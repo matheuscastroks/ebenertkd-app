@@ -12,10 +12,10 @@ export function ClassAttendanceSummary({ month, lessonCount, rows }: { month: st
         <p className="text-sm text-muted-foreground">{label} · {lessonCount} aula{lessonCount === 1 ? "" : "s"} concluída{lessonCount === 1 ? "" : "s"}</p>
       </div>
       {rows.length === 0 ? (
-        <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">Conclua a primeira chamada do mês para ver o resumo.</p>
+        <p className="rounded-xl bg-card p-4 text-sm text-muted-foreground">Conclua a primeira chamada do mês para ver o resumo.</p>
       ) : (
         <div className="space-y-4">
-          <div className="rounded-xl border border-border bg-card p-4 shadow-xs">
+          <div className="rounded-xl bg-card p-4 shadow-xs">
             <ClassAttendanceChart
               rows={rows.map((r) => ({
                 name: r.student.full_name,
@@ -25,10 +25,10 @@ export function ClassAttendanceSummary({ month, lessonCount, rows }: { month: st
               }))}
             />
           </div>
-          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+          <ul className="divide-y divide-border rounded-xl bg-card">
             {rows.map((row) => (
               <li key={row.student.$id} className="flex items-center gap-3 p-4">
-                <StudentAvatar name={row.student.full_name} photoDocumentId={row.photoDocumentId} size="sm" />
+                <StudentAvatar name={row.student.full_name} sex={row.student.sex} photoDocumentId={row.photoDocumentId} size="sm" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{row.student.full_name}</p>
                   <p className="text-sm text-muted-foreground">{row.present} de {row.total} presenças</p>

@@ -14,6 +14,7 @@ import { ROUTES } from "@/lib/navigation/routes";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { DeleteAccountSection } from "./delete-account-section";
+import { getOwnStudentAvatarSex } from "@/features/students/service";
 import { ProfileEditor } from "./profile-editor";
 import { InstallAppCard } from "@/components/pwa/install-app-card";
 
@@ -49,10 +50,11 @@ export default async function SettingsPage({
   searchParams: Promise<{ tab?: string; saved?: string; error?: string }>;
 }) {
   const [profile, query] = await Promise.all([requireProfile(), searchParams]);
-  const [preferences, pushActive, identity] = await Promise.all([
+  const [preferences, pushActive, identity, avatarSex] = await Promise.all([
     getNotificationPreferences(profile.account_id),
     hasActivePushSubscription(profile).catch(() => false),
     getAcademyIdentity(),
+    getOwnStudentAvatarSex(profile).catch(() => null),
   ]);
   const pushConfigured = isPushConfigured();
   const minor = profile.role === "minor_student";
@@ -126,7 +128,7 @@ export default async function SettingsPage({
               title="Cadastro e Imagem do Usuário"
               description="Atualize sua foto de perfil, nome completo e informações de acesso."
             >
-              <ProfileEditor profile={profile} currentAvatarUrl={avatarUrl} />
+              <ProfileEditor profile={profile} currentAvatarUrl={avatarUrl} avatarSex={avatarSex} />
             </SettingsGroup>
           </TabsContent>
 
@@ -153,7 +155,7 @@ export default async function SettingsPage({
           {/* ABA 3: Conta & Segurança */}
           <TabsContent value="account" className="space-y-8">
             <SettingsGroup id="settings-account" title="Conta">
-              <div className="divide-y divide-border rounded-xl border border-border bg-card shadow-xs">
+              <div className="divide-y divide-border rounded-xl bg-card shadow-xs">
                 <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-foreground">{profile.full_name}</p>

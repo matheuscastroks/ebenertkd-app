@@ -60,13 +60,13 @@ async function EventsContent({ type }: { type?: EventType }) {
           Próximos
         </h2>
         {upcoming.length ? (
-          <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+          <ul className="space-y-4">
             {upcoming.map((item) => (
               <EventCard key={item.event.$id} data={item} />
             ))}
           </ul>
         ) : (
-          <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">Nenhum evento à frente. Use Novo evento para agendar o próximo.</p>
+          <p className="rounded-xl bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">Nenhum evento à frente. Use Novo evento para agendar o próximo.</p>
         )}
       </section>
       {past.length ? (
@@ -74,7 +74,7 @@ async function EventsContent({ type }: { type?: EventType }) {
           <h2 id="eventos-passados" className="text-base font-semibold">
             Passados e cancelados
           </h2>
-          <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+          <ul className="space-y-4">
             {past.map((item) => (
               <EventCard key={item.event.$id} data={item} />
             ))}

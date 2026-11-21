@@ -66,13 +66,13 @@ export function ChampionshipDetail({ admin, bundle, tab, ok, erro }: { admin: Pr
 
   const overview = (
     <div className="space-y-4">
-      <dl className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
-        <Stat label="Na equipe" value={String(confirmed.length)} hint={`${interested} aguardando confirmação`} extra={<AvatarGroup people={confirmed.map((row) => ({ name: row.name, imageUrl: studentPhotoUrl(row.photoDocumentId) }))} max={5} size="sm" surface="card" label="Equipe confirmada" />} />
+      <dl className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
+        <Stat label="Na equipe" value={String(confirmed.length)} hint={`${interested} aguardando confirmação`} extra={<AvatarGroup people={confirmed.map((row) => ({ name: row.name, sex: row.sex, imageUrl: studentPhotoUrl(row.photoDocumentId) }))} max={5} size="sm" surface="card" label="Equipe confirmada" />} />
         <Stat label="Enviados à federação" value={`${submitted}/${confirmed.length}`} hint={pendingDocs ? `${pendingDocs} documento(s) para revisar` : "sem documentos pendentes"} />
         <Stat label="Medalhas" value={String(medals)} hint="registradas em Resultados" />
         <Stat label="Receita" value={formatBrl(receivedCents)} hint={`${formatBrl(expectedCents)} previstos (academia + federação)`} />
       </dl>
-      <section className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+      <section className="space-y-3 rounded-xl bg-card p-4 shadow-xs sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-base font-semibold">Cronograma da federação</h3>
           {!terminal && deadlines.length > 0 ? (
@@ -86,7 +86,7 @@ export function ChampionshipDetail({ admin, bundle, tab, ok, erro }: { admin: Pr
         </div>
         <DeadlineTimeline deadlines={toClientData(deadlines)} />
       </section>
-      <dl className="grid grid-cols-1 gap-3 rounded-xl border border-border bg-card p-4 text-sm shadow-xs sm:grid-cols-2 sm:p-5">
+      <dl className="grid grid-cols-1 gap-3 rounded-xl bg-card p-4 text-sm shadow-xs sm:grid-cols-2 sm:p-5">
         <div>
           <dt className="text-muted-foreground">Quando</dt>
           <dd className="font-medium tabular-nums">
@@ -176,9 +176,9 @@ export function ChampionshipDetail({ admin, bundle, tab, ok, erro }: { admin: Pr
   const paymentRows = active.filter((row) => (row.registration.price_cents > 0 || (row.registration.federation_price_cents ?? 0) > 0) && row.registration.status !== "interested");
   const payments =
     paymentRows.length === 0 ? (
-      <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">As cobranças (academia e federação) são criadas quando você confirma o atleta na equipe.</p>
+      <p className="rounded-xl bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">As cobranças (academia e federação) são criadas quando você confirma o atleta na equipe.</p>
     ) : (
-      <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+      <ul className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
         {paymentRows.map((row) => {
           const academy = paymentLabel({ registration: row.registration, option: row.option, name: row.name, isGuest: false, charge: row.charge });
           const federation = paymentLabel({ registration: { ...row.registration, price_cents: row.registration.federation_price_cents ?? 0 }, option: row.option, name: row.name, isGuest: false, charge: row.federationCharge });
@@ -202,7 +202,7 @@ export function ChampionshipDetail({ admin, bundle, tab, ok, erro }: { admin: Pr
     );
 
   const exportTab = (
-    <section className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+    <section className="space-y-3 rounded-xl bg-card p-4 shadow-xs sm:p-5">
       <h3 className="text-base font-semibold">Lista para a federação</h3>
       <p className="text-sm text-muted-foreground">CSV com nome, nascimento, sexo, faixa, categoria e peso da equipe confirmada. Abre direto no Excel. A lista fica em {confirmed.length} atleta(s).</p>
       <div className="flex flex-wrap gap-2">

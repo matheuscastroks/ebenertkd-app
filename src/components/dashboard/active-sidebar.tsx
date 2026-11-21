@@ -10,7 +10,8 @@ export function ActiveSidebar({
   profileName,
   profileEmail,
   role,
-  avatarUrl
+  avatarUrl,
+  avatarSex
 }: {
   badge: string;
   navItems: AppSidebarNavItem[];
@@ -18,6 +19,7 @@ export function ActiveSidebar({
   profileEmail?: string;
   role?: string;
   avatarUrl?: string;
+  avatarSex?: "feminino" | "masculino" | null;
 }) {
   const pathname = usePathname();
   // A seção fica ativa em qualquer tela dela, inclusive nas telas de detalhe em pilha.
@@ -31,6 +33,7 @@ export function ActiveSidebar({
       profileEmail={profileEmail}
       role={role}
       avatarUrl={avatarUrl}
+      avatarSex={avatarSex}
     />
   );
 }

@@ -7,7 +7,7 @@ import { FeedbackAlert } from "@/components/shared/feedback-alert";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
-import { Check, Loader2, MapPin } from "@/components/ui/icons";
+import { Check, Clock, Loader2, MapPin } from "@/components/ui/icons";
 import { Textarea } from "@/components/ui/textarea";
 import { geolocationErrorMessage, type CheckInResultState } from "@/features/classes/check-in-labels";
 import { JUSTIFICATION_MAX_LENGTH } from "@/features/classes/check-in-rules";
@@ -93,19 +93,20 @@ export function CheckInCard({ state }: { state: StudentCheckInState }) {
         : `Check-in pela localização das ${opensAt} às ${closesAt}, no local do treino.`;
 
   return (
-    <section aria-labelledby="check-in-title" className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+    <section aria-labelledby="check-in-title" className="overflow-hidden rounded-xl bg-card shadow-xs">
       <div className="space-y-3 p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 id="check-in-title" className="text-base font-semibold">Check-in</h2>
           {recordCopy ? <StatusBadge tone={recordCopy.tone}>{recordCopy.label}</StatusBadge> : null}
         </div>
-        <div className="space-y-1">
-          <p className="text-sm font-medium tabular-nums">Treino de hoje · {slot.startTime} às {slot.endTime}</p>
+        <div className="space-y-2">
+          <p className="flex items-center gap-2 text-base font-semibold tabular-nums"><Clock className="size-4 text-muted-foreground" aria-hidden="true" />Hoje · {slot.startTime} às {slot.endTime}</p>
           <p className="flex min-w-0 items-start gap-1.5 text-sm text-muted-foreground">
             <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-            <span className="min-w-0 break-words">{state.className}{state.location ? ` · ${state.location}` : ""}</span>
+            <span className="min-w-0 break-words">{state.location || "Local a confirmar"}</span>
           </p>
         </div>
+        <p className="text-sm font-medium">{state.className}</p>
         {record?.status === "excused" && record.justification ? <p className="text-sm text-muted-foreground break-words">Motivo: {record.justification}</p> : null}
         {record ? <p className="text-sm text-muted-foreground">Só o professor pode alterar este registro.</p> : null}
         {phaseHint ? <p className="text-sm text-muted-foreground">{phaseHint}</p> : null}

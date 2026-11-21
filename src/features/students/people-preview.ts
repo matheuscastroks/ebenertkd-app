@@ -28,7 +28,7 @@ export async function getStudentPreviews(studentIds: readonly string[]): Promise
   const photoByStudent = new Map(photos.flatMap((page) => page.rows).filter((photo) => photo.status !== "rejected").map((photo) => [photo.student_id, photo.$id]));
   for (const student of students.flatMap((page) => page.rows)) {
     const photoDocumentId = photoByStudent.get(student.$id);
-    result.set(student.$id, { name: student.full_name, photoDocumentId, imageUrl: studentPhotoUrl(photoDocumentId) });
+    result.set(student.$id, { name: student.full_name, sex: student.sex, photoDocumentId, imageUrl: studentPhotoUrl(photoDocumentId) });
   }
   return result;
 }

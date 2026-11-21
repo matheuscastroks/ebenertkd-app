@@ -10,10 +10,12 @@ import { eligibilitySexOf } from "@/features/events/rules/category-presets";
 import { isCategoryChangeLocked } from "@/features/events/rules/deadline-rules";
 import { seatsTaken } from "@/features/events/rules/capacity-rules";
 import { evaluateEventEligibility } from "@/features/events/rules/eligibility-rules";
-import { effectiveRegistrationState, isEventTerminal } from "@/features/events/rules/status-rules";
+import { effectiveRegistrationState, holdsSeat, isEventTerminal } from "@/features/events/rules/status-rules";
 import { parseEligibilityJson } from "@/features/events/schemas";
 import type { Event, EventDeadline, EventOption, EventRegistration, EventRegistrationDocument, EventResult } from "@/features/events/types";
 import { resolveStudentProfile } from "@/features/students/access";
+import { getStudentPreviews } from "@/features/students/people-preview";
+import type { PersonPreview } from "@/features/students/photo-url";
 import type { Enrollment, Student } from "@/features/students/types";
 import { APPWRITE_IDS } from "@/lib/appwrite/ids";
 import { createAppwriteAdminClient } from "@/lib/appwrite/server";
@@ -35,6 +37,9 @@ export type StudentOpenEvent = {
   registrationState: "not_open" | "open" | "closed";
   options: StudentEventOption[];
   seatsLeft: number | null;
+  /** Alunos únicos com inscrição que reserva vaga. */
+  attendeeCount?: number;
+  attendees?: PersonPreview[];
   /** Cronograma da federação (campeonato). */
   deadlines?: EventDeadline[];
   /** Cadastro sem sexo informado: o aluno precisa completar antes de competir. */
@@ -55,8 +60,8 @@ export type StudentEventEntry = {
 };
 
 /**
- * Eventos simples vistos por um aluno ou pelo responsável. Convidados e inscrições de outras pessoas
- * nunca aparecem: só contagens de vagas. Menores não recebem dados financeiros.
+ * Eventos vistos por alunos e responsáveis, com prévia dos alunos inscritos.
+ * Dados de inscrição de terceiros e convidados não são enviados. Menores não recebem valores.
  */
 export async function getStudentEvents(actor: Profile, requestedProfileId?: string | null) {
   const profile = await resolveStudentProfile(actor, requestedProfileId);
@@ -104,6 +109,15 @@ export async function getStudentEvents(actor: Profile, requestedProfileId?: stri
   for (const deadline of deadlines.rows) deadlinesByEvent.set(deadline.event_id, [...(deadlinesByEvent.get(deadline.event_id) ?? []), deadline]);
   const resultByRegistration = new Map(results.rows.map((result) => [result.registration_id, result]));
 
+  const attendeeIds = new Map<string, string[]>();
+  for (const event of visible) {
+    if (isEventTerminal(event.status) || Date.parse(event.starts_at) < Date.now()) continue;
+    attendeeIds.set(event.$id, [...new Set((registrationsByEvent.get(event.$id) ?? [])
+      .filter((registration) => holdsSeat(registration.status) && registration.student_id)
+      .map((registration) => registration.student_id!))]);
+  }
+  const previews = await getStudentPreviews([...attendeeIds.values()].flatMap((ids) => ids.slice(0, 4)));
+
   const now = new Date();
   const open: StudentOpenEvent[] = [];
   for (const event of visible) {
@@ -131,7 +145,12 @@ export async function getStudentEvents(actor: Profile, requestedProfileId?: stri
         weightRange: rule.min_weight_grams !== undefined || rule.max_weight_grams !== undefined ? { minGrams: rule.min_weight_grams, maxGrams: rule.max_weight_grams } : undefined
       };
     });
-    open.push({ event, registrationState: state, options: optionList, seatsLeft: event.capacity == null ? null : Math.max(0, event.capacity - taken), deadlines: deadlinesByEvent.get(event.$id) ?? [], sexMissing: event.event_type === "championship" && !student.sex });
+    open.push({ event, registrationState: state, options: optionList, attendeeCount: (attendeeIds.get(event.$id) ?? []).length,
+      attendees: (attendeeIds.get(event.$id) ?? []).slice(0, 4).map((id) => {
+        const preview = previews.get(id);
+        return { name: preview?.name ?? "Aluno", sex: preview?.sex,
+          imageUrl: preview?.photoDocumentId ? `/api/events/${encodeURIComponent(event.$id)}/students/${encodeURIComponent(id)}/avatar` : undefined };
+      }), seatsLeft: event.capacity == null ? null : Math.max(0, event.capacity - taken), deadlines: deadlinesByEvent.get(event.$id) ?? [], sexMissing: event.event_type === "championship" && !student.sex });
   }
 
   const entries: StudentEventEntry[] = mine.flatMap((registration) => {

@@ -71,7 +71,7 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
   return (
     <><p className="mb-3 text-sm text-muted-foreground">Ordenação da página atual · pendentes primeiro</p><ResponsiveDataView
       desktop={
-        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        <div className="overflow-hidden rounded-xl bg-card shadow-xs">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted">
@@ -124,7 +124,7 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
                   <TableCell className="whitespace-normal pr-3">
                     <div className="flex items-center gap-2.5">
                       <StudentAvatar
-                        name={student.full_name}
+                        name={student.full_name} sex={student.sex}
                         photoDocumentId={profilePhotoDocumentId}
                         size="sm"
                         className="shrink-0"
@@ -169,7 +169,7 @@ export function EnrollmentTable({ rows }: { rows: EnrollmentRow[] }) {
               <CardContent className="space-y-4 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex min-w-0 items-center gap-3">
-                    <StudentAvatar name={student.full_name} photoDocumentId={profilePhotoDocumentId} />
+                    <StudentAvatar name={student.full_name} sex={student.sex} photoDocumentId={profilePhotoDocumentId} />
                     <div className="min-w-0 space-y-1">
                       <p className="font-semibold text-foreground text-sm">{student.full_name}</p>
                       <div className="flex flex-wrap items-center gap-1.5">

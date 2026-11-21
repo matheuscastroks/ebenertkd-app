@@ -21,7 +21,7 @@ import {
 export type AddToCalendarButtonProps = CalendarEventInput & {
   fileName: string;
   label?: string;
-  variant?: "outline" | "default" | "secondary";
+  variant?: "outline" | "default" | "secondary" | "ghost";
   align?: "start" | "end";
 };
 

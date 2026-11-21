@@ -4,6 +4,14 @@ import { describe, expect, it, vi } from "vitest";
 import { AddToCalendarButton } from "@/features/classes/components/add-to-calendar-button";
 
 describe("AddToCalendarButton", () => {
+  it("permite abrir o calendário pela ação discreta de um treino", async () => {
+    const user = userEvent.setup();
+    render(<AddToCalendarButton uid="treino" title="Treino" date="2026-11-18" fileName="treino" label="Salvar treino" variant="ghost" />);
+    const trigger = screen.getByRole("button", { name: "Salvar treino" });
+    expect(trigger).toHaveAttribute("data-variant", "ghost");
+    await user.click(trigger);
+    expect(await screen.findByRole("menuitem", { name: /google agenda/i })).toBeInTheDocument();
+  });
   it("abre o menu com links para Google Agenda, Outlook e opção Apple Calendar (.ics)", async () => {
     const user = userEvent.setup();
     render(

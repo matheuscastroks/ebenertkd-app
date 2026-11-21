@@ -10,6 +10,10 @@ vi.mock("@/components/ui/avatar", () => ({
 import { StudentAvatar } from "@/features/students/components/student-avatar";
 
 describe("StudentAvatar", () => {
+  it("seleciona a ilustração feminina quando o cadastro informa sexo feminino", () => {
+    const { container } = render(<StudentAvatar name="Ana Silva" sex="feminino" />);
+    expect(container.querySelector('[data-placeholder="feminino"]')).toBeInTheDocument();
+  });
   it("uses the authenticated document endpoint when a photo exists", () => {
     render(<StudentAvatar name="Camila Ferreira" photoDocumentId="photo-1" />);
     expect(screen.getByRole("img", { name: "Camila Ferreira" })).toHaveAttribute("data-src", "/api/student-documents/photo-1");

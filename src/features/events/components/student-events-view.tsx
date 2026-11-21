@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { confirmInterestAction } from "@/app/actions/events";
+import { Calendar, Clock, MapPin, Users } from "@/components/ui/icons";
+import { ReadableDate } from "@/components/shared/readable-date";
+import { AvatarGroup } from "@/components/shared/avatar-group";
 import { EmptyState } from "@/components/shared/empty-state";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
-import { formatEventDay, formatEventTime } from "@/features/events/dates";
+import { formatEventTime } from "@/features/events/dates";
 import { CancelRegistrationDialog } from "@/features/events/components/cancel-registration-dialog";
 import { ChampionshipEntryDetails, StudentDeadlineList } from "@/features/events/components/championship-entry-details";
 import { ChampionshipRegisterDialog } from "@/features/events/components/championship-register-dialog";
@@ -43,9 +46,7 @@ function priceText(item: StudentOpenEvent) {
 
 function When({ startsAt }: { startsAt: string }) {
   return (
-    <span className="tabular-nums">
-      {formatEventDay(startsAt)} às {formatEventTime(startsAt)}
-    </span>
+    <span className="inline-flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium"><span className="inline-flex items-center gap-2"><Calendar className="size-4 text-muted-foreground" aria-hidden="true" /><ReadableDate value={startsAt} /></span><span className="inline-flex items-center gap-2 tabular-nums"><Clock className="size-4 text-muted-foreground" aria-hidden="true" />{formatEventTime(startsAt)}</span></span>
   );
 }
 
@@ -54,27 +55,42 @@ function OpenEventCard({ item, props }: { item: StudentOpenEvent; props: Props }
   const allMine = item.options.length > 0 && item.options.every((entry) => entry.mine);
   const price = props.showFinancial ? priceText(item) : null;
   const championship = event.event_type === "championship";
+  const eligibilityReasons = [...new Set(item.options.filter((entry) => !entry.eligible).flatMap((entry) => entry.reasons))];
   const guestsAllowed = event.audience !== "students" && props.viewer.kind !== "minor" && !championship;
   return (
-    <li className="space-y-3 p-4 sm:p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0 space-y-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base font-semibold text-foreground">{event.title}</h3>
+    <li className="flex min-w-0 flex-col rounded-xl bg-card p-4 sm:p-5">
+      <div className="flex flex-1 flex-col gap-5">
+        <div className="min-w-0 space-y-3">
+          <div className="space-y-2">
             <EventTypeBadge type={event.event_type} />
+            <h3 className="text-lg font-semibold leading-snug text-foreground">{event.title}</h3>
           </div>
-          <p className="text-sm text-muted-foreground">
-            <When startsAt={event.starts_at} />
-            {event.location_text ? ` · ${event.location_text}` : ""}
-          </p>
-          {event.description ? <p className="max-w-prose text-sm text-muted-foreground">{event.description}</p> : null}
-          <p className="text-sm text-muted-foreground">
-            {price ? `${price} · ` : ""}
-            {championship ? (event.organizer_name ? `Organização: ${event.organizer_name}` : "A academia monta a equipe e envia à federação") : item.seatsLeft === null ? "Vagas ilimitadas" : item.seatsLeft === 0 ? "Lotado (lista de espera)" : `${item.seatsLeft} vagas restantes`}
-          </p>
+          <dl className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+            <div>
+              <dt className="sr-only">Data</dt>
+              <dd className="flex items-center gap-2 font-medium"><Calendar aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" /><ReadableDate value={event.starts_at} weekday /></dd>
+            </div>
+            <div>
+              <dt className="sr-only">Horário</dt>
+              <dd className="flex items-center gap-2 font-medium tabular-nums"><Clock aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />{formatEventTime(event.starts_at)}</dd>
+            </div>
+            <div className="w-full">
+              <dt className="sr-only">Local</dt>
+              <dd className="flex items-start gap-2 text-muted-foreground"><MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0" /><span>{event.location_text || "Local a confirmar"}</span></dd>
+            </div>
+          </dl>
+          {event.description ? <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{event.description}</p> : null}
+          {championship ? <p className="pt-2 text-sm text-muted-foreground">{event.organizer_name ? `Organização: ${event.organizer_name}` : "A academia monta a equipe e envia à federação"}</p> : null}
           {championship && item.deadlines ? <StudentDeadlineList deadlines={item.deadlines} /> : null}
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="mt-auto space-y-4 pt-1">
+          <dl className="flex flex-wrap items-end justify-between gap-4">
+            {price ? <div><dt className="text-xs text-muted-foreground">Valor</dt><dd className="mt-1 text-lg font-semibold tabular-nums">{price}</dd></div> : null}
+            {!championship ? <div className="text-sm"><dt className="sr-only">Vagas</dt><dd className="flex items-center gap-2 text-muted-foreground"><Users aria-hidden="true" className="size-4 shrink-0" />{item.seatsLeft === null ? "Vagas ilimitadas" : item.seatsLeft === 0 ? "Lotado (lista de espera)" : `${item.seatsLeft} vagas restantes`}</dd></div> : null}
+          </dl>
+          {item.attendeeCount ? <div className="flex flex-wrap items-center gap-2"><AvatarGroup people={item.attendees ?? []} max={4} total={item.attendeeCount} size="sm" surface="card" label={`${item.attendeeCount} ${item.attendeeCount === 1 ? "aluno inscrito" : "alunos inscritos"}`} /><span className="text-sm text-muted-foreground">{item.attendeeCount} {item.attendeeCount === 1 ? "aluno inscrito" : "alunos inscritos"}</span><span className="sr-only">Inscrições</span></div> : null}
+          <div className="flex flex-wrap items-center gap-2">
+
           {item.registrationState === "open" ? (
             allMine ? (
               <StatusBadge tone="success">Você já está inscrito</StatusBadge>
@@ -87,18 +103,20 @@ function OpenEventCard({ item, props }: { item: StudentOpenEvent; props: Props }
           ) : (
             <StatusBadge tone="warning">{item.registrationState === "closed" ? "Inscrições encerradas" : "Inscrições ainda não abertas"}</StatusBadge>
           )}
+          </div>
         </div>
       </div>
-      {item.options.some((entry) => !entry.eligible) && item.registrationState === "open" ? (
-        <ul className="space-y-0.5 text-sm text-muted-foreground">
-          {item.options
-            .filter((entry) => !entry.eligible)
-            .map((entry) => (
-              <li key={entry.option.$id}>
-                {entry.option.label}: {entry.reasons.join("; ")}
-              </li>
+      {eligibilityReasons.length > 0 && item.registrationState === "open" ? eligibilityReasons.length === 1 && item.options.length === 1 ? (
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{eligibilityReasons[0].charAt(0).toUpperCase() + eligibilityReasons[0].slice(1)}</p>
+      ) : (
+        <details className="mt-4 text-sm text-muted-foreground">
+          <summary className="min-h-11 cursor-pointer py-3 font-medium text-foreground focus-visible:outline-2 focus-visible:outline-ring">Condições para participar</summary>
+          <ul className="space-y-2 pb-1 leading-relaxed">
+            {item.options.filter((entry) => !entry.eligible).map((entry) => (
+              <li key={entry.option.$id}><span className="font-medium">{entry.option.label}:</span> {entry.reasons.join("; ")}</li>
             ))}
-        </ul>
+          </ul>
+        </details>
       ) : null}
     </li>
   );
@@ -111,17 +129,20 @@ function RegistrationRow({ entry, props, canCancel }: { entry: StudentEventEntry
   const confirmInterest = props.viewer.kind === "guardian" && registration.status === "interested" && !championship;
   const cancellable = canCancel && ["interested", "pending_approval", "confirmed", "waitlisted"].includes(registration.status) && isRegistrationOpen(event) && !paid && (props.viewer.kind !== "minor" || registration.status === "interested");
   return (
-    <li className="p-4 sm:p-5">
+    <li className="rounded-xl bg-card p-5">
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div className="min-w-0 space-y-1">
+      <div className="min-w-0 space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-sm font-semibold text-foreground">{event.title}</p>
+          <p className="text-lg font-semibold leading-snug text-foreground">{event.title}</p>
           <RegistrationStatusBadge status={registration.status} />
           {registration.status === "waitlisted" && registration.waitlist_position ? <StatusBadge tone="neutral">{registration.waitlist_position}º na fila</StatusBadge> : null}
         </div>
         <p className="text-sm text-muted-foreground">
           <When startsAt={event.starts_at} />
-          {option ? ` · ${option.label}` : ""}
+        </p>
+        {event.location_text ? <p className="flex items-start gap-2 text-sm text-muted-foreground"><MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" />{event.location_text}</p> : null}
+        <p className="text-sm text-muted-foreground">
+          {option?.label}
           {registration.companions > 0 ? ` · +${registration.companions} acompanhante${registration.companions > 1 ? "s" : ""}` : ""}
         </p>
         {props.showFinancial
@@ -171,12 +192,12 @@ export function StudentEventsView(props: Props) {
     <div className="space-y-8">
       <section className="space-y-3" aria-labelledby="eventos-abertos">
         <h2 id="eventos-abertos" className="text-base font-semibold">
-          Abertos para inscrição
+          Próximos eventos
         </h2>
         {props.open.length === 0 ? (
           <EmptyState title="Nenhum evento no momento" description="Campeonatos, aulões, seminários e confraternizações aparecem aqui assim que o professor publicar." />
         ) : (
-          <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+          <ul className="grid items-stretch gap-4 xl:grid-cols-2">
             {props.open.map((item) => (
               <OpenEventCard key={item.event.$id} item={item} props={props} />
             ))}
@@ -189,9 +210,9 @@ export function StudentEventsView(props: Props) {
           Minhas inscrições
         </h2>
         {props.upcoming.length === 0 ? (
-          <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">Nenhuma inscrição ativa.</p>
+          <p className="rounded-xl bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">Nenhuma inscrição ativa.</p>
         ) : (
-          <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+          <ul className="space-y-4">
             {props.upcoming.map((entry) => (
               <RegistrationRow key={entry.registration.$id} entry={entry} props={props} canCancel />
             ))}
@@ -204,7 +225,7 @@ export function StudentEventsView(props: Props) {
           <h2 id="historico-eventos" className="text-base font-semibold">
             Histórico
           </h2>
-          <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+          <ul className="space-y-4">
             {props.past.map((entry) => (
               <RegistrationRow key={entry.registration.$id} entry={entry} props={props} canCancel={false} />
             ))}

@@ -73,10 +73,10 @@ function paymentCell(row: ChampionshipRow) {
 /** Equipe do campeonato: pendências, confirmação, desfazer envio, recusa e cancelamento. */
 export function ChampionshipTeamTable({ rows, returnTo }: { rows: ChampionshipRow[]; returnTo: string }) {
   if (rows.length === 0) {
-    return <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">Nenhum atleta ainda. Alunos e responsáveis manifestam interesse em Eventos; você confirma a equipe aqui.</p>;
+    return <p className="rounded-xl bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">Nenhum atleta ainda. Alunos e responsáveis manifestam interesse em Eventos; você confirma a equipe aqui.</p>;
   }
   return (
-    <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-xs">
+    <div className="overflow-x-auto rounded-xl bg-card shadow-xs">
       <Table>
         <TableHeader>
           <TableRow>
@@ -96,7 +96,7 @@ export function ChampionshipTeamTable({ rows, returnTo }: { rows: ChampionshipRo
               <TableRow key={registration.$id}>
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-3">
-                    <StudentAvatar name={row.name} photoDocumentId={row.photoDocumentId} size="sm" />
+                    <StudentAvatar name={row.name} sex={row.sex} photoDocumentId={row.photoDocumentId} size="sm" />
                     <div className="min-w-0">
                       {row.name}
                       <div className="text-xs font-normal text-muted-foreground">
@@ -173,7 +173,7 @@ export function FederationSubmitPanel({ rows, returnTo }: { rows: ChampionshipRo
   const ready = rows.filter((row) => row.registration.status === "confirmed" && !row.registration.external_submitted_at && row.readiness.ready);
   const waiting = rows.filter((row) => row.registration.status === "confirmed" && !row.registration.external_submitted_at && !row.readiness.ready).length;
   return (
-    <form action={submitToFederationAction} className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+    <form action={submitToFederationAction} className="space-y-3 rounded-xl bg-card p-4 shadow-xs sm:p-5">
       <input type="hidden" name="return_to" value={returnTo} />
       <div className="space-y-0.5">
         <h3 className="text-base font-semibold">Enviar à federação</h3>
@@ -185,7 +185,7 @@ export function FederationSubmitPanel({ rows, returnTo }: { rows: ChampionshipRo
         <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {ready.map((row) => (
             <li key={row.registration.$id}>
-              <label htmlFor={`submit-${row.registration.$id}`} className="flex min-h-11 items-center gap-3 rounded-lg border border-border px-3 text-sm">
+              <label htmlFor={`submit-${row.registration.$id}`} className="flex min-h-11 items-center gap-3 rounded-lg bg-muted px-3 text-sm">
                 <Checkbox id={`submit-${row.registration.$id}`} name="registration_id" value={row.registration.$id} defaultChecked />
                 <span className="min-w-0 truncate">
                   {row.name} <span className="text-muted-foreground">· {row.option?.label}</span>
@@ -206,10 +206,10 @@ export function FederationSubmitPanel({ rows, returnTo }: { rows: ChampionshipRo
 export function DocumentsPanel({ rows, returnTo }: { rows: ChampionshipRow[]; returnTo: string }) {
   const withDocs = rows.filter((row) => row.documents.length > 0);
   if (withDocs.length === 0) {
-    return <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">Nenhum documento enviado. Autorização e termo assinados, atestado e carteira da federação aparecem aqui para revisão.</p>;
+    return <p className="rounded-xl bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">Nenhum documento enviado. Autorização e termo assinados, atestado e carteira da federação aparecem aqui para revisão.</p>;
   }
   return (
-    <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+    <ul className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
       {withDocs.map((row) => (
         <li key={row.registration.$id} className="space-y-2 px-4 py-3 sm:px-5">
           <p className="text-sm font-semibold">{row.name}</p>
@@ -276,10 +276,10 @@ export function RejectDocumentDialog({ documentId, returnTo, personName }: { doc
 export function ResultsEditor({ rows, returnTo }: { rows: ChampionshipRow[]; returnTo: string }) {
   const eligible = rows.filter((row) => ["confirmed", "checked_in", "completed"].includes(row.registration.status));
   if (eligible.length === 0) {
-    return <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">Confirme atletas na equipe para registrar colocação e medalha depois do campeonato.</p>;
+    return <p className="rounded-xl bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">Confirme atletas na equipe para registrar colocação e medalha depois do campeonato.</p>;
   }
   return (
-    <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+    <ul className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
       {eligible.map((row) => (
         <li key={row.registration.$id} className="space-y-2 px-4 py-3 sm:px-5">
           <div className="flex flex-wrap items-center justify-between gap-2">

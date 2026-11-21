@@ -4,7 +4,7 @@ import { useState, type CSSProperties } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
-export type AvatarGroupPerson = { name: string; imageUrl?: string | null };
+export type AvatarGroupPerson = { name: string; imageUrl?: string | null; sex?: "feminino" | "masculino" | null };
 
 /** Fração do deslocamento que cada vizinho herda por posição de distância (token `--avatar-falloff`). */
 export const AVATAR_FALLOFF = 0.45;
@@ -27,11 +27,11 @@ export function avatarLift(index: number, active: number | null): CSSProperties 
 }
 
 /** Avatar único de uma pessoa (foto autorizada ou iniciais). */
-export function PersonAvatar({ name, imageUrl, size = "default", className }: AvatarGroupPerson & { size?: "sm" | "default" | "lg"; className?: string }) {
+export function PersonAvatar({ name, imageUrl, sex, size = "default", className }: AvatarGroupPerson & { size?: "sm" | "default" | "lg"; className?: string }) {
   return (
     <Avatar size={size} role="img" aria-label={name} className={cn("after:hidden", className)}>
       {imageUrl ? <AvatarImage src={imageUrl} alt="" loading="lazy" decoding="async" /> : null}
-      <AvatarFallback className="bg-muted font-medium">{initials(name)}</AvatarFallback>
+      <AvatarFallback data-placeholder={sex === "feminino" ? "feminino" : undefined} className="bg-muted font-medium">{initials(name)}</AvatarFallback>
     </Avatar>
   );
 }
@@ -103,7 +103,7 @@ export function AvatarGroup({
           onPointerEnter={() => enter(index)}
           title={person.name}
         >
-          <PersonAvatar name={person.name} imageUrl={person.imageUrl} size={size} />
+          <PersonAvatar name={person.name} imageUrl={person.imageUrl} sex={person.sex} size={size} />
         </li>
       ))}
       {remaining > 0 ? (

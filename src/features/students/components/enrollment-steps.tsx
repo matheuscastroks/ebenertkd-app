@@ -337,7 +337,7 @@ export function DocumentsEnrollmentStep({ bundle }: StepProps) {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="flex items-start gap-3.5">
             <StudentAvatar
-              name={student.full_name}
+              name={student.full_name} sex={student.sex}
               photoDocumentId={profilePhoto?.$id}
               size="lg"
             />

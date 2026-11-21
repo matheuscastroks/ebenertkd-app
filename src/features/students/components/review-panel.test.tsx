@@ -42,6 +42,12 @@ describe("ReviewPanel", () => {
     revision: 1
   } as Enrollment;
 
+  it("não apresenta saúde não preenchida como ausência de restrições", () => {
+    render(<ReviewPanel bundle={{ student: { ...student, health_condition: null }, enrollment, documents: [] }} reviews={[]} />);
+    expect(screen.queryByText("Sem restrições")).not.toBeInTheDocument();
+    expect(screen.getByText("Saúde não informada")).toBeInTheDocument();
+  });
+
   it("renders structured info card, pre-fills 1-year contract dates, and does not show approve button for photo", () => {
     const documents = [
       {

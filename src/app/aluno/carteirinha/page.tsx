@@ -13,9 +13,10 @@ import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { getStudentJourneySnapshot } from "@/features/students/journey-service";
 import { PARQ_STATUS_LABELS, type ParqStatus } from "@/features/students/parq-rules";
 import { requireCapability } from "@/lib/auth/session";
-import { formatBusinessDateBr } from "@/lib/dates";
+import { ReadableDate } from "@/components/shared/readable-date";
+import { formatBrazilianPhone } from "@/lib/phone";
 import { ROUTES } from "@/lib/navigation/routes";
-import { ArrowRight, ShieldCheck } from "@/components/ui/icons";
+import { ArrowRight, ShieldCheck, HeartPulse, Phone, Calendar, Users, FileText, Camera } from "@/components/ui/icons";
 
 const MEDICAL_LABELS: Record<MedicalComplianceStatus, string> = {
   valid: "Atestado em dia",
@@ -89,9 +90,9 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
         <section
           aria-labelledby="digital-passport-heading"
-          className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border"
+          className="overflow-hidden rounded-xl bg-card shadow-xs divide-y divide-border"
         >
-          <div className="flex items-center justify-between gap-3 bg-muted/40 px-5 py-3.5">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-muted/40 px-5 py-3.5">
             <div className="flex items-center gap-2">
               <ShieldCheck className="size-4 text-muted-foreground" aria-hidden="true" />
               <h2 id="digital-passport-heading" className="text-sm font-semibold text-foreground">
@@ -105,7 +106,7 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
 
           <div className="flex flex-col items-start gap-5 p-5 sm:flex-row sm:items-center">
             <StudentAvatar
-              name={student.full_name}
+              name={student.full_name} sex={student.sex}
               photoDocumentId={compliance.photoDocumentId}
               size="lg"
             />
@@ -124,22 +125,22 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
 
           <dl className="grid grid-cols-2 gap-4 p-5 text-sm sm:grid-cols-3">
             <div>
-              <dt className="text-xs font-medium text-muted-foreground">Turma</dt>
+              <dt className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground"><Users className="size-3.5" aria-hidden="true" />Turma</dt>
               <dd className="mt-0.5 font-medium text-foreground">
                 {trainingClass?.name ?? student.training_class ?? "A definir"}
               </dd>
             </div>
             <div>
-              <dt className="text-xs font-medium text-muted-foreground">Praticante desde</dt>
+              <dt className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground"><Calendar className="size-3.5" aria-hidden="true" />Praticante desde</dt>
               <dd className="mt-0.5 font-medium tabular-nums text-foreground">
-                {formatBusinessDateBr(student.started_at_tkd ?? enrollment?.contract_start)}
+                <ReadableDate value={student.started_at_tkd ?? enrollment?.contract_start} />
               </dd>
             </div>
             <div>
               <dt className="text-xs font-medium text-muted-foreground">Atestado médico</dt>
               <dd className="mt-0.5 font-medium tabular-nums text-foreground">
                 {compliance.medicalExpiresAt
-                  ? `Até ${formatBusinessDateBr(compliance.medicalExpiresAt)}`
+                  ? <><span>Até </span><ReadableDate value={compliance.medicalExpiresAt} /></>
                   : MEDICAL_LABELS[compliance.medicalStatus]}
               </dd>
             </div>
@@ -148,58 +149,58 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
 
         <section
           aria-labelledby="health-compliance-heading"
-          className="flex flex-col justify-between gap-4 rounded-xl border border-border bg-card p-5 shadow-xs"
+          className="flex flex-col justify-between gap-4 rounded-xl bg-card p-5 shadow-xs"
         >
           <div className="space-y-4">
-            <div className="flex items-center justify-between gap-2">
-              <h2 id="health-compliance-heading" className="text-base font-semibold">
-                Saúde e documentos
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <h2 id="health-compliance-heading" className="flex items-center gap-2 text-base font-semibold">
+                <HeartPulse className="size-4 text-muted-foreground" aria-hidden="true" />Saúde e documentos
               </h2>
               <StatusBadge tone={MEDICAL_TONES[compliance.medicalStatus]}>
                 {MEDICAL_LABELS[compliance.medicalStatus]}
               </StatusBadge>
             </div>
 
-            <dl className="divide-y divide-border text-sm">
-              <div className="flex items-center justify-between gap-3 py-2.5">
-                <dt className="text-muted-foreground">Atestado válido até</dt>
+            <dl className="grid gap-x-6 gap-y-5 text-sm sm:grid-cols-2">
+              <div className="space-y-2">
+                <dt className="flex items-center gap-1.5 text-xs text-muted-foreground"><Calendar className="size-3.5" aria-hidden="true" />Atestado válido até</dt>
                 <dd className="flex items-center gap-2 font-medium tabular-nums text-foreground">
                   {compliance.medicalExpiresAt
-                    ? formatBusinessDateBr(compliance.medicalExpiresAt)
+                    ? <ReadableDate value={compliance.medicalExpiresAt} />
                     : "Aguardando aprovação"}
                   {needsMedicalAction ? <RowLink href={ROUTES.studentEnrollment} label="Enviar novo atestado">Enviar</RowLink> : null}
                 </dd>
               </div>
-              <div className="flex items-center justify-between gap-3 py-2.5">
-                <dt className="text-muted-foreground">Questionário de saúde (PAR-Q)</dt>
+              <div className="space-y-2">
+                <dt className="flex items-center gap-1.5 text-xs text-muted-foreground"><FileText className="size-3.5" aria-hidden="true" />Questionário de saúde (PAR-Q)</dt>
                 <dd className="flex items-center gap-2">
                   <StatusBadge tone={PARQ_TONES[compliance.parqStatus]}>
                     {compliance.parqExpiresAt
-                      ? `Até ${formatBusinessDateBr(compliance.parqExpiresAt)}`
+                      ? <><span>Até </span><ReadableDate value={compliance.parqExpiresAt} /></>
                       : PARQ_STATUS_LABELS[compliance.parqStatus]}
                   </StatusBadge>
                   {needsParqAction && !isMinor ? <RowLink href={ROUTES.studentParq} label="Responder o questionário de saúde">Responder</RowLink> : null}
                 </dd>
               </div>
-              <div className="flex items-center justify-between gap-3 py-2.5">
-                <dt className="text-muted-foreground">Foto de identificação</dt>
+              <div className="space-y-2">
+                <dt className="flex items-center gap-1.5 text-xs text-muted-foreground"><Camera className="size-3.5" aria-hidden="true" />Foto de identificação</dt>
                 <dd>
                   <StatusBadge tone={compliance.hasApprovedPhoto ? "success" : "warning"}>
                     {compliance.hasApprovedPhoto ? "Aprovada" : "Pendente"}
                   </StatusBadge>
                 </dd>
               </div>
-              <div className="flex items-center justify-between gap-3 py-2.5">
-                <dt className="text-muted-foreground">Contato de emergência</dt>
-                <dd className="text-right font-medium text-foreground">
+              <div className="space-y-2">
+                <dt className="flex items-center gap-1.5 text-xs text-muted-foreground"><Phone className="size-3.5" aria-hidden="true" />Contato de emergência</dt>
+                <dd className="space-y-1 break-words font-medium leading-relaxed text-foreground">
                   {student.emergency_contact_name
-                    ? `${student.emergency_contact_name}${student.emergency_contact_phone ? ` · ${student.emergency_contact_phone}` : ""}`
+                    ? <><span className="block">{student.emergency_contact_name}</span>{student.emergency_contact_phone ? <span className="block tabular-nums">{formatBrazilianPhone(student.emergency_contact_phone)}</span> : null}</>
                     : "Não informado"}
                 </dd>
               </div>
-              <div className="flex items-center justify-between gap-3 py-2.5">
-                <dt className="text-muted-foreground">Alergias / restrições</dt>
-                <dd className="text-right font-medium text-foreground">
+              <div className="space-y-2">
+                <dt className="flex items-center gap-1.5 text-xs text-muted-foreground"><HeartPulse className="size-3.5" aria-hidden="true" />Alergias / restrições</dt>
+                <dd className="space-y-1 break-words font-medium leading-relaxed text-foreground">
                   {student.allergies?.trim() || student.health_details?.trim() || "Nenhuma declarada"}
                 </dd>
               </div>

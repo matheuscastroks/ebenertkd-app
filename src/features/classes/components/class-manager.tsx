@@ -186,17 +186,17 @@ export function ClassManager({
             description="Use Nova turma para cadastrar o primeiro horário. Os alunos escolhem a turma no cadastro."
           />
         ) : (
-          <ul className="t-stagger divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+          <ul className="t-stagger space-y-3">
             {classes.map((trainingClass) => {
               const active = trainingClass.status === "active";
               return (
                 <li
                   key={trainingClass.$id}
-                  className="t-interactive-row flex flex-col gap-3 px-4 py-4 hover:bg-muted sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                  className="t-interactive-row flex flex-col gap-4 rounded-xl bg-card p-5 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="min-w-0 space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-base font-semibold text-foreground">
+                      <p className="text-lg font-semibold text-foreground">
                         {trainingClass.name}
                       </p>
                       <StatusBadge tone={active ? "success" : "neutral"}>

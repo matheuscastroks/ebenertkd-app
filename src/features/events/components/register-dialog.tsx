@@ -34,7 +34,7 @@ export function RegisterDialog({
   const defaultOption = eligible[0]?.option.$id ?? item.options[0]?.option.$id ?? "";
   const maxCompanions = event.max_companions ?? 0;
   const interest = who.kind === "minor";
-  const full = item.seatsLeft === 0 || eligible.every((entry) => entry.seatsLeft === 0);
+  const full = item.seatsLeft === 0 || (eligible.length > 0 && eligible.every((entry) => entry.seatsLeft === 0));
   const label = interest ? "Tenho interesse" : full ? "Entrar na lista de espera" : "Inscrever-se";
 
   return (

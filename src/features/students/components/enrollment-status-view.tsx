@@ -10,7 +10,11 @@ import {
   FileText,
   ImageIcon,
   Pencil,
+  User,
+  HeartPulse,
 } from "@/components/ui/icons";
+import type { ReactNode } from "react";
+import { ReadableDate } from "@/components/shared/readable-date";
 import { StatusBadge } from "@/components/shared/status-badge";
 import {
   Attachment,
@@ -25,7 +29,6 @@ import type { EnrollmentBundle, EnrollmentStatus } from "@/features/students/typ
 import { useBeltLabels, useBeltRanks } from "@/components/academy-config-provider";
 import { rankFullLabel } from "@/features/academy/belt-rules";
 import { formatAddress, parseAddress } from "@/lib/address";
-import { formatBusinessDateBr } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { StudentAvatar } from "./student-avatar";
 
@@ -149,11 +152,11 @@ function formatSubmittedDate(iso?: string | null): string | null {
   });
 }
 
-function SummaryRow({ label, value }: { label: string; value: string }) {
+function SummaryRow({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="flex items-baseline justify-between gap-4 py-2 text-sm first:pt-0 last:pb-0">
-      <dt className="shrink-0 text-muted-foreground">{label}</dt>
-      <dd className="min-w-0 truncate text-right font-medium text-foreground">{value}</dd>
+    <div className="space-y-1 py-2 text-sm first:pt-0 last:pb-0">
+      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dd className="min-w-0 break-words font-medium leading-relaxed text-foreground">{value}</dd>
     </div>
   );
 }
@@ -205,14 +208,14 @@ export function EnrollmentStatusView({
   return (
     <section
       aria-labelledby="enrollment-status-heading"
-      className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs"
+      className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs"
     >
       {/* Cabeçalho de Status + Ações */}
       <div className="space-y-4 p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-3.5">
             <StudentAvatar
-              name={student.full_name}
+              name={student.full_name} sex={student.sex}
               photoDocumentId={profilePhoto?.$id}
               size="md"
             />
@@ -348,17 +351,17 @@ export function EnrollmentStatusView({
       {/* Resumo Estruturado em 2 Colunas (sem scroll, sem excesso de cards) */}
       <div className="grid grid-cols-1 divide-y divide-border lg:grid-cols-2 lg:divide-x lg:divide-y-0">
         <div className="space-y-2.5 p-5">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Identificação e contato
+          <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
+            <User aria-hidden="true" className="size-4 text-muted-foreground" />Identificação e contato
           </h3>
-          <dl className="divide-y divide-border">
+          <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
             <SummaryRow label="Aluno" value={student.full_name} />
             <SummaryRow label="CPF" value={formatCpfMask(student.cpf)} />
             <SummaryRow
               label="Nascimento"
               value={
                 student.birth_date
-                  ? formatBusinessDateBr(student.birth_date)
+                  ? <ReadableDate value={student.birth_date} />
                   : "Não informada"
               }
             />
@@ -371,16 +374,20 @@ export function EnrollmentStatusView({
         </div>
 
         <div className="space-y-2.5 p-5">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Treino e saúde
+          <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
+            <User aria-hidden="true" className="size-4 text-muted-foreground" />Treino
           </h3>
-          <dl className="divide-y divide-border">
+          <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
             <SummaryRow label="Turma" value={classSummary} />
             <SummaryRow label="Graduação" value={beltSummary} />
             <SummaryRow
               label="Vencimento"
               value={dueDay ? `Todo dia ${dueDay}` : "A definir"}
             />
+          </dl>
+          <div className="mt-6 space-y-3">
+            <h3 className="flex items-center gap-2 text-base font-semibold"><HeartPulse aria-hidden="true" className="size-4 text-muted-foreground" />Saúde e emergência</h3>
+            <dl className="space-y-3">
             <SummaryRow label="Emergência" value={emergencySummary} />
             <SummaryRow
               label="Condição de saúde"
@@ -392,15 +399,16 @@ export function EnrollmentStatusView({
                     : "Não informada"
               }
             />
-          </dl>
+            </dl>
+          </div>
         </div>
       </div>
 
       {/* Documentos Enviados */}
       {documents.length > 0 ? (
         <div className="space-y-2.5 px-5 py-4">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Documentos enviados
+          <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
+            <FileText aria-hidden="true" className="size-4 text-muted-foreground" />Documentos enviados
           </h3>
           <div className="flex flex-wrap gap-3">
             {documents.map((document) => (

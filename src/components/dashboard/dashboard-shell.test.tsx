@@ -2,6 +2,11 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...await importOriginal<typeof import("next/navigation")>(),
+  usePathname: () => "/aluno/ficha",
+}));
+
 vi.mock("@/components/dashboard/active-sidebar", () => ({
   ActiveSidebar: () => <aside aria-label="Sidebar mock" />,
 }));
@@ -39,6 +44,18 @@ beforeEach(() => {
 });
 
 describe("DashboardShell (moldura integrada à sidebar)", () => {
+  it("mantém a navegação entre seções no conteúdo, fora do cabeçalho", () => {
+    const { container } = render(
+      <NotificationCountProvider initialCount={0}>
+        <DashboardShell title="Ficha" subtitle="Cadastro" badge="Aluno" segments={[{ label: "Resumo", href: "/aluno/ficha" }, { label: "Saúde", href: "/aluno/ficha/saude" }]}>
+          <p>Dados da ficha</p>
+        </DashboardShell>
+      </NotificationCountProvider>
+    );
+    const nav = screen.getByRole("navigation", { name: "Seções de Ficha" });
+    expect(container.querySelector("main")).toContainElement(nav);
+    expect(container.querySelector("header")).not.toContainElement(nav);
+  });
   it("integra o cabeçalho ao fundo da sidebar e isola o conteúdo no painel saltado", () => {
     const { container } = render(
       <NotificationCountProvider initialCount={2}>

@@ -132,7 +132,7 @@ function TabsList({
           aria-hidden="true"
           data-slot="tabs-pill"
           className={cn(
-            "pointer-events-none absolute top-0 left-0 z-0 rounded-lg bg-card shadow-xs transition-[transform,width,height,opacity] duration-(--duration-fast) ease-(--ease-smooth-out) motion-reduce:transition-none dark:border dark:border-input dark:bg-input/30",
+            "pointer-events-none absolute top-0 left-0 z-0 rounded-lg segmented-indicator transition-[transform,width,height,opacity] duration-(--duration-fast) ease-(--ease-smooth-out) motion-reduce:transition-none",
             pillReady ? "opacity-100" : "opacity-0"
           )}
         />
@@ -150,10 +150,10 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "relative z-1 inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border border-transparent px-3 py-1 text-sm font-medium whitespace-nowrap text-foreground/60 transition-[color,background-color,box-shadow,transform] duration-(--duration-fast) ease-(--ease-smooth-out) motion-reduce:transition-none group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 dark:text-muted-foreground dark:hover:text-foreground group-data-[variant=default]/tabs-list:data-[state=active]:shadow-sm group-data-[variant=line]/tabs-list:data-[state=active]:shadow-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:border-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent",
-        "data-[state=active]:bg-background data-[state=active]:text-foreground dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 dark:data-[state=active]:text-foreground",
-        "group-data-[pill-ready=true]/tabs-list:data-[state=active]:bg-transparent! group-data-[pill-ready=true]/tabs-list:data-[state=active]:shadow-none! dark:group-data-[pill-ready=true]/tabs-list:data-[state=active]:border-transparent! dark:group-data-[pill-ready=true]/tabs-list:data-[state=active]:bg-transparent!",
+        "relative z-1 inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-1 text-sm font-medium whitespace-nowrap text-foreground/60 transition-[color,background-color,box-shadow,transform] duration-(--duration-fast) ease-(--ease-smooth-out) motion-reduce:transition-none group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 dark:text-muted-foreground dark:hover:text-foreground group-data-[variant=default]/tabs-list:data-[state=active]:shadow-sm group-data-[variant=line]/tabs-list:data-[state=active]:shadow-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent",
+        "data-[state=active]:bg-card data-[state=active]:text-foreground dark:data-[state=active]:bg-card-elevated dark:data-[state=active]:text-foreground",
+        "group-data-[pill-ready=true]/tabs-list:data-[state=active]:bg-transparent! group-data-[pill-ready=true]/tabs-list:data-[state=active]:shadow-none! dark:group-data-[pill-ready=true]/tabs-list:data-[state=active]:bg-transparent!",
         "after:absolute after:bg-foreground after:opacity-0 after:transition-[opacity,transform] after:duration-(--duration-fast) after:ease-(--ease-smooth-out) motion-reduce:after:transition-none group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-[state=active]:after:opacity-100",
         className
       )}

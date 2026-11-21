@@ -1,3 +1,4 @@
+import { ReadableDate } from "@/components/shared/readable-date";
 import { EVENT_TYPE_LABEL } from "@/features/events/labels";
 import { getAcademyIdentity } from "@/features/academy/config-service";
 import Link from "next/link";
@@ -13,9 +14,8 @@ import { CheckInSection } from "@/features/classes/components/check-in-section";
 import { findFirstOccurrenceDate } from "@/features/classes/student-calendar-rules";
 import { getStudentCalendarData } from "@/features/classes/student-calendar-service";
 import { requireCapability } from "@/lib/auth/session";
-import { formatBusinessDateBr } from "@/lib/dates";
 import { ROUTES } from "@/lib/navigation/routes";
-import { ArrowRight, Clock, MapPin } from "@/components/ui/icons";
+import { ArrowRight, Clock, MapPin, Calendar } from "@/components/ui/icons";
 
 async function StudentCalendarContent({ profile }: { profile: Profile }) {
   const [data, identity] = await Promise.all([getStudentCalendarData(profile), getAcademyIdentity()]);
@@ -27,57 +27,8 @@ async function StudentCalendarContent({ profile }: { profile: Profile }) {
 
   return (
     <div className="space-y-6">
-      <section
-        aria-labelledby="weekly-schedule-heading"
-        className="rounded-xl border border-border bg-card p-5 shadow-xs"
-      >
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <h2 id="weekly-schedule-heading" className="text-base font-semibold">
-              Grade semanal da sua turma
-            </h2>
-            {trainingClass ? (
-              <p className="text-sm text-muted-foreground">
-                {trainingClass.name} · {trainingClass.weekdays.join(", ")}
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Sua turma será vinculada assim que sua matrícula for aprovada.
-              </p>
-            )}
-          </div>
-
-          {trainingClass ? (
-            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5 tabular-nums">
-                <Clock className="size-4" aria-hidden="true" />
-                {trainingClass.start_time} às {trainingClass.end_time}
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <MapPin className="size-4" aria-hidden="true" />
-                {trainingClass.location || "Dojang principal"}
-              </span>
-              {firstClassDate ? (
-                <AddToCalendarButton
-                  uid={`class-weekly-${trainingClass.$id}`}
-                  title={`Taekwondo · ${trainingClass.name}`}
-                  date={firstClassDate}
-                  startTime={trainingClass.start_time}
-                  endTime={trainingClass.end_time}
-                  location={trainingClass.location}
-                  description={`Treino semanal da turma ${trainingClass.name} (${trainingClass.weekdays.join(", ")}). Portal ${identity.short_name}.`}
-                  recurrenceWeekdays={trainingClass.weekdays}
-                  fileName={`grade-${trainingClass.$id}`}
-                  label="Salvar grade na agenda"
-                />
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-      </section>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <section aria-labelledby="upcoming-sessions-heading" className="space-y-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-start">
+        <section aria-labelledby="upcoming-sessions-heading" className="space-y-3 lg:col-start-1 lg:row-start-1">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 id="upcoming-sessions-heading" className="text-base font-semibold">
               Próximos treinos (21 dias)
@@ -98,30 +49,22 @@ async function StudentCalendarContent({ profile }: { profile: Profile }) {
               }
             />
           ) : (
-            <ul className="t-stagger divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
-              {upcomingSessions.map((session) => (
+            <ul className="t-stagger space-y-3">
+              {upcomingSessions.map((session, index) => (
                 <li
                   key={session.id}
-                  className="t-interactive-row flex flex-col gap-3 px-4 py-3.5 hover:bg-muted/40 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                  className="t-interactive-row flex flex-col gap-4 rounded-xl bg-card p-5 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="min-w-0 space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-medium text-foreground">
-                        {session.weekday} ·{" "}
-                        <span className="tabular-nums">{formatBusinessDateBr(session.date)}</span>
+                      <p className={index === 0 ? "text-base font-semibold text-foreground" : "text-sm font-medium text-foreground"}>
+                        <Calendar aria-hidden="true" className="mr-2 inline size-4 text-muted-foreground" /><ReadableDate value={session.date} weekday />
                       </p>
-                      <StatusBadge tone={session.kind === "makeup" ? "info" : "neutral"}>
-                        {session.kind === "makeup" ? "Reposição" : "Treino regular"}
-                      </StatusBadge>
+                      {session.kind === "makeup" ? <StatusBadge tone="info">Reposição</StatusBadge> : null}
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      <span className="tabular-nums">
-                        {session.startTime} às {session.endTime}
-                      </span>
-                      {" · "}
-                      {session.className}
-                      {session.location ? ` · ${session.location}` : ""}
-                    </p>
+                    <p className="flex items-center gap-2 pt-1 text-sm font-medium tabular-nums"><Clock aria-hidden="true" className="size-4 text-muted-foreground" />{session.startTime} às {session.endTime}</p>
+                    <p className="pt-1 text-sm text-muted-foreground">{session.className}</p>
+                    {session.location ? <p className="flex items-start gap-2 text-sm text-muted-foreground"><MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0" />{session.location}</p> : null}
                   </div>
 
                   <AddToCalendarButton
@@ -133,7 +76,8 @@ async function StudentCalendarContent({ profile }: { profile: Profile }) {
                     location={session.location}
                     description={`Treino agendado pelo portal ${identity.short_name}.`}
                     fileName={`treino-${session.date}`}
-                    label="Adicionar à agenda"
+                    label="Salvar treino"
+                    variant="ghost"
                   />
                 </li>
               ))}
@@ -141,7 +85,56 @@ async function StudentCalendarContent({ profile }: { profile: Profile }) {
           )}
         </section>
 
-        <section aria-labelledby="upcoming-events-heading" className="space-y-3">
+        <section
+          aria-labelledby="weekly-schedule-heading"
+          className="rounded-xl bg-card p-5 shadow-xs lg:col-start-1 lg:row-start-2"
+        >
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <h2 id="weekly-schedule-heading" className="text-base font-semibold">
+                Grade semanal da sua turma
+              </h2>
+              {trainingClass ? (
+                <p className="text-sm text-muted-foreground">
+                  {trainingClass.name} · {trainingClass.weekdays.join(", ")}
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Sua turma será vinculada assim que sua matrícula for aprovada.
+                </p>
+              )}
+            </div>
+
+            {trainingClass ? (
+              <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5 tabular-nums">
+                  <Clock className="size-4" aria-hidden="true" />
+                  {trainingClass.start_time} às {trainingClass.end_time}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <MapPin className="size-4" aria-hidden="true" />
+                  {trainingClass.location || "Dojang principal"}
+                </span>
+                {firstClassDate ? (
+                  <AddToCalendarButton
+                    uid={`class-weekly-${trainingClass.$id}`}
+                    title={`Taekwondo · ${trainingClass.name}`}
+                    date={firstClassDate}
+                    startTime={trainingClass.start_time}
+                    endTime={trainingClass.end_time}
+                    location={trainingClass.location}
+                    description={`Treino semanal da turma ${trainingClass.name} (${trainingClass.weekdays.join(", ")}). Portal ${identity.short_name}.`}
+                    recurrenceWeekdays={trainingClass.weekdays}
+                    fileName={`grade-${trainingClass.$id}`}
+                    label="Salvar grade na agenda"
+                  />
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        </section>
+
+        <section aria-labelledby="upcoming-events-heading" className="space-y-3 lg:col-start-2 lg:row-span-2 lg:row-start-1">
           <div className="flex items-center justify-between gap-2">
             <h2 id="upcoming-events-heading" className="text-base font-semibold">
               Próximos eventos
@@ -155,13 +148,13 @@ async function StudentCalendarContent({ profile }: { profile: Profile }) {
           </div>
 
           {upcomingExams.length === 0 ? (
-            <div className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground shadow-xs">
+            <div className="rounded-xl bg-card p-5 text-sm text-muted-foreground shadow-xs">
               Nenhum evento marcado no calendário no momento.
             </div>
           ) : (
-            <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+            <ul className="space-y-3">
               {upcomingExams.map((exam) => (
-                <li key={exam.id} className="space-y-3 p-4 sm:p-5">
+                <li key={exam.id} className="space-y-4 rounded-xl bg-card p-5">
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-sm font-semibold text-foreground">{exam.name}</p>
@@ -169,14 +162,8 @@ async function StudentCalendarContent({ profile }: { profile: Profile }) {
                         {EVENT_TYPE_LABEL[exam.type]}
                       </StatusBadge>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      Data:{" "}
-                      <span className="font-medium tabular-nums text-foreground">
-                        {formatBusinessDateBr(exam.date)}
-                      </span>
-                      {" · "}
-                      {exam.location || "Local a confirmar"}
-                    </p>
+                    <p className="flex items-center gap-2 pt-2 text-sm font-medium"><Calendar aria-hidden="true" className="size-4 text-muted-foreground" /><ReadableDate value={exam.date} /></p>
+                    <p className="flex items-start gap-2 pt-1 text-sm text-muted-foreground"><MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0" />{exam.location || "Local a confirmar"}</p>
                   </div>
 
                   <AddToCalendarButton

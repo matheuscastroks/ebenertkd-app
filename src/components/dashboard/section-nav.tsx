@@ -6,10 +6,11 @@ import { usePathname } from "next/navigation";
 import { ChevronLeft } from "@/components/ui/icons";
 import { resolveNavLocation, type NavSegment, type SidebarNavItem } from "@/lib/navigation/routes";
 import { cn } from "@/lib/utils";
+import { useSlidingIndicator } from "@/hooks/use-sliding-indicator";
 
 const NavItemsContext = createContext<SidebarNavItem[]>([]);
 
-/** Disponibiliza as seções do perfil para o cabeçalho de cada tela, sem repassar props por página. */
+/** Disponibiliza as seções do perfil para o conteúdo de cada tela, sem repassar props por página. */
 export function NavItemsProvider({ items, children }: { items: SidebarNavItem[]; children: ReactNode }) {
   return <NavItemsContext.Provider value={items}>{children}</NavItemsContext.Provider>;
 }
@@ -51,9 +52,13 @@ function centerInScroller(link: HTMLAnchorElement | null) {
 }
 
 function SegmentBar({ label, segments, active }: { label: string; segments: NavSegment[]; active?: NavSegment }) {
+  const { containerRef, indicatorRef, ready, moveTo } = useSlidingIndicator<HTMLUListElement>('[aria-current="page"]', "aria-current");
   return (
     <nav aria-label={label} className="relative -mx-4 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0">
-      <ul className="inline-flex min-h-11 items-center gap-1 rounded-xl bg-muted p-1 text-muted-foreground">
+      <ul ref={containerRef} data-indicator-ready={ready ? "true" : undefined} className="group/segments relative isolate inline-flex min-h-11 items-center gap-1 rounded-xl bg-muted p-1 text-muted-foreground">
+        <li aria-hidden="true" className="contents">
+          <span ref={indicatorRef} className={cn("segmented-indicator pointer-events-none absolute left-0 top-0 rounded-lg transition-[transform,width,height,opacity] duration-(--duration-fast) ease-(--ease-smooth-out) motion-reduce:transition-none", ready ? "opacity-100" : "opacity-0")} />
+        </li>
         {segments.map((item) => {
           const isActive = item === active;
           return (
@@ -62,9 +67,12 @@ function SegmentBar({ label, segments, active }: { label: string; segments: NavS
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
                 ref={isActive ? centerInScroller : undefined}
+                onClick={(event) => {
+                  if (!event.defaultPrevented && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) moveTo(event.currentTarget, true);
+                }}
                 className={cn(
-                  "inline-flex h-9 items-center whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  isActive ? "bg-card text-foreground shadow-xs" : "hover:text-foreground"
+                  "relative z-1 inline-flex h-9 items-center whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  isActive ? "segmented-selected text-foreground group-data-[indicator-ready=true]/segments:bg-transparent" : "hover:text-foreground"
                 )}
               >
                 {item.label}

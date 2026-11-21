@@ -326,6 +326,30 @@
 
 .font-display { font-family: var(--font-body), sans-serif; }
 
+@layer components {
+  .segmented-indicator,
+  .segmented-selected {
+    background-color: var(--card);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .segmented-indicator,
+    .segmented-selected {
+      background-color: var(--card-elevated);
+    }
+  }
+}
+
+.avatar-placeholder {
+  background-image: url("/avatar-placeholder.webp");
+  background-position: center;
+  background-size: cover;
+}
+
+.avatar-placeholder[data-placeholder="feminino"] {
+  background-image: url("/avatar-placeholder-feminino.webp");
+}
+
 [data-slot="button"]:focus-visible {
   outline: 2px solid var(--foreground);
   outline-offset: 3px;

@@ -4,7 +4,7 @@ export function studentPhotoUrl(photoDocumentId?: string | null) {
 }
 
 /** Pessoa resumida para grupos de avatares; compatível com `AvatarGroup`. */
-export type PersonPreview = { name: string; imageUrl?: string };
+export type PersonPreview = { name: string; imageUrl?: string; sex?: "feminino" | "masculino" | null };
 
 /** Pessoa resumida com o id do documento da foto, para linhas que usam `StudentAvatar`. */
 export type StudentPreview = PersonPreview & { photoDocumentId?: string };

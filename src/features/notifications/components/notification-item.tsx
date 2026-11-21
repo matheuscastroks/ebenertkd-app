@@ -51,11 +51,11 @@ export function NotificationItem({
   return (
     <article
       className={cn(
-        "t-interactive-row rounded-xl border transition-colors duration-(--duration-quick)",
+        "t-interactive-row rounded-xl transition-colors duration-(--duration-quick)",
         compact ? "p-3.5" : "p-4",
         unread
-          ? "border-primary/25 bg-card shadow-xs hover:border-primary/40"
-          : "border-border/70 bg-card/70 hover:bg-card hover:border-border"
+          ? "bg-card shadow-xs"
+          : "bg-card/70 hover:bg-card"
       )}
     >
       <div className="flex items-start gap-3">

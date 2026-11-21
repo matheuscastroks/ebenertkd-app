@@ -95,7 +95,7 @@ export async function ExamBundleSections({ eventId }: { eventId: string }) {
     <div className="space-y-6">
       <dl
         aria-label="Indicadores da banca"
-        className="grid grid-cols-2 overflow-hidden rounded-xl border border-border bg-card shadow-xs sm:grid-cols-4"
+        className="grid grid-cols-2 overflow-hidden rounded-xl bg-card shadow-xs sm:grid-cols-4"
       >
         <div className="p-4 sm:px-5">
           <dt className="text-sm font-medium text-muted-foreground">Inscritos</dt>
@@ -135,7 +135,7 @@ export async function ExamBundleSections({ eventId }: { eventId: string }) {
       {bundle.event.status === "completed" ? (
         <div
           role="status"
-          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3.5 shadow-xs sm:px-5"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-card px-4 py-3.5 shadow-xs sm:px-5"
         >
           <div className="flex items-center gap-2.5">
             <CheckCircle2 className="size-4 shrink-0 text-success" aria-hidden="true" />
@@ -179,7 +179,7 @@ export async function ExamBundleSections({ eventId }: { eventId: string }) {
                     </span>
                   </div>
 
-                  <ul className="t-stagger divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+                  <ul className="t-stagger divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
                     {group.participants.map(
                       ({ participant, student, photoDocumentId, charge }) => {
                         const isRegistered = participant.status === "registered";
@@ -197,7 +197,7 @@ export async function ExamBundleSections({ eventId }: { eventId: string }) {
                           >
                             <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center">
                               <StudentAvatar
-                                name={student!.full_name}
+                                name={student!.full_name} sex={student!.sex}
                                 photoDocumentId={photoDocumentId}
                                 size="sm"
                                 className="mt-0.5 shrink-0 sm:mt-0"
@@ -428,7 +428,7 @@ export async function ExamBundleSections({ eventId }: { eventId: string }) {
                 />
                 Inscrições canceladas ({cancelledParticipants.length})
               </summary>
-              <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+              <ul className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
                 {cancelledParticipants.map(({ participant, student, photoDocumentId }) => (
                   <li
                     key={participant.$id}
@@ -436,7 +436,7 @@ export async function ExamBundleSections({ eventId }: { eventId: string }) {
                   >
                     <div className="flex min-w-0 items-center gap-3">
                       <StudentAvatar
-                        name={student!.full_name}
+                        name={student!.full_name} sex={student!.sex}
                         photoDocumentId={photoDocumentId}
                         size="sm"
                       />
@@ -535,7 +535,7 @@ export async function ExamBundleSections({ eventId }: { eventId: string }) {
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex min-w-0 items-center gap-2.5">
                           <StudentAvatar
-                            name={student!.full_name}
+                            name={student!.full_name} sex={student!.sex}
                             photoDocumentId={photoDocumentId}
                             size="sm"
                           />

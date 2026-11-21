@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ReadableDate } from "@/components/shared/readable-date";
 import {
   advanceToSignatureAction,
   reviewDocumentAction,
@@ -66,6 +67,12 @@ import { formatBrazilianPhone } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 import { ENROLLMENT_STATUS_LABELS } from "@/features/students/enrollment-labels";
 import {
+  Calendar,
+  HeartPulse,
+  Phone,
+  MapPin,
+  User,
+  Award,
   AlertTriangle,
   CheckCircle2,
   ExternalLink,
@@ -158,7 +165,7 @@ export function ReviewPanel({
   // nos demais status ela continua junto do contrato.
   const decisionOnTop = DECISION_STATUSES.has(enrollment.status);
   const decisionPanel = (
-    <div className="lg:col-span-5 overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
+    <div className="lg:col-span-5 overflow-hidden rounded-xl bg-card shadow-xs divide-y divide-border">
       {enrollment.status === "awaiting_renewal" ? (
         <section className="p-5 space-y-4">
           <div>
@@ -247,10 +254,10 @@ export function ReviewPanel({
   return (
     <div className="space-y-6">
       {/* 1. Cabeçalho do Aluno com Avatar e Status Geral */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 sm:p-5 shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl bg-card p-4 sm:p-5 shadow-xs">
         <div className="flex items-center gap-4">
           <StudentAvatar
-            name={student.full_name}
+            name={student.full_name} sex={student.sex}
             photoDocumentId={profilePhoto?.$id}
             size="lg"
           />
@@ -291,28 +298,28 @@ export function ReviewPanel({
 
       <div className="space-y-6">
         <section id="dados" aria-label="Dados" className="scroll-mt-24 space-y-4">
-          <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
+          <div className="overflow-hidden rounded-xl bg-card shadow-xs divide-y divide-border">
             <div className="p-5 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-base font-semibold text-foreground">Identificação e contato</h2>
+                  <h2 className="flex items-center gap-2 text-lg font-semibold leading-snug text-foreground"><User className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />Identificação e contato</h2>
                   <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                     Dados pessoais e canais de comunicação direta com o aluno ou responsáveis.
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 text-sm">
+              <div className="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3 text-sm">
                 <div className="space-y-0.5">
-                  <span className="text-xs text-muted-foreground block">Data de nascimento</span>
+                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Calendar className="size-3.5" aria-hidden="true" />Data de nascimento</span>
                   <span className="font-medium text-foreground">
                     {dateValue(student.birth_date)
-                      ? new Date(`${dateValue(student.birth_date)}T12:00:00`).toLocaleDateString("pt-BR")
+                      ? <ReadableDate value={dateValue(student.birth_date)} />
                       : "—"}
                   </span>
                 </div>
                 <div className="space-y-0.5">
-                  <span className="text-xs text-muted-foreground block">WhatsApp</span>
+                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Phone className="size-3.5" aria-hidden="true" />WhatsApp</span>
                   <span className="font-medium text-foreground">
                     {formatBrazilianPhone(student.whatsapp) || "—"}
                   </span>
@@ -322,14 +329,14 @@ export function ReviewPanel({
                   <span className="font-medium text-foreground">{student.guardian_contact || "Não informado / próprio aluno"}</span>
                 </div>
                 <div className="space-y-0.5 sm:col-span-2 lg:col-span-3">
-                  <span className="text-xs text-muted-foreground block">Endereço</span>
+                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><MapPin className="size-3.5" aria-hidden="true" />Endereço</span>
                   <span className="font-medium text-foreground">{student.address || "—"}</span>
                 </div>
               </div>
             </div>
 
-            <div className="p-5 space-y-4">
-              <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+            <div className="bg-muted p-5 space-y-4">
+              <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
                 <Users className="size-4 text-muted-foreground" aria-hidden="true" /> Contato de emergência
               </h3>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 text-sm">
@@ -353,9 +360,9 @@ export function ReviewPanel({
         </section>
 
         <section id="treino" aria-label="Treino e acesso" className="scroll-mt-24 space-y-4">
-          <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
+          <div className="overflow-hidden rounded-xl bg-card shadow-xs divide-y divide-border">
             <div className="p-5 space-y-4">
-              <h2 className="text-base font-semibold text-foreground">Treino e graduação</h2>
+              <h2 className="flex items-center gap-2 text-lg font-semibold leading-snug text-foreground"><Award className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />Treino e graduação</h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 text-sm">
                 <div className="space-y-0.5">
                   <span className="text-xs text-muted-foreground block">Turma</span>
@@ -371,7 +378,7 @@ export function ReviewPanel({
                   <span className="text-xs text-muted-foreground block">Início no taekwondo</span>
                   <span className="font-medium text-foreground">
                     {dateValue(student.started_at_tkd)
-                      ? new Date(`${dateValue(student.started_at_tkd)}T12:00:00`).toLocaleDateString("pt-BR")
+                      ? <ReadableDate value={dateValue(student.started_at_tkd)} />
                       : "—"}
                   </span>
                 </div>
@@ -393,7 +400,7 @@ export function ReviewPanel({
                   </StatusBadge>
                 </div>
 
-                <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3 rounded-lg border border-border bg-muted/20 p-4 text-sm">
+                <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3 rounded-lg bg-muted p-4 text-sm">
                   <div>
                     <dt className="text-xs text-muted-foreground">Último pagamento</dt>
                     <dd className="mt-0.5 font-medium tabular-nums text-foreground">
@@ -446,11 +453,11 @@ export function ReviewPanel({
         </section>
 
         <section id="saude" aria-label="Saúde" className="scroll-mt-24 space-y-4">
-          <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
+          <div className="overflow-hidden rounded-xl bg-card shadow-xs divide-y divide-border">
             <div className="p-5 space-y-4">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-base font-semibold text-foreground">Cuidados de saúde declarados</h2>
+                  <h2 className="flex items-center gap-2 text-lg font-semibold leading-snug text-foreground"><HeartPulse className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />Cuidados de saúde declarados</h2>
                   <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                     Informações fornecidas na ficha de matrícula para segurança nos treinos.
                   </p>
@@ -460,16 +467,16 @@ export function ReviewPanel({
                     <AlertTriangle className="size-3" aria-hidden="true" />
                     Condição informada
                   </Badge>
-                ) : (
-                  <Badge variant="outline" className="gap-1 text-success border-success/30 bg-success/10">
+                ) : student.health_condition === "no" ? (
+                  <Badge variant="outline" className="gap-1 text-success-foreground bg-success-soft">
                     <CheckCircle2 className="size-3" aria-hidden="true" />
                     Sem restrições
                   </Badge>
-                )}
+                ) : <StatusBadge tone="neutral">Saúde não informada</StatusBadge>}
               </div>
 
               {student.health_condition === "yes" ? (
-                <div className="space-y-3 rounded-lg border border-warning/30 bg-warning/5 p-4 text-sm">
+                <div className="space-y-3 rounded-lg bg-warning-soft p-4 text-sm">
                   {student.health_details ? (
                     <div>
                       <span className="text-xs font-medium text-muted-foreground block">Detalhes da condição</span>
@@ -492,8 +499,8 @@ export function ReviewPanel({
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">
-                  O aluno declarou não possuir condições crônicas ou restrições especiais na ficha de cadastro.
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {student.health_condition === "no" ? "O aluno declarou não possuir condições crônicas ou restrições especiais na ficha de cadastro." : "As informações de saúde ainda não foram preenchidas na ficha."}
                 </p>
               )}
             </div>
@@ -502,7 +509,7 @@ export function ReviewPanel({
             <div className="p-5 space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-base font-semibold text-foreground">Questionário de saúde (PAR-Q)</h3>
+                  <h3 className="flex items-center gap-2 text-lg font-semibold leading-snug text-foreground"><HeartPulse className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />Questionário de saúde (PAR-Q)</h3>
                   <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                     Questionário de prontidão para atividade física com validade de 12 meses.
                   </p>
@@ -515,18 +522,18 @@ export function ReviewPanel({
               </div>
 
               {parqAssessment && parqAssessment.signedAt ? (
-                <div className="space-y-3 rounded-lg border border-border bg-muted/20 p-4 text-sm">
+                <div className="space-y-3 rounded-lg bg-muted p-4 text-sm">
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     <div>
                       <span className="text-xs text-muted-foreground block">Assinado em</span>
                       <span className="font-medium tabular-nums text-foreground">
-                        {formatBusinessDateBr(parqAssessment.signedAt)}
+                        <ReadableDate value={parqAssessment.signedAt} />
                       </span>
                     </div>
                     <div>
                       <span className="text-xs text-muted-foreground block">Válido até</span>
                       <span className="font-medium tabular-nums text-foreground">
-                        {formatBusinessDateBr(parqAssessment.expiresAt)}
+                        <ReadableDate value={parqAssessment.expiresAt} />
                         {parqAssessment.daysUntilExpiration != null
                           ? parqAssessment.daysUntilExpiration < 0
                             ? ` (vencido)`
@@ -570,7 +577,7 @@ export function ReviewPanel({
         </section>
 
         <section id="documentos" aria-label="Documentos" className="scroll-mt-24 space-y-4">
-          <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
+          <div className="overflow-hidden rounded-xl bg-card shadow-xs divide-y divide-border">
             {/* Foto do Aluno */}
             <div className="p-5 space-y-3">
               <div className="flex items-center justify-between gap-3">
@@ -581,7 +588,7 @@ export function ReviewPanel({
                   </p>
                 </div>
                 {profilePhoto ? (
-                  <Badge variant="outline" className="text-success border-success/30 bg-success/10">
+                  <Badge variant="outline" className="text-success bg-success/10">
                     Cadastrada
                   </Badge>
                 ) : (
@@ -751,7 +758,7 @@ export function ReviewPanel({
         <section id="contrato" aria-label="Contrato" className="scroll-mt-24 space-y-4">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
             {/* Coluna 1: Condições Contratuais e Valores */}
-            <div className={cn(decisionOnTop ? "lg:col-span-12" : "lg:col-span-7", "overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border")}>
+            <div className={cn(decisionOnTop ? "lg:col-span-12" : "lg:col-span-7", "overflow-hidden rounded-xl bg-card shadow-xs divide-y divide-border")}>
               <section className="p-5 space-y-4">
                 <div>
                   <h2 className="text-base font-semibold text-foreground">Condições do contrato</h2>

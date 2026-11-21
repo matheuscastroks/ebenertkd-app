@@ -31,6 +31,7 @@ type DashboardFrameProps = Pick<DashboardShellProps, "badge" | "children"> & {
   profileEmail?: string;
   role?: string;
   avatarUrl?: string;
+  avatarSex?: "feminino" | "masculino" | null;
   navItems: AppSidebarNavItem[];
   unreadNotifications?: number;
 };
@@ -41,6 +42,7 @@ export function DashboardFrame({
   profileEmail,
   role,
   avatarUrl,
+  avatarSex,
   navItems,
   unreadNotifications,
   children,
@@ -60,6 +62,7 @@ export function DashboardFrame({
           profileEmail={profileEmail}
           role={role}
           avatarUrl={avatarUrl}
+          avatarSex={avatarSex}
         />
         <NavItemsProvider items={navItems}>
           <PageTransition>{children}</PageTransition>
@@ -74,8 +77,7 @@ export function DashboardFrame({
 /**
  * Moldura visual contínua em "L":
  * - Cabeçalho fixo no topo com o mesmo fundo da sidebar (`bg-sidebar`), contendo o voltar da
- *   pilha (telas de detalhe), título, subtítulo, ações da tela, notificações e, abaixo, os
- *   segmentos da seção atual.
+ *   pilha (telas de detalhe), título, subtítulo, ações da tela, notificações. Os segmentos ficam no conteúdo da página.
  * - Painel de conteúdo saltado ("inset") abaixo do cabeçalho, com fundo `bg-background`,
  *   cantos arredondados e rolagem própria no desktop.
  */
@@ -115,23 +117,23 @@ export function DashboardShell({
             <NotificationHeaderButton />
           </div>
         </div>
-        {segments ? (
-          <div className="mt-3">
-            <ScreenSegments label={`Seções de ${title}`} segments={segments} />
-          </div>
-        ) : back ? null : (
-          <div className="mt-3 empty:hidden">
-            <SectionSegments />
-          </div>
-        )}
       </header>
 
       <main
         data-slot="dashboard-content"
-        className="relative flex min-h-0 flex-1 flex-col border-t border-border/60 bg-background md:mb-2 md:mr-2 md:overflow-y-auto md:rounded-xl md:border md:border-border/60 md:shadow-sm"
+        className="relative flex min-h-0 flex-1 flex-col bg-background md:mb-2 md:mr-2 md:overflow-y-auto md:rounded-xl md:shadow-sm"
       >
         <div className="min-w-0 flex-1 p-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:p-6 md:pb-8">
           <div className="flex w-full min-w-0 flex-col gap-6">
+            {segments ? (
+              <div className="min-w-0">
+                <ScreenSegments label={`Seções de ${title}`} segments={segments} />
+              </div>
+            ) : back ? null : (
+              <div className="min-w-0 empty:hidden">
+                <SectionSegments />
+              </div>
+            )}
             {children}
           </div>
         </div>

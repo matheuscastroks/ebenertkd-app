@@ -35,7 +35,7 @@ export function BeltProgressionPill({ fromRankKey, toRankKey, fromName, toName, 
   return (
     <div
       className={cn(
-        "inline-flex max-w-full flex-wrap items-center gap-1.5 rounded-lg border border-border bg-background px-2 py-1 shadow-xs",
+        "inline-flex max-w-full flex-wrap items-center gap-1.5 rounded-lg bg-background px-2 py-1",
         size === "sm" && "px-1.5 py-0.5 text-xs",
         size === "lg" && "px-3 py-1.5 text-sm",
         className
@@ -49,7 +49,7 @@ export function BeltProgressionPill({ fromRankKey, toRankKey, fromName, toName, 
       <ArrowRight className={cn("shrink-0 text-muted-foreground", size === "sm" ? "size-3" : "size-3.5")} aria-hidden="true" />
       <div className="flex items-center gap-1">
         <span className="hidden text-xs font-medium text-primary-text sm:inline">Alvo:</span>
-        <BeltBadge rankKey={toRankKey} nameOverride={toName} size={badgeSize} showRank={showRank} className="ring-1 ring-primary/20" />
+        <BeltBadge rankKey={toRankKey} nameOverride={toName} size={badgeSize} showRank={showRank} className="bg-primary/15" />
       </div>
     </div>
   );

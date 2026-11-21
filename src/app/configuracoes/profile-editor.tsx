@@ -13,9 +13,11 @@ import type { Profile } from "@/features/auth/types";
 export function ProfileEditor({
   profile,
   currentAvatarUrl,
+  avatarSex,
 }: {
   profile: Profile;
   currentAvatarUrl?: string;
+  avatarSex?: "feminino" | "masculino" | null;
 }) {
   const [previewUrl, setPreviewUrl] = useState<string | undefined>(currentAvatarUrl);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -37,14 +39,14 @@ export function ProfileEditor({
 
   return (
     <form action={updateProfileAction} className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 rounded-xl border border-border bg-card p-5 shadow-xs">
+      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 rounded-xl bg-card p-5 shadow-xs">
         {/* Avatar com ação de foto */}
         <div className="relative group flex flex-col items-center gap-2">
           <Avatar className="size-24 border-2 border-border shadow-xs">
             {previewUrl ? (
               <AvatarImage src={previewUrl} alt={profile.full_name} className="object-cover" />
             ) : null}
-            <AvatarFallback className="bg-primary/10 text-primary-text font-bold text-xl">
+            <AvatarFallback data-placeholder={avatarSex === "feminino" ? "feminino" : undefined} className="bg-primary/10 text-primary-text font-bold text-xl">
               {profile.full_name.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>

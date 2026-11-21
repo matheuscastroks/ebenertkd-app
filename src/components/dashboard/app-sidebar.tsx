@@ -62,7 +62,8 @@ export function AppSidebar({
   profileName,
   profileEmail,
   role,
-  avatarUrl
+  avatarUrl,
+  avatarSex
 }: {
   badge: string;
   navItems: AppSidebarNavItem[];
@@ -70,6 +71,7 @@ export function AppSidebar({
   profileEmail?: string;
   role?: string;
   avatarUrl?: string;
+  avatarSex?: "feminino" | "masculino" | null;
 }) {
   const { shortName } = useAcademyBrand();
   const sidebarItems = navItems.filter((item) => item.icon !== "notifications" && item.group !== "Rodapé");
@@ -117,6 +119,7 @@ export function AppSidebar({
           email={profileEmail}
           role={role}
           avatarUrl={avatarUrl}
+          avatarSex={avatarSex}
         />
       </SidebarFooter>
     </Sidebar>

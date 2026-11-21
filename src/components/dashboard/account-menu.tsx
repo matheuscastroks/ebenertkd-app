@@ -29,6 +29,7 @@ export type AccountMenuProps = {
   badge?: string;
   email?: string;
   avatarUrl?: string;
+  avatarSex?: "feminino" | "masculino" | null;
   /** Mantido por compatibilidade; os atalhos por perfil vivem na navegação. */
   role?: string;
 };
@@ -38,6 +39,7 @@ export function AccountMenu({
   badge,
   email,
   avatarUrl,
+  avatarSex,
 }: AccountMenuProps) {
   const { isMobile } = useSidebar();
   const initials =
@@ -62,7 +64,7 @@ export function AccountMenu({
             >
               <Avatar className="size-9">
                 {avatarUrl ? <AvatarImage src={avatarUrl} alt={name} /> : null}
-                <AvatarFallback className="text-xs font-medium">{initials}</AvatarFallback>
+                <AvatarFallback data-placeholder={avatarSex === "feminino" ? "feminino" : undefined} className="text-xs font-medium">{initials}</AvatarFallback>
               </Avatar>
               <div className="grid grid-cols-1 flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{name}</span>
@@ -83,7 +85,7 @@ export function AccountMenu({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="size-9">
                   {avatarUrl ? <AvatarImage src={avatarUrl} alt={name} /> : null}
-                  <AvatarFallback className="text-xs font-medium">{initials}</AvatarFallback>
+                  <AvatarFallback data-placeholder={avatarSex === "feminino" ? "feminino" : undefined} className="text-xs font-medium">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="grid grid-cols-1 flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold text-foreground">{name}</span>

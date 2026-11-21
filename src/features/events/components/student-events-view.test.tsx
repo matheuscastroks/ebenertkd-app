@@ -43,9 +43,29 @@ describe("StudentEventsView", () => {
     expect(screen.getByRole("button", { name: "Inscrever-se" })).toBeTruthy();
   });
 
+  it("identifica data, horário, local, valor, vagas e quantidade de inscrições", () => {
+    render(<StudentEventsView {...base} open={[{ ...openItem(12), attendeeCount: 3, attendees: [{ name: "Ana Silva", sex: "feminino" }, { name: "Bruno Costa" }] }]} />);
+    for (const label of ["Data", "Horário", "Local", "Valor", "Vagas", "Inscrições"]) {
+      expect(screen.getByText(label)).toBeInTheDocument();
+    }
+    expect(screen.getByRole("img", { name: "Ana Silva" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Bruno Costa" })).toBeInTheDocument();
+    expect(screen.getByText("+1")).toBeInTheDocument();
+  });
+
   it("lotado oferece a lista de espera", () => {
     render(<StudentEventsView {...base} open={[openItem(0)]} />);
     expect(screen.getByRole("button", { name: "Entrar na lista de espera" })).toBeTruthy();
+  });
+
+  it("não apresenta lista de espera quando há vagas e o aluno não é elegível", () => {
+    const item = openItem(12);
+    item.options[0].eligible = false;
+    item.options[0].reasons = ["matrícula ativa necessária"];
+    render(<StudentEventsView {...base} open={[item]} />);
+    expect(screen.getByRole("button", { name: "Inscrever-se" })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Entrar na lista de espera" })).not.toBeInTheDocument();
+    expect(screen.getByText("Matrícula ativa necessária")).toBeInTheDocument();
   });
 
   it("menor só manifesta interesse e não vê valores", () => {

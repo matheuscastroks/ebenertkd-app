@@ -215,12 +215,12 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
       <div hidden={step !== 0} className="space-y-4">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {SELECTABLE_TYPES.map((item) => (
-            <button key={item} type="button" onClick={() => chooseType(item)} aria-pressed={type === item} className={`rounded-xl border p-4 text-left shadow-xs transition-colors ${type === item ? "border-primary bg-accent" : "border-border bg-card hover:bg-muted"}`}>
+            <button key={item} type="button" onClick={() => chooseType(item)} aria-pressed={type === item} className={`rounded-xl p-4 text-left shadow-xs transition-colors ${type === item ? "bg-primary/15 ring-1 ring-primary" : "bg-muted hover:bg-secondary"}`}>
               <span className="block text-sm font-semibold text-foreground">{EVENT_TYPE_LABEL[item]}</span>
               <span className="mt-1 block text-sm text-muted-foreground">{EVENT_TYPE_HINT[item]}</span>
             </button>
           ))}
-          <Link href={ROUTES.adminExams} className="rounded-xl border border-border bg-card p-4 shadow-xs transition-colors hover:bg-muted">
+          <Link href={ROUTES.adminExams} className="rounded-xl bg-card p-4 shadow-xs transition-colors hover:bg-muted">
             <span className="block text-sm font-semibold text-foreground">{EVENT_TYPE_LABEL.belt_exam}</span>
             <span className="mt-1 block text-sm text-muted-foreground">Criado em Exames de faixa, com elegibilidade e promoção de graduação.</span>
           </Link>

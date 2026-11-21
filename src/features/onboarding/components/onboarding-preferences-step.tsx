@@ -53,11 +53,11 @@ export function OnboardingPreferencesStep({
                       aria-checked={isSelected}
                       onClick={() => onChange(question.id, option.id)}
                       className={cn(
-                        "flex items-start justify-between gap-3 rounded-xl border p-3.5 text-left transition-[color,background-color,border-color,box-shadow] duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none",
+                        "flex items-start justify-between gap-3 rounded-xl p-3.5 text-left transition-[color,background-color,border-color,box-shadow] duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none",
                         "hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
                         isSelected
-                          ? "border-primary bg-card ring-1 ring-primary"
-                          : "border-border bg-card"
+                          ? "bg-primary/15 ring-1 ring-primary"
+                          : "bg-muted"
                       )}
                     >
                       <div className="space-y-1">
@@ -76,10 +76,10 @@ export function OnboardingPreferencesStep({
 
                       <div
                         className={cn(
-                          "flex size-5 shrink-0 items-center justify-center rounded-full border transition-[color,background-color,border-color] duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none mt-0.5",
+                          "flex size-5 shrink-0 items-center justify-center rounded-full transition-[color,background-color,border-color] duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none mt-0.5",
                           isSelected
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "border-border bg-background"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-input"
                         )}
                       >
                         {isSelected && <Check className="size-3 stroke-[3]" />}

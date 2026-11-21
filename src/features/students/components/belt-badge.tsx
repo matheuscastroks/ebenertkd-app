@@ -1,7 +1,7 @@
 "use client";
 
 import { useBeltLabels, useBeltRanks } from "@/components/academy-config-provider";
-import { beltBackground, swatchOutline, type BeltAppearance } from "@/features/academy/belt-colors";
+import { beltBackground, type BeltAppearance } from "@/features/academy/belt-colors";
 import { appearanceOf } from "@/features/academy/belt-rules";
 import { isRankKey, rankShortLabel } from "@/features/academy/ranks";
 import { cn } from "@/lib/utils";
@@ -19,8 +19,8 @@ export function BeltMini({ appearance, size = "md", className }: { appearance: O
   return (
     <span
       aria-hidden="true"
-      className={cn("relative inline-block shrink-0 overflow-hidden rounded-sm border shadow-xs", MINI_SIZE[size], className)}
-      style={{ background: beltBackground(appearance), borderColor: swatchOutline(appearance.colorPrimary) }}
+      className={cn("relative inline-block shrink-0 overflow-hidden rounded-sm", MINI_SIZE[size], className)}
+      style={{ background: beltBackground(appearance) }}
     />
   );
 }
@@ -41,7 +41,7 @@ export function BeltBadgeView({
   return (
     <div
       className={cn(
-        "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border border-border bg-muted font-sans text-foreground select-none shadow-xs",
+        "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md bg-muted font-sans text-foreground select-none",
         size === "sm" && "h-6 px-2 text-xs",
         size === "md" && "h-7 px-2.5 text-xs",
         size === "lg" && "h-8 px-3 text-sm",
@@ -84,7 +84,7 @@ export function BeltBadge({
     return (
       <div
         className={cn(
-          "inline-flex h-7 shrink-0 items-center whitespace-nowrap rounded-md border border-border bg-muted px-2.5 text-xs font-semibold text-muted-foreground",
+          "inline-flex h-7 shrink-0 items-center whitespace-nowrap rounded-md bg-muted px-2.5 text-xs font-semibold text-muted-foreground",
           className
         )}
       >
