@@ -44,7 +44,7 @@ export async function PayerBilling({
       {access && access.status !== "not_applicable" ? (
         <section
           aria-label="Ciclo mensal de acesso ao aplicativo"
-          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 shadow-xs"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-card p-4 shadow-xs"
         >
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">

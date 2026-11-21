@@ -29,7 +29,7 @@ type ExamOverview = Awaited<ReturnType<typeof getExamsOverview>>;
 
 function ExamList({ events }: { events: ExamOverview["events"] }) {
   return (
-    <ul className="t-stagger divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+    <ul className="t-stagger divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
       {events.map((event) => (
         <li
           key={event.$id}
@@ -91,7 +91,7 @@ async function ExamEventsContent() {
     <div className="space-y-6">
       <dl
         aria-label="Resumo dos exames"
-        className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs sm:grid-cols-3 sm:divide-x sm:divide-y-0"
+        className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs sm:grid-cols-3 sm:divide-x sm:divide-y-0"
       >
         <div className="p-4 sm:px-5">
           <dt className="text-sm font-medium text-muted-foreground">Próximo exame</dt>
@@ -133,7 +133,7 @@ async function ExamEventsContent() {
         {active.length ? (
           <ExamList events={active} />
         ) : (
-          <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">
+          <p className="rounded-xl bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">
             Nenhum exame em aberto. Use Novo exame para agendar a próxima banca.
           </p>
         )}
@@ -155,7 +155,7 @@ async function ExamEventsContent() {
 function ExamsOverviewSkeleton() {
   return (
     <div aria-label="Carregando exames…" aria-busy="true" className="space-y-6">
-      <div className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+      <div className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs sm:grid-cols-3 sm:divide-x sm:divide-y-0">
         {Array.from({ length: 3 }, (_, index) => (
           <div key={index} className="space-y-2 p-4 sm:px-5">
             <Skeleton className="h-4 w-28" />
@@ -166,7 +166,7 @@ function ExamsOverviewSkeleton() {
       </div>
       <div className="space-y-3">
         <Skeleton className="h-5 w-36" />
-        <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        <div className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
           {Array.from({ length: 3 }, (_, index) => (
             <div key={index} className="flex flex-col gap-3 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
               <div className="space-y-2">

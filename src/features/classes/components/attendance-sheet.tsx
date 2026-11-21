@@ -46,7 +46,7 @@ export function AttendanceSheet({ classId, lessonId, lessonCompleted, rows, noti
     {notice === "reason" ? <OperationToast tone="warning" title="Informe o motivo da correção" description="Chamadas concluídas exigem uma justificativa para qualquer alteração." clearParams={["error"]} /> : null}
     {notice === "error" ? <OperationToast tone="error" title="Não foi possível salvar a chamada" description="Confira se todos os alunos receberam um status e tente novamente." clearParams={["error"]} /> : null}
 
-    <div className="sticky top-3 z-10 space-y-3 rounded-xl border bg-background p-4 shadow-xs">
+    <div className="sticky top-3 z-10 space-y-3 rounded-xl bg-background p-4 shadow-xs">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-base font-semibold tabular-nums">{selectedCount} de {rows.length} alunos marcados</p>
@@ -70,7 +70,7 @@ export function AttendanceSheet({ classId, lessonId, lessonCompleted, rows, noti
     {rows.length === 0 ? (
       <EmptyState title="Turma sem alunos ativos" description="Ative uma matrícula vinculada a esta turma antes de realizar a chamada." />
     ) : (
-      <ul className="t-stagger divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+      <ul className="t-stagger divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
         {rows.map((row) => (
           <li key={row.classEnrollmentId} className="flex flex-col gap-3 px-4 py-3.5 lg:flex-row lg:items-center lg:justify-between sm:px-5">
             <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -104,6 +104,6 @@ export function AttendanceSheet({ classId, lessonId, lessonCompleted, rows, noti
     )}
 
     {lessonCompleted && changed ? <Field><FieldLabel htmlFor="correction-reason">Motivo da correção</FieldLabel><Textarea id="correction-reason" name="correction_reason" required minLength={3} placeholder="Ex.: presença corrigida após conferência com o professor." /><FieldDescription>Este motivo fica registrado na trilha de auditoria.</FieldDescription></Field> : null}
-    <div className="sticky bottom-20 z-10 rounded-xl border bg-background p-3 shadow-xs md:bottom-3"><FormSubmitButton className="h-11 w-full sm:w-auto" disabled={!complete || (lessonCompleted && changed === false)} pendingLabel="Salvando chamada…">{lessonCompleted ? "Salvar correção" : "Concluir chamada"}</FormSubmitButton></div>
+    <div className="sticky bottom-20 z-10 rounded-xl bg-background p-3 shadow-xs md:bottom-3"><FormSubmitButton className="h-11 w-full sm:w-auto" disabled={!complete || (lessonCompleted && changed === false)} pendingLabel="Salvando chamada…">{lessonCompleted ? "Salvar correção" : "Concluir chamada"}</FormSubmitButton></div>
   </form>;
 }

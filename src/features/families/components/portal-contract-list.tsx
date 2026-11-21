@@ -23,7 +23,7 @@ export function PortalContractList({ contracts, hrefFor, canSign, canOpen = true
   canOpen?: boolean;
   emptyDescription: string;
 }) {
-  if (contracts === null) return <p role="alert" className="rounded-xl border border-border bg-card p-4 text-sm">Não foi possível carregar os contratos. Atualize a página para tentar de novo.</p>;
+  if (contracts === null) return <p role="alert" className="rounded-xl bg-card p-4 text-sm">Não foi possível carregar os contratos. Atualize a página para tentar de novo.</p>;
   if (!contracts.length) return <EmptyState icon={<FileText className="size-5" aria-hidden="true" />} title="Nenhum contrato emitido" description={emptyDescription} />;
   const firstPending = canSign ? contracts.find((contract) => contract.status === "pending_signature")?.$id : undefined;
   return <Card><CardContent>

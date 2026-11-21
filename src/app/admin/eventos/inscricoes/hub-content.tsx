@@ -53,7 +53,7 @@ export async function HubContent() {
 
   if (pending.length === 0) {
     return (
-      <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">
+      <p className="rounded-xl bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">
         Nenhuma inscrição esperando você. Aprovações, documentos, pagamentos e envios à federação aparecem aqui quando houver.
       </p>
     );

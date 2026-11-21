@@ -36,9 +36,9 @@ export function CheckinList({ rows, returnTo, closed }: { rows: CheckinRow[]; re
         </p>
       </div>
       {visible.length === 0 ? (
-        <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">{rows.length === 0 ? "Ninguém confirmado ainda." : "Ninguém encontrado com esse nome."}</p>
+        <p className="rounded-xl bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">{rows.length === 0 ? "Ninguém confirmado ainda." : "Ninguém encontrado com esse nome."}</p>
       ) : (
-        <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        <ul className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
           {visible.map((row) => {
             const isPresent = row.status === "checked_in" || row.status === "completed";
             return (

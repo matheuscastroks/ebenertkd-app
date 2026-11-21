@@ -20,7 +20,7 @@ function DrawerLoadingSkeleton() {
   return (
     <div role="status" aria-busy="true" className="space-y-4">
       <Skeleton className="h-12 w-full rounded-xl" />
-      <div className="divide-y divide-border/70 overflow-hidden rounded-2xl border border-border/70 bg-card shadow-xs">
+      <div className="divide-y divide-border/70 overflow-hidden rounded-2xl bg-card shadow-xs">
         {Array.from({ length: 3 }, (_, idx) => (
           <div key={idx} className="flex items-start gap-3 p-4">
             <Skeleton className="size-9 shrink-0 rounded-xl" />

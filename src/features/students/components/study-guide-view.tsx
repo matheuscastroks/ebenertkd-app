@@ -81,7 +81,7 @@ export function StudyGuideView({
           </div>
         </div>
 
-        <article className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
+        <article className="overflow-hidden rounded-xl bg-card shadow-xs divide-y divide-border">
           <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1.5">
               <div className="flex flex-wrap items-center gap-2">
@@ -147,7 +147,7 @@ export function StudyGuideView({
 
       <TabsContent value="vocabulary" className="space-y-6">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-          <section className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+          <section className="overflow-hidden rounded-xl bg-card shadow-xs">
             <div className="border-b border-border px-5 py-3.5">
               <h2 className="text-base font-semibold">Comandos essenciais do dojang</h2>
             </div>
@@ -164,7 +164,7 @@ export function StudyGuideView({
             </dl>
           </section>
 
-          <section className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+          <section className="overflow-hidden rounded-xl bg-card shadow-xs">
             <div className="border-b border-border px-5 py-3.5">
               <h2 className="text-base font-semibold">Contagem em coreano (1 a 10)</h2>
             </div>
@@ -192,7 +192,7 @@ export function StudyGuideView({
             {TAEKWONDO_TENETS.map((tenet) => (
               <div
                 key={tenet.korean}
-                className="space-y-1.5 rounded-xl border border-border bg-card p-4 shadow-xs"
+                className="space-y-1.5 rounded-xl bg-card p-4 shadow-xs"
               >
                 <p className="text-xs font-medium text-muted-foreground">{tenet.korean}</p>
                 <h3 className="text-base font-semibold text-foreground">{tenet.name}</h3>
@@ -202,7 +202,7 @@ export function StudyGuideView({
           </div>
         </section>
 
-        <section className="space-y-2 rounded-xl border border-border bg-card p-5 shadow-xs">
+        <section className="space-y-2 rounded-xl bg-card p-5 shadow-xs">
           <h2 className="text-base font-semibold">Etiqueta no dojang</h2>
           <ul className="list-disc space-y-1.5 pl-4 text-sm text-muted-foreground">
             <li>Cumprimente as bandeiras e o professor ao entrar e sair do tatame.</li>
@@ -214,7 +214,7 @@ export function StudyGuideView({
       </TabsContent>
 
       <TabsContent value="quiz" className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 shadow-xs sm:px-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-card p-4 shadow-xs sm:px-5">
           <div className="space-y-1">
             <h2 className="text-base font-semibold">
               Revisão teórica · Faixa {beltNameOf(ranks, activeModule.rankKey)}
@@ -250,7 +250,7 @@ export function StudyGuideView({
             return (
               <div
                 key={q.id}
-                className="space-y-3 rounded-xl border border-border bg-card p-5 shadow-xs"
+                className="space-y-3 rounded-xl bg-card p-5 shadow-xs"
               >
                 <p className="text-sm font-semibold text-foreground">
                   {qIdx + 1}. {q.question}

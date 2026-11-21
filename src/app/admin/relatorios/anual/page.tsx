@@ -26,7 +26,7 @@ async function AnnualReportContent({ searchParams }: { searchParams: SearchParam
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-xs sm:flex-row sm:items-end sm:justify-between sm:px-5">
+      <div className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-xs sm:flex-row sm:items-end sm:justify-between sm:px-5">
         <AnnualYearPicker year={report.year} years={years} />
         <p className="text-xs text-muted-foreground tabular-nums">
           Pagamentos em dia no ano:{" "}
@@ -38,7 +38,7 @@ async function AnnualReportContent({ searchParams }: { searchParams: SearchParam
 
       <dl
         aria-label={`Indicadores anuais de ${report.year}`}
-        className="grid grid-cols-2 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs sm:grid-cols-4 sm:divide-x sm:divide-y-0"
+        className="grid grid-cols-2 divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs sm:grid-cols-4 sm:divide-x sm:divide-y-0"
       >
         <div className="p-4 sm:px-5">
           <dt className="text-sm font-medium text-muted-foreground">Receita anual realizada</dt>
@@ -97,7 +97,7 @@ async function AnnualReportContent({ searchParams }: { searchParams: SearchParam
 
       <section
         aria-labelledby="quarterly-summary-heading"
-        className="overflow-hidden rounded-xl border border-border bg-card shadow-xs"
+        className="overflow-hidden rounded-xl bg-card shadow-xs"
       >
         <div className="border-b border-border px-4 py-3.5 sm:px-5">
           <h2 id="quarterly-summary-heading" className="text-base font-semibold">

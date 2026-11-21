@@ -153,7 +153,7 @@ export function BeltRanksEditor({ ranks, studentsPerRank }: { ranks: RankConfig[
             type="multiple"
             value={openItems}
             onValueChange={setOpenItems}
-            className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs"
+            className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs"
           >
             {ranks
               .filter((rank) => rank.kind === group.kind)
@@ -174,7 +174,7 @@ export function BeltRanksEditor({ ranks, studentsPerRank }: { ranks: RankConfig[
         </section>
       ))}
 
-      <div className="sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-3 shadow-sm">
+      <div className="sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-card p-3 shadow-sm">
         <p role="status" className="text-sm text-muted-foreground">
           {patches.length === 0 ? "Nenhuma alteração pendente." : `${patches.length} graduaç${patches.length === 1 ? "ão alterada" : "ões alteradas"}, ainda não salva${patches.length === 1 ? "" : "s"}.`}
         </p>

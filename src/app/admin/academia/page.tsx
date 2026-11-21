@@ -94,7 +94,7 @@ export default async function AdminAcademyOverviewPage() {
         {groups.map((group) => (
           <section key={group.title} aria-labelledby={`ajustes-${group.title}`} className="space-y-2">
             <h2 id={`ajustes-${group.title}`} className="px-1 text-sm font-medium text-muted-foreground">{group.title}</h2>
-            <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+            <ul className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
               {group.rows.map((row) => (
                 <li key={row.href}>
                   <Link href={row.href} className="t-interactive-row flex min-h-14 items-center gap-3 px-4 py-3 hover:bg-muted sm:px-5">

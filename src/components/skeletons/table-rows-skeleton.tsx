@@ -16,7 +16,7 @@ export function TableRowsSkeleton({
         <div
           aria-label="Carregando tabela…"
           aria-busy="true"
-          className="overflow-hidden rounded-xl border border-border bg-card shadow-xs"
+          className="overflow-hidden rounded-xl bg-card shadow-xs"
         >
           <Table>
             <TableHeader>

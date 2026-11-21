@@ -85,7 +85,7 @@ function PendingRequest({ request, contract }: Row) {
 
 function DecidedList({ rows }: { rows: Row[] }) {
   return (
-    <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+    <ul className="divide-y divide-border rounded-xl bg-card">
       {rows.map(({ request, contract }) => (
         <li key={request.$id} className="space-y-1 p-4 text-sm">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -128,7 +128,7 @@ export async function CancellationsList() {
         {pending.length ? (
           <div className="space-y-4">{pending.map((row) => <PendingRequest key={row.request.$id} {...row} />)}</div>
         ) : (
-          <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">Nenhum pedido aguardando decisão.</p>
+          <p className="rounded-xl bg-card p-4 text-sm text-muted-foreground">Nenhum pedido aguardando decisão.</p>
         )}
       </section>
 

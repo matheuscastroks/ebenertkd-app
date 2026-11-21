@@ -354,7 +354,7 @@ function CalculatorBody({
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        <section aria-label="Resumo do planejamento" className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        <section aria-label="Resumo do planejamento" className="overflow-hidden rounded-xl bg-card shadow-xs">
           <dl className="grid grid-cols-1 divide-y divide-border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
             <ResultCard
               label="Ponto de equilíbrio"

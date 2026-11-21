@@ -50,7 +50,7 @@ async function StudentAchievementsContent({ profile }: { profile: Profile }) {
     <div className="space-y-6">
       <dl
         aria-label="Indicadores de constância"
-        className="grid grid-cols-2 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs sm:grid-cols-4 sm:divide-x sm:divide-y-0"
+        className="grid grid-cols-2 divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs sm:grid-cols-4 sm:divide-x sm:divide-y-0"
       >
         <div className="p-4 sm:px-5">
           <dt className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
@@ -94,12 +94,12 @@ async function StudentAchievementsContent({ profile }: { profile: Profile }) {
       </dl>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-        <section className="rounded-xl border border-border bg-card p-5 shadow-xs">
+        <section className="rounded-xl bg-card p-5 shadow-xs">
           <h2 className="mb-3 text-base font-semibold">Mapa de presenças</h2>
           <ConsistencyHeatmap weeks={report.heatmapWeeks} />
         </section>
 
-        <section className="rounded-xl border border-border bg-card p-5 shadow-xs">
+        <section className="rounded-xl bg-card p-5 shadow-xs">
           <h2 className="mb-2 text-base font-semibold">Presenças por mês</h2>
           <StudentMonthlyProgressChart series={snapshot.monthlySeries} />
         </section>
@@ -121,7 +121,7 @@ async function StudentAchievementsContent({ profile }: { profile: Profile }) {
           {report.badges.map((badge) => (
             <div
               key={badge.id}
-              className="flex flex-col justify-between gap-3 rounded-xl border border-border bg-card p-4 shadow-xs"
+              className="flex flex-col justify-between gap-3 rounded-xl bg-card p-4 shadow-xs"
             >
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between gap-2">

@@ -26,7 +26,7 @@ export function SystemSummary({ health }: { health: HealthSnapshot }) {
   const attention = systemAttentionItems(health);
   if (!attention.length) {
     return (
-      <div role="status" className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
+      <div role="status" className="flex items-center gap-3 rounded-xl bg-card p-4">
         <CheckCircle2 className="size-5 shrink-0 text-success" aria-hidden="true" />
         <div>
           <p className="text-base font-semibold">Tudo funcionando</p>
@@ -36,7 +36,7 @@ export function SystemSummary({ health }: { health: HealthSnapshot }) {
     );
   }
   return (
-    <div role="status" className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
+    <div role="status" className="flex items-start gap-3 rounded-xl bg-card p-4">
       <TriangleAlert className="mt-0.5 size-5 shrink-0 text-warning" aria-hidden="true" />
       <div>
         <p className="text-base font-semibold">{attention.length === 1 ? "1 item precisa de atenção" : `${attention.length} itens precisam de atenção`}</p>

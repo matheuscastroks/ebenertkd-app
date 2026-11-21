@@ -35,7 +35,7 @@ export function HistoryTimeline({ entries }: { entries: HistoryEntry[] }) {
   return (
     <ol className="space-y-3" aria-label="Alterações de configuração">
       {entries.map((entry) => (
-        <li key={entry.id} className="rounded-xl border border-border bg-card p-4 shadow-xs">
+        <li key={entry.id} className="rounded-xl bg-card p-4 shadow-xs">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
               <p className="flex flex-wrap items-center gap-2 font-medium">

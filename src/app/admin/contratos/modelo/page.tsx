@@ -91,7 +91,7 @@ export default async function ContractTemplatePage({
         {/* Histórico de versões ao lado do editor */}
         <aside
           aria-label="Histórico de versões"
-          className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs"
+          className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs"
         >
           <section className="p-5 space-y-3">
             <div>

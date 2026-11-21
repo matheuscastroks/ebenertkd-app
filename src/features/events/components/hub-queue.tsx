@@ -63,7 +63,7 @@ export function HubQueue({ id, title, hint, rows, action, fieldName = "registrat
   );
 
   return (
-    <section id={id} className="scroll-mt-24 overflow-hidden rounded-xl border border-border bg-card shadow-xs" aria-label={title}>
+    <section id={id} className="scroll-mt-24 overflow-hidden rounded-xl bg-card shadow-xs" aria-label={title}>
       <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3 sm:px-5">
         <div className="space-y-0.5">
           <h2 className="flex items-center gap-2 text-base font-semibold">

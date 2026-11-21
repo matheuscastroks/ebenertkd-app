@@ -26,7 +26,7 @@ export async function SetupCardSection() {
   const [identity, store] = await Promise.all([getAcademyIdentity(), cookies()]);
   if (identity.setup_completed_at || store.get(SETUP_BANNER_COOKIE)) return null;
   return (
-    <section aria-label="Configuração da academia" className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-xs sm:flex-row sm:items-center sm:justify-between sm:px-5">
+    <section aria-label="Configuração da academia" className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-xs sm:flex-row sm:items-center sm:justify-between sm:px-5">
       <div className="min-w-0 space-y-1">
         <h2 className="text-sm font-semibold text-foreground">Configure sua academia</h2>
         <p className="text-sm text-muted-foreground">
@@ -76,7 +76,7 @@ export async function UrgentTasksSection() {
     return (
       <section className="space-y-3" aria-label="Pendências">
         <h2 className="text-base font-semibold">Aguardando você</h2>
-        <div className="rounded-xl border border-border bg-card p-5 text-center text-sm text-muted-foreground shadow-xs">
+        <div className="rounded-xl bg-card p-5 text-center text-sm text-muted-foreground shadow-xs">
           Tudo em dia. Nenhuma ficha ou comprovante esperando por você.
         </div>
       </section>
@@ -94,7 +94,7 @@ export async function UrgentTasksSection() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border">
+      <div className="overflow-hidden rounded-xl bg-card shadow-xs divide-y divide-border">
         <ul className="t-stagger divide-y divide-border">
           {enrollments.slice(0, 5).map(({ student, enrollment }) => (
             <li
@@ -175,7 +175,7 @@ export async function TodayClassesSection() {
   const nextId = (classes.find((item) => item.end_time > now) ?? classes.at(-1))?.$id;
   return <section className="space-y-3" aria-label="Treinos de hoje">
     <h2 className="text-base font-semibold">Treinos de hoje</h2>
-    {classes.length ? <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+    {classes.length ? <ul className="divide-y divide-border rounded-xl bg-card">
       {classes.map((item) => <li key={item.$id} className="flex flex-wrap items-center justify-between gap-3 p-4">
         <div className="min-w-0">
           <p className="text-sm font-medium">{item.name}</p>
@@ -198,7 +198,7 @@ export async function OverdueSection() {
     <Link
       href={`${ROUTES.adminBilling}?status=overdue`}
       aria-label={overdue > 0 ? `Em atraso: ${money(overdue)}. Ver cobranças` : "Nenhuma mensalidade em atraso. Ver cobranças"}
-      className="t-interactive-row flex min-h-12 items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-xs transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:bg-muted motion-reduce:transition-none sm:px-5"
+      className="t-interactive-row flex min-h-12 items-center justify-between gap-3 rounded-xl bg-card px-4 py-3 shadow-xs transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:bg-muted motion-reduce:transition-none sm:px-5"
     >
       <span className="text-sm text-muted-foreground">
         {overdue > 0 ? "Em atraso" : "Mensalidades em dia"}
@@ -229,7 +229,7 @@ export async function NextExamSection() {
       </div>
 
       {exam ? (
-        <div className="t-interactive-row flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-xs hover:border-primary/30 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="t-interactive-row flex flex-col gap-4 rounded-xl bg-card p-4 shadow-xs hover:border-primary/30 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div className="flex items-center gap-4 min-w-0">
             {/* Data no estilo do Calendário */}
             <div className="flex size-14 shrink-0 flex-col items-center justify-center rounded-xl border border-primary/25 bg-primary/10 text-center select-none">
@@ -264,7 +264,7 @@ export async function NextExamSection() {
           </Button>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card p-6 text-center shadow-xs sm:p-8">
+        <div className="flex flex-col items-center justify-center gap-2 rounded-xl bg-card p-6 text-center shadow-xs sm:p-8">
           <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
             <Calendar className="size-5" aria-hidden="true" />
           </div>

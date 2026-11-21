@@ -21,10 +21,10 @@ export function paymentLabel(row: EventRegistrationRow) {
 /** Inscritos com ações do professor: aprovar, recusar e cancelar (com decisão financeira quando há pagamento). */
 export function RegistrationTable({ rows, returnTo }: { rows: EventRegistrationRow[]; returnTo: string }) {
   if (rows.length === 0) {
-    return <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">Nenhuma inscrição ainda. Quando alguém se inscrever, aparece aqui.</p>;
+    return <p className="rounded-xl bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">Nenhuma inscrição ainda. Quando alguém se inscrever, aparece aqui.</p>;
   }
   return (
-    <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-xs">
+    <div className="overflow-x-auto rounded-xl bg-card shadow-xs">
       <Table>
         <TableHeader>
           <TableRow>

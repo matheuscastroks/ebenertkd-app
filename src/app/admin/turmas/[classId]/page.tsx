@@ -29,7 +29,7 @@ type LessonItem = Awaited<ReturnType<typeof listLessonsForClass>>[number];
 
 function LessonList({ lessons, classId, today }: { lessons: LessonItem[]; classId: string; today: string }) {
   return (
-    <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+    <ul className="divide-y divide-border rounded-xl bg-card">
       {lessons.map((lesson) => {
         const status = lessonStatus[lesson.status];
         const isToday = lesson.lesson_date.slice(0, 10) === today;
@@ -103,7 +103,7 @@ export default async function ClassLessonsPage({
         ) : null}
 
         {/* Aula de hoje: a tarefa principal da tela */}
-        <section aria-labelledby="aula-de-hoje" className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <section aria-labelledby="aula-de-hoje" className="flex flex-col gap-4 rounded-xl bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div className="min-w-0 space-y-1">
             <h2 id="aula-de-hoje" className="text-base font-semibold">{todayLesson ? "Aula de hoje pronta" : "Aula de hoje"}</h2>
             <p className="text-sm text-muted-foreground">
@@ -173,7 +173,7 @@ export default async function ClassLessonsPage({
         <section className="space-y-3" aria-labelledby="historico-aulas">
           <h2 id="historico-aulas" className="text-base font-semibold">Histórico de aulas</h2>
           {lessons.length === 0 ? (
-            <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
+            <p className="rounded-xl bg-card p-4 text-sm text-muted-foreground">
               Nenhuma aula criada ainda. Crie a aula de hoje para fazer a primeira chamada.
             </p>
           ) : (

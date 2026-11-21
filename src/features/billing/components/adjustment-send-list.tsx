@@ -127,7 +127,7 @@ export function AdjustmentSendList({ data, professorName, academyName, billingDe
 
   return (
     <div className="space-y-6">
-      <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+      <div className="space-y-4 rounded-xl bg-card p-4 shadow-xs sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -215,7 +215,7 @@ export function AdjustmentSendList({ data, professorName, academyName, billingDe
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">Nenhum aluno incluído nesta campanha.</p>
       ) : (
-        <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        <ul className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
           {rows.map((row) => {
             const text = messageFor(row);
             const link = buildWhatsappMessageLink(row.whatsappBase, text);

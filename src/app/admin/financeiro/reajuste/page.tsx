@@ -52,7 +52,7 @@ function CampaignList({ id, title, items }: { id: string; title: string; items: 
   return (
     <section aria-labelledby={id} className="space-y-3">
       <h2 id={id} className="text-base font-semibold">{title}</h2>
-      <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+      <ul className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
         {items.map((campaign) => (
           <li key={campaign.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-5">
             <div className="space-y-1">

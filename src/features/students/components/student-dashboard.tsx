@@ -59,13 +59,13 @@ export async function StudentDashboardDynamic({ profile, minor, footer }: { prof
     {pendencies.length > 0 ? (
       <section aria-labelledby="pendencies-title" className="space-y-2.5">
         <h2 id="pendencies-title" className="text-base font-semibold">Pendências</h2>
-        <div className="overflow-hidden rounded-xl border border-border bg-card px-4 py-3 shadow-xs">
+        <div className="overflow-hidden rounded-xl bg-card px-4 py-3 shadow-xs">
           <PendencyList items={pendencies} primaryKey={primary?.id} />
         </div>
       </section>
     ) : null}
 
-    <section aria-labelledby="next-training-title" className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+    <section aria-labelledby="next-training-title" className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
       <div className="space-y-1.5 p-5">
         <h2 id="next-training-title" className="text-sm font-medium text-muted-foreground">Próximo treino</h2>
         <p className="text-2xl font-semibold tracking-tight tabular-nums">{formatNextTraining(next)}</p>

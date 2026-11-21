@@ -102,7 +102,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
 
   const activeCount = (["status", "rank", "turma"] as const).filter((key) => isSet(optimisticFilters[key])).length;
   return (
-    <div aria-busy={pending} className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-xs transition-opacity duration-(--duration-quick) motion-reduce:transition-none aria-busy:opacity-80">
+    <div aria-busy={pending} className="space-y-3 rounded-xl bg-card p-4 shadow-xs transition-opacity duration-(--duration-quick) motion-reduce:transition-none aria-busy:opacity-80">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Field>
           <FieldLabel htmlFor="enrollment-search">Aluno</FieldLabel>

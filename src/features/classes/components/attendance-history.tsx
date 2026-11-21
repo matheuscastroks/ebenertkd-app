@@ -175,7 +175,7 @@ export function AttendanceHistory({
       {/* Resumo Mensal e Gráficos de Frequência */}
       <section
         aria-labelledby="attendance-summary-title"
-        className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs"
+        className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs"
       >
         <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
@@ -257,7 +257,7 @@ export function AttendanceHistory({
       {/* Grade Unificada com Calendário Compacto e Detalhes do Dia */}
       <section
         aria-labelledby="attendance-calendar-title"
-        className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs lg:grid-cols-[20rem_minmax(0,1fr)] lg:divide-x lg:divide-y-0"
+        className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs lg:grid-cols-[20rem_minmax(0,1fr)] lg:divide-x lg:divide-y-0"
       >
         {/* Coluna Esquerda: Calendário ajustado à largura natural */}
         <div className="min-w-0 space-y-3.5 p-4 sm:p-5">

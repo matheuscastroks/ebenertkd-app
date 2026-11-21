@@ -50,7 +50,7 @@ export function StudentAccessGate({
     if (isMinor) {
       return (
         <div className="mx-auto flex w-full max-w-xl flex-col items-center justify-center px-4 py-14 text-center">
-          <div className="w-full space-y-5 rounded-xl border border-border bg-card p-6 shadow-xs sm:p-8">
+          <div className="w-full space-y-5 rounded-xl bg-card p-6 shadow-xs sm:p-8">
             <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-muted text-foreground">
               <Lock className="size-5" aria-hidden="true" />
             </div>
@@ -74,7 +74,7 @@ export function StudentAccessGate({
     if (!isAllowedWhenLocked(pathname)) {
       return (
         <div className="mx-auto flex w-full max-w-xl flex-col items-center justify-center px-4 py-14 text-center">
-          <div className="w-full space-y-5 rounded-xl border border-border bg-card p-6 shadow-xs sm:p-8">
+          <div className="w-full space-y-5 rounded-xl bg-card p-6 shadow-xs sm:p-8">
             <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-warning/15 text-warning-foreground">
               <Lock className="size-5" aria-hidden="true" />
             </div>

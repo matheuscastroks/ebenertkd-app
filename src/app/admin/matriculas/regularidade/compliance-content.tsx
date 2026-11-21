@@ -99,7 +99,7 @@ export async function ComplianceContent({ query }: { query: ComplianceQuery }) {
           <h2 id="compliance-list-heading" className="text-base font-semibold">
             {status ? labels[status] : "Todos os alunos"} ({rows.length})
           </h2>
-          <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+          <ul className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
             {rows.map((row) => (
               <ComplianceRow key={row.studentId} row={row} returnTo={returnTo} />
             ))}

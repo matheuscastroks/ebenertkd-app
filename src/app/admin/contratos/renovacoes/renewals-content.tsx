@@ -106,7 +106,7 @@ export async function RenewalsContent({ bucket, search }: { bucket?: RenewalBuck
             <p className="text-sm text-muted-foreground">Ao renovar, a versão publicada do modelo vai para assinatura.</p>
           </div>
 
-          <ul className="t-stagger divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+          <ul className="t-stagger divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
             {rows.map((item) => (
               <li
                 key={item.contractId}

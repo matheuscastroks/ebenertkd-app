@@ -52,7 +52,7 @@ export function NotificationPreferences({
   }
 
   return (
-    <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
+    <div className="divide-y divide-border overflow-hidden rounded-xl bg-card">
       {options
         .filter((option) => showFinancial || option.key !== "financial_enabled")
         .map(({ key, label, description }) => (

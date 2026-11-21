@@ -123,7 +123,7 @@ export default async function AdminLocationsPage({
           {locations.map((loc) => (
             <div
               key={loc.id}
-              className="flex flex-col justify-between rounded-xl border border-border bg-card p-5 shadow-xs transition-colors duration-(--duration-quick) hover:border-border/80"
+              className="flex flex-col justify-between rounded-xl bg-card p-5 shadow-xs transition-colors duration-(--duration-quick) hover:border-border/80"
             >
               <div className="space-y-2">
                 <div className="flex items-start justify-between gap-2">

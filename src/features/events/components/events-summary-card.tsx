@@ -5,7 +5,7 @@ import { ROUTES } from "@/lib/navigation/routes";
 /** Resumo de eventos de um período para o relatório anual e o fechamento mensal. */
 export function EventsSummaryCard({ summary, periodLabel }: { summary: EventsSummary; periodLabel: string }) {
   return (
-    <section aria-labelledby="events-summary-heading" className="rounded-xl border border-border bg-card shadow-xs">
+    <section aria-labelledby="events-summary-heading" className="rounded-xl bg-card shadow-xs">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3 sm:px-5">
         <h2 id="events-summary-heading" className="text-base font-semibold">
           Eventos · {periodLabel}

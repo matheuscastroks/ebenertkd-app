@@ -39,7 +39,7 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
     <div className="space-y-6">
       <section
         aria-labelledby="readiness-heading"
-        className="overflow-hidden rounded-xl border border-border bg-card shadow-xs divide-y divide-border"
+        className="overflow-hidden rounded-xl bg-card shadow-xs divide-y divide-border"
       >
         <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
@@ -131,7 +131,7 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
         <section
           aria-labelledby="roadmap-heading"
-          className="space-y-3 rounded-xl border border-border bg-card p-5 shadow-xs"
+          className="space-y-3 rounded-xl bg-card p-5 shadow-xs"
         >
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 id="roadmap-heading" className="text-base font-semibold">
@@ -178,7 +178,7 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
         <div className="space-y-6">
           <section
             aria-labelledby="belt-history-heading"
-            className="space-y-3 rounded-xl border border-border bg-card p-5 shadow-xs"
+            className="space-y-3 rounded-xl bg-card p-5 shadow-xs"
           >
             <div className="flex items-center justify-between gap-2">
               <h2 id="belt-history-heading" className="text-base font-semibold">

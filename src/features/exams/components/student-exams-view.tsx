@@ -81,7 +81,7 @@ export function StudentExamsView({
           <h2 id="exam-history" className="text-base font-semibold text-foreground">
             Histórico de exames
           </h2>
-          <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+          <ul className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
             {past.map((entry) => (
               <PastExamRow key={entry.participant.$id} entry={entry} />
             ))}

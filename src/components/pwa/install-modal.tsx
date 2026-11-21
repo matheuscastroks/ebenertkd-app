@@ -60,7 +60,7 @@ export function InstallModal({ open, onOpenChange }: InstallModalProps) {
               </p>
             </div>
           ) : isIos ? (
-            <div className="space-y-3 rounded-xl border border-border bg-muted/40 p-4">
+            <div className="space-y-3 rounded-xl bg-muted/40 p-4">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Como instalar no iPhone / iPad (Safari)
               </p>
@@ -111,7 +111,7 @@ export function InstallModal({ open, onOpenChange }: InstallModalProps) {
               </p>
             </div>
           ) : (
-            <div className="space-y-3 rounded-xl border border-border bg-muted/40 p-4">
+            <div className="space-y-3 rounded-xl bg-muted/40 p-4">
               <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                 <Smartphone className="size-4 text-primary" />
                 <span>Instalar pelo navegador</span>

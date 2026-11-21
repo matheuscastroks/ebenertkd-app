@@ -77,13 +77,13 @@ async function EventDetail({ admin, bundle, tab, ok, erro }: { admin: Profile; b
 
   const overview = (
     <div className="space-y-4">
-      <dl className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
+      <dl className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
         <Stat label="Vagas" value={event.capacity ? `${bundle.seatsTaken}/${event.capacity}` : String(bundle.seatsTaken)} hint={event.capacity ? "ocupadas" : "sem limite"} extra={<AvatarGroup people={active.map((row) => ({ name: row.name, imageUrl: row.imageUrl }))} max={5} size="sm" surface="card" label="Inscritos e interessados" />} />
         <Stat label="Confirmados" value={String(confirmed)} hint={`${present} presentes`} />
         <Stat label="Pendências" value={String(pending)} hint={`${waitlisted} na lista de espera`} />
         <Stat label="Receita" value={formatBrl(receivedCents)} hint={`${formatBrl(expectedCents)} previstos`} />
       </dl>
-      <dl className="grid grid-cols-1 gap-3 rounded-xl border border-border bg-card p-4 text-sm shadow-xs sm:grid-cols-2 sm:p-5">
+      <dl className="grid grid-cols-1 gap-3 rounded-xl bg-card p-4 text-sm shadow-xs sm:grid-cols-2 sm:p-5">
         <div>
           <dt className="text-muted-foreground">Quando</dt>
           <dd className="font-medium tabular-nums">
@@ -172,9 +172,9 @@ async function EventDetail({ admin, bundle, tab, ok, erro }: { admin: Profile; b
   const paymentRows = rows.filter((row) => row.registration.price_cents > 0 && !["cancelled", "rejected", "waitlisted", "interested"].includes(row.registration.status));
   const payments =
     paymentRows.length === 0 ? (
-      <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">Nenhuma cobrança neste evento.</p>
+      <p className="rounded-xl bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">Nenhuma cobrança neste evento.</p>
     ) : (
-      <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+      <ul className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
         {paymentRows.map((row) => {
           const payment = paymentLabel(row);
           return (

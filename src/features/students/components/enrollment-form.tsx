@@ -227,7 +227,7 @@ export function EnrollmentForm({
         </Alert>
       ) : null}
 
-      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+      <div className="overflow-hidden rounded-xl bg-card shadow-xs">
         <div className="space-y-3 border-b border-border bg-muted/20 px-5 py-3.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-sm font-semibold text-foreground">

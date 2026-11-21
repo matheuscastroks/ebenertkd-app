@@ -113,7 +113,7 @@ async function SystemHealthContent() {
         {/* Resumo Operacional: Rotina diária, Backup externo e Armazenamento */}
         <section
           aria-label="Resumo operacional"
-          className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs lg:grid-cols-3 lg:divide-x lg:divide-y-0"
+          className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs lg:grid-cols-3 lg:divide-x lg:divide-y-0"
         >
           <RunColumn
             title="Rotina diária"
@@ -178,7 +178,7 @@ async function SystemHealthContent() {
         {/* Configurações e Falhas Recentes */}
         <section
           aria-label="Integrações e falhas"
-          className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs lg:grid-cols-2 lg:divide-x lg:divide-y-0"
+          className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs lg:grid-cols-2 lg:divide-x lg:divide-y-0"
         >
           <div className="p-5 space-y-4">
             <div>

@@ -93,7 +93,7 @@ export function BillingTable({
   return (
     <ResponsiveDataView
       desktop={
-        <div className="overflow-hidden rounded-xl border border-border/50 bg-card shadow-xs">
+        <div className="overflow-hidden rounded-xl bg-card shadow-xs">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40">

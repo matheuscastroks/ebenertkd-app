@@ -47,7 +47,7 @@ export function AnnualRevenueAreaChart({
   }));
 
   return (
-    <div className="space-y-2 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+    <div className="space-y-2 rounded-xl bg-card p-4 shadow-xs sm:p-5">
       <div>
         <h2 className="text-sm font-medium text-muted-foreground">
           Receita prevista vs. realizada (12 meses)
@@ -148,7 +148,7 @@ export function AnnualSeasonalityBarChart({
   series: AnnualMonthlyPoint[];
 }) {
   return (
-    <div className="space-y-2 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+    <div className="space-y-2 rounded-xl bg-card p-4 shadow-xs sm:p-5">
       <div>
         <h2 className="text-sm font-medium text-muted-foreground">
           Sazonalidade: entradas vs. cancelamentos
@@ -195,7 +195,7 @@ export function BeltPyramidChart({
   );
 
   return (
-    <div className="space-y-2 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+    <div className="space-y-2 rounded-xl bg-card p-4 shadow-xs sm:p-5">
       <div>
         <h2 className="text-sm font-medium text-muted-foreground">
           Distribuição e retenção por faixa

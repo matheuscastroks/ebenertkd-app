@@ -12,7 +12,7 @@ import { ROUTES } from "@/lib/navigation/routes";
 function ExamSectionsSkeleton() {
   return (
     <div aria-label="Carregando banca…" aria-busy="true" className="space-y-6">
-      <div className="grid grid-cols-2 overflow-hidden rounded-xl border border-border bg-card shadow-xs sm:grid-cols-4">
+      <div className="grid grid-cols-2 overflow-hidden rounded-xl bg-card shadow-xs sm:grid-cols-4">
         <div className="space-y-2 p-4 sm:px-5">
           <Skeleton className="h-4 w-20" />
           <Skeleton className="h-7 w-12" />
@@ -34,7 +34,7 @@ function ExamSectionsSkeleton() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <div className="space-y-4 lg:col-span-8">
           <Skeleton className="h-5 w-40" />
-          <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+          <div className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
             {Array.from({ length: 3 }, (_, index) => (
               <div
                 key={index}

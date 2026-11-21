@@ -29,12 +29,12 @@ async function DependentSummary({ guardian, minor }: { guardian: Profile; minor:
     {pendencies.length > 0 ? (
       <section aria-labelledby="dependent-pendencies" className="space-y-2.5">
         <h2 id="dependent-pendencies" className="text-base font-semibold">Pendências</h2>
-        <div className="overflow-hidden rounded-xl border border-border bg-card px-4 py-3 shadow-xs">
+        <div className="overflow-hidden rounded-xl bg-card px-4 py-3 shadow-xs">
           <PendencyList items={pendencies} primaryKey={primaryPendency(pendencies)?.id} subject={minor.full_name} />
         </div>
       </section>
     ) : null}
-    <section aria-labelledby="dependent-next-training" className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+    <section aria-labelledby="dependent-next-training" className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
       <div className="space-y-1 p-5">
         <h2 id="dependent-next-training" className="text-sm font-medium text-muted-foreground">Próximo treino</h2>
         <p className="text-xl font-semibold tracking-tight tabular-nums">{formatNextTraining(next)}</p>

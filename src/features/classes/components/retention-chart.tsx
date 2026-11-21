@@ -57,7 +57,7 @@ export function RetentionCharts({ summary, windowDays = 30 }: { summary: Retenti
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
-      <div className="flex flex-col justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+      <div className="flex flex-col justify-between gap-4 rounded-xl bg-card p-4 shadow-xs sm:p-5">
         <div>
           <h2 className="text-sm font-medium text-muted-foreground">
             Saúde de presença da academia
@@ -151,7 +151,7 @@ export function RetentionCharts({ summary, windowDays = 30 }: { summary: Retenti
         </div>
       </div>
 
-      <div className="flex flex-col justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+      <div className="flex flex-col justify-between gap-4 rounded-xl bg-card p-4 shadow-xs sm:p-5">
         <div>
           <h2 className="text-sm font-medium text-muted-foreground">
             Risco de evasão por turma

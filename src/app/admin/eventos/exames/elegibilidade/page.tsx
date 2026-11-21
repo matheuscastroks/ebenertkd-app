@@ -128,7 +128,7 @@ async function EligibilityContent({ searchParams }: { searchParams: SearchParams
             </p>
           </div>
 
-          <ul className="t-stagger divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+          <ul className="t-stagger divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
             {rows.map((row) => (
               <li
                 key={row.studentId}

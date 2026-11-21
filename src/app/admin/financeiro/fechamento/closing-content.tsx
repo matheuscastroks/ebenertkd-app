@@ -59,7 +59,7 @@ function PendingSection({ data, label }: { data: ClosingOverview; label: string 
 
   if (openCharges.length === 0 && report.readyToClose) {
     return (
-      <section aria-labelledby="closing-pending-heading" className="rounded-xl border border-border bg-card p-4 shadow-xs sm:px-5">
+      <section aria-labelledby="closing-pending-heading" className="rounded-xl bg-card p-4 shadow-xs sm:px-5">
         <h2 id="closing-pending-heading" className="text-base font-semibold">Nada pendente em {label}</h2>
         <p className="mt-1 text-sm text-muted-foreground">Todos os comprovantes foram conferidos e não há mensalidades em atraso.</p>
       </section>
@@ -91,7 +91,7 @@ function PendingSection({ data, label }: { data: ClosingOverview; label: string 
       </div>
 
       {openCharges.length > 0 ? (
-        <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        <ul className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
           {openCharges.slice(0, PENDING_PREVIEW).map((charge) => (
             <li key={charge.$id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-5">
               <div className="min-w-0">
@@ -129,7 +129,7 @@ function SummaryList({ data, label }: { data: ClosingOverview; label: string }) 
   return (
     <dl
       aria-label={`Resumo de ${label}`}
-      className="grid grid-cols-2 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs sm:grid-cols-4 sm:divide-x sm:divide-y-0"
+      className="grid grid-cols-2 divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs sm:grid-cols-4 sm:divide-x sm:divide-y-0"
     >
       <SummaryItem
         term="Previsto"
@@ -181,7 +181,7 @@ function DetailsSection({ data, label }: { data: ClosingOverview; label: string 
         </Button>
       </CollapsibleTrigger>
       <CollapsibleContent className="mt-3 space-y-6">
-        <section aria-labelledby="closing-result-heading" className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        <section aria-labelledby="closing-result-heading" className="overflow-hidden rounded-xl bg-card shadow-xs">
           <div className="border-b border-border px-4 py-3.5 sm:px-5">
             <h2 id="closing-result-heading" className="text-base font-semibold">Resultado do mês · {label}</h2>
           </div>
@@ -226,11 +226,11 @@ function DetailsSection({ data, label }: { data: ClosingOverview; label: string 
         </section>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <section className="rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+          <section className="rounded-xl bg-card p-4 shadow-xs sm:p-5">
             <h2 className="mb-2 text-sm font-medium text-muted-foreground">Por categoria · {label}</h2>
             <ClosingBreakdownChart categories={report.categories} />
           </section>
-          <section className="rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+          <section className="rounded-xl bg-card p-4 shadow-xs sm:p-5">
             <h2 className="mb-2 text-sm font-medium text-muted-foreground">Receita nos últimos 6 meses</h2>
             <BillingOverviewChart
               monthlySeries={monthlySeries}

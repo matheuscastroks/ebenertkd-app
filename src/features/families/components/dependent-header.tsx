@@ -26,7 +26,7 @@ export function DependentHeader({ name, rankKey, photoDocumentId, siblings, curr
   name: string; rankKey?: string | null; photoDocumentId?: string | null;
   siblings: Array<{ profileId: string; name: string }>; currentProfileId: string; section: DependentSection;
 }) {
-  return <section aria-label={`${sections[section]} de ${name}`} className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-4">
+  return <section aria-label={`${sections[section]} de ${name}`} className="flex flex-wrap items-center justify-between gap-4 rounded-xl bg-card p-4">
     <div className="flex min-w-0 items-center gap-3">
       <StudentAvatar name={name} photoDocumentId={photoDocumentId ?? undefined} size="md" className="size-14" />
       <div className="min-w-0 space-y-1">
