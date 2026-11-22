@@ -49,7 +49,7 @@ export default async function TrainingClassesPage({
       subtitle="Horários, locais e a chamada de cada turma."
     >
       <div className="w-full min-w-0">
-        <Suspense fallback={<InlineCardsSkeleton count={4} columns={2} label="Carregando turmas…" />}>
+        <Suspense fallback={<InlineCardsSkeleton count={6} columns={3} label="Carregando turmas…" />}>
           <ClassManagerSection searchParams={searchParams} />
         </Suspense>
       </div>

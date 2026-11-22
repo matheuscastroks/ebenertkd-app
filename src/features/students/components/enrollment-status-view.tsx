@@ -346,9 +346,17 @@ export function EnrollmentStatusView({
       {/* Resumo Estruturado em 2 Colunas (sem scroll, sem excesso de cards) */}
       <div className="grid grid-cols-1 divide-y divide-border lg:grid-cols-2 lg:divide-x lg:divide-y-0">
         <div className="space-y-2.5 p-5">
-          <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
-            <User aria-hidden="true" className="size-4 text-muted-foreground" />Identificação e contato
-          </h3>
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
+              <User aria-hidden="true" className="size-4 text-muted-foreground" />Identificação e contato
+            </h3>
+            {canEdit ? (
+              <Button type="button" variant="ghost" size="sm" className="h-8 gap-1 text-xs" onClick={() => onEdit(0)}>
+                <Pencil className="size-3" aria-hidden="true" />
+                Editar
+              </Button>
+            ) : null}
+          </div>
           <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
             <SummaryRow label="Aluno" value={student.full_name} />
             <SummaryRow label="CPF" value={formatCpfMask(student.cpf)} />
@@ -369,9 +377,17 @@ export function EnrollmentStatusView({
         </div>
 
         <div className="space-y-2.5 p-5">
-          <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
-            <User aria-hidden="true" className="size-4 text-muted-foreground" />Treino
-          </h3>
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
+              <User aria-hidden="true" className="size-4 text-muted-foreground" />Treino
+            </h3>
+            {canEdit ? (
+              <Button type="button" variant="ghost" size="sm" className="h-8 gap-1 text-xs" onClick={() => onEdit(2)}>
+                <Pencil className="size-3" aria-hidden="true" />
+                Editar
+              </Button>
+            ) : null}
+          </div>
           <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
             <SummaryRow label="Turma" value={classSummary} />
             <SummaryRow label="Graduação" value={<BeltBadge rankKey={student.rank_key} size="sm" />} />
@@ -381,7 +397,15 @@ export function EnrollmentStatusView({
             />
           </dl>
           <div className="mt-6 space-y-3">
-            <h3 className="flex items-center gap-2 text-base font-semibold"><HeartPulse aria-hidden="true" className="size-4 text-muted-foreground" />Saúde e emergência</h3>
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="flex items-center gap-2 text-base font-semibold"><HeartPulse aria-hidden="true" className="size-4 text-muted-foreground" />Saúde e emergência</h3>
+              {canEdit ? (
+                <Button type="button" variant="ghost" size="sm" className="h-8 gap-1 text-xs" onClick={() => onEdit(1)}>
+                  <Pencil className="size-3" aria-hidden="true" />
+                  Editar
+                </Button>
+              ) : null}
+            </div>
             <dl className="space-y-3">
             <SummaryRow label="Emergência" value={emergencySummary} />
             <SummaryRow

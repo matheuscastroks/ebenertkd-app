@@ -68,14 +68,14 @@ export function ContractPolicyForm({
           <CardTitle>Vigência</CardTitle>
           <CardDescription>Sugestão de duração ao aprovar a matrícula e ao renovar o contrato.</CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <ConfigField id="default_duration_months" label="Duração padrão (meses)" error={fieldErrors.default_duration_months} help="Só preenche a data de término sugerida. Você pode alterar as datas em cada matrícula.">
-            <Input id="default_duration_months" name="default_duration_months" inputMode="numeric" value={duration} onChange={(event) => setDuration(event.target.value)} required />
+            <Input id="default_duration_months" name="default_duration_months" inputMode="numeric" value={duration} onChange={(event) => setDuration(event.target.value)} required className="sm:max-w-xs" />
           </ConfigField>
           <ConfigField id="rematriculation_after_months" label="Rematrícula após afastamento (meses)" error={fieldErrors.rematriculation_after_months} help="Quem volta depois deste tempo afastado pode precisar de uma nova matrícula. Entra no texto do contrato.">
-            <Input id="rematriculation_after_months" name="rematriculation_after_months" inputMode="numeric" value={rematriculation} onChange={(event) => setRematriculation(event.target.value)} required />
+            <Input id="rematriculation_after_months" name="rematriculation_after_months" inputMode="numeric" value={rematriculation} onChange={(event) => setRematriculation(event.target.value)} required className="sm:max-w-xs" />
           </ConfigField>
-          <ConfigField id="renewal_reminder_days" label="Avisos de renovação (dias antes do fim)" error={fieldErrors.renewal_reminder_days} help="Dias antes do término do contrato em que a renovação é lembrada. Separe por vírgula. Ex.: 30, 7." className="sm:col-span-2">
+          <ConfigField id="renewal_reminder_days" label="Avisos de renovação (dias antes do fim)" error={fieldErrors.renewal_reminder_days} help="Dias antes do término do contrato em que a renovação é lembrada. Separe por vírgula. Ex.: 30, 7.">
             <Input id="renewal_reminder_days" name="renewal_reminder_days" inputMode="text" placeholder="Ex.: 30, 7" value={reminders} onChange={(event) => setReminders(event.target.value)} required />
           </ConfigField>
         </CardContent>
@@ -89,9 +89,9 @@ export function ContractPolicyForm({
             <Link href={ROUTES.adminContractTemplate} className="relative inline-block leading-6 font-medium text-foreground underline underline-offset-4 after:absolute after:-inset-x-1 after:-inset-y-2.5">Editar texto do contrato</Link>
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <ConfigField id="cancellation_notice_day" label="Dia limite do aviso" error={fieldErrors.cancellation_notice_day} help="Quem avisa a saída até este dia do mês anterior sai sem encargo. Depois dele, vale o encargo abaixo. De 1 a 28.">
-            <Input id="cancellation_notice_day" name="cancellation_notice_day" inputMode="numeric" value={noticeDay} onChange={(event) => setNoticeDay(event.target.value)} required />
+            <Input id="cancellation_notice_day" name="cancellation_notice_day" inputMode="numeric" value={noticeDay} onChange={(event) => setNoticeDay(event.target.value)} required className="sm:max-w-xs" />
           </ConfigField>
           <ConfigField id="exit_fee_mode" label="Encargo de saída" error={fieldErrors.exit_fee_mode} help="O que é cobrado de quem avisa depois do dia limite.">
             <Select name="exit_fee_mode" value={mode} onValueChange={(value) => setMode(value as ExitFeeMode)}>

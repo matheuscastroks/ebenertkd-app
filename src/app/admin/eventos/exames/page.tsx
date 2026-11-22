@@ -29,7 +29,7 @@ type ExamOverview = Awaited<ReturnType<typeof getExamsOverview>>;
 
 function ExamList({ events }: { events: ExamOverview["events"] }) {
   return (
-    <ul className="t-stagger grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <ul className="t-stagger grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
       {events.map((event) => (
         <li
           key={event.$id}

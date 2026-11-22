@@ -426,7 +426,6 @@ function CalculatorBody({
                     />
                     <AffixInput id="calc-fee" prefix="R$" value={fee} onChange={setFee} />
                     <RealValueReset show={edited(fee, realFee)} text={`Valor real: ${formatBrl(baseline.averageFeeCents)}`} onReset={() => setFee(realFee)} />
-                    {defaultFee ? <DefaultFeeShortcut initial={defaultFee} candidateCents={parseMoneyInput(fee)} /> : null}
                   </div>
                   <div className="space-y-1.5">
                     <FieldHeading
@@ -442,6 +441,7 @@ function CalculatorBody({
                     <RealValueReset show={edited(defaultRate, realDefault)} text={`Valor real: ${realDefault}%`} onReset={() => setDefaultRate(realDefault)} />
                   </div>
                 </div>
+                {defaultFee ? <DefaultFeeShortcut initial={defaultFee} candidateCents={parseMoneyInput(fee)} /> : null}
               </div>
 
               <Separator />

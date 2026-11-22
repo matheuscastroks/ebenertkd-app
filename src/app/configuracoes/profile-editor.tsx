@@ -74,19 +74,19 @@ export function ProfileEditor({
 
         {/* Campos de Perfil */}
         <div className="flex-1 space-y-4 w-full">
-          <Field>
-            <FieldLabel htmlFor="profile-fullname">Nome completo</FieldLabel>
-            <Input
-              id="profile-fullname"
-              name="full_name"
-              defaultValue={profile.full_name}
-              placeholder="Seu nome completo"
-              required
-              className="h-11 text-sm"
-            />
-          </Field>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Field className="sm:col-span-2 lg:col-span-1">
+              <FieldLabel htmlFor="profile-fullname">Nome completo</FieldLabel>
+              <Input
+                id="profile-fullname"
+                name="full_name"
+                defaultValue={profile.full_name}
+                placeholder="Seu nome completo"
+                required
+                className="h-11 text-sm"
+              />
+            </Field>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field>
               <FieldLabel htmlFor="profile-email">E-mail ou Usuário</FieldLabel>
               <Input

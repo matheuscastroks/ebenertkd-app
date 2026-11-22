@@ -66,7 +66,7 @@ export function CompliancePolicyForm({ policy, revision }: { policy: ComplianceP
           <CardDescription>Por quanto tempo cada documento vale e quando o aluno e o responsável são avisados. Vale também para os documentos já enviados.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <ConfigField id="medical_validity_days" label="Validade do atestado (dias)" error={fieldErrors.medical_validity_days} help="Contada da aprovação do atestado pelo professor.">
               <Input id="medical_validity_days" name="medical_validity_days" inputMode="numeric" value={medicalValidity} onChange={(event) => setMedicalValidity(event.target.value)} required />
             </ConfigField>
@@ -79,7 +79,7 @@ export function CompliancePolicyForm({ policy, revision }: { policy: ComplianceP
             <ConfigField id="parq_expiring_window_days" label="Alerta antes de vencer (dias)" error={fieldErrors.parq_expiring_window_days} help="Quantos dias antes do vencimento o PAR-Q aparece como 'vence em breve'.">
               <Input id="parq_expiring_window_days" name="parq_expiring_window_days" inputMode="numeric" value={parqWindow} onChange={(event) => setParqWindow(event.target.value)} required />
             </ConfigField>
-            <ConfigField id="parq_reminder_days" label="Lembretes do PAR-Q (dias antes)" error={fieldErrors.parq_reminder_days} help="Dias antes do vencimento em que o aluno ou responsável recebe o aviso. Use 0 para o dia do vencimento. Deixe vazio para não enviar lembretes." className="sm:col-span-2">
+            <ConfigField id="parq_reminder_days" label="Lembretes do PAR-Q (dias antes)" error={fieldErrors.parq_reminder_days} help="Dias antes do vencimento em que o aluno ou responsável recebe o aviso. Use 0 para o dia do vencimento. Deixe vazio para não enviar lembretes.">
               <Input id="parq_reminder_days" name="parq_reminder_days" inputMode="text" placeholder="Ex.: 30, 7, 0" value={reminders} onChange={(event) => setReminders(event.target.value)} />
             </ConfigField>
           </div>

@@ -93,7 +93,7 @@ async function GuardianMinorsList({ guardian, openId }: { guardian: Profile; ope
           <CollapsibleContent className="mt-4 space-y-4 border-t border-border pt-4">
             <form action={resetMinorPasswordAction} className="flex flex-col gap-3 sm:flex-row sm:items-end">
               <input type="hidden" name="minor_profile_id" value={minor.$id} />
-              <Field className="w-full flex-1">
+              <Field className="w-full flex-1 sm:max-w-xs">
                 <FieldLabel htmlFor={`minor-new-password-${minor.$id}`}>Nova senha de {minor.full_name.split(" ")[0]}</FieldLabel>
                 <Input id={`minor-new-password-${minor.$id}`} name="password" type="password" autoComplete="new-password" minLength={8} placeholder="Mínimo de 8 caracteres" required className="h-11" />
               </Field>

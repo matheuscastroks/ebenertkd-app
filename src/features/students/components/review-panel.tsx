@@ -1,21 +1,30 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { ReadableDate } from "@/components/shared/readable-date";
 import {
+  adminUpdateStudentAction,
   advanceToSignatureAction,
   reviewDocumentAction,
   saveFinancialReviewAction,
   setAccessOverrideAction
 } from "@/app/actions/enrollment-review";
 import { renewContractAction } from "@/app/actions/renewals";
+import { AddressFields } from "@/components/shared/address-fields";
 import { DateField } from "@/components/shared/date-field";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
+import { MaskedInput } from "@/components/shared/masked-input";
 import { OperationToast } from "@/components/shared/operation-toast";
+import { PhoneField } from "@/components/shared/phone-field";
 import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { CheckIcon } from "@/components/ui/check";
 import { FilePenLineIcon } from "@/components/ui/file-pen-line";
 import { SheetClose } from "@/components/ui/sheet";
+import { SquarePenIcon } from "@/components/ui/square-pen";
+import { Textarea } from "@/components/ui/textarea";
 import { XIcon } from "@/components/ui/x";
 import {
   AlertDialog,
@@ -44,7 +53,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
-import { EditStudentDialog } from "@/features/students/components/edit-student-dialog";
+import { GraduationFields } from "@/features/students/components/graduation-fields";
 import type { TrainingClass } from "@/features/classes/types";
 import { type PublicRank } from "@/features/academy/belt-rules";
 import { DEFAULT_BILLING_POLICY, DEFAULT_CONTRACT_POLICY } from "@/features/academy/defaults";
@@ -141,6 +150,11 @@ export function ReviewPanel({
   levelLabel?: string;
 }) {
   const { student, enrollment, documents } = bundle;
+  const [editingBlock, setEditingBlock] = useState<"dados" | "treino" | "saude" | null>(null);
+  const [hasHealthCondition, setHasHealthCondition] = useState(
+    student.health_condition === "yes" ? "yes" : "no"
+  );
+  const today = new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" });
   const profilePhoto = documents.find((doc) => doc.document_type === "profile_photo");
   const medicalCertificate = documents.find((doc) => doc.document_type === "medical_certificate");
 
@@ -280,7 +294,6 @@ export function ReviewPanel({
           >
             {ENROLLMENT_STATUS_LABELS[enrollment.status] ?? enrollment.status}
           </StatusBadge>
-          <EditStudentDialog student={student} classes={classes} />
         </div>
       </div>
 
@@ -297,90 +310,283 @@ export function ReviewPanel({
       <div className="space-y-6">
         <section id="dados" aria-label="Dados" className="scroll-mt-24 space-y-4">
           <div className="overflow-hidden rounded-xl bg-card shadow-xs divide-y divide-border">
-            <div className="p-5 space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 className="flex items-center gap-2 text-lg font-semibold leading-snug text-foreground"><User className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />Identificação e contato</h2>
-                  <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
-                    Dados pessoais e canais de comunicação direta com o aluno ou responsáveis.
-                  </p>
-                </div>
-              </div>
+            {editingBlock === "dados" ? (
+              <form action={adminUpdateStudentAction} className="divide-y divide-border">
+                <input type="hidden" name="student_id" value={student.$id} />
+                <input type="hidden" name="started_at_tkd" value={dateValue(student.started_at_tkd)} />
+                <input type="hidden" name="training_class_id" value={student.training_class_id ?? ""} />
+                <input type="hidden" name="rank_key" value={student.rank_key ?? ""} />
+                <input type="hidden" name="health_condition" value={student.health_condition ?? ""} />
+                <input type="hidden" name="health_details" value={student.health_details ?? ""} />
+                <input type="hidden" name="medications" value={student.medications ?? ""} />
+                <input type="hidden" name="allergies" value={student.allergies ?? ""} />
+                <input type="hidden" name="injuries" value={student.injuries ?? ""} />
 
-              <div className="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3 text-sm">
-                <div className="space-y-0.5">
-                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Calendar className="size-3.5" aria-hidden="true" />Data de nascimento</span>
-                  <span className="font-medium text-foreground">
-                    {dateValue(student.birth_date)
-                      ? <ReadableDate value={dateValue(student.birth_date)} />
-                      : "—"}
-                  </span>
-                </div>
-                <div className="space-y-0.5">
-                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Phone className="size-3.5" aria-hidden="true" />WhatsApp</span>
-                  <span className="font-medium text-foreground">
-                    {formatBrazilianPhone(student.whatsapp) || "—"}
-                  </span>
-                </div>
-                <div className="space-y-0.5">
-                  <span className="text-xs text-muted-foreground block">Contato do responsável</span>
-                  <span className="font-medium text-foreground">{student.guardian_contact || "Não informado / próprio aluno"}</span>
-                </div>
-                <div className="space-y-0.5 sm:col-span-2 lg:col-span-3">
-                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><MapPin className="size-3.5" aria-hidden="true" />Endereço</span>
-                  <span className="font-medium text-foreground">{student.address || "—"}</span>
-                </div>
-              </div>
-            </div>
+                <div className="p-5 space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <h2 className="flex items-center gap-2 text-lg font-semibold leading-snug text-foreground"><User className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />Identificação e contato</h2>
+                      <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
+                        Atualize os dados pessoais, canais de comunicação e endereço do aluno.
+                      </p>
+                    </div>
+                  </div>
 
-            <div className="bg-muted p-5 space-y-4">
-              <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
-                <Users className="size-4 text-muted-foreground" aria-hidden="true" /> Contato de emergência
-              </h3>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 text-sm">
-                <div className="space-y-0.5">
-                  <span className="text-xs text-muted-foreground block">Nome</span>
-                  <span className="font-medium text-foreground">{student.emergency_contact_name || "—"}</span>
+                  <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-12">
+                    <div className="sm:col-span-12 lg:col-span-5">
+                      <Field>
+                        <FieldLabel htmlFor="inline-full-name">Nome completo *</FieldLabel>
+                        <Input id="inline-full-name" name="full_name" defaultValue={student.full_name} required />
+                      </Field>
+                    </div>
+                    <div className="sm:col-span-6 lg:col-span-3">
+                      <Field>
+                        <FieldLabel htmlFor="inline-cpf">CPF</FieldLabel>
+                        <MaskedInput mask="cpf" id="inline-cpf" name="cpf" defaultValue={student.cpf ?? ""} />
+                      </Field>
+                    </div>
+                    <div className="sm:col-span-6 lg:col-span-2">
+                      <DateField
+                        id="inline-birth-date"
+                        name="birth_date"
+                        label="Data de nascimento"
+                        defaultValue={dateValue(student.birth_date)}
+                        max={today}
+                      />
+                    </div>
+                    <div className="sm:col-span-6 lg:col-span-2">
+                      <Field>
+                        <FieldLabel htmlFor="inline-sex">Sexo</FieldLabel>
+                        <Select name="sex" defaultValue={student.sex ?? ""}>
+                          <SelectTrigger id="inline-sex" className="w-full">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="feminino">Feminino</SelectItem>
+                            <SelectItem value="masculino">Masculino</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </Field>
+                    </div>
+                    <div className="sm:col-span-6 lg:col-span-4">
+                      <PhoneField
+                        id="inline-whatsapp"
+                        name="whatsapp"
+                        label="WhatsApp"
+                        defaultValue={student.whatsapp ?? ""}
+                      />
+                    </div>
+                    <div className="sm:col-span-12 lg:col-span-5">
+                      <Field>
+                        <FieldLabel htmlFor="inline-guardian">Contato do responsável</FieldLabel>
+                        <Input
+                          id="inline-guardian"
+                          name="guardian_contact"
+                          defaultValue={student.guardian_contact ?? ""}
+                          placeholder="Nome e telefone do responsável"
+                        />
+                      </Field>
+                    </div>
+                    <div className="sm:col-span-12">
+                      <AddressFields defaultValue={student.address} compact />
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-0.5">
-                  <span className="text-xs text-muted-foreground block">Parentesco</span>
-                  <span className="font-medium text-foreground">{student.emergency_contact_relationship || "—"}</span>
+
+                <div className="bg-muted p-5 space-y-4">
+                  <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
+                    <Users className="size-4 text-muted-foreground" aria-hidden="true" /> Contato de emergência
+                  </h3>
+                  <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-12">
+                    <div className="sm:col-span-12 lg:col-span-5">
+                      <Field>
+                        <FieldLabel htmlFor="inline-em-name">Nome do contato</FieldLabel>
+                        <Input id="inline-em-name" name="emergency_contact_name" defaultValue={student.emergency_contact_name ?? ""} />
+                      </Field>
+                    </div>
+                    <div className="sm:col-span-6 lg:col-span-3">
+                      <Field>
+                        <FieldLabel htmlFor="inline-em-rel">Parentesco</FieldLabel>
+                        <Input id="inline-em-rel" name="emergency_contact_relationship" defaultValue={student.emergency_contact_relationship ?? ""} />
+                      </Field>
+                    </div>
+                    <div className="sm:col-span-6 lg:col-span-4">
+                      <PhoneField
+                        id="inline-em-phone"
+                        name="emergency_contact_phone"
+                        label="Telefone de emergência"
+                        defaultValue={student.emergency_contact_phone ?? ""}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap justify-end gap-2 pt-2">
+                    <Button type="button" variant="outline" size="sm" onClick={() => setEditingBlock(null)}>
+                      Cancelar
+                    </Button>
+                    <FormSubmitButton size="sm" pendingLabel="Salvando…">
+                      Salvar alterações
+                    </FormSubmitButton>
+                  </div>
                 </div>
-                <div className="space-y-0.5">
-                  <span className="text-xs text-muted-foreground block">Telefone de emergência</span>
-                  <span className="font-medium text-foreground">
-                    {formatBrazilianPhone(student.emergency_contact_phone) || "—"}
-                  </span>
+              </form>
+            ) : (
+              <>
+                <div className="p-5 space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <h2 className="flex items-center gap-2 text-lg font-semibold leading-snug text-foreground"><User className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />Identificação e contato</h2>
+                      <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
+                        Dados pessoais e canais de comunicação direta com o aluno ou responsáveis.
+                      </p>
+                    </div>
+                    <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => setEditingBlock("dados")}>
+                      <SquarePenIcon className="size-3.5" aria-hidden="true" />
+                      <span>Editar dados</span>
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3 text-sm">
+                    <div className="space-y-0.5">
+                      <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Calendar className="size-3.5" aria-hidden="true" />Data de nascimento</span>
+                      <span className="font-medium text-foreground">
+                        {dateValue(student.birth_date)
+                          ? <ReadableDate value={dateValue(student.birth_date)} />
+                          : "—"}
+                      </span>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Phone className="size-3.5" aria-hidden="true" />WhatsApp</span>
+                      <span className="font-medium text-foreground">
+                        {formatBrazilianPhone(student.whatsapp) || "—"}
+                      </span>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="text-xs text-muted-foreground block">Contato do responsável</span>
+                      <span className="font-medium text-foreground">{student.guardian_contact || "Não informado / próprio aluno"}</span>
+                    </div>
+                    <div className="space-y-0.5 sm:col-span-2 lg:col-span-3">
+                      <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><MapPin className="size-3.5" aria-hidden="true" />Endereço</span>
+                      <span className="font-medium text-foreground">{student.address || "—"}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+
+                <div className="bg-muted p-5 space-y-4">
+                  <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
+                    <Users className="size-4 text-muted-foreground" aria-hidden="true" /> Contato de emergência
+                  </h3>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 text-sm">
+                    <div className="space-y-0.5">
+                      <span className="text-xs text-muted-foreground block">Nome</span>
+                      <span className="font-medium text-foreground">{student.emergency_contact_name || "—"}</span>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="text-xs text-muted-foreground block">Parentesco</span>
+                      <span className="font-medium text-foreground">{student.emergency_contact_relationship || "—"}</span>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="text-xs text-muted-foreground block">Telefone de emergência</span>
+                      <span className="font-medium text-foreground">
+                        {formatBrazilianPhone(student.emergency_contact_phone) || "—"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </section>
 
         <section id="treino" aria-label="Treino e acesso" className="scroll-mt-24 space-y-4">
           <div className="overflow-hidden rounded-xl bg-card shadow-xs divide-y divide-border">
             <div className="p-5 space-y-4">
-              <h2 className="flex items-center gap-2 text-lg font-semibold leading-snug text-foreground"><Award className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />Treino e graduação</h2>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 text-sm">
-                <div className="space-y-0.5">
-                  <span className="text-xs text-muted-foreground block">Turma</span>
-                  <span className="font-medium text-foreground">{student.training_class || "—"}</span>
-                </div>
-                <div className="space-y-0.5">
-                  <span className="text-xs text-muted-foreground block">Graduação atual</span>
-                  <div className="pt-0.5">
-                    <BeltBadge rankKey={student.rank_key} size="sm" />
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="flex items-center gap-2 text-lg font-semibold leading-snug text-foreground"><Award className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />Treino e graduação</h2>
+                {editingBlock !== "treino" ? (
+                  <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => setEditingBlock("treino")}>
+                    <SquarePenIcon className="size-3.5" aria-hidden="true" />
+                    <span>Editar treino</span>
+                  </Button>
+                ) : null}
+              </div>
+
+              {editingBlock === "treino" ? (
+                <form action={adminUpdateStudentAction} className="space-y-4">
+                  <input type="hidden" name="student_id" value={student.$id} />
+                  <input type="hidden" name="full_name" value={student.full_name} />
+                  <input type="hidden" name="cpf" value={student.cpf ?? ""} />
+                  <input type="hidden" name="birth_date" value={dateValue(student.birth_date)} />
+                  <input type="hidden" name="sex" value={student.sex ?? ""} />
+                  <input type="hidden" name="whatsapp" value={student.whatsapp ?? ""} />
+                  <input type="hidden" name="guardian_contact" value={student.guardian_contact ?? ""} />
+                  <input type="hidden" name="address" value={student.address ?? ""} />
+                  <input type="hidden" name="emergency_contact_name" value={student.emergency_contact_name ?? ""} />
+                  <input type="hidden" name="emergency_contact_relationship" value={student.emergency_contact_relationship ?? ""} />
+                  <input type="hidden" name="emergency_contact_phone" value={student.emergency_contact_phone ?? ""} />
+                  <input type="hidden" name="health_condition" value={student.health_condition ?? ""} />
+                  <input type="hidden" name="health_details" value={student.health_details ?? ""} />
+                  <input type="hidden" name="medications" value={student.medications ?? ""} />
+                  <input type="hidden" name="allergies" value={student.allergies ?? ""} />
+                  <input type="hidden" name="injuries" value={student.injuries ?? ""} />
+
+                  <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-3">
+                    <Field>
+                      <FieldLabel htmlFor="inline-class">Turma</FieldLabel>
+                      <Select name="training_class_id" defaultValue={student.training_class_id ?? ""}>
+                        <SelectTrigger id="inline-class" className="w-full">
+                          <SelectValue placeholder="Selecione a turma" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {classes.map((c) => (
+                            <SelectItem key={c.$id} value={c.$id}>
+                              {c.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                    <GraduationFields defaultRankKey={student.rank_key} />
+                    <DateField
+                      id="inline-started-at-tkd"
+                      name="started_at_tkd"
+                      label="Início no Taekwondo"
+                      defaultValue={dateValue(student.started_at_tkd)}
+                      max={today}
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap justify-end gap-2 pt-2">
+                    <Button type="button" variant="outline" size="sm" onClick={() => setEditingBlock(null)}>
+                      Cancelar
+                    </Button>
+                    <FormSubmitButton size="sm" pendingLabel="Salvando…">
+                      Salvar alterações
+                    </FormSubmitButton>
+                  </div>
+                </form>
+              ) : (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 text-sm">
+                  <div className="space-y-0.5">
+                    <span className="text-xs text-muted-foreground block">Turma</span>
+                    <span className="font-medium text-foreground">{student.training_class || "—"}</span>
+                  </div>
+                  <div className="space-y-0.5">
+                    <span className="text-xs text-muted-foreground block">Graduação atual</span>
+                    <div className="pt-0.5">
+                      <BeltBadge rankKey={student.rank_key} size="sm" />
+                    </div>
+                  </div>
+                  <div className="space-y-0.5">
+                    <span className="text-xs text-muted-foreground block">Início no taekwondo</span>
+                    <span className="font-medium text-foreground">
+                      {dateValue(student.started_at_tkd)
+                        ? <ReadableDate value={dateValue(student.started_at_tkd)} />
+                        : "—"}
+                    </span>
                   </div>
                 </div>
-                <div className="space-y-0.5">
-                  <span className="text-xs text-muted-foreground block">Início no taekwondo</span>
-                  <span className="font-medium text-foreground">
-                    {dateValue(student.started_at_tkd)
-                      ? <ReadableDate value={dateValue(student.started_at_tkd)} />
-                      : "—"}
-                  </span>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Ciclo mensal de acesso ao app */}
@@ -419,14 +625,16 @@ export function ReviewPanel({
                   </div>
                 </dl>
 
-                <form action={setAccessOverrideAction} className="space-y-3 pt-2">
+                <form action={setAccessOverrideAction} className="flex flex-wrap items-end gap-3 pt-2">
                   <input type="hidden" name="student_id" value={student.$id} />
-                  <DateField
-                    id="access-override-until"
-                    name="access_override_until"
-                    label="Liberar acesso manualmente até (opcional)"
-                    defaultValue={dateValue(enrollment.access_override_until)}
-                  />
+                  <div className="w-full sm:max-w-xs">
+                    <DateField
+                      id="access-override-until"
+                      name="access_override_until"
+                      label="Liberar acesso manualmente até (opcional)"
+                      defaultValue={dateValue(enrollment.access_override_until)}
+                    />
+                  </div>
                   <div className="flex flex-wrap gap-2">
                     <FormSubmitButton variant="outline" size="sm" className="min-h-10" pendingLabel="Salvando…">
                       Salvar liberação temporária
@@ -460,20 +668,114 @@ export function ReviewPanel({
                     Informações fornecidas na ficha de matrícula para segurança nos treinos.
                   </p>
                 </div>
-                {student.health_condition === "yes" ? (
-                  <Badge variant="destructive" className="gap-1">
-                    <AlertTriangle className="size-3" aria-hidden="true" />
-                    Condição informada
-                  </Badge>
-                ) : student.health_condition === "no" ? (
-                  <Badge variant="outline" className="gap-1 text-success-foreground bg-success-soft">
-                    <CheckCircle2 className="size-3" aria-hidden="true" />
-                    Sem restrições
-                  </Badge>
-                ) : <StatusBadge tone="neutral">Saúde não informada</StatusBadge>}
+                <div className="flex flex-wrap items-center gap-2">
+                  {student.health_condition === "yes" ? (
+                    <Badge variant="destructive" className="gap-1">
+                      <AlertTriangle className="size-3" aria-hidden="true" />
+                      Condição informada
+                    </Badge>
+                  ) : student.health_condition === "no" ? (
+                    <Badge variant="outline" className="gap-1 text-success-foreground bg-success-soft">
+                      <CheckCircle2 className="size-3" aria-hidden="true" />
+                      Sem restrições
+                    </Badge>
+                  ) : <StatusBadge tone="neutral">Saúde não informada</StatusBadge>}
+                  {editingBlock !== "saude" ? (
+                    <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => setEditingBlock("saude")}>
+                      <SquarePenIcon className="size-3.5" aria-hidden="true" />
+                      <span>Editar saúde</span>
+                    </Button>
+                  ) : null}
+                </div>
               </div>
 
-              {student.health_condition === "yes" ? (
+              {editingBlock === "saude" ? (
+                <form action={adminUpdateStudentAction} className="space-y-4">
+                  <input type="hidden" name="student_id" value={student.$id} />
+                  <input type="hidden" name="full_name" value={student.full_name} />
+                  <input type="hidden" name="cpf" value={student.cpf ?? ""} />
+                  <input type="hidden" name="birth_date" value={dateValue(student.birth_date)} />
+                  <input type="hidden" name="sex" value={student.sex ?? ""} />
+                  <input type="hidden" name="whatsapp" value={student.whatsapp ?? ""} />
+                  <input type="hidden" name="guardian_contact" value={student.guardian_contact ?? ""} />
+                  <input type="hidden" name="address" value={student.address ?? ""} />
+                  <input type="hidden" name="emergency_contact_name" value={student.emergency_contact_name ?? ""} />
+                  <input type="hidden" name="emergency_contact_relationship" value={student.emergency_contact_relationship ?? ""} />
+                  <input type="hidden" name="emergency_contact_phone" value={student.emergency_contact_phone ?? ""} />
+                  <input type="hidden" name="started_at_tkd" value={dateValue(student.started_at_tkd)} />
+                  <input type="hidden" name="training_class_id" value={student.training_class_id ?? ""} />
+                  <input type="hidden" name="rank_key" value={student.rank_key ?? ""} />
+
+                  <Field className="w-full sm:max-w-xs">
+                    <FieldLabel htmlFor="inline-health-condition">
+                      Possui condição de saúde ou restrição médica?
+                    </FieldLabel>
+                    <Select
+                      name="health_condition"
+                      value={hasHealthCondition}
+                      onValueChange={setHasHealthCondition}
+                    >
+                      <SelectTrigger id="inline-health-condition" className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="no">Não possui restrições</SelectItem>
+                        <SelectItem value="yes">Sim, possui condição/restrição</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+
+                  {hasHealthCondition === "yes" ? (
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <Field>
+                        <FieldLabel htmlFor="inline-health-details">Detalhes da condição</FieldLabel>
+                        <Textarea
+                          id="inline-health-details"
+                          name="health_details"
+                          defaultValue={student.health_details ?? ""}
+                          rows={2}
+                        />
+                      </Field>
+                      <Field>
+                        <FieldLabel htmlFor="inline-medications">Medicamentos em uso</FieldLabel>
+                        <Textarea
+                          id="inline-medications"
+                          name="medications"
+                          defaultValue={student.medications ?? ""}
+                          rows={2}
+                        />
+                      </Field>
+                      <Field>
+                        <FieldLabel htmlFor="inline-allergies">Alergias</FieldLabel>
+                        <Textarea
+                          id="inline-allergies"
+                          name="allergies"
+                          defaultValue={student.allergies ?? ""}
+                          rows={2}
+                        />
+                      </Field>
+                      <Field>
+                        <FieldLabel htmlFor="inline-injuries">Lesões anteriores</FieldLabel>
+                        <Textarea
+                          id="inline-injuries"
+                          name="injuries"
+                          defaultValue={student.injuries ?? ""}
+                          rows={2}
+                        />
+                      </Field>
+                    </div>
+                  ) : null}
+
+                  <div className="flex flex-wrap justify-end gap-2 pt-2">
+                    <Button type="button" variant="outline" size="sm" onClick={() => setEditingBlock(null)}>
+                      Cancelar
+                    </Button>
+                    <FormSubmitButton size="sm" pendingLabel="Salvando…">
+                      Salvar alterações
+                    </FormSubmitButton>
+                  </div>
+                </form>
+              ) : student.health_condition === "yes" ? (
                 <div className="space-y-3 rounded-lg bg-warning-soft p-4 text-sm">
                   {student.health_details ? (
                     <div>
@@ -837,7 +1139,7 @@ export function ReviewPanel({
                     <DateField
                       id="review-contract-end"
                       name="contract_end"
-                      label={`Fim (${contractDurationMonths === 12 ? "1 ano" : `${contractDurationMonths} meses`})`}
+                      label={`Fim do contrato (${contractDurationMonths === 12 ? "1 ano" : `${contractDurationMonths} meses`})`}
                       defaultValue={contractDates.end}
                       required
                     />
@@ -845,9 +1147,11 @@ export function ReviewPanel({
 
                   <Separator />
 
-                  <FormSubmitButton variant="outline" className="min-h-11 w-full" pendingLabel="Salvando condições…">
-                    Salvar condições contratuais
-                  </FormSubmitButton>
+                  <div className="flex justify-end">
+                    <FormSubmitButton variant="outline" className="min-h-11 w-full sm:w-auto" pendingLabel="Salvando condições…">
+                      Salvar condições contratuais
+                    </FormSubmitButton>
+                  </div>
                 </form>
               </section>
 

@@ -235,12 +235,16 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
             <CardTitle>Dados e datas</CardTitle>
             <CardDescription>Horários em Brasília.</CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field className="sm:col-span-2">
+          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Field className="sm:col-span-2 lg:col-span-2">
               <FieldLabel htmlFor="event-title">Nome do evento</FieldLabel>
               <Input id="event-title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={128} placeholder="Ex.: Aulão de chutes" className="h-11" />
             </Field>
-            <Field className="sm:col-span-2">
+            <Field className="sm:col-span-2 lg:col-span-2">
+              <FieldLabel htmlFor="event-location">Local</FieldLabel>
+              <LocationSelect id="event-location" name="location" locations={locations} placeholder="Selecione o dojang ou informe outro local" />
+            </Field>
+            <Field className="sm:col-span-2 lg:col-span-4">
               <FieldLabel htmlFor="event-description">Descrição e programação</FieldLabel>
               <Textarea id="event-description" value={description} onChange={(event) => setDescription(event.target.value)} maxLength={4000} rows={3} />
             </Field>
@@ -255,10 +259,6 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
                 <Input id="event-end" type="time" value={endTime} onChange={(event) => setEndTime(event.target.value)} className="h-11 tabular-nums" />
               </Field>
             </div>
-            <Field className="sm:col-span-2">
-              <FieldLabel htmlFor="event-location">Local</FieldLabel>
-              <LocationSelect id="event-location" name="location" locations={locations} placeholder="Selecione o dojang ou informe outro local" />
-            </Field>
             <DateField id="event-opens" name="opens_date" label={championship ? "Interesse aberto em" : "Inscrições abrem em"} defaultValue={opensDate} onValueChange={setOpensDate} description="Vazio: abrem ao publicar." />
             <DateField id="event-closes" name="closes_date" label={championship ? "Interesse encerra em" : "Inscrições encerram em"} defaultValue={closesDate} onValueChange={setClosesDate} description="Vazio: até o dia do evento." />
           </CardContent>

@@ -54,7 +54,7 @@ async function EventsContent({ type }: { type?: EventType }) {
           Próximos
         </h2>
         {upcoming.length ? (
-          <ul className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
+          <ul className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2 2xl:grid-cols-3">
             {upcoming.map((item) => (
               <EventCard key={item.event.$id} data={item} />
             ))}
@@ -68,7 +68,7 @@ async function EventsContent({ type }: { type?: EventType }) {
           <h2 id="eventos-passados" className="text-base font-semibold">
             Passados e cancelados
           </h2>
-          <ul className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
+          <ul className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2 2xl:grid-cols-3">
             {past.map((item) => (
               <EventCard key={item.event.$id} data={item} compact />
             ))}
@@ -113,7 +113,7 @@ export default async function AdminEventsPage({ searchParams }: { searchParams: 
               <h2 id="eventos-proximos" className="text-base font-semibold">
                 Próximos
               </h2>
-              <InlineCardsSkeleton count={2} columns={2} label="Carregando eventos…" />
+              <InlineCardsSkeleton count={3} columns={3} label="Carregando eventos…" />
             </section>
           }
         >

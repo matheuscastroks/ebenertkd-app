@@ -187,7 +187,7 @@ export function ClassManager({
             description="Use Nova turma para cadastrar o primeiro horário. Os alunos escolhem a turma no cadastro."
           />
         ) : (
-          <ul className="t-stagger grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <ul className="t-stagger grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {classes.map((trainingClass) => {
               const active = trainingClass.status === "active";
               return (

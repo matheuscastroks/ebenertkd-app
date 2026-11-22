@@ -32,7 +32,7 @@ export function IdentityForm({ identity, revision }: { identity: AcademyIdentity
           <CardDescription>Como a academia aparece no aplicativo, nos contratos e nas mensagens.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap items-start gap-4">
-          <ConfigField id="legal_name" label="Nome legal" error={fieldErrors.legal_name} help="Razão social ou nome da associação. Aparece no contrato e na política de privacidade." className="w-full">
+          <ConfigField id="legal_name" label="Nome legal" error={fieldErrors.legal_name} help="Razão social ou nome da associação. Aparece no contrato e na política de privacidade." className="min-w-64 flex-1">
             <Input id="legal_name" name="legal_name" defaultValue={identity.legal_name} required maxLength={160} />
           </ConfigField>
           <ConfigField id="display_name" label="Nome de exibição" error={fieldErrors.display_name} help="Nome usado em frases, como na carteirinha e nas mensagens aos alunos." className="min-w-56 flex-1">
@@ -131,8 +131,8 @@ export function IdentityForm({ identity, revision }: { identity: AcademyIdentity
           <CardTitle>Aparência</CardTitle>
           <CardDescription>A cor do aplicativo instalado. O fuso horário é fixo em {identity.timezone}.</CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <ConfigField id="theme_color" label="Cor do aplicativo" error={fieldErrors.theme_color} help="Formato #RRGGBB. O aplicativo já instalado só atualiza nome e cor ao ser reinstalado.">
+        <CardContent className="flex flex-wrap items-start gap-4">
+          <ConfigField id="theme_color" label="Cor do aplicativo" error={fieldErrors.theme_color} help="Formato #RRGGBB. O aplicativo já instalado só atualiza nome e cor ao ser reinstalado." className="w-full sm:w-44">
             <Input id="theme_color" name="theme_color" defaultValue={identity.theme_color} maxLength={7} />
           </ConfigField>
         </CardContent>

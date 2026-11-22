@@ -50,8 +50,8 @@ export function NotificationsPolicyForm({ policy, revision }: { policy: Notifica
           <CardTitle>Lembretes de pagamento</CardTitle>
           <CardDescription>Quando o responsável é avisado sobre uma mensalidade. Os lembretes saem pela rotina diária.</CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <ConfigField id="payment_stages" label="Dias da régua" error={fieldErrors.payment_stages} help="Dias em relação ao vencimento. Número negativo é antes do vencimento, 0 é o dia e positivo é depois (atraso). Ex.: -3, 0, 3." className="sm:col-span-2">
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ConfigField id="payment_stages" label="Dias da régua" error={fieldErrors.payment_stages} help="Dias em relação ao vencimento. Número negativo é antes do vencimento, 0 é o dia e positivo é depois (atraso). Ex.: -3, 0, 3.">
             <Input id="payment_stages" name="payment_stages" inputMode="text" placeholder="Ex.: -3, 0, 3" value={stages} onChange={(event) => setStages(event.target.value)} />
           </ConfigField>
           <ConfigField id="overdue_weekly_from_day" label="Lembrete semanal a partir de (dias de atraso)" error={fieldErrors.overdue_weekly_from_day} help="A partir deste dia de atraso o lembrete se repete a cada 7 dias. Precisa ser depois do último dia da régua.">
@@ -60,7 +60,7 @@ export function NotificationsPolicyForm({ policy, revision }: { policy: Notifica
           <ConfigField id="due_soon_alert_days" label="Alerta de vencimento próximo (dias)" error={fieldErrors.due_soon_alert_days} help="No aplicativo, mensalidades que vencem em até este número de dias aparecem como pendência.">
             <Input id="due_soon_alert_days" name="due_soon_alert_days" inputMode="numeric" value={dueSoon} onChange={(event) => setDueSoon(event.target.value)} required />
           </ConfigField>
-          <p className="text-sm text-muted-foreground sm:col-span-2">Com estes valores: {describeStages(after.payment_stages)}; depois, toda semana a partir do {after.overdue_weekly_from_day}º dia de atraso.</p>
+          <p className="text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">Com estes valores: {describeStages(after.payment_stages)}; depois, toda semana a partir do {after.overdue_weekly_from_day}º dia de atraso.</p>
         </CardContent>
       </Card>
 

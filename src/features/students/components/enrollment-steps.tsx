@@ -88,7 +88,7 @@ export function PersonalEnrollmentStep({ bundle, onValueChange }: StepProps) {
               required
             />
           </div>
-          <div className="sm:col-span-6">
+          <div className="sm:col-span-4 lg:col-span-3">
             <FormField>
               <FieldLabel htmlFor="enrollment-sex">Sexo *</FieldLabel>
               <Select name="sex" defaultValue={student.sex ?? ""} onValueChange={(value) => onValueChange?.("sex", value)} required>
@@ -103,7 +103,7 @@ export function PersonalEnrollmentStep({ bundle, onValueChange }: StepProps) {
               <FieldDescription>Usado para as categorias de campeonatos.</FieldDescription>
             </FormField>
           </div>
-          <div className="sm:col-span-6">
+          <div className="sm:col-span-4 lg:col-span-4">
             <PhoneField
               id="enrollment-whatsapp"
               label="WhatsApp"
@@ -112,7 +112,7 @@ export function PersonalEnrollmentStep({ bundle, onValueChange }: StepProps) {
               required
             />
           </div>
-          <div className="sm:col-span-6">
+          <div className="sm:col-span-4 lg:col-span-5">
             <PhoneField
               id="enrollment-guardian-contact"
               label="Contato do responsável"
@@ -293,7 +293,7 @@ export function TrainingEnrollmentStep({ bundle, classes, onValueChange }: StepP
                 ) : null}
               </FormField>
             </div>
-            <div className="sm:col-span-12 lg:col-span-4">
+            <div className="sm:col-span-6 lg:col-span-4">
               <FormField>
                 <FieldLabel htmlFor="requested-due-day">Dia de vencimento preferido *</FieldLabel>
                 <Select
@@ -316,9 +316,10 @@ export function TrainingEnrollmentStep({ bundle, classes, onValueChange }: StepP
                 </Select>
               </FormField>
             </div>
+            <div className="sm:col-span-6 lg:col-span-5">
+              <GraduationFields defaultRankKey={student.rank_key} />
+            </div>
           </div>
-
-          <GraduationFields defaultRankKey={student.rank_key} />
         </div>
       </Section>
     </div>

@@ -27,7 +27,7 @@ export async function GuardianMinorsOverview({ guardian, minors }: { guardian: P
     .sort((a, b) => a.priority - b.priority);
   const primaryKey = primaryPendency(urgent)?.key;
 
-  return <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">{data.map(({ minor, student, summary, next, trainingClass, pendencies, photoDocumentId }) => {
+  return <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-3">{data.map(({ minor, student, summary, next, trainingClass, pendencies, photoDocumentId }) => {
     const firstName = minor.full_name.split(" ")[0];
     return <Card key={minor.$id} aria-labelledby={`dependent-${minor.$id}`}>
       <CardHeader>

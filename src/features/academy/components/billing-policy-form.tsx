@@ -57,7 +57,7 @@ export function BillingPolicyForm({ policy, revision }: { policy: BillingPolicy;
             <Link href={ROUTES.adminBillingAdjustment} className="relative inline-block leading-6 font-medium text-foreground underline underline-offset-4 after:absolute after:-inset-x-1 after:-inset-y-2.5">reajuste de mensalidade</Link>.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <ConfigField id="default_monthly_fee" label="Mensalidade padrão" error={fieldErrors.default_monthly_fee_cents} help="Vem preenchida na aprovação de novas matrículas. Você pode ajustar o valor de cada aluno.">
             <InputGroup>
               <InputGroupAddon><InputGroupText>R$</InputGroupText></InputGroupAddon>
@@ -72,7 +72,7 @@ export function BillingPolicyForm({ policy, revision }: { policy: BillingPolicy;
             <Input id="charge_lead_days" name="charge_lead_days" inputMode="numeric" value={leadDays} onChange={(event) => setLeadDays(event.target.value)} required />
           </ConfigField>
 
-          <div className="space-y-3 sm:col-span-2">
+          <div className="space-y-3 sm:col-span-2 lg:col-span-3">
             <div className="flex items-center gap-3">
               <Switch id="enrollment_fee_enabled" name="enrollment_fee_enabled" checked={enrollmentEnabled} onCheckedChange={setEnrollmentEnabled} />
               <Label htmlFor="enrollment_fee_enabled">Cobrar taxa de matrícula</Label>

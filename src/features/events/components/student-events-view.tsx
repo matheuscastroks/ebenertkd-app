@@ -200,7 +200,7 @@ export function StudentEventsView(props: Props) {
         {props.open.length === 0 ? (
           <EmptyState illustration="empty-agenda" title="Nenhum evento no momento" description="Campeonatos, aulões, seminários e confraternizações aparecem aqui assim que o professor publicar." />
         ) : (
-          <ul className="grid items-stretch gap-4 xl:grid-cols-2">
+          <ul className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2 2xl:grid-cols-3">
             {props.open.map((item) => (
               <OpenEventCard key={item.event.$id} item={item} props={props} />
             ))}
@@ -215,7 +215,7 @@ export function StudentEventsView(props: Props) {
         {props.upcoming.length === 0 ? (
           <p className="rounded-xl bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">Nenhuma inscrição ativa.</p>
         ) : (
-          <ul className="space-y-4">
+          <ul className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
             {props.upcoming.map((entry) => (
               <RegistrationRow key={entry.registration.$id} entry={entry} props={props} canCancel />
             ))}
@@ -228,7 +228,7 @@ export function StudentEventsView(props: Props) {
           <h2 id="historico-eventos" className="text-base font-semibold">
             Histórico
           </h2>
-          <ul className="space-y-4">
+          <ul className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
             {props.past.map((entry) => (
               <RegistrationRow key={entry.registration.$id} entry={entry} props={props} canCancel={false} />
             ))}
