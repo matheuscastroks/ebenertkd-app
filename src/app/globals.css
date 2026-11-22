@@ -422,6 +422,19 @@
     border-radius: 0;
   }
 
+  .no-scrollbar,
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar,
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
   @media (prefers-color-scheme: dark) {
     .segmented-indicator,
     .segmented-selected {

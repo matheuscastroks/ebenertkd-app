@@ -10,7 +10,7 @@ export function EventTabs({ tabs, initial }: { tabs: EventTab[]; initial?: strin
   const defaultValue = tabs.some((tab) => tab.id === initial) ? initial : tabs[0]?.id;
   return (
     <Tabs defaultValue={defaultValue} className="w-full min-w-0 gap-4">
-      <TabsList className="w-full justify-start overflow-x-auto sm:w-fit">
+      <TabsList className="no-scrollbar w-full justify-start overflow-x-auto sm:w-fit">
         {tabs.map((tab) => (
           <TabsTrigger key={tab.id} value={tab.id} className="min-h-11 flex-none px-3">
             {tab.label}

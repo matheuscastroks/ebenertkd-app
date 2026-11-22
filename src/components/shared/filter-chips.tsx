@@ -16,7 +16,7 @@ export type FilterChip = {
  */
 export function FilterChips({ label, items, scroll = false }: { label: string; items: FilterChip[]; /** true para chips que levam a âncoras na própria página. */ scroll?: boolean }) {
   return (
-    <nav aria-label={label} className="-mx-1 overflow-x-auto px-1">
+    <nav aria-label={label} className="no-scrollbar -mx-1 overflow-x-auto px-1">
       <ul className="flex w-max gap-2">
         {items.map((item) => (
           <li key={item.href}>

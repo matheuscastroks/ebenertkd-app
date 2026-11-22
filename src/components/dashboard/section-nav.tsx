@@ -58,7 +58,7 @@ function centerInScroller(link: HTMLAnchorElement | null) {
 function SegmentBar({ label, segments, active }: { label: string; segments: NavSegment[]; active?: NavSegment }) {
   const { containerRef, indicatorRef, ready, moveTo } = useSlidingIndicator<HTMLUListElement>('[aria-current="page"]', "aria-current");
   return (
-    <nav aria-label={label} className="relative -mx-4 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0">
+    <nav aria-label={label} className="no-scrollbar relative -mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
       <ul ref={containerRef} data-indicator-ready={ready ? "true" : undefined} className="group/segments relative isolate inline-flex min-h-11 items-center gap-1 rounded-xl bg-muted p-1 text-muted-foreground">
         <li aria-hidden="true" className="contents">
           <span ref={indicatorRef} className={cn("segmented-indicator pointer-events-none absolute left-0 top-0 rounded-lg transition-[transform,width,height,opacity] duration-(--duration-fast) ease-(--ease-smooth-out) motion-reduce:transition-none", ready ? "opacity-100" : "opacity-0")} />
