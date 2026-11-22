@@ -15,6 +15,10 @@ export function NavItemsProvider({ items, children }: { items: SidebarNavItem[];
   return <NavItemsContext.Provider value={items}>{children}</NavItemsContext.Provider>;
 }
 
+export function useNavItems() {
+  return useContext(NavItemsContext);
+}
+
 /**
  * Segmentos da seção atual (modelo Seção → Segmento → Pilha).
  * São links por URL, não abas: o voltar do navegador funciona e cada visão tem endereço próprio.

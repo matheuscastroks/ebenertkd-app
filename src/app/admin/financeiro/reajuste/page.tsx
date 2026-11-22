@@ -25,11 +25,11 @@ async function AdjustmentContent({ adminName }: { adminName: string }) {
   const drafts = campaigns.filter((campaign) => campaign.status === "draft");
   const history = campaigns.filter((campaign) => campaign.status !== "draft");
 
-  return (
-    <div className="space-y-8">
-      {drafts.length > 0 ? <CampaignList id="drafts-heading" title="Em rascunho" items={drafts} /> : null}
+  const hasSideCampaigns = drafts.length > 0 || history.length > 0;
 
-      <section aria-labelledby="new-adjustment-heading" className="space-y-3">
+  return (
+    <div className={hasSideCampaigns ? "grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,8fr)_minmax(0,4fr)]" : "space-y-8"}>
+      <section aria-labelledby="new-adjustment-heading" className="min-w-0 space-y-3">
         <h2 id="new-adjustment-heading" className="text-base font-semibold">Nova campanha de reajuste</h2>
         <AdjustmentWizard
           candidates={toClientData(candidates)}
@@ -41,7 +41,12 @@ async function AdjustmentContent({ adminName }: { adminName: string }) {
         />
       </section>
 
-      {history.length > 0 ? <CampaignList id="campaigns-heading" title="Campanhas anteriores" items={history} /> : null}
+      {hasSideCampaigns ? (
+        <div className="min-w-0 space-y-6">
+          {drafts.length > 0 ? <CampaignList id="drafts-heading" title="Em rascunho" items={drafts} /> : null}
+          {history.length > 0 ? <CampaignList id="campaigns-heading" title="Campanhas anteriores" items={history} /> : null}
+        </div>
+      ) : null}
     </div>
   );
 }

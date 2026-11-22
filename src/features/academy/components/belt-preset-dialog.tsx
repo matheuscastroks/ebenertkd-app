@@ -11,7 +11,7 @@ import { diffPreset } from "@/features/academy/preset-rules";
 import type { BeltPreset } from "@/features/academy/presets";
 import { rankShortLabel } from "@/features/academy/ranks";
 import { ConsequenceDialog } from "@/features/billing/components/consequence-dialog";
-import { BeltBadgeView } from "@/features/students/components/belt-badge";
+import { BeltBadgeView, danDegreeOf } from "@/features/students/components/belt-badge";
 
 /**
  * "Aplicar modelo": mostra o que muda (só nomes, cores e formas), avisa o que NÃO muda e pede confirmação.
@@ -59,9 +59,9 @@ export function BeltPresetDialog({ ranks, preset, current }: { ranks: RankConfig
             <li key={diff.rank_key} className="space-y-1.5 p-2.5 text-sm">
               <p className="font-medium text-foreground">{rankShortLabel(diff.rank_key)}</p>
               <div className="flex flex-wrap items-center gap-2">
-                <BeltBadgeView appearance={{ name: diff.before.display_name, colorPrimary: diff.before.color_primary, colorSecondary: diff.before.color_secondary, colorStyle: diff.before.color_style }} size="sm" />
+                <BeltBadgeView appearance={{ name: diff.before.display_name, colorPrimary: diff.before.color_primary, colorSecondary: diff.before.color_secondary, colorStyle: diff.before.color_style }} danDegree={danDegreeOf(diff.rank_key)} rankLabel={rankShortLabel(diff.rank_key)} showName={false} size="sm" />
                 <ArrowRight className="size-3.5 text-muted-foreground" aria-hidden="true" />
-                <BeltBadgeView appearance={{ name: diff.after.display_name, colorPrimary: diff.after.color_primary, colorSecondary: diff.after.color_secondary, colorStyle: diff.after.color_style }} size="sm" />
+                <BeltBadgeView appearance={{ name: diff.after.display_name, colorPrimary: diff.after.color_primary, colorSecondary: diff.after.color_secondary, colorStyle: diff.after.color_style }} danDegree={danDegreeOf(diff.rank_key)} rankLabel={rankShortLabel(diff.rank_key)} showName={false} size="sm" />
               </div>
               {diff.after.form_name !== diff.before.form_name ? (
                 <p className="text-muted-foreground">

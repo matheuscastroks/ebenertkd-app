@@ -14,13 +14,30 @@ const MINI_SIZE: Record<BeltSize, string> = {
   lg: "h-4 w-9"
 };
 
+/** Extrai o grau de Dan (`1`..`9`) de uma `rank_key` como `"dan-2"`. */
+export function danDegreeOf(rankKey?: string | null): number | null {
+  if (!rankKey) return null;
+  const match = /^dan-(\d+)$/.exec(rankKey);
+  return match ? Number(match[1]) : null;
+}
+
 /** Miniatura da faixa desenhada a partir da configuração (lisa, ponta, listra ou meia). Cores em linha: vêm do banco. */
-export function BeltMini({ appearance, size = "md", className }: { appearance: Omit<BeltAppearance, "name">; size?: BeltSize; className?: string }) {
+export function BeltMini({
+  appearance,
+  danDegree,
+  size = "md",
+  className
+}: {
+  appearance: Omit<BeltAppearance, "name">;
+  danDegree?: number | null;
+  size?: BeltSize;
+  className?: string;
+}) {
   return (
     <span
       aria-hidden="true"
       className={cn("relative inline-block shrink-0 overflow-hidden rounded-sm", MINI_SIZE[size], className)}
-      style={{ background: beltBackground(appearance) }}
+      style={{ background: beltBackground(appearance, danDegree) }}
     />
   );
 }
@@ -29,15 +46,20 @@ export function BeltMini({ appearance, size = "md", className }: { appearance: O
 export function BeltBadgeView({
   appearance,
   rankLabel,
+  danDegree,
   size = "md",
+  showName = false,
   className
 }: {
   appearance: BeltAppearance;
-  /** "9º Gub": mostrado ao lado do nome. Omitido, só o nome. */
+  /** "9º Gub": mostrado ao lado da faixa. Omitido, mostra o nome. */
   rankLabel?: string | null;
+  danDegree?: number | null;
   size?: BeltSize;
+  showName?: boolean;
   className?: string;
 }) {
+  const showCompactRank = !showName && Boolean(rankLabel);
   return (
     <div
       className={cn(
@@ -48,12 +70,19 @@ export function BeltBadgeView({
         className
       )}
       aria-label={`Faixa ${appearance.name}${rankLabel ? `, ${rankLabel}` : ""}`}
+      title={`Faixa ${appearance.name}${rankLabel ? ` · ${rankLabel}` : ""}`}
     >
-      <BeltMini appearance={appearance} size={size} />
-      <span className="font-semibold tracking-tight whitespace-nowrap">{appearance.name}</span>
-      {rankLabel ? (
-        <span className="shrink-0 rounded bg-background px-1 py-0.5 text-xs font-medium leading-none text-muted-foreground">{rankLabel}</span>
-      ) : null}
+      <BeltMini appearance={appearance} danDegree={danDegree} size={size} />
+      {showCompactRank ? (
+        <span className="font-semibold tracking-tight whitespace-nowrap">{rankLabel}</span>
+      ) : (
+        <>
+          <span className="font-semibold tracking-tight whitespace-nowrap">{appearance.name}</span>
+          {rankLabel ? (
+            <span className="shrink-0 rounded bg-background px-1 py-0.5 text-xs font-medium leading-none text-muted-foreground">{rankLabel}</span>
+          ) : null}
+        </>
+      )}
     </div>
   );
 }
@@ -67,6 +96,7 @@ export function BeltBadge({
   nameOverride,
   size = "md",
   showRank = true,
+  showName,
   className
 }: {
   rankKey?: string | null;
@@ -74,6 +104,7 @@ export function BeltBadge({
   nameOverride?: string | null;
   size?: BeltSize;
   showRank?: boolean;
+  showName?: boolean;
   className?: string;
 }) {
   const ranks = useBeltRanks();
@@ -92,5 +123,16 @@ export function BeltBadge({
       </div>
     );
   }
-  return <BeltBadgeView appearance={appearance} rankLabel={showRank ? rankShortLabel(rankKey, levelLabel) : null} size={size} className={className} />;
+  const danDegree = danDegreeOf(rankKey);
+  const resolvedShowName = showName ?? !showRank;
+  return (
+    <BeltBadgeView
+      appearance={appearance}
+      danDegree={danDegree}
+      rankLabel={showRank ? rankShortLabel(rankKey, levelLabel) : null}
+      size={size}
+      showName={resolvedShowName}
+      className={className}
+    />
+  );
 }

@@ -47,11 +47,31 @@ export function swatchOutline(background: string): string {
   return contrastRatio(background, "#f2f2f7") < 1.6 || contrastRatio(background, "#000000") < 1.6 ? "rgba(128,128,128,0.7)" : "rgba(0,0,0,0.25)";
 }
 
+function danTipBarsBackground(primary: string, secondary: string, degree: number): string {
+  const count = Math.min(Math.max(1, Math.trunc(degree)), 4);
+  if (count === 1) {
+    return `linear-gradient(to right, ${primary} 0 74%, ${secondary} 74% 84%, ${primary} 84% 100%)`;
+  }
+  if (count === 2) {
+    return `linear-gradient(to right, ${primary} 0 64%, ${secondary} 64% 72%, ${primary} 72% 78%, ${secondary} 78% 86%, ${primary} 86% 100%)`;
+  }
+  if (count === 3) {
+    return `linear-gradient(to right, ${primary} 0 54%, ${secondary} 54% 61%, ${primary} 61% 67%, ${secondary} 67% 74%, ${primary} 74% 80%, ${secondary} 80% 87%, ${primary} 87% 100%)`;
+  }
+  return `linear-gradient(to right, ${primary} 0 46%, ${secondary} 46% 52%, ${primary} 52% 57%, ${secondary} 57% 63%, ${primary} 63% 68%, ${secondary} 68% 74%, ${primary} 74% 79%, ${secondary} 79% 85%, ${primary} 85% 100%)`;
+}
+
 /** `background` CSS da miniatura de uma faixa, conforme o estilo (lisa, ponta, listra ou meia). */
-export function beltBackground(appearance: Pick<BeltAppearance, "colorPrimary" | "colorSecondary" | "colorStyle">): string {
+export function beltBackground(
+  appearance: Pick<BeltAppearance, "colorPrimary" | "colorSecondary" | "colorStyle">,
+  danDegree?: number | null
+): string {
   const { colorPrimary: primary, colorSecondary: secondary, colorStyle: style } = appearance;
   switch (style) {
     case "tip":
+      if (danDegree && danDegree >= 1) {
+        return danTipBarsBackground(primary, secondary, danDegree);
+      }
       return `linear-gradient(to right, ${primary} 0 72%, ${secondary} 72% 100%)`;
     case "stripe":
       return `linear-gradient(to bottom, ${primary} 0 36%, ${secondary} 36% 64%, ${primary} 64% 100%)`;

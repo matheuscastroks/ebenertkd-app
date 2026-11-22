@@ -2,8 +2,8 @@ import "server-only";
 
 import { Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
-import { beltNameOf, toPublicRank } from "@/features/academy/belt-rules";
-import { getBeltRanks } from "@/features/academy/config-service";
+import { getBeltContext } from "@/features/academy/config-service";
+import { rankShortLabel } from "@/features/academy/ranks";
 import type { Charge } from "@/features/billing/types";
 import { STUDENT_EVENT_TYPES, toSeated } from "@/features/events/event-service";
 import { eligibilitySexOf } from "@/features/events/rules/category-presets";
@@ -74,9 +74,9 @@ export async function getStudentEvents(actor: Profile, requestedProfileId?: stri
   if (!student) return empty;
   const hasEnrollment = (await tables.listRows<Enrollment>({ databaseId, tableId: APPWRITE_IDS.tables.enrollments, queries: [Query.equal("student_id", [student.$id]), Query.equal("status", ["active"]), Query.limit(1)] })).total > 0;
 
-  const [events, ranks] = await Promise.all([
+  const [events, beltContext] = await Promise.all([
     tables.listRows<Event>({ databaseId, tableId: APPWRITE_IDS.tables.events, queries: [Query.equal("event_type", [...STUDENT_EVENT_TYPES]), Query.orderAsc("starts_at"), Query.limit(200)] }),
-    getBeltRanks()
+    getBeltContext()
   ]);
   const visible = events.rows.filter((event) => event.status !== "draft");
   const eventIds = visible.map((event) => event.$id);
@@ -86,7 +86,6 @@ export async function getStudentEvents(actor: Profile, requestedProfileId?: stri
     tables.listRows<EventRegistration>({ databaseId, tableId: APPWRITE_IDS.tables.eventRegistrations, queries: [Query.equal("event_id", eventIds), Query.limit(5000)] }),
     tables.listRows<EventDeadline>({ databaseId, tableId: APPWRITE_IDS.tables.eventDeadlines, queries: [Query.equal("event_id", eventIds), Query.orderAsc("due_at"), Query.limit(1000)] })
   ]);
-  const publicRanks = ranks.map(toPublicRank);
   const optionsByEvent = new Map<string, EventOption[]>();
   for (const option of options.rows) optionsByEvent.set(option.event_id, [...(optionsByEvent.get(option.event_id) ?? []), option]);
   const registrationsByEvent = new Map<string, EventRegistration[]>();
@@ -132,7 +131,7 @@ export async function getStudentEvents(actor: Profile, requestedProfileId?: stri
         rule: event.event_type === "championship" ? { ...rule, min_weight_grams: undefined, max_weight_grams: undefined } : rule,
         athlete: { rankKey: student.rank_key, birthDate: student.birth_date, sex: eligibilitySexOf(student.sex), hasActiveEnrollment: hasEnrollment, hasOverdueCharges: false },
         event: { startsAt: event.starts_at, ageCutoff: event.age_cutoff },
-        rankLabel: (key) => beltNameOf(publicRanks, key)
+        rankLabel: (key) => rankShortLabel(key, beltContext.levelLabel)
       });
       const optionLeft = option.capacity == null ? null : Math.max(0, option.capacity - seatsTaken(seated, option.$id));
       const eventLeft = event.capacity == null ? null : Math.max(0, event.capacity - taken);

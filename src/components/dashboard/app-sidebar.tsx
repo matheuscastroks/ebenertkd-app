@@ -21,6 +21,8 @@ import {
   useSidebar
 } from "@/components/ui/sidebar";
 import { AccountMenu } from "@/components/dashboard/account-menu";
+import { GlobalSearch } from "@/components/dashboard/global-search";
+import type { AppCapability } from "@/lib/auth/auth-utils";
 import type { SidebarNavItem } from "@/lib/navigation/routes";
 
 export type AppSidebarNavItem = SidebarNavItem;
@@ -62,6 +64,7 @@ export function AppSidebar({
   profileName,
   profileEmail,
   role,
+  capabilities,
   avatarUrl,
   avatarSex
 }: {
@@ -70,6 +73,7 @@ export function AppSidebar({
   profileName: string;
   profileEmail?: string;
   role?: string;
+  capabilities?: AppCapability[];
   avatarUrl?: string;
   avatarSex?: "feminino" | "masculino" | null;
 }) {
@@ -86,6 +90,9 @@ export function AppSidebar({
             <p className="font-display text-sm font-semibold leading-5 group-data-[mobile=true]/mobile-sidebar:text-base">{shortName}</p>
             <p className="text-xs leading-4 text-muted-foreground group-data-[mobile=true]/mobile-sidebar:text-sm group-data-[mobile=true]/mobile-sidebar:leading-5">{badge}</p>
           </div>
+        </div>
+        <div className="mt-2.5">
+          <GlobalSearch role={role} capabilities={capabilities} navItems={navItems} />
         </div>
       </SidebarHeader>
 

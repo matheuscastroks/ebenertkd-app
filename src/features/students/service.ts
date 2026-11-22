@@ -125,9 +125,9 @@ export function listEnrollmentsForReview(filters: { search?: string; status?: st
         return { rows: [], page, pageSize: ENROLLMENTS_PAGE_SIZE, total: students.total, totalPages };
       }
       const studentIds = students.rows.map((s) => s.$id);
-      const [enrollments, photos] = await Promise.all([
+      const [enrollments, documents] = await Promise.all([
         tables.listRows<Enrollment>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, queries: [Query.equal("student_id", studentIds), Query.limit(100)] }),
-        tables.listRows<StudentDocument>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.studentDocuments, queries: [Query.equal("student_id", studentIds), Query.equal("document_type", ["profile_photo"]), Query.limit(100)] })
+        tables.listRows<StudentDocument>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.studentDocuments, queries: [Query.equal("student_id", studentIds), Query.limit(200)] })
       ]);
       const enrollmentByStudent = new Map<string, Enrollment>();
       for (const enrollment of enrollments.rows) {
@@ -136,9 +136,20 @@ export function listEnrollmentsForReview(filters: { search?: string; status?: st
         }
       }
       const photoByStudent = new Map<string, StudentDocument>();
-      for (const photo of photos.rows) {
-        if (!photoByStudent.has(photo.student_id)) {
-          photoByStudent.set(photo.student_id, photo);
+      const pendingDocsByStudent = new Map<string, Set<"profile_photo" | "medical_certificate">>();
+      const rejectedDocsByStudent = new Map<string, Set<"profile_photo" | "medical_certificate">>();
+      for (const doc of documents.rows) {
+        if (doc.document_type === "profile_photo" && !photoByStudent.has(doc.student_id)) {
+          photoByStudent.set(doc.student_id, doc);
+        }
+        if (doc.status === "pending") {
+          const set = pendingDocsByStudent.get(doc.student_id) ?? new Set();
+          set.add(doc.document_type);
+          pendingDocsByStudent.set(doc.student_id, set);
+        } else if (doc.status === "rejected") {
+          const set = rejectedDocsByStudent.get(doc.student_id) ?? new Set();
+          set.add(doc.document_type);
+          rejectedDocsByStudent.set(doc.student_id, set);
         }
       }
       const rows = students.rows.map((student) => {
@@ -146,7 +157,9 @@ export function listEnrollmentsForReview(filters: { search?: string; status?: st
         return {
           student,
           enrollment: enrollmentByStudent.get(student.$id) ?? null,
-          profilePhotoDocumentId: photo?.status === "rejected" ? undefined : photo?.$id
+          profilePhotoDocumentId: photo?.status === "rejected" ? undefined : photo?.$id,
+          pendingDocuments: [...(pendingDocsByStudent.get(student.$id) ?? [])],
+          rejectedDocuments: [...(rejectedDocsByStudent.get(student.$id) ?? [])]
         };
       });
       return {
@@ -154,6 +167,8 @@ export function listEnrollmentsForReview(filters: { search?: string; status?: st
           student: Student;
           enrollment: Enrollment | null;
           profilePhotoDocumentId?: string;
+          pendingDocuments: Array<"profile_photo" | "medical_certificate">;
+          rejectedDocuments: Array<"profile_photo" | "medical_certificate">;
         }>,
         page,
         pageSize: ENROLLMENTS_PAGE_SIZE,

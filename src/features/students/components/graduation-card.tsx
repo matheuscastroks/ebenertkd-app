@@ -22,7 +22,7 @@ export function GraduationCard({ rankKey, startedAtTkd, attendanceRate, title = 
     <CardContent className="space-y-4 text-sm">
       <BeltBadge rankKey={rankKey} size="md" />
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-        {next ? <><dt className="text-muted-foreground">Próxima faixa</dt><dd className="font-medium">{next.display_name}</dd></> : null}
+        {next ? <><dt className="text-muted-foreground">Próxima faixa</dt><dd className="font-medium"><BeltBadge rankKey={next.rank_key} size="sm" /></dd></> : null}
         {current?.form_name ? <><dt className="text-muted-foreground">{formLabel} atual</dt><dd className="font-medium">{current.form_name}</dd></> : null}
         {next && typeof attendanceRate === "number" ? <><dt className="text-muted-foreground">Frequência para o exame</dt><dd className="font-medium tabular-nums">{attendanceRate}%</dd></> : null}
       </dl>

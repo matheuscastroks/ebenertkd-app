@@ -3,8 +3,8 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { Query } from "node-appwrite";
 import type { Profile } from "@/features/auth/types";
-import { beltNameOf, toPublicRank } from "@/features/academy/belt-rules";
-import { getBeltRanks } from "@/features/academy/config-service";
+import { getBeltContext } from "@/features/academy/config-service";
+import { rankShortLabel } from "@/features/academy/ranks";
 import { cancelUnpaidEventCharge, createEventCharge, reopenEventCharge } from "@/features/billing/charge-service";
 import type { Charge } from "@/features/billing/types";
 import { formatEventDayTime } from "@/features/events/dates";
@@ -130,11 +130,11 @@ export async function loadRegistrationForActor(actor: Profile, registrationId: s
 export async function evaluateOptionEligibility(tables: Tables, databaseId: string, input: { student: Student; event: Event; option: EventOption; weightGrams?: number | null; hasActiveEnrollment?: boolean }) {
   const rule = parseEligibilityJson(input.option.eligibility_json);
   const overdue = rule.require_no_overdue ? (await tables.listRows<Charge>({ databaseId, tableId: APPWRITE_IDS.tables.charges, queries: [Query.equal("student_id", [input.student.$id]), Query.equal("status", ["overdue"]), Query.limit(1)] })).total > 0 : false;
-  const ranks = (await getBeltRanks()).map(toPublicRank);
+  const { levelLabel } = await getBeltContext();
   return evaluateEventEligibility({
     rule,
     athlete: { rankKey: input.student.rank_key, birthDate: input.student.birth_date, sex: eligibilitySexOf(input.student.sex), weightGrams: input.weightGrams, hasActiveEnrollment: input.hasActiveEnrollment ?? true, hasOverdueCharges: overdue },
     event: { startsAt: input.event.starts_at, ageCutoff: input.event.age_cutoff },
-    rankLabel: (key) => beltNameOf(ranks, key)
+    rankLabel: (key) => rankShortLabel(key, levelLabel)
   });
 }

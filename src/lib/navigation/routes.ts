@@ -202,15 +202,12 @@ export function navigationForProfile(
     { label: "Início", href: ROUTES.student, exact: true, icon: "dashboard", group: "Principal" },
     notifications,
     {
-      label: "Treinos",
+      label: "Agenda",
       bottomNav: true,
       href: ROUTES.studentCalendar,
       icon: "attendance",
       group: "Principal",
-      segments: [
-        { label: "Agenda", href: ROUTES.studentCalendar },
-        { label: "Frequência", href: ROUTES.studentAttendance }
-      ]
+      match: [ROUTES.studentAttendance]
     },
     {
       label: "Faixa",

@@ -1,4 +1,5 @@
 import { StudentAvatar } from "@/features/students/components/student-avatar";
+import { BeltBadge } from "@/features/students/components/belt-badge";
 import Link from "next/link";
 import { confirmChampionshipAction, recordResultAction, reviewRegistrationDocumentAction, submitToFederationAction } from "@/app/actions/championships";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
@@ -99,8 +100,9 @@ export function ChampionshipTeamTable({ rows, returnTo }: { rows: ChampionshipRo
                     <StudentAvatar name={row.name} sex={row.sex} photoDocumentId={row.photoDocumentId} size="sm" />
                     <div className="min-w-0">
                       {row.name}
-                      <div className="text-xs font-normal text-muted-foreground">
-                        {[row.beltName, row.ageClass, row.sex === "masculino" ? "Masc." : row.sex === "feminino" ? "Fem." : null, registration.declared_weight_grams ? formatWeightKg(registration.declared_weight_grams) : null].filter(Boolean).join(" · ")}
+                      <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs font-normal text-muted-foreground">
+                        {row.rankKey ? <BeltBadge rankKey={row.rankKey} size="sm" /> : null}
+                        {[row.ageClass, row.sex === "masculino" ? "Masc." : row.sex === "feminino" ? "Fem." : null, registration.declared_weight_grams ? formatWeightKg(registration.declared_weight_grams) : null].filter(Boolean).join(" · ")}
                       </div>
                     </div>
                   </div>

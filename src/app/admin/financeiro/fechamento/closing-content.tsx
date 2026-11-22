@@ -30,10 +30,16 @@ export async function MonthlyClosingContent({ competence }: { competence?: strin
   return (
     <div className="space-y-6">
       <ClosingToolbar data={data} />
-      <PendingSection data={data} label={label} />
-      <SummaryList data={data} label={label} />
-      <DetailsSection data={data} label={label} />
-      <EventsSummaryCard summary={eventsSummary} periodLabel={label} />
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+        <div className="min-w-0">
+          <PendingSection data={data} label={label} />
+        </div>
+        <div className="min-w-0 space-y-6">
+          <SummaryList data={data} label={label} />
+          <EventsSummaryCard summary={eventsSummary} periodLabel={label} />
+          <DetailsSection data={data} label={label} />
+        </div>
+      </div>
     </div>
   );
 }
@@ -129,7 +135,7 @@ function SummaryList({ data, label }: { data: ClosingOverview; label: string }) 
   return (
     <dl
       aria-label={`Resumo de ${label}`}
-      className="grid grid-cols-2 divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs sm:grid-cols-4 sm:divide-x sm:divide-y-0"
+      className="grid grid-cols-2 divide-x divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs"
     >
       <SummaryItem
         term="Previsto"

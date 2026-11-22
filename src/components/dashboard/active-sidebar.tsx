@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { AppSidebar, type AppSidebarNavItem } from "@/components/dashboard/app-sidebar";
+import type { AppCapability } from "@/lib/auth/auth-utils";
 import { resolveNavLocation } from "@/lib/navigation/routes";
 
 export function ActiveSidebar({
@@ -10,6 +11,7 @@ export function ActiveSidebar({
   profileName,
   profileEmail,
   role,
+  capabilities,
   avatarUrl,
   avatarSex
 }: {
@@ -18,6 +20,7 @@ export function ActiveSidebar({
   profileName: string;
   profileEmail?: string;
   role?: string;
+  capabilities?: AppCapability[];
   avatarUrl?: string;
   avatarSex?: "feminino" | "masculino" | null;
 }) {
@@ -32,6 +35,7 @@ export function ActiveSidebar({
       profileName={profileName}
       profileEmail={profileEmail}
       role={role}
+      capabilities={capabilities}
       avatarUrl={avatarUrl}
       avatarSex={avatarSex}
     />

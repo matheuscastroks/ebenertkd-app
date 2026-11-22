@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useBeltRanks } from "@/components/academy-config-provider";
-import { beltNameOf } from "@/features/academy/belt-rules";
+import { useBeltLabels } from "@/components/academy-config-provider";
+import { isRankKey, rankShortLabel } from "@/features/academy/ranks";
 import { RankSelect } from "@/features/students/components/rank-select";
 import type { TrainingClass } from "@/features/classes/types";
 import { ROUTES } from "@/lib/navigation/routes";
@@ -29,7 +29,7 @@ const isSet = (value: string) => Boolean(value && value !== "all");
 
 export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
   const router = useRouter();
-  const ranks = useBeltRanks();
+  const { levelLabel } = useBeltLabels();
   const [expanded, setExpanded] = useState(false);
   const [pending, startTransition] = useTransition();
   const pathname = usePathname();
@@ -174,7 +174,7 @@ export function EnrollmentFilters({ classes }: { classes: TrainingClass[] }) {
         </Field>
         </div>
       </div>
-      <div className="flex flex-wrap gap-2">{(["status", "rank", "turma"] as const).filter((key) => isSet(optimisticFilters[key])).map((key) => <Button key={key} type="button" variant="outline" className="min-h-11" onClick={() => update(key, "all")}>Remover {key === "status" ? STATUS_OPTIONS.find((option) => option.value === optimisticFilters.status)?.label : key === "rank" ? beltNameOf(ranks, optimisticFilters.rank) : optimisticFilters[key]}</Button>)}</div>
+      <div className="flex flex-wrap gap-2">{(["status", "rank", "turma"] as const).filter((key) => isSet(optimisticFilters[key])).map((key) => <Button key={key} type="button" variant="outline" className="min-h-11" onClick={() => update(key, "all")}>Remover {key === "status" ? STATUS_OPTIONS.find((option) => option.value === optimisticFilters.status)?.label : key === "rank" ? (isRankKey(optimisticFilters.rank) ? rankShortLabel(optimisticFilters.rank, levelLabel) : optimisticFilters.rank) : optimisticFilters[key]}</Button>)}</div>
       {hasActiveFilters && (
         <div className="flex justify-end pt-1">
           <Button type="button" variant="ghost" size="sm" onClick={handleClear}>

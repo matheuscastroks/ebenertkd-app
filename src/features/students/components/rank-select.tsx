@@ -5,16 +5,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { PublicRank } from "@/features/academy/belt-rules";
 import { selectableRanks } from "@/features/academy/belt-rules";
 import { rankShortLabel } from "@/features/academy/ranks";
-import { BeltMini } from "@/features/students/components/belt-badge";
+import { BeltMini, danDegreeOf } from "@/features/students/components/belt-badge";
 import { cn } from "@/lib/utils";
 
-/** Linha de uma graduação nas listas: miniatura da faixa, nome configurado e nível ("9º Gub"). */
+/** Linha de uma graduação nas listas: miniatura da faixa e nível ("9º Gub"). */
 export function RankOptionLabel({ rank, levelLabel }: { rank: PublicRank; levelLabel: string }) {
   return (
     <span className="flex min-w-0 items-center gap-2">
-      <BeltMini appearance={{ colorPrimary: rank.color_primary, colorSecondary: rank.color_secondary, colorStyle: rank.color_style }} size="sm" />
-      <span className="truncate">{rank.display_name}</span>
-      <span className="text-muted-foreground">· {rankShortLabel(rank.rank_key, levelLabel)}</span>
+      <BeltMini
+        appearance={{ colorPrimary: rank.color_primary, colorSecondary: rank.color_secondary, colorStyle: rank.color_style }}
+        danDegree={danDegreeOf(rank.rank_key)}
+        size="sm"
+      />
+      <span className="font-medium tabular-nums">{rankShortLabel(rank.rank_key, levelLabel)}</span>
     </span>
   );
 }

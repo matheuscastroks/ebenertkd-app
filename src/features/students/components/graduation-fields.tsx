@@ -12,7 +12,7 @@ export function GraduationFields({ defaultRankKey }: { defaultRankKey?: string |
     <Field>
       <FieldLabel htmlFor="rank-key">Graduação *</FieldLabel>
       <RankSelect id="rank-key" name="rank_key" value={rankKey} onValueChange={setRankKey} keep={defaultRankKey} required />
-      <FieldDescription>A faixa é definida pela graduação, com o nome e a cor que a academia configurou.</FieldDescription>
+      <FieldDescription>A cor da faixa é exibida automaticamente conforme a graduação configurada pela academia.</FieldDescription>
     </Field>
   );
 }

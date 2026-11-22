@@ -132,7 +132,7 @@ describe("editor de graduações", () => {
     await user.clear(name);
     await user.type(name, "Laranja");
     await user.click(screen.getAllByRole("radio", { name: "Laranja" })[0]);
-    expect(screen.getAllByText("Laranja").length).toBeGreaterThan(1);
+    expect(screen.getAllByLabelText("Faixa Laranja, 9º Gub").length).toBeGreaterThan(1);
     expect(screen.getByRole("status")).toHaveTextContent("1 graduação alterada");
     expect(screen.getAllByText("Alterada")).toHaveLength(1);
   });
@@ -227,7 +227,7 @@ describe("aplicar modelo de federação", () => {
     expect(await screen.findByText("Aplicar o modelo ITF?")).toBeVisible();
     expect(screen.getByText(/Alunos, tempos, presenças, taxas e quais graduações estão habilitadas não mudam/)).toBeVisible();
     const list = screen.getByRole("list", { name: "Mudanças do modelo" });
-    expect(within(list).getByText("Branca listra Amarela")).toBeVisible();
+    expect(within(list).getByLabelText("Faixa Branca listra Amarela, 9º Gub")).toBeInTheDocument();
     expect(within(list).getAllByText("Revise: valor sugerido").length).toBeGreaterThan(0);
     expect(screen.getByText("Termo da forma").nextElementSibling).toHaveTextContent("Tul");
     expect(actions.applyPreset).not.toHaveBeenCalled();

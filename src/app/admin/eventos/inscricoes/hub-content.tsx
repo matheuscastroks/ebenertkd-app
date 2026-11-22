@@ -73,23 +73,25 @@ export async function HubContent() {
         />
       ) : null}
 
-      {pending.map(({ queue, rows }) => {
-        const config = ACTIONS[queue];
-        return (
-          <HubQueue
-            key={queue}
-            id={queueAnchor(queue)}
-            title={HUB_QUEUE_LABEL[queue].title}
-            hint={HUB_QUEUE_LABEL[queue].hint}
-            rows={rows}
-            action={config?.action}
-            fieldName={config?.field}
-            actionLabel={config?.label}
-            hiddenFields={config?.hidden}
-            returnTo={ROUTES.adminEventHub}
-          />
-        );
-      })}
+      <div className={pending.length > 1 ? "grid grid-cols-1 items-start gap-4 xl:grid-cols-2" : "space-y-4"}>
+        {pending.map(({ queue, rows }) => {
+          const config = ACTIONS[queue];
+          return (
+            <HubQueue
+              key={queue}
+              id={queueAnchor(queue)}
+              title={HUB_QUEUE_LABEL[queue].title}
+              hint={HUB_QUEUE_LABEL[queue].hint}
+              rows={rows}
+              action={config?.action}
+              fieldName={config?.field}
+              actionLabel={config?.label}
+              hiddenFields={config?.hidden}
+              returnTo={ROUTES.adminEventHub}
+            />
+          );
+        })}
+      </div>
 
       {empty.length > 0 ? (
         <p className="text-sm text-muted-foreground">

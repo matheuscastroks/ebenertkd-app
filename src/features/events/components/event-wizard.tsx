@@ -16,9 +16,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
-import { useBeltRanks } from "@/components/academy-config-provider";
+import { useBeltLabels, useBeltRanks } from "@/components/academy-config-provider";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { RankKey } from "@/features/academy/ranks";
+import { rankShortLabel, type RankKey } from "@/features/academy/ranks";
+import { BeltMini, danDegreeOf } from "@/features/students/components/belt-badge";
 import { EVENT_TYPE_HINT, EVENT_TYPE_LABEL } from "@/features/events/labels";
 import { buildCategoryPresets, PRESET_SEX_LABEL, type PresetAgeClassKey, type PresetSex } from "@/features/events/rules/category-presets";
 import { CHAMPIONSHIP_DEADLINE_KINDS, DEADLINE_KIND_LABEL } from "@/features/events/rules/deadline-rules";
@@ -86,6 +87,7 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
   const [error, setError] = useState<string | null>(null);
   // Campeonato: organizador externo, cronograma da federação e gerador de categorias.
   const ranks = useBeltRanks();
+  const { levelLabel } = useBeltLabels();
   const [organizerName, setOrganizerName] = useState("");
   const [externalUrl, setExternalUrl] = useState("");
   const [deadlines, setDeadlines] = useState<Record<string, DeadlineDraft>>({});
@@ -334,7 +336,18 @@ export function EventWizard({ locations }: { locations: TrainingLocation[] }) {
                         <SelectItem value="none">Sem mínimo</SelectItem>
                         {ranks.filter((rank) => rank.enabled).map((rank) => (
                           <SelectItem key={rank.rank_key} value={rank.rank_key}>
-                            {rank.display_name}
+                            <span className="inline-flex items-center gap-2">
+                              <BeltMini
+                                appearance={{
+                                  colorPrimary: rank.color_primary,
+                                  colorSecondary: rank.color_secondary,
+                                  colorStyle: rank.color_style
+                                }}
+                                danDegree={danDegreeOf(rank.rank_key)}
+                                size="sm"
+                              />
+                              <span>{rankShortLabel(rank.rank_key, levelLabel)}</span>
+                            </span>
                           </SelectItem>
                         ))}
                       </SelectContent>

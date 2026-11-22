@@ -6,10 +6,18 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { FilterChips } from "@/components/shared/filter-chips";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { OperationToast } from "@/components/shared/operation-toast";
+import { ResponsiveDataView } from "@/components/shared/responsive-data-view";
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";
 import { MetricCardsSkeleton, TableRowsSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { getBeltRanks, getPolicy } from "@/features/academy/config-service";
 import { findRank } from "@/features/academy/belt-rules";
 import { isRankKey } from "@/features/academy/ranks";
@@ -61,6 +69,77 @@ type SearchParams = Promise<{
   enrolled?: string;
   error?: string;
 }>;
+
+function EligibilityCriterion({
+  met,
+  text,
+}: {
+  met: boolean;
+  text: string;
+}) {
+  return (
+    <span className={met ? "inline-flex items-center gap-1.5 text-sm font-medium text-foreground tabular-nums" : "text-sm text-muted-foreground tabular-nums"}>
+      {met ? <CheckCircle2 className="size-3.5 shrink-0 text-success" aria-hidden="true" /> : null}
+      {text}
+    </span>
+  );
+}
+
+function EligibilityActions({
+  row,
+  nextOpenEvent,
+  ranks,
+}: {
+  row: Awaited<ReturnType<typeof getExamEligibilityOverview>>["rows"][number];
+  nextOpenEvent: Awaited<ReturnType<typeof getExamEligibilityOverview>>["openEvents"][number] | null;
+  ranks: Awaited<ReturnType<typeof getBeltRanks>>;
+}) {
+  return (
+    <div className="flex flex-wrap items-center justify-end gap-1.5">
+      {row.status === "eligible" && nextOpenEvent && row.targetRankKey ? (
+        <form action={enrollEligibleStudentAction}>
+          <input type="hidden" name="event_id" value={nextOpenEvent.$id} />
+          <input type="hidden" name="student_id" value={row.studentId} />
+          <input type="hidden" name="target_rank_key" value={row.targetRankKey} />
+          <FormSubmitButton
+            size="sm"
+            className="min-h-10"
+            pendingLabel="Inscrevendo…"
+          >
+            <CheckCircle2 className="size-3.5" aria-hidden="true" />
+            Inscrever ({formatBrl(findRank(ranks, row.targetRankKey)?.exam_fee_cents ?? nextOpenEvent.default_fee_cents)})
+          </FormSubmitButton>
+        </form>
+      ) : null}
+
+      {row.status === "already_registered" && row.registeredEventId ? (
+        <Button asChild size="sm" variant="outline" className="min-h-10">
+          <Link href={adminExamPath(row.registeredEventId)}>
+            Ver banca
+            <ArrowRight className="size-3.5" aria-hidden="true" />
+          </Link>
+        </Button>
+      ) : null}
+
+      {row.status === "financial_hold" ? (
+        <Button asChild size="sm" variant="outline" className="min-h-10">
+          <Link
+            href={`${ROUTES.adminBilling}?student=${encodeURIComponent(row.fullName)}&status=overdue`}
+          >
+            Ver atrasos
+          </Link>
+        </Button>
+      ) : null}
+
+      <Button asChild size="sm" variant="ghost" className="min-h-10">
+        <Link href={adminEnrollmentPath(row.studentId)}>
+          Ficha
+          <ArrowRight className="size-3.5" aria-hidden="true" />
+        </Link>
+      </Button>
+    </div>
+  );
+}
 
 async function EligibilityContent({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
@@ -128,110 +207,150 @@ async function EligibilityContent({ searchParams }: { searchParams: SearchParams
             </p>
           </div>
 
-          <ul className="t-stagger divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
-            {rows.map((row) => (
-              <li
-                key={row.studentId}
-                className="t-interactive-row flex flex-col gap-4 px-4 py-4 hover:bg-muted/50 xl:flex-row xl:items-center xl:justify-between sm:px-5"
-              >
-                <div className="flex min-w-0 flex-1 items-start gap-3">
-                  <StudentAvatar
-                    name={row.fullName}
-                    photoDocumentId={row.photoDocumentId}
-                    size="sm"
-                  />
-                  <div className="min-w-0 flex-1 space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="truncate text-sm font-medium text-foreground">
-                        {row.fullName}
-                      </p>
+          <ResponsiveDataView
+            desktop={
+              <div className="overflow-hidden rounded-xl bg-card shadow-xs">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted">
+                      <TableHead>Aluno</TableHead>
+                      <TableHead>Evolução</TableHead>
+                      <TableHead>Requisitos</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className="t-stagger">
+                    {rows.map((row) => (
+                      <TableRow key={row.studentId}>
+                        <TableCell className="whitespace-normal">
+                          <div className="flex items-center gap-2.5">
+                            <StudentAvatar
+                              name={row.fullName}
+                              photoDocumentId={row.photoDocumentId}
+                              size="sm"
+                              className="shrink-0"
+                            />
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold text-foreground">
+                                {row.fullName}
+                              </p>
+                              <p className="truncate text-xs text-muted-foreground">
+                                {row.trainingClassName}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {row.targetRankKey ? (
+                            <BeltProgressionPill
+                              fromRankKey={row.currentRankKey}
+                              toRankKey={row.targetRankKey}
+                              size="sm"
+                            />
+                          ) : (
+                            <BeltBadge rankKey={row.currentRankKey} size="sm" />
+                          )}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {row.minPresencesRequired > 0 ? (
+                            <div className="flex flex-col gap-0.5">
+                              <EligibilityCriterion
+                                met={row.presenceProgressPct >= 100}
+                                text={`${row.presencesSinceLastBelt}/${row.minPresencesRequired} aulas`}
+                              />
+                              <EligibilityCriterion
+                                met={row.timeProgressPct >= 100}
+                                text={`${Math.floor(row.monthsInCurrentBelt)}/${row.minMonthsRequired} meses`}
+                              />
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="whitespace-normal">
+                          <div className="space-y-1">
+                            <StatusBadge tone={STATUS_TONES[row.status]}>
+                              {STATUS_LABELS[row.status]}
+                            </StatusBadge>
+                            {row.ageBlocked && row.minAgeRequired != null ? (
+                              <p className="text-xs text-muted-foreground">
+                                Mín. {row.minAgeRequired} anos
+                              </p>
+                            ) : null}
+                          </div>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-right">
+                          <EligibilityActions row={row} nextOpenEvent={nextOpenEvent} ranks={ranks} />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            }
+            mobile={
+              <ul className="t-stagger space-y-3">
+                {rows.map((row) => (
+                  <li key={row.studentId} className="space-y-3 rounded-xl bg-card p-4 shadow-xs">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <StudentAvatar
+                          name={row.fullName}
+                          photoDocumentId={row.photoDocumentId}
+                          size="sm"
+                        />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-foreground">
+                            {row.fullName}
+                          </p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {row.trainingClassName}
+                          </p>
+                        </div>
+                      </div>
                       <StatusBadge tone={STATUS_TONES[row.status]}>
                         {STATUS_LABELS[row.status]}
                       </StatusBadge>
-                      <span className="text-xs text-muted-foreground">{row.trainingClassName}</span>
                     </div>
 
                     {row.targetRankKey ? (
-                      <BeltProgressionPill fromRankKey={row.currentRankKey} toRankKey={row.targetRankKey} size="sm" />
+                      <BeltProgressionPill
+                        fromRankKey={row.currentRankKey}
+                        toRankKey={row.targetRankKey}
+                        size="sm"
+                      />
                     ) : (
                       <BeltBadge rankKey={row.currentRankKey} size="sm" />
                     )}
-                    {row.ageBlocked && row.minAgeRequired != null ? (
-                      <p className="text-xs text-muted-foreground">Idade mínima para esta graduação: {row.minAgeRequired} anos.</p>
-                    ) : null}
 
                     {row.minPresencesRequired > 0 ? (
-                      <div className="grid grid-cols-1 gap-3 pt-1 sm:grid-cols-2">
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between text-xs text-muted-foreground">
-                            <span>Presenças na faixa</span>
-                            <span className="font-medium text-foreground tabular-nums">
-                              {row.presencesSinceLastBelt}/{row.minPresencesRequired} aulas
-                            </span>
-                          </div>
-                          <Progress value={row.presenceProgressPct} className="h-2" />
-                        </div>
-
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between text-xs text-muted-foreground">
-                            <span>Carência de tempo</span>
-                            <span className="font-medium text-foreground tabular-nums">
-                              {Math.floor(row.monthsInCurrentBelt)}/{row.minMonthsRequired} meses
-                            </span>
-                          </div>
-                          <Progress value={row.timeProgressPct} className="h-2" />
-                        </div>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+                        <EligibilityCriterion
+                          met={row.presenceProgressPct >= 100}
+                          text={`${row.presencesSinceLastBelt}/${row.minPresencesRequired} aulas`}
+                        />
+                        <EligibilityCriterion
+                          met={row.timeProgressPct >= 100}
+                          text={`${Math.floor(row.monthsInCurrentBelt)}/${row.minMonthsRequired} meses`}
+                        />
                       </div>
                     ) : null}
-                  </div>
-                </div>
 
-                <div className="flex flex-wrap items-center gap-2 xl:shrink-0">
-                  {row.status === "eligible" && nextOpenEvent && row.targetRankKey ? (
-                    <form action={enrollEligibleStudentAction}>
-                      <input type="hidden" name="event_id" value={nextOpenEvent.$id} />
-                      <input type="hidden" name="student_id" value={row.studentId} />
-                      <input type="hidden" name="target_rank_key" value={row.targetRankKey} />
-                      <FormSubmitButton
-                        size="sm"
-                        className="min-h-10"
-                        pendingLabel="Inscrevendo…"
-                      >
-                        <CheckCircle2 className="size-3.5" aria-hidden="true" />
-                        Inscrever ({formatBrl(findRank(ranks, row.targetRankKey)?.exam_fee_cents ?? nextOpenEvent.default_fee_cents)})
-                      </FormSubmitButton>
-                    </form>
-                  ) : null}
+                    {row.ageBlocked && row.minAgeRequired != null ? (
+                      <p className="text-xs text-muted-foreground">
+                        Idade mínima para esta graduação: {row.minAgeRequired} anos.
+                      </p>
+                    ) : null}
 
-                  {row.status === "already_registered" && row.registeredEventId ? (
-                    <Button asChild size="sm" variant="outline" className="min-h-10">
-                      <Link href={adminExamPath(row.registeredEventId)}>
-                        Ver banca
-                        <ArrowRight className="size-3.5" aria-hidden="true" />
-                      </Link>
-                    </Button>
-                  ) : null}
-
-                  {row.status === "financial_hold" ? (
-                    <Button asChild size="sm" variant="outline" className="min-h-10">
-                      <Link
-                        href={`${ROUTES.adminBilling}?student=${encodeURIComponent(row.fullName)}&status=overdue`}
-                      >
-                        Ver atrasos
-                      </Link>
-                    </Button>
-                  ) : null}
-
-                  <Button asChild size="sm" variant="ghost" className="min-h-10">
-                    <Link href={adminEnrollmentPath(row.studentId)}>
-                      Ficha
-                      <ArrowRight className="size-3.5" aria-hidden="true" />
-                    </Link>
-                  </Button>
-                </div>
-              </li>
-            ))}
-          </ul>
+                    <div className="border-t border-border/40 pt-2">
+                      <EligibilityActions row={row} nextOpenEvent={nextOpenEvent} ranks={ranks} />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            }
+          />
         </section>
       )}
     </div>

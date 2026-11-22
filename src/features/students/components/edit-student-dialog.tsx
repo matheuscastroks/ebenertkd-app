@@ -5,6 +5,7 @@ import { SquarePenIcon } from "@/components/ui/square-pen";
 import { adminUpdateStudentAction } from "@/app/actions/enrollment-review";
 import { DateField } from "@/components/shared/date-field";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
+import { MaskedInput } from "@/components/shared/masked-input";
 import { PhoneField } from "@/components/shared/phone-field";
 import { AddressFields } from "@/components/shared/address-fields";
 import { Button } from "@/components/ui/button";
@@ -83,11 +84,11 @@ export function EditStudentDialog({
               <div>
                 <Field>
                   <FieldLabel htmlFor="edit-cpf">CPF</FieldLabel>
-                  <Input
+                  <MaskedInput
+                    mask="cpf"
                     id="edit-cpf"
                     name="cpf"
                     defaultValue={student.cpf ?? ""}
-                    placeholder="Somente números"
                   />
                 </Field>
               </div>

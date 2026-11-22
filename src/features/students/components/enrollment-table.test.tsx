@@ -1,82 +1,107 @@
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
-import { EnrollmentTable } from "@/features/students/components/enrollment-table";
+import {
+  describeEnrollmentAction,
+  EnrollmentTable,
+  type EnrollmentRow,
+} from "@/features/students/components/enrollment-table";
 import type { Enrollment, Student } from "@/features/students/types";
 
+function makeRow(
+  id: string,
+  name: string,
+  status: Enrollment["status"],
+  extras: Partial<Pick<EnrollmentRow, "pendingDocuments" | "rejectedDocuments">> = {}
+): EnrollmentRow {
+  const student = {
+    $id: id,
+    profile_id: `profile-${id}`,
+    full_name: name,
+    rank_key: "gub-9",
+    training_class: "Infantil manhã",
+    status: "active",
+    created_at: "2026-01-01T00:00:00Z",
+    updated_at: "2026-01-01T00:00:00Z",
+  } as Student;
+
+  const enrollment = {
+    $id: `enr-${id}`,
+    student_id: id,
+    status,
+    requested_due_day: 10,
+    revision: 1,
+    created_at: "2026-01-01T00:00:00Z",
+    updated_at: "2026-01-01T00:00:00Z",
+  } as Enrollment;
+
+  return { student, enrollment, ...extras };
+}
+
 describe("EnrollmentTable", () => {
-  it("prioriza pendentes e reserva Analisar para fichas em revisão", () => {
-    const student = { $id: "a", full_name: "Ativa" } as Student;
-    render(<EnrollmentTable rows={[
-      { student, enrollment: { status: "active" } as Enrollment },
-      { student: { ...student, $id: "b", full_name: "Pendente" }, enrollment: { status: "submitted" } as Enrollment },
-    ]} />);
-    expect(screen.getAllByRole("link")[0]).toHaveAttribute("href", "/admin/matriculas/b");
-    expect(screen.getAllByRole("link", { name: "Ver" })).toHaveLength(2);
-    expect(screen.getByText(/Ordenação da página atual/)).toBeInTheDocument();
-  });
-  it("shows operational data and preserves the review destination", () => {
-    const student = {
-      $id: "student-1",
-      full_name: "Camila Ferreira",
-      rank_key: "gub-4",
-      training_class: "Adulto noite",
-    } as Student;
-    const enrollment = {
-      status: "under_review",
-      requested_due_day: 10,
-    } as Enrollment;
-    render(<EnrollmentTable rows={[{ student, enrollment }]} />);
-    expect(screen.getAllByText("Camila Ferreira")).toHaveLength(2);
-    expect(screen.getAllByText("Em análise")).toHaveLength(2);
-    expect(screen.getAllByRole("link", { name: /Analisar/ })[0]).toHaveAttribute(
-      "href",
-      "/admin/matriculas/student-1"
-    );
+  it("explains whose turn it is and what needs review", () => {
+    expect(
+      describeEnrollmentAction(
+        makeRow("1", "Ana", "submitted", { pendingDocuments: ["medical_certificate"] })
+      )
+    ).toMatchObject({
+      hint: "Sua revisão: ficha e atestado médico",
+      needsAdminReview: true,
+      primaryLabel: "Revisar ficha",
+      primaryHref: "/admin/matriculas/1",
+    });
+
+    expect(
+      describeEnrollmentAction(
+        makeRow("2", "Bruno", "active", { pendingDocuments: ["medical_certificate"] })
+      )
+    ).toMatchObject({
+      hint: "Sua revisão: validar atestado médico",
+      needsAdminReview: true,
+      primaryLabel: "Revisar docs",
+      primaryHref: "/admin/matriculas/2#documentos",
+    });
+
+    expect(
+      describeEnrollmentAction(makeRow("3", "Carla", "awaiting_signature"))
+    ).toMatchObject({
+      hint: "Aguardando aluno: assinatura do contrato",
+      needsAdminReview: false,
+      primaryLabel: "Ver contrato",
+      primaryHref: "/admin/matriculas/3#contrato",
+    });
+
+    expect(
+      describeEnrollmentAction(
+        makeRow("4", "Diego", "active", { rejectedDocuments: ["profile_photo"] })
+      )
+    ).toMatchObject({
+      hint: "Aguardando aluno: reenvio de foto",
+      needsAdminReview: false,
+      primaryLabel: "Ver docs",
+      primaryHref: "/admin/matriculas/4#documentos",
+    });
   });
 
-  it("sorts rows when clicking the Aluno column header", async () => {
-    const user = userEvent.setup();
-    const studentA = {
-      $id: "student-1",
-      full_name: "Carlos Eduardo",
-      rank_key: "gub-10",
-    } as Student;
-    const studentB = {
-      $id: "student-2",
-      full_name: "Ana Clara",
-      rank_key: "gub-4",
-    } as Student;
-
+  it("renders pending hints and quick-action menu trigger in the table", () => {
     render(
       <EnrollmentTable
         rows={[
-          { student: studentA, enrollment: null },
-          { student: studentB, enrollment: null },
+          makeRow("stu-1", "Lucas Mendes", "active", {
+            pendingDocuments: ["medical_certificate"],
+          }),
+          makeRow("stu-2", "Camila Ferreira", "awaiting_signature"),
         ]}
       />
     );
 
-    const sortButton = screen.getByRole("button", { name: /Aluno:/i });
-
-    // Initial order: Carlos, Ana
-    const initialNames = screen
-      .getAllByText(/Carlos Eduardo|Ana Clara/)
-      .map((el) => el.textContent);
-    expect(initialNames[0]).toBe("Carlos Eduardo");
-
-    // Click 1: asc -> Ana Clara first
-    await user.click(sortButton);
-    const ascNames = screen
-      .getAllByText(/Carlos Eduardo|Ana Clara/)
-      .map((el) => el.textContent);
-    expect(ascNames[0]).toBe("Ana Clara");
-
-    // Click 2: desc -> Carlos Eduardo first
-    await user.click(sortButton);
-    const descNames = screen
-      .getAllByText(/Carlos Eduardo|Ana Clara/)
-      .map((el) => el.textContent);
-    expect(descNames[0]).toBe("Carlos Eduardo");
+    expect(screen.getAllByText("Sua revisão: validar atestado médico").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Aguardando aluno: assinatura do contrato").length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: "Revisar docs" })[0]).toHaveAttribute(
+      "href",
+      "/admin/matriculas/stu-1#documentos"
+    );
+    expect(
+      screen.getAllByRole("button", { name: "Mais ações para Lucas Mendes" }).length
+    ).toBeGreaterThan(0);
   });
 });

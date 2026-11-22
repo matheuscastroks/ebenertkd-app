@@ -60,7 +60,7 @@ async function EventsContent({ type }: { type?: EventType }) {
           Próximos
         </h2>
         {upcoming.length ? (
-          <ul className="space-y-4">
+          <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {upcoming.map((item) => (
               <EventCard key={item.event.$id} data={item} />
             ))}
@@ -74,7 +74,7 @@ async function EventsContent({ type }: { type?: EventType }) {
           <h2 id="eventos-passados" className="text-base font-semibold">
             Passados e cancelados
           </h2>
-          <ul className="space-y-4">
+          <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {past.map((item) => (
               <EventCard key={item.event.$id} data={item} />
             ))}

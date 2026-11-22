@@ -29,14 +29,14 @@ type ExamOverview = Awaited<ReturnType<typeof getExamsOverview>>;
 
 function ExamList({ events }: { events: ExamOverview["events"] }) {
   return (
-    <ul className="t-stagger divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
+    <ul className="t-stagger grid grid-cols-1 gap-4 lg:grid-cols-2">
       {events.map((event) => (
         <li
           key={event.$id}
-          className="t-interactive-row flex flex-col gap-3 px-4 py-3.5 hover:bg-muted sm:flex-row sm:items-center sm:justify-between sm:px-5"
+          className="t-interactive-row flex flex-col justify-between gap-4 rounded-xl bg-card p-4 shadow-xs hover:bg-muted/40 sm:p-5"
         >
           <div className="min-w-0 space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="truncate text-base font-medium text-foreground">{event.name}</p>
               <StatusBadge tone={examEventTones[event.status]}>{examEventLabels[event.status]}</StatusBadge>
             </div>
@@ -46,19 +46,21 @@ function ExamList({ events }: { events: ExamOverview["events"] }) {
               {event.location || "Local não informado"}
             </p>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-4 sm:shrink-0 sm:justify-end">
-            <AvatarGroup people={event.candidates} total={event.participantCount} max={4} size="sm" surface="card" />
-            <div className="text-left sm:text-right">
-              <p className="text-sm font-medium tabular-nums text-foreground">
-                {event.participantCount} {event.participantCount === 1 ? "candidato" : "candidatos"}
-              </p>
-              <p className="text-sm tabular-nums text-muted-foreground">
-                {event.participantCount > 0
-                  ? `${formatBrl(event.totalFeesCents)} previstos`
-                  : `Taxa ${formatBrl(event.default_fee_cents)}`}
-              </p>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/50 pt-3">
+            <div className="flex items-center gap-3">
+              <AvatarGroup people={event.candidates} total={event.participantCount} max={4} size="sm" surface="card" />
+              <div className="text-left">
+                <p className="text-sm font-medium tabular-nums text-foreground">
+                  {event.participantCount} {event.participantCount === 1 ? "candidato" : "candidatos"}
+                </p>
+                <p className="text-xs tabular-nums text-muted-foreground">
+                  {event.participantCount > 0
+                    ? `${formatBrl(event.totalFeesCents)} previstos`
+                    : `Taxa ${formatBrl(event.default_fee_cents)}`}
+                </p>
+              </div>
             </div>
-            <Button asChild variant="outline" size="sm" className="h-11 shrink-0 px-3 sm:h-9">
+            <Button asChild variant="outline" size="sm" className="h-10 shrink-0 px-3">
               <Link href={adminExamPath(event.$id)}>
                 Abrir banca
                 <ArrowRightIcon className="size-3.5" aria-hidden="true" />

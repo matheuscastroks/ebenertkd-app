@@ -10,6 +10,7 @@ export type UpcomingTrainingSession = {
   startTime: string;
   endTime: string;
   className: string;
+  classId?: string;
   location: string | null;
   kind: "regular" | "makeup";
 };
@@ -76,6 +77,7 @@ export function buildUpcomingTrainingSessions(input: {
       startTime: lesson.start_time,
       endTime: lesson.end_time,
       className: input.trainingClass?.name ?? "Treino",
+      classId: lesson.training_class_id,
       location: input.trainingClass?.location ?? null,
       kind: lesson.lesson_type,
     });
@@ -96,6 +98,7 @@ export function buildUpcomingTrainingSessions(input: {
         startTime: input.trainingClass.start_time,
         endTime: input.trainingClass.end_time,
         className: input.trainingClass.name,
+        classId: input.trainingClass.$id,
         location: input.trainingClass.location ?? null,
         kind: "regular",
       });

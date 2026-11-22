@@ -297,20 +297,20 @@ export function AdjustmentWizard({
               </div>
             </fieldset>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="flex flex-wrap items-start gap-4">
               {mode !== "fixed" ? (
-                <div className="space-y-1.5">
+                <div className="w-full space-y-1.5 sm:w-44">
                   <Label htmlFor="adj-percent">Percentual de reajuste (%)</Label>
                   <Input id="adj-percent" inputMode="decimal" value={percent} onChange={(event) => setPercent(event.target.value)} />
                 </div>
               ) : (
-                <div className="space-y-1.5">
+                <div className="w-full space-y-1.5 sm:w-52">
                   <Label htmlFor="adj-fixed">Novo valor da mensalidade (R$)</Label>
                   <Input id="adj-fixed" inputMode="decimal" placeholder="0,00" value={fixed} onChange={(event) => setFixed(event.target.value)} />
                 </div>
               )}
               {mode === "rounded" ? (
-                <div className="space-y-1.5">
+                <div className="w-full space-y-1.5 sm:w-52">
                   <Label htmlFor="adj-round">Arredondar para cima em múltiplos de</Label>
                   <select id="adj-round" className={SELECT_CLASS} value={roundTo} onChange={(event) => setRoundTo(event.target.value)}>
                     <option value="500">R$ 5,00</option>
@@ -318,7 +318,7 @@ export function AdjustmentWizard({
                   </select>
                 </div>
               ) : null}
-              <div className="space-y-1.5">
+              <div className="min-w-56 flex-1 space-y-1.5">
                 <Label htmlFor="adj-index">Índice de referência (opcional)</Label>
                 <Input id="adj-index" maxLength={128} placeholder="Ex.: IPCA 12 meses: 4,5%" value={indexLabel} onChange={(event) => setIndexLabel(event.target.value)} />
               </div>
@@ -329,6 +329,7 @@ export function AdjustmentWizard({
                 defaultValue={effectiveFrom}
                 onValueChange={(value) => value && setEffectiveFrom(value)}
                 description={`Padrão: primeiro dia de um mês com pelo menos ${minNoticeDays} dias de aviso.`}
+                className="w-full sm:w-64"
               />
             </div>
 

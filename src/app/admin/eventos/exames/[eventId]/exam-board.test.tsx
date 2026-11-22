@@ -3,8 +3,13 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 vi.mock("@/app/actions/exams", () => ({ cancelExamEventAction: vi.fn(), cancelExamParticipantAction: vi.fn() }));
 vi.mock("@/features/exams/service", () => ({ getExamEventBundle: vi.fn() }));
-vi.mock("@/features/academy/config-service", () => ({ getBeltRanks: vi.fn(async () => []), getPolicy: vi.fn(async () => ({ allow_skip_grades: false })) }));
-vi.mock("@/features/academy/belt-rules", () => ({ beltNameOf: () => "Amarela", examTargetRanks: () => ["gub-8"], toPublicRank: (rank: unknown) => rank }));
+vi.mock("@/features/academy/config-service", () => ({
+  getBeltRanks: vi.fn(async () => []),
+  getPolicy: vi.fn(async (key: string) =>
+    key === "belts" ? { level_label: "Gub" } : { allow_skip_grades: false }
+  ),
+}));
+vi.mock("@/features/academy/belt-rules", () => ({ examTargetRanks: () => ["gub-8"], toPublicRank: (rank: unknown) => rank }));
 vi.mock("@/features/billing/components/exam-result-actions", () => ({ ExamResultActions: () => null }));
 vi.mock("@/features/exams/components/enroll-participant-form", () => ({ EnrollParticipantForm: () => null }));
 vi.mock("@/features/students/components/student-avatar", () => ({ StudentAvatar: () => null }));

@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useTransition, type FormEvent } from "react";
+import { useState, useTransition, type FormEvent } from "react";
 import { toast } from "sonner";
 import { saveBillingSettingsAction } from "@/app/actions/billing";
+import { MaskedInput } from "@/components/shared/masked-input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
@@ -16,6 +17,15 @@ import type { BillingSettings } from "@/features/billing/types";
 export function PixSettingsForm({ settings }: { settings: BillingSettings | null }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [pixKeyType, setPixKeyType] = useState<string>(settings?.pix_key_type ?? "random");
+  const pixKeyMask =
+    pixKeyType === "cpf"
+      ? "cpf"
+      : pixKeyType === "cnpj"
+        ? "cnpj"
+        : pixKeyType === "phone"
+          ? "phone"
+          : "none";
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -39,14 +49,14 @@ export function PixSettingsForm({ settings }: { settings: BillingSettings | null
         <CardDescription>Aparecem para alunos e responsáveis na hora de pagar.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={onSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field>
+        <form onSubmit={onSubmit} className="flex flex-wrap items-start gap-4">
+          <Field className="min-w-56 flex-1">
             <FieldLabel htmlFor="pix-beneficiary-name">Beneficiário</FieldLabel>
             <Input id="pix-beneficiary-name" name="beneficiary_name" defaultValue={settings?.beneficiary_name} required />
           </Field>
-          <Field>
+          <Field className="w-full sm:w-44">
             <FieldLabel htmlFor="pix-key-type">Tipo da chave</FieldLabel>
-            <Select name="pix_key_type" defaultValue={settings?.pix_key_type ?? "random"}>
+            <Select name="pix_key_type" value={pixKeyType} onValueChange={setPixKeyType}>
               <SelectTrigger id="pix-key-type" className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="cpf">CPF</SelectItem>
@@ -57,16 +67,16 @@ export function PixSettingsForm({ settings }: { settings: BillingSettings | null
               </SelectContent>
             </Select>
           </Field>
-          <Field className="sm:col-span-2">
+          <Field className="w-full sm:max-w-md">
             <FieldLabel htmlFor="pix-key">Chave PIX</FieldLabel>
-            <Input id="pix-key" name="pix_key" defaultValue={settings?.pix_key} required />
+            <MaskedInput id="pix-key" name="pix_key" mask={pixKeyMask} defaultValue={settings?.pix_key ?? ""} required />
           </Field>
-          <Field className="sm:col-span-2">
+          <Field className="w-full">
             <FieldLabel htmlFor="pix-instructions">Instruções</FieldLabel>
             <Textarea id="pix-instructions" name="instructions" defaultValue={settings?.instructions ?? ""} className="min-h-24" />
             <FieldDescription>Exibido antes do envio do comprovante.</FieldDescription>
           </Field>
-          <div className="flex justify-end sm:col-span-2">
+          <div className="flex w-full justify-end">
             <Button type="submit" className="min-h-11" disabled={pending}>{pending ? "Salvando…" : "Salvar dados PIX"}</Button>
           </div>
         </form>

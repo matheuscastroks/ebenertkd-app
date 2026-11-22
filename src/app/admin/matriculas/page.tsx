@@ -91,7 +91,10 @@ export default async function EnrollmentsPage({
         ) : null}
         <EnrollmentFilters classes={toClientData(classes)} />
 
-        <Suspense fallback={<TableRowsSkeleton columns={6} rows={5} />}>
+        <Suspense
+          key={`${query.q ?? ""}|${query.status ?? ""}|${query.rank ?? ""}|${query.turma ?? ""}|${query.page ?? ""}`}
+          fallback={<TableRowsSkeleton columns={6} rows={5} />}
+        >
           <EnrollmentListContent searchParams={searchParams} />
         </Suspense>
       </div>

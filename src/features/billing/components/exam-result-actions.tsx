@@ -6,12 +6,15 @@ import { CheckIcon } from "@/components/ui/check";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { XIcon } from "@/components/ui/x";
+import { BeltBadge } from "@/features/students/components/belt-badge";
 import { formatBrl } from "@/lib/money";
 
 export function ExamResultActions({
   participantId,
   eventId,
   name,
+  currentRankKey,
+  targetRankKey,
   currentName,
   targetName,
   feeCents,
@@ -19,6 +22,8 @@ export function ExamResultActions({
   participantId: string;
   eventId: string;
   name: string;
+  currentRankKey?: string | null;
+  targetRankKey?: string | null;
   currentName: string;
   targetName: string;
   feeCents: number;
@@ -32,7 +37,7 @@ export function ExamResultActions({
             label: "Aprovar",
             className:
               "bg-success-soft text-success-foreground hover:bg-success-soft hover:text-success-foreground",
-            effect: `Muda a faixa de ${currentName} para ${targetName}. O resultado será publicado no portal do aluno.`,
+            effect: `Muda a graduação de ${currentName} para ${targetName}. O resultado será publicado no portal do aluno.`,
           },
           {
             result: "failed",
@@ -73,13 +78,17 @@ export function ExamResultActions({
               <dt className="text-muted-foreground">Aluno</dt>
               <dd className="font-medium text-foreground">{name}</dd>
             </div>
-            <div className="flex flex-wrap justify-between gap-2">
-              <dt className="text-muted-foreground">Faixa atual</dt>
-              <dd className="font-medium text-foreground">{currentName}</dd>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <dt className="text-muted-foreground">Graduação atual</dt>
+              <dd className="font-medium text-foreground">
+                {currentRankKey ? <BeltBadge rankKey={currentRankKey} size="sm" /> : currentName}
+              </dd>
             </div>
-            <div className="flex flex-wrap justify-between gap-2">
-              <dt className="text-muted-foreground">Faixa pretendida</dt>
-              <dd className="font-medium text-foreground">{targetName}</dd>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <dt className="text-muted-foreground">Graduação pretendida</dt>
+              <dd className="font-medium text-foreground">
+                {targetRankKey ? <BeltBadge rankKey={targetRankKey} size="sm" /> : targetName}
+              </dd>
             </div>
             <div className="flex flex-wrap justify-between gap-2">
               <dt className="text-muted-foreground">Taxa do exame</dt>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FileText, ImageIcon } from "@/components/ui/icons";
 import { DateField } from "@/components/shared/date-field";
 import { FileField } from "@/components/shared/file-field";
+import { MaskedInput } from "@/components/shared/masked-input";
 import { PhoneField } from "@/components/shared/phone-field";
 import { AddressFields } from "@/components/shared/address-fields";
 import {
@@ -64,14 +65,16 @@ export function PersonalEnrollmentStep({ bundle, onValueChange }: StepProps) {
             />
           </div>
           <div className="sm:col-span-6 lg:col-span-3">
-            <Field
-              label="CPF"
-              name="cpf"
-              inputMode="numeric"
-              defaultValue={student.cpf ?? ""}
-              required
-              placeholder="Somente números"
-            />
+            <FormField>
+              <FieldLabel htmlFor="enrollment-cpf">CPF *</FieldLabel>
+              <MaskedInput
+                mask="cpf"
+                id="enrollment-cpf"
+                name="cpf"
+                defaultValue={student.cpf ?? ""}
+                required
+              />
+            </FormField>
           </div>
           <div className="sm:col-span-6 lg:col-span-3">
             <DateField

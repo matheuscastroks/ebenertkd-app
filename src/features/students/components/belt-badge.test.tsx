@@ -16,26 +16,28 @@ const config = (overrides: Partial<PublicAcademyConfig> = {}): PublicAcademyConf
 });
 
 describe("BeltBadge", () => {
-  it("shows the configured name and the graduation level", () => {
+  it("shows only the belt mini and the graduation level by default", () => {
     render(<BeltBadge rankKey="gub-8" />);
-    expect(screen.getByText("Amarela")).toBeInTheDocument();
+    expect(screen.queryByText("Amarela")).not.toBeInTheDocument();
     expect(screen.getByText("8º Gub")).toBeInTheDocument();
     expect(screen.getByLabelText("Faixa Amarela, 8º Gub")).toBeInTheDocument();
   });
 
   it("renders the white belt, a tip belt and the first Dan from the catalog defaults", () => {
     const { unmount } = render(<BeltBadge rankKey="gub-10" />);
-    expect(screen.getByText("Branca")).toBeInTheDocument();
+    expect(screen.getByText("10º Gub")).toBeInTheDocument();
+    expect(screen.getByLabelText("Faixa Branca, 10º Gub")).toBeInTheDocument();
     unmount();
     const second = render(<BeltBadge rankKey="gub-9" />);
-    expect(screen.getByText("Ponta Amarela")).toBeInTheDocument();
+    expect(screen.getByText("9º Gub")).toBeInTheDocument();
+    expect(screen.getByLabelText("Faixa Ponta Amarela, 9º Gub")).toBeInTheDocument();
     second.unmount();
     render(<BeltBadge rankKey="dan-1" />);
-    expect(screen.getByText("Preta")).toBeInTheDocument();
+    expect(screen.queryByText("Preta")).not.toBeInTheDocument();
     expect(screen.getByText("1º Dan")).toBeInTheDocument();
   });
 
-  it("uses the name the academy configured and the federation's level term", () => {
+  it("uses the name the academy configured in accessibility labels and the federation's level term", () => {
     const ranks = DEFAULT_PUBLIC_RANKS.map((rank) =>
       rank.rank_key === "gub-9" ? { ...rank, display_name: "Laranja", color_primary: "#f97316", color_style: "solid" as const } : rank
     );
@@ -44,12 +46,23 @@ describe("BeltBadge", () => {
         <BeltBadge rankKey="gub-9" />
       </AcademyConfigProvider>
     );
-    expect(screen.getByText("Laranja")).toBeInTheDocument();
     expect(screen.getByText("9º Gup")).toBeInTheDocument();
+    expect(screen.getByLabelText("Faixa Laranja, 9º Gup")).toBeInTheDocument();
     expect(screen.queryByText("Ponta Amarela")).not.toBeInTheDocument();
   });
 
-  it("can hide the level and show a historical name without touching the color", () => {
+  it("hides the belt name visually even for a historical snapshot when showRank is true", () => {
+    const { unmount } = render(<BeltBadge rankKey="gub-8" showName />);
+    expect(screen.getByText("Amarela")).toBeInTheDocument();
+    expect(screen.getByText("8º Gub")).toBeInTheDocument();
+    unmount();
+
+    const snapshot = render(<BeltBadge rankKey="gub-9" nameOverride="Nome da época" />);
+    expect(screen.queryByText("Nome da época")).not.toBeInTheDocument();
+    expect(screen.getByText("9º Gub")).toBeInTheDocument();
+    expect(screen.getByLabelText("Faixa Nome da época, 9º Gub")).toBeInTheDocument();
+    snapshot.unmount();
+
     render(<BeltBadge rankKey="gub-9" showRank={false} nameOverride="Nome da época" />);
     expect(screen.getByText("Nome da época")).toBeInTheDocument();
     expect(screen.queryByText("9º Gub")).not.toBeInTheDocument();
@@ -88,8 +101,27 @@ describe("BeltBadgeView and BeltMini", () => {
     expect((container.querySelector("span") as HTMLElement).getAttribute("style")).toContain("background: rgb(37, 99, 235)");
   });
 
-  it("renders the live preview badge with the name and level label", () => {
-    render(<BeltBadgeView appearance={{ ...base, colorStyle: "stripe" }} rankLabel="9º Gub" />);
+  it("renders Dan belts with vertical gold bars near the tip instead of a solid right block", () => {
+    const firstDan = render(<BeltBadge rankKey="dan-1" />);
+    const firstStyle = (firstDan.container.querySelector("span[aria-hidden='true']") as HTMLElement).getAttribute("style") ?? "";
+    expect(firstStyle).toContain("74%");
+    expect(firstStyle).toContain("84%");
+    firstDan.unmount();
+
+    const thirdDan = render(<BeltBadge rankKey="dan-3" />);
+    const thirdStyle = (thirdDan.container.querySelector("span[aria-hidden='true']") as HTMLElement).getAttribute("style") ?? "";
+    expect(thirdStyle).toContain("54%");
+    expect(thirdStyle).toContain("87%");
+  });
+
+  it("renders the live preview badge with the level label by default and name when requested", () => {
+    const { unmount } = render(<BeltBadgeView appearance={{ ...base, colorStyle: "stripe" }} rankLabel="9º Gub" />);
+    expect(screen.queryByText("Teste")).not.toBeInTheDocument();
+    expect(screen.getByText("9º Gub")).toBeInTheDocument();
+    expect(screen.getByLabelText("Faixa Teste, 9º Gub")).toBeInTheDocument();
+    unmount();
+
+    render(<BeltBadgeView appearance={{ ...base, colorStyle: "stripe" }} rankLabel="9º Gub" showName />);
     expect(screen.getByText("Teste")).toBeInTheDocument();
     expect(screen.getByText("9º Gub")).toBeInTheDocument();
   });

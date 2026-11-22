@@ -15,9 +15,9 @@ import { UserPlusIcon } from "@/components/ui/user-plus";
 import { ExamResultActions } from "@/features/billing/components/exam-result-actions";
 import { EnrollParticipantForm } from "@/features/exams/components/enroll-participant-form";
 import { examParticipantLabels, examParticipantTones } from "@/features/exams/labels";
-import { beltNameOf, examTargetRanks, toPublicRank } from "@/features/academy/belt-rules";
+import { examTargetRanks, toPublicRank } from "@/features/academy/belt-rules";
 import { getBeltRanks, getPolicy } from "@/features/academy/config-service";
-import { isRankKey, rankOrder } from "@/features/academy/ranks";
+import { isRankKey, rankOrder, rankShortLabel } from "@/features/academy/ranks";
 import { getExamEventBundle } from "@/features/exams/service";
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import { studentPhotoUrl } from "@/features/students/photo-url";
@@ -27,7 +27,8 @@ import { ROUTES } from "@/lib/navigation/routes";
 
 /** Mesa da banca: candidatos e resultados, inscrição de alunos e cancelamento do exame. */
 export async function ExamBundleSections({ eventId }: { eventId: string }) {
-  const [bundle, ranks, examPolicy] = await Promise.all([getExamEventBundle(eventId), getBeltRanks(), getPolicy("exam")]);
+  const [bundle, ranks, beltPolicy, examPolicy] = await Promise.all([getExamEventBundle(eventId), getBeltRanks(), getPolicy("belts"), getPolicy("exam")]);
+  const levelLabel = beltPolicy.level_label;
   const publicRanks = ranks.map(toPublicRank);
   // Só entra na lista quem ainda tem alguma graduação habilitada acima da atual.
   const eligibleStudents = bundle.eligibleStudents.filter(
@@ -240,8 +241,18 @@ export async function ExamBundleSections({ eventId }: { eventId: string }) {
                                     participantId={participant.$id}
                                     eventId={eventId}
                                     name={student!.full_name}
-                                    currentName={beltNameOf(publicRanks, student!.rank_key, "Sem faixa")}
-                                    targetName={beltNameOf(publicRanks, participant.target_rank_key)}
+                                    currentRankKey={student!.rank_key}
+                                    targetRankKey={participant.target_rank_key}
+                                    currentName={
+                                      isRankKey(student!.rank_key)
+                                        ? rankShortLabel(student!.rank_key, levelLabel)
+                                        : "Sem graduação"
+                                    }
+                                    targetName={
+                                      isRankKey(participant.target_rank_key)
+                                        ? rankShortLabel(participant.target_rank_key, levelLabel)
+                                        : participant.target_rank_key
+                                    }
                                     feeCents={
                                       charge?.amount_cents ?? bundle.event.default_fee_cents
                                     }
@@ -291,10 +302,10 @@ export async function ExamBundleSections({ eventId }: { eventId: string }) {
                                         </div>
                                         <div className="flex flex-wrap justify-between gap-2">
                                           <dt className="text-muted-foreground">
-                                            Faixa pretendida
+                                            Graduação pretendida
                                           </dt>
                                           <dd className="font-medium text-foreground">
-                                            {beltNameOf(publicRanks, participant.target_rank_key)}
+                                            <BeltBadge rankKey={participant.target_rank_key} size="sm" />
                                           </dd>
                                         </div>
                                         <div className="flex flex-wrap justify-between gap-2">
@@ -444,14 +455,15 @@ export async function ExamBundleSections({ eventId }: { eventId: string }) {
                         <p className="truncate text-sm font-medium text-foreground">
                           {student!.full_name}
                         </p>
-                        <p className="text-sm text-muted-foreground">
-                          Para faixa {beltNameOf(publicRanks, participant.target_rank_key)}
+                        <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+                          <span>Para</span>
+                          <BeltBadge rankKey={participant.target_rank_key} size="sm" />
                           {participant.financial_decision === "future_credit"
-                            ? " · Crédito para próximo exame"
+                            ? <span>· Crédito para próximo exame</span>
                             : participant.financial_decision === "keep_charge"
-                              ? " · Valor mantido"
-                              : ""}
-                        </p>
+                              ? <span>· Valor mantido</span>
+                              : null}
+                        </div>
                       </div>
                     </div>
                     <StatusBadge tone="neutral">Cancelado</StatusBadge>
@@ -543,10 +555,10 @@ export async function ExamBundleSections({ eventId }: { eventId: string }) {
                             <p className="line-clamp-2 text-sm font-medium text-foreground">
                               {student!.full_name}
                             </p>
-                            <p className="line-clamp-2 text-sm text-muted-foreground">
-                              Atual:{" "}
-                              {beltNameOf(publicRanks, student!.rank_key)}
-                            </p>
+                            <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <span>Atual:</span>
+                              <BeltBadge rankKey={student!.rank_key} size="sm" />
+                            </div>
                           </div>
                         </div>
 

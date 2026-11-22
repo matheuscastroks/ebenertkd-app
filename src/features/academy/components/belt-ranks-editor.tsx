@@ -23,7 +23,7 @@ import { eligibilityImpactText } from "@/features/academy/impact-notes";
 import { buildRankPatches, patchesAffectEligibility, toRankDraft, type RankDraft } from "@/features/academy/rank-form";
 import { rankShortLabel, type RankKind } from "@/features/academy/ranks";
 import { ConsequenceDialog } from "@/features/billing/components/consequence-dialog";
-import { BeltBadgeView } from "@/features/students/components/belt-badge";
+import { BeltBadgeView, danDegreeOf } from "@/features/students/components/belt-badge";
 import { cn } from "@/lib/utils";
 
 const GROUPS: Array<{ kind: RankKind; title: string; description: string }> = [
@@ -237,7 +237,9 @@ function RankRow({
         <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1.5">
           <BeltBadgeView
             appearance={{ name: draft.display_name || "Sem nome", colorPrimary: draft.color_primary, colorSecondary: draft.color_secondary, colorStyle: draft.color_style }}
+            danDegree={danDegreeOf(key)}
             rankLabel={rankShortLabel(key, levelLabel)}
+            showName={false}
             size="md"
           />
           {requirement ? <span className="text-sm font-normal text-muted-foreground tabular-nums">{requirement}</span> : null}
@@ -249,7 +251,7 @@ function RankRow({
       <AccordionContent>
         <div className="space-y-5 pb-3 pt-1">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <ConfigField id={`${key}-name`} label="Nome na academia" error={error("display_name")} help="Como esta graduação aparece para alunos e responsáveis. Ex.: Ponta Amarela, Laranja, Amarela listra Branca.">
+            <ConfigField id={`${key}-name`} label="Nome na academia" error={error("display_name")} help="Rótulo interno e de acessibilidade desta graduação. Nas telas do portal, exibimos a faixa colorida e o nível.">
               <Input id={`${key}-name`} value={draft.display_name} maxLength={64} onChange={(event) => onChange({ display_name: event.target.value })} className="h-11" />
             </ConfigField>
             <ConfigField id={`${key}-aliases`} label="Nomes alternativos" error={error("aliases")} help="Outros nomes usados para este mesmo nível. Separe por vírgula. Servem para reconhecer o nível em buscas.">
@@ -290,7 +292,9 @@ function RankRow({
               <div>
                 <BeltBadgeView
                   appearance={{ name: draft.display_name || "Sem nome", colorPrimary: draft.color_primary, colorSecondary: draft.color_secondary, colorStyle: draft.color_style }}
+                  danDegree={danDegreeOf(key)}
                   rankLabel={rankShortLabel(key, levelLabel)}
+                  showName={false}
                   size="lg"
                 />
               </div>

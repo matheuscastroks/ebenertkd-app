@@ -5,9 +5,9 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBeltLabels, useBeltRanks } from "@/components/academy-config-provider";
-import { beltNameOf, findRank } from "@/features/academy/belt-rules";
-import type { RankKey } from "@/features/academy/ranks";
-import { BeltBadge } from "@/features/students/components/belt-badge";
+import { appearanceOf, findRank } from "@/features/academy/belt-rules";
+import { rankShortLabel, type RankKey } from "@/features/academy/ranks";
+import { BeltBadge, BeltMini, danDegreeOf } from "@/features/students/components/belt-badge";
 import {
   KOREAN_COMMANDS,
   KOREAN_NUMBERS,
@@ -24,7 +24,7 @@ export function StudyGuideView({
   currentRankKey: RankKey;
 }) {
   const ranks = useBeltRanks();
-  const { formLabel } = useBeltLabels();
+  const { formLabel, levelLabel } = useBeltLabels();
   const [selectedKey, setSelectedKey] = useState<RankKey>(currentRankKey);
   const [answers, setAnswers] = useState<Record<string, number>>({});
 
@@ -64,17 +64,27 @@ export function StudyGuideView({
           <div className="flex flex-wrap gap-2">
             {modules.map((mod) => {
               const isSelected = mod.rankKey === activeModule.rankKey;
+              const appearance = appearanceOf(ranks, mod.rankKey);
               return (
                 <Button
                   key={mod.rankKey}
                   type="button"
                   size="sm"
                   variant={isSelected ? "default" : "outline"}
-                  className="min-h-9"
+                  className="min-h-9 gap-2"
                   onClick={() => setSelectedKey(mod.rankKey)}
                 >
-                  {beltNameOf(ranks, mod.rankKey)}
-                  {mod.accessState === "current" ? " (Atual)" : ""}
+                  {appearance ? (
+                    <BeltMini
+                      appearance={appearance}
+                      danDegree={danDegreeOf(mod.rankKey)}
+                      size="sm"
+                    />
+                  ) : null}
+                  <span>
+                    {rankShortLabel(mod.rankKey, levelLabel)}
+                    {mod.accessState === "current" ? " (Atual)" : ""}
+                  </span>
                 </Button>
               );
             })}
@@ -216,9 +226,10 @@ export function StudyGuideView({
       <TabsContent value="quiz" className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-card p-4 shadow-xs sm:px-5">
           <div className="space-y-1">
-            <h2 className="text-base font-semibold">
-              Revisão teórica · Faixa {beltNameOf(ranks, activeModule.rankKey)}
-            </h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-base font-semibold">Revisão teórica</h2>
+              <BeltBadge rankKey={activeModule.rankKey} size="sm" />
+            </div>
             <p className="text-xs text-muted-foreground">
               Teste seus conhecimentos antes do exame. Esta prática é livre e não altera sua nota oficial.
             </p>

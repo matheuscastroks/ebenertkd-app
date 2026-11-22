@@ -2,7 +2,7 @@ import type { Charge, Payment } from "@/features/billing/types";
 import type { CancellationRequest } from "@/features/contracts/types";
 import type { BeltHistory } from "@/features/exams/types";
 import type { PublicRank } from "@/features/academy/belt-rules";
-import { rankOrder, type RankKey } from "@/features/academy/ranks";
+import { rankOrder, rankShortLabel, type RankKey } from "@/features/academy/ranks";
 import type { Enrollment, Student } from "@/features/students/types";
 import { daysBetweenIsoDates, saoPauloToday } from "@/lib/dates";
 
@@ -207,7 +207,7 @@ export function buildAnnualExecutiveReport(input: {
     return {
       rankKey,
       belt,
-      shortBelt: belt.replace("Ponta ", "P. "),
+      shortBelt: rankShortLabel(rankKey),
       activeCount,
       inactiveCount,
       graduationsInYear: grads,

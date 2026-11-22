@@ -29,6 +29,7 @@ export async function PortalFrame({ profile, children }: { profile: Profile; chi
       profileName={profile.full_name}
       profileEmail={email}
       role={profile.role}
+      capabilities={profile.capabilities}
       avatarUrl={avatarUrl}
       avatarSex={avatarSex}
       navItems={navigationForProfile(profile, { enrollments, notifications })}

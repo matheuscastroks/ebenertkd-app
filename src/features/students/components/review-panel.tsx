@@ -46,8 +46,8 @@ import { Separator } from "@/components/ui/separator";
 import { StudentAvatar } from "@/features/students/components/student-avatar";
 import { EditStudentDialog } from "@/features/students/components/edit-student-dialog";
 import type { TrainingClass } from "@/features/classes/types";
-import { DEFAULT_PUBLIC_RANKS, type PublicRank } from "@/features/academy/belt-rules";
-import { DEFAULT_BELTS_POLICY, DEFAULT_BILLING_POLICY, DEFAULT_CONTRACT_POLICY } from "@/features/academy/defaults";
+import { type PublicRank } from "@/features/academy/belt-rules";
+import { DEFAULT_BILLING_POLICY, DEFAULT_CONTRACT_POLICY } from "@/features/academy/defaults";
 import {
   accessStatusLabel,
   type StudentAppAccessState,
@@ -60,7 +60,7 @@ import {
 } from "@/features/students/parq-rules";
 import { formatBusinessDateBr } from "@/lib/dates";
 import { calculateDefaultContractDates, calculateNextDueDate } from "@/features/students/options";
-import { rankFullLabel } from "@/features/academy/belt-rules";
+import { BeltBadge } from "@/features/students/components/belt-badge";
 import type { EnrollmentBundle } from "@/features/students/types";
 import { centsToReaisInput } from "@/lib/money";
 import { formatBrazilianPhone } from "@/lib/phone";
@@ -120,9 +120,7 @@ export function ReviewPanel({
   notice,
   defaultMonthlyFeeCents = DEFAULT_BILLING_POLICY.default_monthly_fee_cents,
   contractDurationMonths = DEFAULT_CONTRACT_POLICY.default_duration_months,
-  dueDayOptions = DEFAULT_BILLING_POLICY.due_day_options,
-  ranks = DEFAULT_PUBLIC_RANKS,
-  levelLabel = DEFAULT_BELTS_POLICY.level_label
+  dueDayOptions = DEFAULT_BILLING_POLICY.due_day_options
 }: {
   bundle: EnrollmentBundle;
   reviews: Array<Record<string, unknown>>;
@@ -143,7 +141,6 @@ export function ReviewPanel({
   levelLabel?: string;
 }) {
   const { student, enrollment, documents } = bundle;
-  const rankLabel = rankFullLabel(ranks, student.rank_key, levelLabel);
   const profilePhoto = documents.find((doc) => doc.document_type === "profile_photo");
   const medicalCertificate = documents.find((doc) => doc.document_type === "medical_certificate");
 
@@ -263,9 +260,10 @@ export function ReviewPanel({
           />
           <div>
             <p className="text-base font-semibold text-foreground">Ficha cadastral do aluno</p>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              CPF {student.cpf || "não informado"} · {rankLabel}
-            </p>
+            <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+              <span>CPF {student.cpf || "não informado"}</span>
+              <BeltBadge rankKey={student.rank_key} size="sm" />
+            </div>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -370,9 +368,9 @@ export function ReviewPanel({
                 </div>
                 <div className="space-y-0.5">
                   <span className="text-xs text-muted-foreground block">Graduação atual</span>
-                  <span className="font-medium text-foreground">
-                    {student.rank_key ? rankLabel : "—"}
-                  </span>
+                  <div className="pt-0.5">
+                    <BeltBadge rankKey={student.rank_key} size="sm" />
+                  </div>
                 </div>
                 <div className="space-y-0.5">
                   <span className="text-xs text-muted-foreground block">Início no taekwondo</span>
@@ -746,10 +744,10 @@ export function ReviewPanel({
                   </ResponsiveDialog>
                 </div>
               ) : medicalCertificate?.status === "approved" ? (
-                <p className="flex items-center gap-1.5 pt-1 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1.5 pt-1 text-sm text-muted-foreground">
                   <CheckCircle2 className="size-3.5 text-success" aria-hidden="true" />
-                  Atestado validado e arquivado com sucesso.
-                </p>
+                  <span>Atestado validado e arquivado com sucesso.</span>
+                </div>
               ) : null}
             </div>
           </div>
@@ -770,9 +768,9 @@ export function ReviewPanel({
                 <form action={saveFinancialReviewAction} className="space-y-4">
                   <input type="hidden" name="student_id" value={student.$id} />
 
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 items-end">
+                  <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-3">
                     <Field>
-                      <FieldLabel htmlFor="review-monthly-fee">Mensalidade acordada (R$)</FieldLabel>
+                      <FieldLabel htmlFor="review-monthly-fee">Mensalidade (R$)</FieldLabel>
                       <Input
                         id="review-monthly-fee"
                         name="monthly_fee_reais"
@@ -787,7 +785,7 @@ export function ReviewPanel({
                     </Field>
 
                     <Field>
-                      <FieldLabel htmlFor="review-discount">Desconto mensal (R$)</FieldLabel>
+                      <FieldLabel htmlFor="review-discount">Desconto (R$)</FieldLabel>
                       <Input
                         id="review-discount"
                         name="discount_reais"
@@ -799,27 +797,27 @@ export function ReviewPanel({
                         defaultValue={centsToReaisInput(enrollment.discount_cents ?? 0)}
                       />
                     </Field>
-                  </div>
 
-                  <Field>
-                    <FieldLabel htmlFor="review-due-day">Dia de vencimento aprovado</FieldLabel>
-                    <Select name="approved_due_day" defaultValue={String(dueDay)} required>
-                      <SelectTrigger id="review-due-day" className="w-full">
-                        <SelectValue placeholder="Selecione o dia" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(dueDayOptions.includes(dueDay) ? dueDayOptions : [...dueDayOptions, dueDay].sort((a, b) => a - b)).map((day) => (
-                          <SelectItem key={day} value={String(day)}>
-                            Dia {day} de cada mês
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Field>
+                    <Field>
+                      <FieldLabel htmlFor="review-due-day">Vencimento aprovado</FieldLabel>
+                      <Select name="approved_due_day" defaultValue={String(dueDay)} required>
+                        <SelectTrigger id="review-due-day" className="w-full">
+                          <SelectValue placeholder="Selecione o dia" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(dueDayOptions.includes(dueDay) ? dueDayOptions : [...dueDayOptions, dueDay].sort((a, b) => a - b)).map((day) => (
+                            <SelectItem key={day} value={String(day)}>
+                              Dia {day}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                  </div>
 
                   <Separator />
 
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-3">
                     <DateField
                       id="review-first-due"
                       name="first_due_date"
@@ -828,23 +826,21 @@ export function ReviewPanel({
                       required
                     />
 
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 items-end">
-                      <DateField
-                        id="review-contract-start"
-                        name="contract_start"
-                        label="Início do contrato"
-                        defaultValue={contractDates.start}
-                        required
-                      />
+                    <DateField
+                      id="review-contract-start"
+                      name="contract_start"
+                      label="Início do contrato"
+                      defaultValue={contractDates.start}
+                      required
+                    />
 
-                      <DateField
-                        id="review-contract-end"
-                        name="contract_end"
-                        label={`Fim do contrato (${contractDurationMonths === 12 ? "1 ano" : `${contractDurationMonths} meses`})`}
-                        defaultValue={contractDates.end}
-                        required
-                      />
-                    </div>
+                    <DateField
+                      id="review-contract-end"
+                      name="contract_end"
+                      label={`Fim (${contractDurationMonths === 12 ? "1 ano" : `${contractDurationMonths} meses`})`}
+                      defaultValue={contractDates.end}
+                      required
+                    />
                   </div>
 
                   <Separator />

@@ -1,5 +1,6 @@
 import { registerForEventAction } from "@/app/actions/events";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
+import { MaskedInput } from "@/components/shared/masked-input";
 import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -132,7 +133,7 @@ export function GuestRegisterDialog({ item, returnTo }: { item: StudentOpenEvent
         </Field>
         <Field>
           <FieldLabel htmlFor={`guest-contact-${event.$id}`}>WhatsApp</FieldLabel>
-          <Input id={`guest-contact-${event.$id}`} name="guest_contact" type="tel" inputMode="tel" required placeholder="(21) 9 6518-8988" className="h-11" />
+          <MaskedInput mask="phone" id={`guest-contact-${event.$id}`} name="guest_contact" type="tel" required className="h-11" />
           <FieldDescription>Usado só para avisos deste evento e apagado depois dele.</FieldDescription>
         </Field>
         <label className="flex items-start gap-3 text-sm leading-relaxed" htmlFor={`guest-terms-${event.$id}`}>

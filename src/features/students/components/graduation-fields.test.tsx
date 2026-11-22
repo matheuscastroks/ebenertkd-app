@@ -16,15 +16,16 @@ const config = (ranks = DEFAULT_PUBLIC_RANKS): PublicAcademyConfig => ({
 });
 
 describe("GraduationFields", () => {
-  it("asks only for the graduation, showing the configured belt name", async () => {
+  it("asks only for the graduation, showing the belt mini and level without color name", async () => {
     const user = userEvent.setup();
     render(<GraduationFields defaultRankKey="gub-9" />);
     expect(screen.getAllByRole("combobox")).toHaveLength(1);
     const select = screen.getByRole("combobox", { name: "Graduação *" });
-    expect(select).toHaveTextContent("Ponta Amarela");
+    expect(select).toHaveTextContent("9º Gub");
+    expect(select).not.toHaveTextContent("Ponta Amarela");
     await user.click(select);
-    await user.click(screen.getByRole("option", { name: /^Azul/ }));
-    expect(screen.getByRole("combobox", { name: "Graduação *" })).toHaveTextContent("Azul");
+    await user.click(screen.getByRole("option", { name: /^4º Gub/ }));
+    expect(screen.getByRole("combobox", { name: "Graduação *" })).toHaveTextContent("4º Gub");
     expect(screen.queryByText(/Faixa atual/)).not.toBeInTheDocument();
   });
 
@@ -37,7 +38,7 @@ describe("GraduationFields", () => {
     expect(names.some((name) => name.includes("Poom"))).toBe(false);
     expect(names.some((name) => name.includes("4º Dan"))).toBe(false);
     expect(names.some((name) => name.includes("3º Dan"))).toBe(true);
-    expect(names[0]).toContain("Branca");
+    expect(names[0]).toContain("10º Gub");
   });
 
   it("shows graduations the academy enabled and hides the ones it disabled", async () => {
@@ -55,7 +56,7 @@ describe("GraduationFields", () => {
     await user.click(screen.getByRole("combobox", { name: "Graduação *" }));
     const names = screen.getAllByRole("option").map((option) => option.textContent ?? "");
     expect(names.some((name) => name.includes("1º Poom"))).toBe(true);
-    expect(names.some((name) => name.includes("Ponta Azul"))).toBe(false);
+    expect(names.some((name) => name.includes("5º Gub"))).toBe(false);
   });
 
   it("keeps the student's current graduation selectable even after the academy disabled it", () => {
@@ -65,6 +66,6 @@ describe("GraduationFields", () => {
         <GraduationFields defaultRankKey="gub-5" />
       </AcademyConfigProvider>
     );
-    expect(screen.getByRole("combobox", { name: "Graduação *" })).toHaveTextContent("Ponta Azul");
+    expect(screen.getByRole("combobox", { name: "Graduação *" })).toHaveTextContent("5º Gub");
   });
 });

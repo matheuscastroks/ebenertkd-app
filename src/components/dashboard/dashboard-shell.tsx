@@ -8,6 +8,7 @@ import {
 import { HeaderActions } from "@/components/dashboard/header-actions";
 import { BackLink, NavItemsProvider, ScreenSegments, SectionSegments, type BackTarget } from "@/components/dashboard/section-nav";
 import type { NavSegment } from "@/lib/navigation/routes";
+import type { AppCapability } from "@/lib/auth/auth-utils";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 import { MobileBottomNav } from "@/components/dashboard/mobile-bottom-nav";
@@ -30,6 +31,7 @@ type DashboardFrameProps = Pick<DashboardShellProps, "badge" | "children"> & {
   profileName: string;
   profileEmail?: string;
   role?: string;
+  capabilities?: AppCapability[];
   avatarUrl?: string;
   avatarSex?: "feminino" | "masculino" | null;
   navItems: AppSidebarNavItem[];
@@ -41,6 +43,7 @@ export function DashboardFrame({
   profileName,
   profileEmail,
   role,
+  capabilities,
   avatarUrl,
   avatarSex,
   navItems,
@@ -61,6 +64,7 @@ export function DashboardFrame({
           profileName={profileName}
           profileEmail={profileEmail}
           role={role}
+          capabilities={capabilities}
           avatarUrl={avatarUrl}
           avatarSex={avatarSex}
         />

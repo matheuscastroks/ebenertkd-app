@@ -48,8 +48,8 @@ describe("navigationForProfile (Seção → Segmento → Pilha)", () => {
 
   it("keeps money and family away from minors", () => {
     const labels = sidebar(nav("minor_student")).map((item) => item.label);
-    expect(labels).toEqual(["Início", "Treinos", "Faixa", "Eventos", "Cadastro"]);
-    expect(sidebar(nav("adult_student", ["guardian"])).map((item) => item.label)).toEqual(["Início", "Treinos", "Faixa", "Eventos", "Cadastro", "Pagamentos", "Família"]);
+    expect(labels).toEqual(["Início", "Agenda", "Faixa", "Eventos", "Cadastro"]);
+    expect(sidebar(nav("adult_student", ["guardian"])).map((item) => item.label)).toEqual(["Início", "Agenda", "Faixa", "Eventos", "Cadastro", "Pagamentos", "Família"]);
     expect(sidebar(nav("adult_student")).some((item) => item.label === "Família")).toBe(false);
     expect(guardianExamsPath("minor 1")).toBe("/responsavel/dependentes/minor%201/exames");
   });
@@ -58,8 +58,8 @@ describe("navigationForProfile (Seção → Segmento → Pilha)", () => {
     const cases = [
       { role: "admin", capabilities: ["admin"], labels: ["Turmas", "Financeiro"] },
       { role: "guardian", capabilities: ["guardian"], labels: [] },
-      { role: "minor_student", capabilities: [], labels: ["Treinos", "Faixa"] },
-      { role: "adult_student", capabilities: ["guardian"], labels: ["Treinos", "Pagamentos"] }
+      { role: "minor_student", capabilities: [], labels: ["Agenda", "Faixa"] },
+      { role: "adult_student", capabilities: ["guardian"], labels: ["Agenda", "Pagamentos"] }
     ] as const;
     for (const { role, capabilities, labels } of cases) {
       const shortcuts = nav(role, [...capabilities]).filter((item) => item.bottomNav);

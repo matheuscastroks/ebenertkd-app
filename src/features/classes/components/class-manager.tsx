@@ -92,9 +92,9 @@ function Fields({
 
       <WeekdayFields selected={trainingClass?.weekdays} idSuffix={suffix} />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Field>
-          <FieldLabel htmlFor={`class-start-${suffix}`}>Horário de início</FieldLabel>
+      <div className="flex flex-wrap items-end gap-3">
+        <Field className="w-36">
+          <FieldLabel htmlFor={`class-start-${suffix}`}>Início</FieldLabel>
           <Input
             id={`class-start-${suffix}`}
             name="start_time"
@@ -104,8 +104,8 @@ function Fields({
             required
           />
         </Field>
-        <Field>
-          <FieldLabel htmlFor={`class-end-${suffix}`}>Horário de término</FieldLabel>
+        <Field className="w-36">
+          <FieldLabel htmlFor={`class-end-${suffix}`}>Término</FieldLabel>
           <Input
             id={`class-end-${suffix}`}
             name="end_time"
@@ -115,8 +115,8 @@ function Fields({
             required
           />
         </Field>
-        <Field>
-          <FieldLabel htmlFor={`class-capacity-${suffix}`}>Capacidade máxima</FieldLabel>
+        <Field className="w-40">
+          <FieldLabel htmlFor={`class-capacity-${suffix}`}>Capacidade</FieldLabel>
           <Input
             id={`class-capacity-${suffix}`}
             name="capacity"
@@ -186,16 +186,16 @@ export function ClassManager({
             description="Use Nova turma para cadastrar o primeiro horário. Os alunos escolhem a turma no cadastro."
           />
         ) : (
-          <ul className="t-stagger space-y-3">
+          <ul className="t-stagger grid grid-cols-1 gap-4 lg:grid-cols-2">
             {classes.map((trainingClass) => {
               const active = trainingClass.status === "active";
               return (
                 <li
                   key={trainingClass.$id}
-                  className="t-interactive-row flex flex-col gap-4 rounded-xl bg-card p-5 sm:flex-row sm:items-center sm:justify-between"
+                  className="t-interactive-row flex flex-col justify-between gap-4 rounded-xl bg-card p-5 shadow-xs"
                 >
-                  <div className="min-w-0 space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
+                  <div className="min-w-0 space-y-2.5">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="text-lg font-semibold text-foreground">
                         {trainingClass.name}
                       </p>
@@ -232,7 +232,7 @@ export function ClassManager({
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border/50 pt-3">
                     <ClassStatusToggle classId={trainingClass.$id} active={active} />
 
                     <Button asChild size="sm" variant="outline" className="min-h-11 touch-manipulation">

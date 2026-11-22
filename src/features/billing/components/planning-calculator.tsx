@@ -384,8 +384,8 @@ function CalculatorBody({
           </div>
         </section>
 
-        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-          <Card>
+        <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-12">
+          <Card className="xl:col-span-5">
             <CardHeader>
               <div className="flex items-center gap-1">
                 <CardTitle>Seus números</CardTitle>
@@ -397,7 +397,7 @@ function CalculatorBody({
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <SectionTitle>A academia hoje</SectionTitle>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <div className="space-y-1.5">
                     <FieldHeading htmlFor="calc-students" label="Alunos pagantes" help="Alunos que pagam mensalidade. Vem preenchido com os alunos ativos." />
                     <AffixInput id="calc-students" ariaLabel="Alunos que pagam mensalidade" inputMode="numeric" placeholder="0" value={students} onChange={setStudents} />
@@ -449,9 +449,9 @@ function CalculatorBody({
               <fieldset className="space-y-3">
                 <legend className="sr-only">Custos fixos mensais</legend>
                 <SectionTitle help="Contas que você paga todo mês, tenha muitos ou poucos alunos. Renomeie, remova ou adicione as que fizerem sentido.">Custos fixos mensais</SectionTitle>
-                <ul className="space-y-2">
+                <ul className="max-h-72 space-y-2 overflow-y-auto pr-1">
                   {costs.map((row, index) => (
-                    <li key={row.id} className="grid grid-cols-[minmax(0,1fr)_minmax(0,9rem)_auto] items-center gap-2">
+                    <li key={row.id} className="grid grid-cols-[minmax(0,1fr)_minmax(0,8.5rem)_auto] items-center gap-2">
                       <Input
                         aria-label={`Nome do custo ${index + 1}`}
                         placeholder="Nome do custo"
@@ -500,7 +500,7 @@ function CalculatorBody({
                 </div>
               </div>
 
-              <Collapsible defaultOpen={input.variableCostCents > 0 || input.paymentFeePercent > 0} className="rounded-xl border border-border">
+              <Collapsible defaultOpen={input.variableCostCents > 0 || input.paymentFeePercent > 0} className="rounded-xl bg-muted/50">
                 <CollapsibleTrigger asChild>
                   <button type="button" className="group flex w-full items-center justify-between gap-2 px-4 py-3 text-left">
                     <span className="min-w-0">
@@ -511,7 +511,7 @@ function CalculatorBody({
                   </button>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <div className="grid grid-cols-1 gap-4 border-t border-border px-4 py-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 border-t border-border/60 px-4 py-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
                       <FieldHeading htmlFor="calc-variable" label="Custo por aluno" help="Opcional. Gasto mensal que cresce com cada aluno, como material ou taxa da federação rateada." />
                       <AffixInput id="calc-variable" prefix="R$" value={variable} onChange={setVariable} />
@@ -534,7 +534,7 @@ function CalculatorBody({
             </CardContent>
           </Card>
 
-          <div className="min-w-0 space-y-6">
+          <div className="min-w-0 space-y-6 xl:col-span-7 xl:sticky xl:top-4">
             <Tabs defaultValue="cobrar">
               <TabsList className="h-auto w-full flex-wrap">
                 <TabsTrigger value="cobrar">Quanto cobrar?</TabsTrigger>

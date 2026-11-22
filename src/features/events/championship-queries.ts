@@ -31,6 +31,7 @@ export type ChampionshipRow = {
   photoDocumentId?: string;
   birthDate?: string | null;
   sex?: "feminino" | "masculino" | null;
+  rankKey?: string | null;
   beltName?: string | null;
   ageClass?: string | null;
   isMinor: boolean;
@@ -111,6 +112,7 @@ export function getChampionshipBundle(eventId: string) {
           photoDocumentId: student ? previews.get(student.$id)?.photoDocumentId : undefined,
           birthDate: student?.birth_date,
           sex: student?.sex,
+          rankKey: student?.rank_key ?? null,
           beltName: student?.rank_key ? beltNameOf(publicRanks, student.rank_key) : null,
           ageClass: ageClassOf(eventAge(student?.birth_date, event.starts_at, event.age_cutoff))?.label ?? null,
           isMinor,

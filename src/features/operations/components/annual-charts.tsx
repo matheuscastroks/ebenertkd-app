@@ -232,7 +232,7 @@ export function BeltPyramidChart({
                   labelFormatter={(_label, payload) => {
                     const row = payload?.[0]?.payload as BeltFunnelPoint | undefined;
                     return row
-                      ? `Faixa ${row.belt} · ${row.graduationsInYear} graduação(ões) no ano`
+                      ? `${row.shortBelt} · ${row.graduationsInYear} graduação(ões) no ano`
                       : "";
                   }}
                 />

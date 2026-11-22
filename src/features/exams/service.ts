@@ -8,7 +8,7 @@ import { cancelUnpaidExamCharge, createExamCharge } from "@/features/billing/cha
 import type { Charge } from "@/features/billing/types";
 import { beltNameOf, findRank, toPublicRank } from "@/features/academy/belt-rules";
 import { getBeltRanks, getPolicy } from "@/features/academy/config-service";
-import { isRankKey } from "@/features/academy/ranks";
+import { isRankKey, rankShortLabel } from "@/features/academy/ranks";
 import { assertNextGraduation, assertPromotion, examChargeCancellation, examFeeCents, type PaidChargeDecision } from "@/features/exams/rules";
 import type { Event } from "@/features/events/types";
 import { examEventSchema, examParticipantSchema, examResultSchema } from "@/features/exams/schemas";
@@ -209,13 +209,15 @@ export async function addExamParticipant(actor: Profile, raw: unknown) {
   if (actor.role !== "admin") throw new Error("admin_required");
   const input = examParticipantSchema.parse(raw);
   const { tables, config } = createAppwriteAdminClient();
-  const [ranks, examPolicy, event, student, enrollments] = await Promise.all([
+  const [ranks, beltPolicy, examPolicy, event, student, enrollments] = await Promise.all([
     getBeltRanks(),
+    getPolicy("belts"),
     getPolicy("exam"),
     getExamEventRow(tables, config.databaseId, input.eventId).then(toExamEvent),
     tables.getRow<Student>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, rowId: input.studentId }),
     tables.listRows<Enrollment>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.enrollments, queries: [Query.equal("student_id", [input.studentId]), Query.equal("status", ["active"]), Query.limit(1)] })
   ]);
+  const levelLabel = beltPolicy.level_label;
   if (["completed", "cancelled"].includes(event.status)) throw new Error("exam_event_closed");
   const enrollment = enrollments.rows[0];
   if (!enrollment) throw new Error("active_enrollment_required");
@@ -242,7 +244,7 @@ export async function addExamParticipant(actor: Profile, raw: unknown) {
     studentId: student.$id,
     audience: "family",
     title: `Inscrição confirmada: ${event.name}`,
-    body: `O professor inscreveu ${student.full_name} no exame para Faixa ${targetRank.display_name} em ${formatBusinessDateBr(event.event_date)}.`,
+    body: `O professor inscreveu ${student.full_name} no exame para ${isRankKey(participant.target_rank_key) ? rankShortLabel(participant.target_rank_key, levelLabel) : participant.target_rank_key} em ${formatBusinessDateBr(event.event_date)}.`,
     dedupeKey: `exam-registered:${participant.$id}`,
     studentActionUrl: ROUTES.studentExams,
     guardianActionUrl: guardianExamsPath,
@@ -280,12 +282,14 @@ export async function recordExamResult(actor: Profile, raw: unknown) {
   const participant = await tables.getRow<ExamParticipant>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examParticipants, rowId: input.participantId });
   if (["approved", "failed", "absent"].includes(participant.status)) return participant;
   if (participant.status !== "registered") throw new Error("exam_participant_not_gradable");
-  const [ranks, student, event, openParticipants] = await Promise.all([
+  const [ranks, beltPolicy, student, event, openParticipants] = await Promise.all([
     getBeltRanks(),
+    getPolicy("belts"),
     tables.getRow<Student>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.students, rowId: participant.student_id }),
     getExamEventRow(tables, config.databaseId, participant.event_id).then(toExamEvent),
     tables.listRows<ExamParticipant>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.examParticipants, queries: [Query.equal("event_id", [participant.event_id]), Query.equal("status", ["registered"]), Query.limit(500)] })
   ]);
+  const levelLabel = beltPolicy.level_label;
   if (event.status === "cancelled") throw new Error("exam_event_cancelled");
   const now = new Date().toISOString();
   const transaction = await tables.createTransaction({ ttl: 60 });
@@ -312,15 +316,17 @@ export async function recordExamResult(actor: Profile, raw: unknown) {
     CACHE_TAGS.enrollments
   );
   await writeAuditEvent("exam.result.recorded", actor.account_id, "exam_participant", participant.$id, { result: input.result, target_rank_key: participant.target_rank_key });
-  const targetName = beltNameOf(ranks.map(toPublicRank), participant.target_rank_key);
-  if (input.result === "approved") await awardBadges([badgeForExamApproval({ studentId: student.$id, participantId: participant.$id, eventId: event.$id, beltName: targetName })]);
+  const targetLabel = isRankKey(participant.target_rank_key)
+    ? rankShortLabel(participant.target_rank_key, levelLabel)
+    : beltNameOf(ranks.map(toPublicRank), participant.target_rank_key);
+  if (input.result === "approved") await awardBadges([badgeForExamApproval({ studentId: student.$id, participantId: participant.$id, eventId: event.$id, beltName: targetLabel })]);
   const resultTitle =
     input.result === "approved"
-      ? `Parabéns! Aprovado para Faixa ${targetName}`
+      ? `Parabéns! Aprovado para ${targetLabel}`
       : `Resultado disponível: ${event.name}`;
   const resultBody =
     input.result === "approved"
-      ? `O professor registrou sua aprovação no exame ${event.name} para a Faixa ${targetName}.${input.notes ? ` Observação: ${input.notes}` : ""}`
+      ? `O professor registrou sua aprovação no exame ${event.name} para ${targetLabel}.${input.notes ? ` Observação: ${input.notes}` : ""}`
       : input.result === "absent"
         ? `Sua presença não foi registrada no exame ${event.name}.${input.notes ? ` Observação: ${input.notes}` : ""}`
         : `O professor publicou o resultado do exame ${event.name}. Confira os detalhes no aplicativo.${input.notes ? ` Observação: ${input.notes}` : ""}`;

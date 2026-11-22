@@ -15,7 +15,7 @@ import { createEnrollmentFeeCharge } from "@/features/billing/charge-service";
 import { getBeltContext, getPolicy } from "@/features/academy/config-service";
 import { isDueDayAllowed } from "@/features/academy/policy-rules";
 import { issueContractForEnrollment } from "@/features/contracts/contract-service";
-import { beltNameOf } from "@/features/academy/belt-rules";
+import { isRankKey, rankShortLabel } from "@/features/academy/ranks";
 import { assertSelectableRank } from "@/features/academy/rank-guard";
 import { notifyAdmins, notifyStudentEvent } from "@/features/notifications/notification-service";
 import {
@@ -172,10 +172,14 @@ export async function adminUpdateStudent(actor: Profile, studentId: string, inpu
   await writeAuditEvent("student.updated_by_admin", actor.account_id, "student", studentId, { changes: input });
   const classChanged = trainingClass && trainingClass.$id !== bundle.student.training_class_id;
   const beltChanged = parsed.rankKey != null && parsed.rankKey !== bundle.student.rank_key;
+  const beltLabel =
+    beltChanged && isRankKey(updatedStudent.rank_key)
+      ? rankShortLabel(updatedStudent.rank_key, (await getBeltContext()).levelLabel)
+      : "atualizada";
   const updateSummary = classChanged
     ? `O professor atualizou sua ficha e definiu sua turma como ${trainingClass.name}.`
     : beltChanged
-      ? `O professor atualizou sua graduação na ficha para Faixa ${beltNameOf((await getBeltContext()).ranks, updatedStudent.rank_key, "atualizada")}.`
+      ? `O professor atualizou sua graduação na ficha para ${beltLabel}.`
       : "O professor atualizou informações da sua ficha de matrícula.";
   await notifyStudentEvent({
     studentId,

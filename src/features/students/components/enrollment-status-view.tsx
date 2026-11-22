@@ -26,10 +26,9 @@ import {
 import { Button } from "@/components/ui/button";
 import type { TrainingClass } from "@/features/classes/types";
 import type { EnrollmentBundle, EnrollmentStatus } from "@/features/students/types";
-import { useBeltLabels, useBeltRanks } from "@/components/academy-config-provider";
-import { rankFullLabel } from "@/features/academy/belt-rules";
 import { formatAddress, parseAddress } from "@/lib/address";
 import { cn } from "@/lib/utils";
+import { BeltBadge } from "./belt-badge";
 import { StudentAvatar } from "./student-avatar";
 
 type StatusMeta = {
@@ -172,8 +171,6 @@ export function EnrollmentStatusView({
   contractsHref?: string;
   onEdit: (initialStep?: number) => void;
 }) {
-  const ranks = useBeltRanks();
-  const { levelLabel } = useBeltLabels();
   const { student, enrollment, documents } = bundle;
   const status = enrollment.status === "draft" ? "submitted" : enrollment.status;
   const meta = STATUS_META[status];
@@ -187,8 +184,6 @@ export function EnrollmentStatusView({
   const classSummary = trainingClass
     ? `${trainingClass.name} · ${trainingClass.start_time}–${trainingClass.end_time}`
     : student.training_class || "Definida na aprovação";
-
-  const beltSummary = student.rank_key ? rankFullLabel(ranks, student.rank_key, levelLabel) : "Não informada";
 
   const dueDay = enrollment.approved_due_day ?? enrollment.requested_due_day;
   const parsedAddress = parseAddress(student.address);
@@ -379,7 +374,7 @@ export function EnrollmentStatusView({
           </h3>
           <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
             <SummaryRow label="Turma" value={classSummary} />
-            <SummaryRow label="Graduação" value={beltSummary} />
+            <SummaryRow label="Graduação" value={<BeltBadge rankKey={student.rank_key} size="sm" />} />
             <SummaryRow
               label="Vencimento"
               value={dueDay ? `Todo dia ${dueDay}` : "A definir"}

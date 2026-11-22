@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { registerForEventAction } from "@/app/actions/events";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
+import { MaskedInput } from "@/components/shared/masked-input";
 import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
@@ -67,7 +68,7 @@ export function AddRegistrationDialog({ eventId, returnTo, options, students, gu
             </Field>
             <Field>
               <FieldLabel htmlFor="add-guest-contact">WhatsApp</FieldLabel>
-              <Input id="add-guest-contact" name="guest_contact" type="tel" inputMode="tel" required className="h-11" />
+              <MaskedInput mask="phone" id="add-guest-contact" name="guest_contact" type="tel" required className="h-11" />
               <FieldDescription>Apagado quando o evento for encerrado.</FieldDescription>
             </Field>
           </>
