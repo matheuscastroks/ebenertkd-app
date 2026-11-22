@@ -12,7 +12,7 @@ import type { EventCardData } from "@/features/events/event-service";
 import { adminEventPath, adminExamPath } from "@/lib/navigation/routes";
 
 /** Cartão da agenda: tipo, data, local, ocupação e pendências. Exames abrem a banca; demais, o detalhe do evento. */
-export function EventCard({ data, compact = false }: { data: EventCardData; compact?: boolean }) {
+export function EventCard({ data }: { data: EventCardData; compact?: boolean }) {
   const { event } = data;
   const exam = event.event_type === "belt_exam";
   const href = exam ? adminExamPath(event.$id) : adminEventPath(event.$id);
@@ -26,8 +26,8 @@ export function EventCard({ data, compact = false }: { data: EventCardData; comp
 
   return (
     <li className="t-interactive-row flex min-w-0 flex-col gap-3 rounded-xl bg-card shadow-elevation-1 p-4 sm:p-5">
-      <div className={`grid flex-1 content-start items-start gap-x-3 gap-y-2 sm:gap-x-4 ${compact ? "grid-cols-[4rem_minmax(0,1fr)]" : "grid-cols-[5rem_minmax(0,1fr)] sm:grid-cols-[7rem_minmax(0,1fr)]"}`}>
-        <AppIllustration name={eventIllustration(event.event_type)} context={compact ? "recognition" : "event"} className="sm:row-span-2" />
+      <div className="grid flex-1 content-start items-start grid-cols-[5rem_minmax(0,1fr)] gap-x-3 gap-y-2 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-x-4">
+        <AppIllustration name={eventIllustration(event.event_type)} context="event" className="sm:row-span-2" />
         <div className="min-w-0 space-y-2 [overflow-wrap:anywhere]">
           <h3 className="text-base font-semibold leading-snug text-foreground">{event.title}</h3>
           <div className="flex flex-wrap items-center gap-1.5">
