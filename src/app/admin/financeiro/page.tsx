@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { OperationToast } from "@/components/shared/operation-toast";
-import { TableRowsSkeleton } from "@/components/skeletons";
+import { InlineTableSkeleton } from "@/components/skeletons";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BillingFilters, BillingToolbar } from "@/features/billing/components/billing-filters";
 import { listTrainingClasses } from "@/features/classes/service";
@@ -40,7 +40,16 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
           <BillingFiltersContent />
         </Suspense>
 
-        <Suspense key={queryKey} fallback={<TableRowsSkeleton columns={5} rows={6} />}>
+        <Suspense
+          key={queryKey}
+          fallback={
+            <InlineTableSkeleton
+              headers={["Aluno", "Competência", "Vencimento", "Valor", "Status", "Ações"]}
+              rows={6}
+              label="Carregando cobranças…"
+            />
+          }
+        >
           <BillingResults params={params} />
         </Suspense>
       </div>

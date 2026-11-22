@@ -3,7 +3,7 @@ import { PortalShell } from "@/components/dashboard/portal-shell";
 import { ListPagination } from "@/components/shared/list-pagination";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { TableSearchBar } from "@/components/shared/table-search-bar";
-import { TableRowsSkeleton } from "@/components/skeletons";
+import { InlineTableSkeleton } from "@/components/skeletons";
 import { ChevronDown } from "@/components/ui/icons";
 import { listStudentAccessProfiles } from "@/features/students/access-service";
 import { StudentAccessTable } from "@/features/students/components/student-access-table";
@@ -86,7 +86,13 @@ export default async function StudentAccessPage({
 
         <Suspense
           key={`${query.q ?? ""}|${query.page ?? ""}`}
-          fallback={<TableRowsSkeleton columns={5} rows={5} />}
+          fallback={
+            <InlineTableSkeleton
+              headers={["Aluno", "Tipo de acesso", "Login / E-mail", "Situação", "Ações"]}
+              rows={5}
+              label="Carregando acessos de alunos…"
+            />
+          }
         >
           <StudentAccessListContent searchParams={searchParams} />
         </Suspense>

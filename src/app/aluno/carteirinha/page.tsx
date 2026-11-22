@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";
-import { CardGridSkeleton } from "@/components/skeletons";
+import { InlineCardsSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import type { Profile } from "@/features/auth/types";
 import type { MedicalComplianceStatus } from "@/features/students/compliance-rules";
@@ -223,7 +223,7 @@ export default async function StudentCardPage() {
       subtitle="Sua carteirinha, a validade dos documentos de saúde e o contato de emergência."
     >
       <div className="w-full min-w-0 space-y-6">
-        <Suspense fallback={<CardGridSkeleton count={2} columns={2} />}>
+        <Suspense fallback={<InlineCardsSkeleton count={2} columns={2} label="Carregando carteirinha…" />}>
           <StudentCardContent profile={profile} />
         </Suspense>
       </div>

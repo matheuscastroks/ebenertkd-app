@@ -2,8 +2,8 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { OperationToast } from "@/components/shared/operation-toast";
+import { InlineTableSkeleton } from "@/components/skeletons";
 import { PayerBilling } from "@/features/billing/components/payer-billing";
-import { PayerBillingSkeleton } from "@/features/billing/components/payer-billing-skeleton";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
 
@@ -41,7 +41,15 @@ export default async function StudentBillingPage({
           />
         ) : null}
 
-        <Suspense fallback={<PayerBillingSkeleton />}>
+        <Suspense
+          fallback={
+            <InlineTableSkeleton
+              headers={["Cobrança", "Competência", "Vencimento", "Valor", "Situação"]}
+              rows={4}
+              label="Carregando pagamentos…"
+            />
+          }
+        >
           <PayerBilling actor={profile} view={query.view === "history" ? "history" : "open"} />
         </Suspense>
       </div>

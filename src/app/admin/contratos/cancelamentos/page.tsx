@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { OperationToast } from "@/components/shared/operation-toast";
-import { ListItemsSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import { CancellationsList } from "@/features/contracts/components/cancellations-list";
 import { requireProfile } from "@/lib/auth/session";
 
@@ -39,7 +39,7 @@ export default async function CancellationsPage({
       />
 
       <div className="w-full min-w-0 space-y-4">
-        <Suspense fallback={<ListItemsSkeleton count={3} />}>
+        <Suspense fallback={<InlineRowsSkeleton rows={3} label="Carregando pedidos de rescisão…" />}>
           <CancellationsList />
         </Suspense>
       </div>

@@ -2,7 +2,7 @@ import { dependentSegments } from "@/features/families/paths";
 import { ROUTES } from "@/lib/navigation/routes";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
-import { ListItemsSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import { listStudentContracts } from "@/features/contracts/contract-service";
 import type { Profile } from "@/features/auth/types";
 import { DependentContext } from "@/features/families/components/dependent-context";
@@ -26,7 +26,7 @@ export default async function DependentContractsPage({ params }: { params: Promi
       subtitle="Assine contratos pendentes e consulte os já assinados."
     >
       <DependentContext guardian={guardian} profileId={profileId} section="contratos" />
-      <Suspense fallback={<ListItemsSkeleton count={2} />}>
+      <Suspense fallback={<InlineRowsSkeleton rows={2} label="Carregando contratos…" />}>
         <DependentContractsList guardian={guardian} profileId={profileId} />
       </Suspense>
     </PortalShell>

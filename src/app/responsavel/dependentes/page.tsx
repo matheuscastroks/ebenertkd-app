@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { cache, Suspense } from "react";
 import Link from "next/link";
 import { ChevronDownIcon } from "@/components/ui/chevron-down";
 import { UserPlusIcon } from "@/components/ui/user-plus";
@@ -8,7 +8,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
-import { ListItemsSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
@@ -34,11 +34,30 @@ function CreateMinorDialog({ trigger, idPrefix }: { trigger: React.ReactNode; id
   </ResponsiveDialog>;
 }
 
+const loadMinors = cache((guardian: Profile) => listGuardianMinors(guardian));
+
+async function DependentsHeaderAction({ guardian }: { guardian: Profile }) {
+  const minors = await loadMinors(guardian);
+  if (minors.length === 0) return null;
+  return (
+    <CreateMinorDialog
+      idPrefix="minor-modal"
+      trigger={
+        <Button className="min-h-11">
+          <UserPlusIcon aria-hidden="true" />
+          Adicionar dependente
+        </Button>
+      }
+    />
+  );
+}
+
 /**
  * Gerenciar dependentes: cadastrar e cuidar do acesso de cada filho.
  * O acompanhamento (frequência, exames, financeiro) fica no resumo de cada um.
  */
-async function GuardianMinorsList({ minors, openId }: { minors: Profile[]; openId?: string }) {
+async function GuardianMinorsList({ guardian, openId }: { guardian: Profile; openId?: string }) {
+  const minors = await loadMinors(guardian);
   const photoIds = await listProfilePhotoDocumentIds(minors.map((minor) => minor.$id)).catch(() => new Map<string, string>());
 
   if (minors.length === 0) {
@@ -109,21 +128,24 @@ async function GuardianMinorsList({ minors, openId }: { minors: Profile[]; openI
 
 export default async function DependentsPage({ searchParams }: { searchParams: Promise<{ error?: string; created?: string; reset?: string; revoked?: string; acesso?: string }> }) {
   const [guardian, params] = await Promise.all([requireCapability("guardian"), searchParams]);
-  const minors = await listGuardianMinors(guardian);
 
   return (
     <PortalShell
       profile={guardian} back={{ label: "Família", href: ROUTES.guardian }}
       title="Acessos dos dependentes"
       subtitle="Cadastre filhos e cuide do acesso de cada um ao aplicativo."
-      headerActions={minors.length === 0 ? undefined : <CreateMinorDialog idPrefix="minor-modal" trigger={<Button className="min-h-11"><UserPlusIcon aria-hidden="true" />Adicionar dependente</Button>} />}
+      headerActions={
+        <Suspense fallback={null}>
+          <DependentsHeaderAction guardian={guardian} />
+        </Suspense>
+      }
     >
       {params.created ? <OperationToast tone="success" title="Dependente cadastrado" description="O acesso já está ativo. Envie o usuário e a senha para o seu filho." clearParams={["created"]} /> : null}
       {params.reset ? <OperationToast tone="success" title="Senha atualizada" description="Os acessos abertos do seu filho foram encerrados. Envie a nova senha a ele." clearParams={["reset"]} /> : null}
       {params.revoked ? <OperationToast tone="success" title="Acessos encerrados" description="Seu filho precisará entrar de novo em todos os aparelhos." clearParams={["revoked"]} /> : null}
       {params.error ? <OperationToast tone="error" title="Não foi possível concluir" description="Revise os dados ou tente outro nome de usuário." clearParams={["error"]} /> : null}
-      <Suspense fallback={<ListItemsSkeleton count={2} />}>
-        <GuardianMinorsList minors={minors} openId={params.acesso} />
+      <Suspense fallback={<InlineRowsSkeleton rows={2} label="Carregando dependentes…" />}>
+        <GuardianMinorsList guardian={guardian} openId={params.acesso} />
       </Suspense>
     </PortalShell>
   );

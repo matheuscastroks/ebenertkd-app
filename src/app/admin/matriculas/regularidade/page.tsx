@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { OperationToast } from "@/components/shared/operation-toast";
-import { TableRowsSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import { listTrainingClasses } from "@/features/classes/service";
 import { ComplianceFilters } from "@/features/students/components/compliance-filters";
 import { requireProfile } from "@/lib/auth/session";
@@ -42,7 +42,7 @@ export default async function AdminCompliancePage({ searchParams }: { searchPara
           <ComplianceFiltersLoader />
         </Suspense>
 
-        <Suspense fallback={<TableRowsSkeleton columns={3} rows={5} />}>
+        <Suspense fallback={<InlineRowsSkeleton rows={5} label="Carregando documentos anuais…" />}>
           <ComplianceContent query={{ q: params.q, status: params.status, turma: params.turma }} />
         </Suspense>
       </div>

@@ -1,7 +1,9 @@
+import { cache, Suspense } from "react";
 import Link from "next/link";
 import { CalendarPlus, ChevronDown, ClipboardCheck } from "@/components/ui/icons";
 import { createLessonAction } from "@/app/actions/attendance";
 import { PortalShell } from "@/components/dashboard/portal-shell";
+import { InlineRowsSkeleton, InlineValueSkeleton } from "@/components/skeletons";
 import { DateField } from "@/components/shared/date-field";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
@@ -57,22 +59,28 @@ function LessonList({ lessons, classId, today }: { lessons: LessonItem[]; classI
   );
 }
 
-export default async function ClassLessonsPage({
-  params,
-  searchParams
-}: {
-  params: Promise<{ classId: string }>;
-  searchParams: Promise<{ error?: string }>;
-}) {
-  const [admin, { classId }, query] = await Promise.all([
-    requireProfile("admin"),
-    params,
-    searchParams
-  ]);
+const loadTrainingClass = cache((classId: string) => getTrainingClass(classId));
 
+async function ClassTitle({ classId }: { classId: string }) {
+  const trainingClass = await loadTrainingClass(classId);
+  return <>{trainingClass.name}</>;
+}
+
+async function ClassSubtitle({ classId }: { classId: string }) {
+  const trainingClass = await loadTrainingClass(classId);
+  return <>{trainingClass.weekdays.join(", ")} · {trainingClass.start_time} às {trainingClass.end_time}</>;
+}
+
+async function ClassLessonsBody({
+  classId,
+  query,
+}: {
+  classId: string;
+  query: { error?: string };
+}) {
   const today = new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" });
   const [trainingClass, lessons, attendanceSummary] = await Promise.all([
-    getTrainingClass(classId),
+    loadTrainingClass(classId),
     listLessonsForClass(classId),
     getClassAttendanceSummary(classId, today.slice(0, 7))
   ]);
@@ -87,12 +95,7 @@ export default async function ClassLessonsPage({
   );
 
   return (
-    <PortalShell
-      profile={admin} back={{ label: "Turmas", href: ROUTES.adminClasses }}
-      title={trainingClass.name}
-      subtitle={`${trainingClass.weekdays.join(", ")} · ${trainingClass.start_time} às ${trainingClass.end_time}`}
-    >
-      <div className="w-full min-w-0 space-y-6">
+    <div className="w-full min-w-0 space-y-6">
         {query.error ? (
           <OperationToast
             tone="error"
@@ -194,7 +197,41 @@ export default async function ClassLessonsPage({
 
         {/* Frequência do mês: consulta, nível terciário */}
         <ClassAttendanceSummary {...attendanceSummary} />
-      </div>
+    </div>
+  );
+}
+
+export default async function ClassLessonsPage({
+  params,
+  searchParams
+}: {
+  params: Promise<{ classId: string }>;
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const [admin, { classId }, query] = await Promise.all([
+    requireProfile("admin"),
+    params,
+    searchParams
+  ]);
+
+  return (
+    <PortalShell
+      profile={admin}
+      back={{ label: "Turmas", href: ROUTES.adminClasses }}
+      title={
+        <Suspense fallback={<InlineValueSkeleton className="h-7 w-44" />}>
+          <ClassTitle classId={classId} />
+        </Suspense>
+      }
+      subtitle={
+        <Suspense fallback={<InlineValueSkeleton className="h-4 w-56" />}>
+          <ClassSubtitle classId={classId} />
+        </Suspense>
+      }
+    >
+      <Suspense fallback={<InlineRowsSkeleton rows={5} label="Carregando aulas da turma…" />}>
+        <ClassLessonsBody classId={classId} query={query} />
+      </Suspense>
     </PortalShell>
   );
 }

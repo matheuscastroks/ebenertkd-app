@@ -5,7 +5,7 @@ import { listLocations } from "@/features/locations/locations-service";
 import { requireProfile } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
 import { PortalShell } from "@/components/dashboard/portal-shell";
-import { CardGridSkeleton } from "@/components/skeletons";
+import { InlineCardsSkeleton } from "@/components/skeletons";
 
 async function ClassManagerSection({
   searchParams,
@@ -49,7 +49,7 @@ export default async function TrainingClassesPage({
       subtitle="Horários, locais e a chamada de cada turma."
     >
       <div className="w-full min-w-0">
-        <Suspense fallback={<CardGridSkeleton count={4} columns={2} />}>
+        <Suspense fallback={<InlineCardsSkeleton count={4} columns={2} label="Carregando turmas…" />}>
           <ClassManagerSection searchParams={searchParams} />
         </Suspense>
       </div>

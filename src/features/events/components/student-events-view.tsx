@@ -60,7 +60,7 @@ function OpenEventCard({ item, props }: { item: StudentOpenEvent; props: Props }
   const eligibilityReasons = [...new Set(item.options.filter((entry) => !entry.eligible).flatMap((entry) => entry.reasons))];
   const guestsAllowed = event.audience !== "students" && props.viewer.kind !== "minor" && !championship;
   return (
-    <li className="flex min-w-0 flex-col gap-3 rounded-xl bg-card p-4 sm:p-5">
+    <li className="flex min-w-0 flex-col gap-3 rounded-xl bg-card shadow-elevation-1 p-4 sm:p-5">
       <div className="min-w-0 flex-1 space-y-3">
         <div className="grid grid-cols-[5rem_minmax(0,1fr)] items-start gap-x-3 gap-y-2 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-x-4">
           <AppIllustration name={eventIllustration(event.event_type)} context="event" className="sm:row-span-2" />
@@ -132,7 +132,7 @@ function RegistrationRow({ entry, props, canCancel }: { entry: StudentEventEntry
   const confirmInterest = props.viewer.kind === "guardian" && registration.status === "interested" && !championship;
   const cancellable = canCancel && ["interested", "pending_approval", "confirmed", "waitlisted"].includes(registration.status) && isRegistrationOpen(event) && !paid && (props.viewer.kind !== "minor" || registration.status === "interested");
   return (
-    <li className="rounded-xl bg-card p-5">
+    <li className="rounded-xl bg-card shadow-elevation-1 p-5">
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0 space-y-3">
         <div className="flex flex-wrap items-center gap-2">

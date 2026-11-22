@@ -405,7 +405,7 @@ export function AdjustmentWizard({
               </div>
             </div>
 
-            <div className="overflow-x-auto rounded-xl border border-border">
+            <div className="overflow-x-auto rounded-xl bg-card shadow-elevation-1 [box-shadow:var(--shadow-elevation-1),var(--card-highlight)]">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -487,7 +487,7 @@ export function AdjustmentWizard({
               </div>
             </dl>
 
-            <div className="overflow-x-auto rounded-xl border border-border">
+            <div className="overflow-x-auto rounded-xl bg-card shadow-elevation-1 [box-shadow:var(--shadow-elevation-1),var(--card-highlight)]">
               <Table>
                 <TableHeader>
                   <TableRow>

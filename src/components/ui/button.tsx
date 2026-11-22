@@ -8,15 +8,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary-hover",
+        default:
+          "bg-primary text-primary-foreground hover:bg-primary-hover shadow-btn [box-shadow:var(--shadow-btn)] active:shadow-none active:translate-y-px",
         outline:
-          "bg-muted text-foreground hover:bg-secondary hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground",
+          "bg-muted text-foreground hover:bg-secondary hover:text-foreground [box-shadow:var(--card-highlight),0_1px_2px_rgba(0,0,0,0.04)] active:translate-y-px aria-expanded:bg-muted aria-expanded:text-foreground",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-accent aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
+          "bg-secondary text-secondary-foreground hover:bg-accent border border-border/30 active:translate-y-px aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         ghost:
           "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive-hover",
+          "bg-destructive text-destructive-foreground hover:bg-destructive-hover shadow-btn [box-shadow:var(--shadow-btn)] active:shadow-none active:translate-y-px",
         link: "text-primary-text underline underline-offset-4",
       },
       size: {

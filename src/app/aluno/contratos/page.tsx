@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { PortalShell } from "@/components/dashboard/portal-shell";
-import { ListItemsSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import { listStudentContracts } from "@/features/contracts/contract-service";
 import type { Profile } from "@/features/auth/types";
 import { PortalContractList } from "@/features/families/components/portal-contract-list";
@@ -25,7 +25,7 @@ export default async function StudentContractsPage() {
       title="Cadastro"
       subtitle={profile.role === "minor_student" ? "Seu contrato de matrícula. Quem assina é o seu responsável." : "Contratos para assinar e documentos já assinados."}
     >
-      <Suspense fallback={<ListItemsSkeleton count={2} />}>
+      <Suspense fallback={<InlineRowsSkeleton rows={2} label="Carregando contratos…" />}>
         <StudentContractsList profile={profile} />
       </Suspense>
     </PortalShell>

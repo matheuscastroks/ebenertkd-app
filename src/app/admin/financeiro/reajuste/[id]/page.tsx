@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { AppwriteException } from "node-appwrite";
 import { PortalShell } from "@/components/dashboard/portal-shell";
-import { TableRowsSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import { getAdjustmentSendList } from "@/features/billing/adjustment-service";
 import { AdjustmentSendList } from "@/features/billing/components/adjustment-send-list";
 import { requireProfile } from "@/lib/auth/session";
@@ -33,7 +33,7 @@ export default async function AdminBillingAdjustmentDetailPage({ params }: { par
       subtitle="Copie a mensagem, abra o WhatsApp de cada pagador e marque quem já foi avisado."
     >
       <div className="w-full min-w-0 space-y-6">
-        <Suspense fallback={<TableRowsSkeleton columns={3} rows={6} />}>
+        <Suspense fallback={<InlineRowsSkeleton rows={6} label="Carregando lista de envio…" />}>
           <SendListContent params={params} adminName={admin.full_name} />
         </Suspense>
       </div>

@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { EmptyState } from "@/components/shared/empty-state";
 import { OperationToast } from "@/components/shared/operation-toast";
-import { CardGridSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import type { Profile } from "@/features/auth/types";
 import { DependentContext } from "@/features/families/components/dependent-context";
@@ -96,7 +96,7 @@ export default async function GuardianParqPage({
           />
         ) : null}
 
-        <Suspense fallback={<CardGridSkeleton count={2} columns={1} />}>
+        <Suspense fallback={<InlineRowsSkeleton rows={4} label="Carregando questionário de saúde…" />}>
           <GuardianParqContent guardian={guardian} profileId={profileId} />
         </Suspense>
       </div>

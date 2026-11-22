@@ -8,7 +8,7 @@ import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { ResponsiveDataView } from "@/components/shared/responsive-data-view";
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";
-import { MetricCardsSkeleton, TableRowsSkeleton } from "@/components/skeletons";
+import { InlineTableSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -399,10 +399,11 @@ export default async function AdminExamEligibilityPage({
 
         <Suspense
           fallback={
-            <div className="space-y-6">
-              <MetricCardsSkeleton count={4} />
-              <TableRowsSkeleton columns={4} rows={5} />
-            </div>
+            <InlineTableSkeleton
+              headers={["Aluno", "Graduação", "Critérios", "Situação", "Ações"]}
+              rows={5}
+              label="Carregando elegibilidade para exame…"
+            />
           }
         >
           <EligibilityContent searchParams={searchParams} />

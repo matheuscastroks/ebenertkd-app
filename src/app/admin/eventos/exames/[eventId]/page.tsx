@@ -1,67 +1,38 @@
-import { Suspense } from "react";
+import { cache, Suspense } from "react";
 import { ExamBundleSections } from "./exam-board";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { InlineRowsSkeleton, InlineValueSkeleton } from "@/components/skeletons";
 import { examEventLabels, examEventTones, formatExamDate } from "@/features/exams/labels";
 import { getExamEvent } from "@/features/exams/service";
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
 
-function ExamSectionsSkeleton() {
-  return (
-    <div aria-label="Carregando banca…" aria-busy="true" className="space-y-6">
-      <div className="grid grid-cols-2 overflow-hidden rounded-xl bg-card shadow-xs sm:grid-cols-4">
-        <div className="space-y-2 p-4 sm:px-5">
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-7 w-12" />
-        </div>
-        <div className="space-y-2 border-l border-border p-4 sm:px-5">
-          <Skeleton className="h-4 w-28" />
-          <Skeleton className="h-7 w-12" />
-        </div>
-        <div className="space-y-2 border-t border-border p-4 sm:border-t-0 sm:border-l sm:px-5">
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-7 w-12" />
-        </div>
-        <div className="space-y-2 border-t border-l border-border p-4 sm:border-t-0 sm:px-5">
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-7 w-24" />
-        </div>
-      </div>
+const loadExamEvent = cache((eventId: string) => getExamEvent(eventId));
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <div className="space-y-4 lg:col-span-8">
-          <Skeleton className="h-5 w-40" />
-          <div className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
-            {Array.from({ length: 3 }, (_, index) => (
-              <div
-                key={index}
-                className="flex flex-col gap-3 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5"
-              >
-                <div className="flex items-center gap-3">
-                  <Skeleton className="size-8 rounded-full" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-40" />
-                    <Skeleton className="h-5 w-52" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-9 w-20 rounded-lg" />
-                  <Skeleton className="h-9 w-20 rounded-lg" />
-                  <Skeleton className="h-9 w-20 rounded-lg" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="space-y-4 lg:col-span-4">
-          <Skeleton className="h-56 w-full rounded-xl" />
-        </div>
-      </div>
-      <span className="sr-only">Carregando banca…</span>
-    </div>
+async function ExamTitle({ eventId }: { eventId: string }) {
+  const event = await loadExamEvent(eventId);
+  return <>{event.name}</>;
+}
+
+async function ExamSubtitle({ eventId }: { eventId: string }) {
+  const event = await loadExamEvent(eventId);
+  return (
+    <>
+      {formatExamDate(event.event_date, { weekday: "long", day: "2-digit", month: "long", year: "numeric" })}
+      {" · "}
+      {event.location || "Local não informado"}
+    </>
+  );
+}
+
+async function ExamStatusHeaderAction({ eventId }: { eventId: string }) {
+  const event = await loadExamEvent(eventId);
+  return (
+    <StatusBadge tone={examEventTones[event.status]}>
+      {examEventLabels[event.status]}
+    </StatusBadge>
   );
 }
 
@@ -77,7 +48,6 @@ export default async function ExamDetailPage({
     params,
     searchParams,
   ]);
-  const event = await getExamEvent(eventId);
 
   const notice = query.added
     ? "Aluno inscrito na banca e cobrança gerada com sucesso."
@@ -89,13 +59,22 @@ export default async function ExamDetailPage({
 
   return (
     <PortalShell
-      profile={admin} back={{ label: "Exames de faixa", href: ROUTES.adminExams }}
-      title={event.name}
-      subtitle={`${formatExamDate(event.event_date, { weekday: "long", day: "2-digit", month: "long", year: "numeric" })} · ${event.location || "Local não informado"}`}
+      profile={admin}
+      back={{ label: "Exames de faixa", href: ROUTES.adminExams }}
+      title={
+        <Suspense fallback={<InlineValueSkeleton className="h-7 w-52" />}>
+          <ExamTitle eventId={eventId} />
+        </Suspense>
+      }
+      subtitle={
+        <Suspense fallback={<InlineValueSkeleton className="h-4 w-64" />}>
+          <ExamSubtitle eventId={eventId} />
+        </Suspense>
+      }
       headerActions={
-        <StatusBadge tone={examEventTones[event.status]}>
-          {examEventLabels[event.status]}
-        </StatusBadge>
+        <Suspense fallback={<InlineValueSkeleton className="h-6 w-20 rounded-full" />}>
+          <ExamStatusHeaderAction eventId={eventId} />
+        </Suspense>
       }
     >
       <div className="w-full min-w-0 space-y-6">
@@ -123,7 +102,7 @@ export default async function ExamDetailPage({
           />
         ) : null}
 
-        <Suspense fallback={<ExamSectionsSkeleton />}>
+        <Suspense fallback={<InlineRowsSkeleton rows={5} label="Carregando banca de exame…" />}>
           <ExamBundleSections eventId={eventId} />
         </Suspense>
       </div>

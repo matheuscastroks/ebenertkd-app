@@ -5,7 +5,8 @@ import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { CardGridSkeleton, MetricCardsSkeleton } from "@/components/skeletons";
+import { InlineCardsSkeleton, MetricStripSkeleton } from "@/components/skeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type { Profile } from "@/features/auth/types";
@@ -171,8 +172,29 @@ export default async function StudentAchievementsPage() {
         <Suspense
           fallback={
             <div className="space-y-6">
-              <MetricCardsSkeleton count={4} />
-              <CardGridSkeleton count={4} columns={2} />
+              <MetricStripSkeleton
+                items={[
+                  { label: "Sequência atual" },
+                  { label: "Treinos concluídos", hint: "presenças confirmadas no tatame" },
+                  { label: "Meses exemplares", hint: "meses completos sem faltas" },
+                  { label: "Conquistas", hint: "marcos desbloqueados" },
+                ]}
+                label="Carregando indicadores de constância…"
+              />
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+                <section className="rounded-xl bg-card p-5 shadow-xs">
+                  <h2 className="mb-3 text-base font-semibold">Mapa de presenças</h2>
+                  <Skeleton className="h-36 w-full" />
+                </section>
+                <section className="rounded-xl bg-card p-5 shadow-xs">
+                  <h2 className="mb-2 text-base font-semibold">Presenças por mês</h2>
+                  <Skeleton className="h-36 w-full" />
+                </section>
+              </div>
+              <section aria-labelledby="badges-heading" className="space-y-3">
+                <h2 id="badges-heading" className="text-base font-semibold">Medalhas</h2>
+                <InlineCardsSkeleton count={4} columns={2} label="Carregando medalhas…" />
+              </section>
             </div>
           }
         >

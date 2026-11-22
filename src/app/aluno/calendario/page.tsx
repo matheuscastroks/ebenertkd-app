@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
-import { Skeleton } from "@/components/ui/skeleton";
+import { InlineCardsSkeleton, InlineRowsSkeleton } from "@/components/skeletons";
 import type { Profile } from "@/features/auth/types";
 import { CheckInSection } from "@/features/classes/components/check-in-section";
 import { MonthlyAgenda } from "@/features/classes/components/monthly-agenda";
@@ -14,12 +14,7 @@ import { requireCapability } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
 import { saoPauloToday } from "@/lib/dates";
 
-function AgendaSkeleton() {
-  return <div className="space-y-6" role="status" aria-label="Carregando agenda">
-    <div className="grid gap-6 lg:grid-cols-2"><Skeleton className="h-96 rounded-xl" /><Skeleton className="h-72 rounded-xl" /></div>
-    <Skeleton className="h-28 rounded-xl" />
-  </div>;
-}
+// Sem skeleton paralelo de página: usa InlineCardsSkeleton/InlineRowsSkeleton no Suspense.
 
 async function StudentAgendaContent({ profile, month }: { profile: Profile; month: string }) {
   const [calendar, history] = await Promise.all([getStudentCalendarData(profile, month), getAttendanceCalendar(profile, month)]);
@@ -44,7 +39,17 @@ export default async function StudentCalendarPage({ searchParams }: { searchPara
   return <PortalShell profile={profile} title="Agenda" subtitle="Treinos, eventos e frequência no mesmo calendário.">
     <div className="w-full min-w-0 space-y-6">
       <Suspense fallback={null}><CheckInSection profile={profile} /></Suspense>
-      <Suspense key={month} fallback={<AgendaSkeleton />}><StudentAgendaContent profile={profile} month={month} /></Suspense>
+      <Suspense
+        key={month}
+        fallback={
+          <div className="grid gap-6 lg:grid-cols-2">
+            <InlineCardsSkeleton count={1} columns={1} label="Carregando calendário…" />
+            <InlineRowsSkeleton rows={4} label="Carregando detalhes do mês…" />
+          </div>
+        }
+      >
+        <StudentAgendaContent profile={profile} month={month} />
+      </Suspense>
     </div>
   </PortalShell>;
 }

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
-import { MetricCardsSkeleton, TableRowsSkeleton } from "@/components/skeletons";
+import { InlineTableSkeleton, MetricStripSkeleton } from "@/components/skeletons";
 import { EventsSummaryCard } from "@/features/events/components/events-summary-card";
 import { getEventsSummary } from "@/features/events/summary-service";
 import { getAnnualExecutiveOverview } from "@/features/operations/annual-analytics-service";
@@ -159,8 +159,20 @@ export default async function AdminAnnualReportPage({
         <Suspense
           fallback={
             <div className="space-y-6">
-              <MetricCardsSkeleton count={4} />
-              <TableRowsSkeleton columns={5} rows={4} />
+              <MetricStripSkeleton
+                items={[
+                  { label: "Receita anual realizada" },
+                  { label: "Crescimento líquido" },
+                  { label: "Mensalidade média" },
+                  { label: "Graduações no ano", hint: "trocas de faixa registradas" },
+                ]}
+                label="Carregando indicadores anuais…"
+              />
+              <InlineTableSkeleton
+                headers={["Período", "Previsto", "Realizado", "Entradas", "Saídas", "Graduações"]}
+                rows={4}
+                label="Carregando desempenho por trimestre…"
+              />
             </div>
           }
         >

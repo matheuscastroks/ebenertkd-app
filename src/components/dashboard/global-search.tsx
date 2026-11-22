@@ -315,13 +315,13 @@ export function GlobalSearch({
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Abrir busca rápida"
-        className="flex w-full items-center gap-2 rounded-lg bg-sidebar-accent/50 px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2"
+        className="flex w-full items-center gap-2 rounded-lg md:rounded-xl bg-surface-recessed/70 px-2.5 py-1.5 md:h-11 md:px-3.5 md:py-2.5 md:gap-3 text-sm text-muted-foreground shadow-inset-well [box-shadow:var(--shadow-inset-well)] border-0 transition-colors hover:bg-surface-recessed hover:text-sidebar-foreground group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2"
       >
-        <SearchIcon className="size-4 shrink-0" aria-hidden="true" />
-        <span className="min-w-0 flex-1 truncate text-left group-data-[collapsible=icon]:hidden">
+        <SearchIcon className="size-4 shrink-0 md:size-5" aria-hidden="true" />
+        <span className="min-w-0 flex-1 truncate text-left md:text-sm md:font-medium group-data-[collapsible=icon]:hidden">
           Buscar...
         </span>
-        <kbd className="hidden rounded bg-background/80 px-1.5 py-0.5 font-sans text-xs font-medium text-muted-foreground sm:inline-block group-data-[collapsible=icon]:hidden">
+        <kbd className="hidden rounded bg-background/80 px-1.5 py-0.5 font-sans text-xs font-medium text-muted-foreground sm:inline-block group-data-[collapsible=icon]:hidden shadow-s">
           {shortcutLabel}
         </kbd>
       </button>

@@ -2,7 +2,7 @@ import { dependentSegments } from "@/features/families/paths";
 import { ROUTES } from "@/lib/navigation/routes";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
-import { ListItemsSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import type { Profile } from "@/features/auth/types";
 import { EventFeedback } from "@/features/events/components/event-feedback";
 import { StudentEventsView } from "@/features/events/components/student-events-view";
@@ -42,7 +42,7 @@ export default async function DependentEventsPage({ params, searchParams }: { pa
     >
       <DependentContext guardian={guardian} profileId={profileId} section="eventos" />
       <EventFeedback ok={query.ok} erro={query.erro} />
-      <Suspense fallback={<ListItemsSkeleton count={3} />}>
+      <Suspense fallback={<InlineRowsSkeleton rows={3} label="Carregando eventos…" />}>
         <DependentEventsContent guardian={guardian} profileId={profileId} />
       </Suspense>
     </PortalShell>

@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import { CancellationsList } from "@/features/contracts/components/cancellations-list";
-import ContractTemplatePage from "./modelo/page";
+import { ContractTemplateBody } from "./modelo/contract-template-body";
 
 const actions = vi.hoisted(() => ({ cancellation: vi.fn(), template: vi.fn() }));
 vi.mock("@/app/actions/cancellations", () => ({ decideCancellationAction: actions.cancellation }));
@@ -30,7 +30,7 @@ it("rescisão exige justificativa e confirma taxa e consequência antes de envia
 });
 
 it("publicar versão informa efeito sobre contratos e mantém rascunho sem publicar", async () => {
-  render(await ContractTemplatePage({ searchParams: Promise.resolve({}) }));
+  render(await ContractTemplateBody());
   fireEvent.click(screen.getByRole("button", { name: "Publicar nova versão" }));
   expect(screen.getByRole("heading", { name: "Publicar versão 2?" })).toBeVisible();
   expect(screen.getByText("Novos contratos usarão esta versão. Contratos atuais não mudam.")).toBeVisible();

@@ -45,7 +45,7 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "group/select-trigger flex w-full items-center justify-between gap-2 rounded-xl bg-muted px-3.5 py-2 text-sm text-foreground whitespace-nowrap shadow-xs transition-[color,background-color,border-color,box-shadow] duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none outline-none select-none focus-visible:ring-3 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 data-placeholder:text-muted-foreground dark:bg-muted [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "group/select-trigger flex w-full items-center justify-between gap-2 rounded-xl bg-muted px-3.5 py-2 text-sm text-foreground whitespace-nowrap shadow-input [box-shadow:var(--shadow-input)] transition-[color,background-color,border-color,box-shadow] duration-(--duration-quick) ease-(--ease-smooth-out) motion-reduce:transition-none outline-none select-none focus-visible:ring-3 focus-visible:ring-primary/20 focus-visible:[box-shadow:none] disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 data-placeholder:text-muted-foreground dark:bg-muted [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         size === "sm" ? "h-9 min-h-9 text-xs" : "h-10 min-h-10",
         className
       )}
@@ -83,7 +83,7 @@ function SelectContent({
         data-slot="select-content"
         data-position={position}
         className={cn(
-          "relative z-50 max-h-(--radix-select-content-available-height) min-w-(--radix-select-trigger-width) origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-xl bg-popover text-popover-foreground shadow-md border border-border ease-(--ease-smooth-out) motion-reduce:animate-none motion-reduce:transition-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-97 data-open:duration-(--duration-fast) data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-99 data-closed:duration-(--duration-quick)",
+          "relative z-50 max-h-(--radix-select-content-available-height) min-w-(--radix-select-trigger-width) origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-xl bg-popover text-popover-foreground shadow-elevation-2 border border-border/80 [box-shadow:var(--shadow-elevation-2),var(--card-highlight)] ease-(--ease-smooth-out) motion-reduce:animate-none motion-reduce:transition-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-97 data-open:duration-(--duration-fast) data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-99 data-closed:duration-(--duration-quick)",
           position === "popper" &&
             "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
           className

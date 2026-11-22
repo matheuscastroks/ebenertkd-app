@@ -8,18 +8,6 @@ import { StudentDashboardDynamic } from "@/features/students/components/student-
 import { requireProfile } from "@/lib/auth/session";
 import { ROUTES } from "@/lib/navigation/routes";
 
-function DashboardSkeleton() {
-  return (
-    <div role="status" aria-label="Carregando início" className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
-      <div className="space-y-6">
-        <Skeleton className="h-24 w-full rounded-xl" />
-        <Skeleton className="h-40 w-full rounded-xl" />
-      </div>
-      <Skeleton className="h-52 w-full rounded-xl" />
-    </div>
-  );
-}
-
 export default async function StudentPage() {
   const profile = await requireProfile();
   if (profile.role === "admin") redirect(ROUTES.admin);
@@ -41,7 +29,28 @@ export default async function StudentPage() {
         <Suspense fallback={null}>
           <CheckInSection profile={profile} />
         </Suspense>
-        <Suspense fallback={<DashboardSkeleton />}>
+        <Suspense
+          fallback={
+            <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+              <section aria-label="Próximo treino" className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
+                <div className="space-y-2 p-5">
+                  <h2 className="text-sm font-medium text-muted-foreground">Próximo treino</h2>
+                  <Skeleton className="h-7 w-44" />
+                  <Skeleton className="h-4 w-56" />
+                </div>
+                <div className="px-5 py-3">
+                  <Skeleton className="h-4 w-48" />
+                </div>
+              </section>
+              <section aria-label="Faixa" className="space-y-3 rounded-xl bg-card p-5 shadow-xs">
+                <h2 className="text-sm font-medium text-muted-foreground">Faixa</h2>
+                <Skeleton className="h-8 w-36" />
+                <Skeleton className="h-4 w-44" />
+              </section>
+              {becomeGuardian ? <div className="lg:col-span-2">{becomeGuardian}</div> : null}
+            </div>
+          }
+        >
           <StudentDashboardDynamic profile={profile} minor={minor} footer={becomeGuardian} />
         </Suspense>
       </div>

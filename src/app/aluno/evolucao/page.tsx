@@ -3,7 +3,8 @@ import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { CardGridSkeleton, MetricCardsSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { getBeltContext } from "@/features/academy/config-service";
@@ -238,8 +239,45 @@ export default async function StudentEvolutionPage() {
         <Suspense
           fallback={
             <div className="space-y-6">
-              <MetricCardsSkeleton count={2} />
-              <CardGridSkeleton count={2} columns={2} />
+              <section
+                aria-labelledby="readiness-heading"
+                className="overflow-hidden rounded-xl bg-card shadow-xs divide-y divide-border"
+              >
+                <div className="space-y-2 p-5">
+                  <p id="readiness-heading" className="text-sm font-medium text-muted-foreground">
+                    Próxima faixa
+                  </p>
+                  <Skeleton className="h-8 w-52" />
+                </div>
+                <div className="grid grid-cols-1 gap-5 p-5 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium text-foreground">Treinos na faixa atual</span>
+                    <Skeleton className="h-2.5 w-full" />
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium text-foreground">Tempo na faixa atual</span>
+                    <Skeleton className="h-2.5 w-full" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-4 bg-muted/30 p-5 text-sm sm:grid-cols-3">
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground">Forma atual</p>
+                    <Skeleton className="mt-1 h-4 w-24" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground">Próxima forma</p>
+                    <Skeleton className="mt-1 h-4 w-24" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground">Na faixa atual desde</p>
+                    <Skeleton className="mt-1 h-4 w-24" />
+                  </div>
+                </div>
+              </section>
+              <section aria-labelledby="roadmap-heading" className="space-y-3 rounded-xl bg-card p-5 shadow-xs">
+                <h2 id="roadmap-heading" className="text-base font-semibold">Todas as faixas</h2>
+                <InlineRowsSkeleton rows={4} label="Carregando graduações…" />
+              </section>
             </div>
           }
         >

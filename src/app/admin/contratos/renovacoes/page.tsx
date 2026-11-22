@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { OperationToast } from "@/components/shared/operation-toast";
-import { TableRowsSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import { RenewalFilters } from "@/features/contracts/components/renewal-filters";
 import { requireProfile } from "@/lib/auth/session";
 import { parseRenewalBucket, RenewalsContent } from "./renewals-content";
@@ -41,7 +41,7 @@ export default async function AdminContractRenewalsPage({ searchParams }: { sear
           <RenewalFilters />
         </Suspense>
 
-        <Suspense key={`${bucket ?? ""}|${params.q ?? ""}`} fallback={<TableRowsSkeleton columns={4} rows={5} />}>
+        <Suspense key={`${bucket ?? ""}|${params.q ?? ""}`} fallback={<InlineRowsSkeleton rows={5} label="Carregando renovações…" />}>
           <RenewalsContent bucket={bucket} search={params.q?.trim() || undefined} />
         </Suspense>
       </div>

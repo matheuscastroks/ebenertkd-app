@@ -45,8 +45,8 @@ function NavigationItem({ item }: { item: AppSidebarNavItem }) {
     >
       <SidebarMenuButton asChild isActive={item.active} tooltip={item.label}>
         <Link href={item.href} onClick={handleNavClick} aria-current={item.active ? "page" : undefined}>
-          <Icon ref={iconRef} aria-hidden="true" className="size-4 shrink-0" strokeWidth={2} />
-          <span>{item.label}</span>
+          <Icon ref={iconRef} aria-hidden="true" className="size-4 shrink-0 md:size-5" strokeWidth={2} />
+          <span className="text-sm md:text-base font-medium">{item.label}</span>
         </Link>
       </SidebarMenuButton>
       {item.badge ? (
@@ -102,7 +102,7 @@ export function AppSidebar({
           // O primeiro grupo abre a navegação: o rótulo fica só para leitores de tela.
           const labelHidden = index === 0 && group === "Principal";
           return (
-            <SidebarGroup key={group} role="group" aria-label={group} className="py-1.5">
+            <SidebarGroup key={group} role="group" aria-label={group} className="py-2 md:py-2.5">
               <SidebarGroupLabel className={labelHidden ? "sr-only" : undefined}>{group}</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>

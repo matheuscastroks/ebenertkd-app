@@ -4,8 +4,8 @@ import { DependentContext } from "@/features/families/components/dependent-conte
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { OperationToast } from "@/components/shared/operation-toast";
+import { InlineTableSkeleton } from "@/components/skeletons";
 import { PayerBilling } from "@/features/billing/components/payer-billing";
-import { PayerBillingSkeleton } from "@/features/billing/components/payer-billing-skeleton";
 import { requireCapability } from "@/lib/auth/session";
 
 export default async function GuardianBillingPage({
@@ -43,7 +43,15 @@ export default async function GuardianBillingPage({
           />
         ) : null}
 
-        <Suspense fallback={<PayerBillingSkeleton />}>
+        <Suspense
+          fallback={
+            <InlineTableSkeleton
+              headers={["Cobrança", "Competência", "Vencimento", "Valor", "Situação"]}
+              rows={4}
+              label="Carregando pagamentos…"
+            />
+          }
+        >
           <PayerBilling
             actor={actor}
             profileId={profileId}

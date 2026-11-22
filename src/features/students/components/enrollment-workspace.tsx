@@ -1,9 +1,12 @@
+import { cache, Suspense } from "react";
 import { DependentContext } from "@/features/families/components/dependent-context";
 import { PortalShell } from "@/components/dashboard/portal-shell";
+import { InlineRowsSkeleton, InlineValueSkeleton } from "@/components/skeletons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BeltBadge } from "@/features/students/components/belt-badge";
 import type { Profile } from "@/features/auth/types";
 import { listTrainingClasses } from "@/features/classes/service";
+import { resolveStudentProfile } from "@/features/students/access";
 import { EnrollmentForm } from "@/features/students/components/enrollment-form";
 import { getOrCreateEnrollmentBundle } from "@/features/students/service";
 import type { EnrollmentStatus } from "@/features/students/types";
@@ -29,54 +32,57 @@ const SUBTITLE_BY_STATUS: Record<EnrollmentStatus, string> = {
   cancelled: "Matrícula encerrada. Consulte o histórico cadastral abaixo.",
 };
 
-export async function EnrollmentWorkspace({
+const loadTargetAndBundle = cache(async (actor: Profile, targetProfileId: string) => {
+  const target = await resolveStudentProfile(actor, targetProfileId);
+  const bundle = await getOrCreateEnrollmentBundle(target, actor);
+  return { target, bundle };
+});
+
+async function EnrollmentSubtitle({ actor, targetProfileId }: { actor: Profile; targetProfileId: string }) {
+  if (actor.role === "minor_student") {
+    return <>Acompanhe sua graduação e o andamento da ficha.</>;
+  }
+  const { bundle } = await loadTargetAndBundle(actor, targetProfileId);
+  return <>{SUBTITLE_BY_STATUS[bundle.enrollment.status]}</>;
+}
+
+async function EnrollmentBody({
   actor,
-  target,
+  targetProfileId,
   query,
-  back,
-  segments,
 }: {
   actor: Profile;
-  target: Profile;
+  targetProfileId: string;
   query: EnrollmentQuery;
-  /** Voltar da pilha quando o responsável abre a ficha de um dependente. */
-  back?: BackTarget;
-  /** Segmentos do dependente, quando aberto pelo responsável. */
-  segments?: NavSegment[];
 }) {
-  const bundle = await getOrCreateEnrollmentBundle(target, actor);
+  const [{ target, bundle }, classes] = await Promise.all([
+    loadTargetAndBundle(actor, targetProfileId),
+    actor.role === "minor_student" ? Promise.resolve([]) : listTrainingClasses(true),
+  ]);
 
   if (actor.role === "minor_student") {
     return (
-      <PortalShell
-        profile={actor}
-      back={back}
-        title="Cadastro"
-        subtitle="Acompanhe sua graduação e o andamento da ficha."
-      >
-        <div className="w-full min-w-0">
-          <Card>
-            <CardHeader>
-              <CardTitle>Resumo da matrícula</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p>
-                <strong>Status:</strong> {ENROLLMENT_STATUS_LABELS[bundle.enrollment.status] ?? bundle.enrollment.status}
-              </p>
-              <p>
-                <strong>Faixa:</strong> <BeltBadge rankKey={bundle.student.rank_key} size="sm" />
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Seu responsável administra dados de saúde, documentos e informações financeiras.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </PortalShell>
+      <div className="w-full min-w-0">
+        <Card>
+          <CardHeader>
+            <CardTitle>Resumo da matrícula</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <p>
+              <strong>Status:</strong> {ENROLLMENT_STATUS_LABELS[bundle.enrollment.status] ?? bundle.enrollment.status}
+            </p>
+            <p>
+              <strong>Faixa:</strong> <BeltBadge rankKey={bundle.student.rank_key} size="sm" />
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Seu responsável administra dados de saúde, documentos e informações financeiras.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
-  const classes = await listTrainingClasses(true);
   const isDraft = bundle.enrollment.status === "draft";
   const isGuardianViewingDependent =
     actor.capabilities.includes("guardian") && actor.$id !== target.$id;
@@ -106,29 +112,61 @@ export async function EnrollmentWorkspace({
           : null;
 
   return (
+    <div className="w-full min-w-0 space-y-4">
+      {isGuardianViewingDependent ? (
+        <DependentContext
+          guardian={actor}
+          profileId={target.$id}
+          section="matricula"
+        />
+      ) : null}
+      <EnrollmentForm
+        bundle={toClientData(bundle)}
+        targetProfileId={target.$id}
+        classes={toClientData(classes)}
+        contractsHref={contractsHref}
+        feedback={feedback}
+      />
+    </div>
+  );
+}
+
+export function EnrollmentWorkspace({
+  actor,
+  targetProfileId,
+  query,
+  back,
+  segments,
+}: {
+  actor: Profile;
+  targetProfileId: string;
+  query: EnrollmentQuery;
+  /** Voltar da pilha quando o responsável abre a ficha de um dependente. */
+  back?: BackTarget;
+  /** Segmentos do dependente, quando aberto pelo responsável. */
+  segments?: NavSegment[];
+}) {
+  const title = actor.$id === targetProfileId ? "Cadastro" : segments ? "Ficha" : "Ficha do dependente";
+
+  return (
     <PortalShell
       profile={actor}
       back={back}
       segments={segments}
-      title={actor.$id === target.$id ? "Cadastro" : segments ? "Ficha" : `Ficha de ${target.full_name}`}
-      subtitle={SUBTITLE_BY_STATUS[bundle.enrollment.status]}
+      title={title}
+      subtitle={
+        <Suspense fallback={<InlineValueSkeleton className="h-4 w-72" />}>
+          <EnrollmentSubtitle actor={actor} targetProfileId={targetProfileId} />
+        </Suspense>
+      }
     >
-      <div className="w-full min-w-0 space-y-4">
-        {isGuardianViewingDependent ? (
-          <DependentContext
-            guardian={actor}
-            profileId={target.$id}
-            section="matricula"
-          />
-        ) : null}
-        <EnrollmentForm
-          bundle={toClientData(bundle)}
-          targetProfileId={target.$id}
-          classes={toClientData(classes)}
-          contractsHref={contractsHref}
-          feedback={feedback}
+      <Suspense fallback={<InlineRowsSkeleton rows={5} label="Carregando ficha cadastral…" />}>
+        <EnrollmentBody
+          actor={actor}
+          targetProfileId={targetProfileId}
+          query={query}
         />
-      </div>
+      </Suspense>
     </PortalShell>
   );
 }

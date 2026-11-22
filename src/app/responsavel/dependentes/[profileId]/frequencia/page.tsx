@@ -3,8 +3,8 @@ import { ROUTES } from "@/lib/navigation/routes";
 import { DependentContext } from "@/features/families/components/dependent-context";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AttendanceHistory } from "@/features/classes/components/attendance-history";
-import { AttendanceCalendarSkeleton } from "@/features/classes/components/attendance-calendar-skeleton";
 import { currentAttendanceMonth, normalizeAttendanceMonth } from "@/features/classes/attendance-calendar-rules";
 import { getAttendanceCalendar } from "@/features/classes/attendance-calendar-service";
 import type { Profile } from "@/features/auth/types";
@@ -55,7 +55,27 @@ export default async function DependentAttendancePage({
     >
       <div className="w-full min-w-0 space-y-6">
         <DependentContext guardian={guardian} profileId={profileId} section="frequencia" />
-        <Suspense fallback={<AttendanceCalendarSkeleton />}>
+        <Suspense
+          fallback={
+            <div className="space-y-5" role="status" aria-busy="true" aria-label="Carregando calendário">
+              <div className="rounded-xl bg-card p-5 shadow-xs">
+                <p className="text-sm text-muted-foreground">Frequência no mês</p>
+                <Skeleton className="mt-2 h-9 w-28" />
+              </div>
+              <div className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs lg:grid-cols-[20rem_minmax(0,1fr)] lg:divide-x lg:divide-y-0">
+                <div className="p-5">
+                  <p className="font-medium">Calendário de treinos</p>
+                  <Skeleton className="mt-4 h-72 w-full" />
+                </div>
+                <div className="p-5">
+                  <p className="font-medium">Detalhes do dia</p>
+                  <Skeleton className="mt-4 h-16 w-full" />
+                </div>
+              </div>
+              <span className="sr-only">Carregando calendário…</span>
+            </div>
+          }
+        >
           <DependentAttendanceContent
             guardian={guardian}
             profileId={profileId}

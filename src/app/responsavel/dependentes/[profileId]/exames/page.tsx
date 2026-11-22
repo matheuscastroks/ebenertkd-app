@@ -3,7 +3,7 @@ import { ROUTES } from "@/lib/navigation/routes";
 import { DependentContext } from "@/features/families/components/dependent-context";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
-import { ListItemsSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import { StudentExamsView } from "@/features/exams/components/student-exams-view";
 import { getStudentExams } from "@/features/exams/student-exams-service";
 import type { Profile } from "@/features/auth/types";
@@ -35,7 +35,7 @@ export default async function DependentExamsPage({ params }: { params: Promise<{
       subtitle="Exames marcados, taxa de cada um e resultados anteriores."
     >
       <DependentContext guardian={guardian} profileId={profileId} section="exames" />
-      <Suspense fallback={<ListItemsSkeleton count={2} />}>
+      <Suspense fallback={<InlineRowsSkeleton rows={2} label="Carregando exames…" />}>
         <DependentExamsContent guardian={guardian} profileId={profileId} />
       </Suspense>
     </PortalShell>

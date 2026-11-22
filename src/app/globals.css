@@ -119,6 +119,35 @@
   --badge-slide-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --badge-pop-ease: cubic-bezier(0.34, 1.36, 0.64, 1);
   --badge-close-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /*
+   * Camadas de Profundidade & Luz Direcional (Depth System - Sajid):
+   * Cada elevação combina:
+   * 1. Sombra interna clara no topo (brilho da luz incidente vinda de cima)
+   * 2. Sombra escura próxima de contato (ancora o elemento)
+   * 3. Sombra difusa suave ambiente (espalhamento natural)
+   */
+  --shadow-s: inset 0 1px 2px rgba(255, 255, 255, 0.7), 0 1px 2px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-m: inset 0 1px 2px rgba(255, 255, 255, 0.85), 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.06);
+  --shadow-l: inset 0 1px 2px rgba(255, 255, 255, 0.95), 0 4px 6px rgba(0, 0, 0, 0.12), 0 6px 10px rgba(0, 0, 0, 0.08);
+
+  --shadow-elevation-1: var(--shadow-s);
+  --shadow-elevation-hover: inset 0 1px 2px rgba(255, 255, 255, 0.8), 0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 16px -2px rgba(0, 0, 0, 0.08);
+  --shadow-elevation-2: var(--shadow-m);
+  --shadow-elevation-3: var(--shadow-l);
+
+  /*
+   * Inner Shadow (Sombra Interna / Cavidades, Progress Bar e Inputs):
+   * A luz vem de cima (12h):
+   * - A borda interna superior projeta sombra interna escura (recesso)
+   * - A borda interna inferior recebe luz direta clara (highlight de relevo)
+   */
+  --shadow-input: inset 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 1px 2px rgba(0, 0, 0, 0.04), inset 0 -1px 1px rgba(255, 255, 255, 0.65);
+  --shadow-inset-well: inset 0 2px 4px rgba(0, 0, 0, 0.16), inset 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 -1px 1px rgba(255, 255, 255, 0.65);
+
+  --shadow-btn: 0 1px 2px 0 rgba(0, 0, 0, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.28);
+  --shadow-inset-frame: inset 0 2px 6px rgba(0, 0, 0, 0.08), inset 2px 0 6px rgba(0, 0, 0, 0.06);
+  --card-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.85);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -178,6 +207,26 @@
     --info-soft: oklch(0.624 0.206 255.5 / 20%);
     --danger-soft: oklch(0.663 0.224 28.3 / 18%);
     --danger-text: oklch(0.78 0.13 24);
+
+    /*
+     * Profundidade no Modo Escuro (Sajid Depth System):
+     * Oclusão profunda combinada com realce de borda superior (top rim light),
+     * separando claramente o cartão do fundo sem poluir com bordas grossas.
+     */
+    --shadow-s: inset 0 1px 2px rgba(255, 255, 255, 0.18), 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.25);
+    --shadow-m: inset 0 1px 2px rgba(255, 255, 255, 0.3), 0 2px 4px rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3);
+    --shadow-l: inset 0 1px 2px rgba(255, 255, 255, 0.45), 0 4px 6px rgba(0, 0, 0, 0.6), 0 6px 10px rgba(0, 0, 0, 0.4);
+
+    --shadow-elevation-1: var(--shadow-s);
+    --shadow-elevation-hover: inset 0 1px 2px rgba(255, 255, 255, 0.25), 0 2px 4px rgba(0, 0, 0, 0.5), 0 8px 16px -2px rgba(0, 0, 0, 0.6);
+    --shadow-elevation-2: var(--shadow-m);
+    --shadow-elevation-3: var(--shadow-l);
+
+    --shadow-input: inset 0 2px 4px rgba(0, 0, 0, 0.6), inset 0 1px 2px rgba(0, 0, 0, 0.8), inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+    --shadow-inset-well: inset 0 2px 5px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(0, 0, 0, 0.9), inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+    --shadow-btn: 0 1px 2px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+    --shadow-inset-frame: inset 0 2px 8px rgba(0, 0, 0, 0.7), inset 2px 0 8px rgba(0, 0, 0, 0.6);
+    --card-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
   }
 }
 
@@ -277,6 +326,19 @@
   --radius-3xl: calc(var(--radius) * 2);
   --radius-4xl: calc(var(--radius) * 2.5);
   --font-sans: var(--font-body);
+  --shadow-xs: var(--shadow-elevation-1);
+  --shadow-sm: var(--shadow-elevation-1);
+  --shadow-s: var(--shadow-s);
+  --shadow-m: var(--shadow-m);
+  --shadow-l: var(--shadow-l);
+  --shadow-input: var(--shadow-input);
+  --shadow-elevation-1: var(--shadow-elevation-1);
+  --shadow-elevation-hover: var(--shadow-elevation-hover);
+  --shadow-elevation-2: var(--shadow-elevation-2);
+  --shadow-elevation-3: var(--shadow-elevation-3);
+  --shadow-inset-well: var(--shadow-inset-well);
+  --shadow-inset-frame: var(--shadow-inset-frame);
+  --shadow-btn: var(--shadow-btn);
 }
 
 /*
@@ -291,10 +353,16 @@
     scrollbar-color: var(--border) transparent;
   }
 
-  /* Scrollbar minimalista de 1px para evitar layout shift */
+  /* Scrollbar moderna sem botões/setas nas extremidades */
   *::-webkit-scrollbar {
-    width: 1px;
-    height: 1px;
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   *::-webkit-scrollbar-track {
@@ -308,6 +376,10 @@
 
   *::-webkit-scrollbar-thumb:hover {
     background: var(--muted-foreground);
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: transparent;
   }
 
   html { min-height: 100%; }
@@ -330,12 +402,20 @@
   .segmented-indicator,
   .segmented-selected {
     background-color: var(--card);
+    box-shadow: var(--shadow-elevation-1), var(--card-highlight);
+  }
+
+  .bg-card.shadow-xs,
+  .bg-card.shadow-sm,
+  .bg-card.shadow-elevation-1 {
+    box-shadow: var(--shadow-elevation-1), var(--card-highlight);
   }
 
   @media (prefers-color-scheme: dark) {
     .segmented-indicator,
     .segmented-selected {
       background-color: var(--card-elevated);
+      box-shadow: var(--shadow-elevation-1), var(--card-highlight);
     }
   }
 }

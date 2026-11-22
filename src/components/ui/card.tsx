@@ -5,17 +5,21 @@ import { cn } from "@/lib/utils"
 function Card({
   className,
   size = "default",
+  interactive = false,
   ...props
 }: React.ComponentProps<"div"> & {
   size?: "default" | "sm"
+  interactive?: boolean
 }) {
   return (
     <div
       data-slot="card"
       data-size={size}
+      data-interactive={interactive ? "true" : undefined}
       className={cn(
         "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-xl text-sm text-card-foreground py-(--card-spacing) [--card-spacing:--spacing(5)] has-data-[slot=card-header]:pt-0 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(4)] data-[size=sm]:has-data-[slot=card-header]:pt-0 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl",
-        "bg-card shadow-xs",
+        "bg-card shadow-elevation-1 [box-shadow:var(--shadow-elevation-1),var(--card-highlight)]",
+        interactive && "cursor-pointer transition-[transform,box-shadow] duration-(--duration-fast) ease-(--ease-smooth-out) hover:-translate-y-0.5 hover:shadow-elevation-hover hover:[box-shadow:var(--shadow-elevation-hover),var(--card-highlight)]",
         className
       )}
       {...props}

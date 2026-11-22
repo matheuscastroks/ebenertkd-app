@@ -1,8 +1,9 @@
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { notFound, redirect } from "next/navigation";
 import { Query } from "node-appwrite";
 import { completeEventAction, setEventStatusAction } from "@/app/actions/events";
 import { PortalShell } from "@/components/dashboard/portal-shell";
+import { InlineRowsSkeleton, InlineValueSkeleton } from "@/components/skeletons";
 import { AvatarGroup } from "@/components/shared/avatar-group";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { Button } from "@/components/ui/button";
@@ -220,16 +221,47 @@ async function EventDetail({ admin, bundle, tab, ok, erro }: { admin: Profile; b
   );
 }
 
-export default async function AdminEventPage({ params, searchParams }: { params: Promise<{ eventId: string }>; searchParams: Promise<{ aba?: string; ok?: string; erro?: string }> }) {
-  const [admin, { eventId }, query] = await Promise.all([requireProfile("admin"), params, searchParams]);
+async function AdminEventContent({
+  admin,
+  eventId,
+  tab,
+  ok,
+  erro,
+}: {
+  admin: Profile;
+  eventId: string;
+  tab?: string;
+  ok?: string;
+  erro?: string;
+}) {
   const bundle = await getEventBundle(eventId).catch(() => null);
   if (!bundle) notFound();
   if (bundle.event.event_type === "championship") {
     const championship = await getChampionshipBundle(eventId).catch(() => null);
     if (!championship) notFound();
-    return <ChampionshipDetail admin={admin} bundle={championship} tab={query.aba} ok={query.ok} erro={query.erro} />;
+    return <ChampionshipDetail admin={admin} bundle={championship} tab={tab} ok={ok} erro={erro} />;
   }
   // Exames têm tela própria (bancas, elegibilidade e promoção de faixa).
   if (bundle.event.event_type === "belt_exam") redirect(adminExamPath(eventId));
-  return <EventDetail admin={admin} bundle={bundle} tab={query.aba} ok={query.ok} erro={query.erro} />;
+  return <EventDetail admin={admin} bundle={bundle} tab={tab} ok={ok} erro={erro} />;
+}
+
+export default async function AdminEventPage({ params, searchParams }: { params: Promise<{ eventId: string }>; searchParams: Promise<{ aba?: string; ok?: string; erro?: string }> }) {
+  const [admin, { eventId }, query] = await Promise.all([requireProfile("admin"), params, searchParams]);
+  return (
+    <Suspense
+      fallback={
+        <PortalShell
+          profile={admin}
+          back={{ label: "Eventos", href: ROUTES.adminEvents }}
+          title={<InlineValueSkeleton className="h-7 w-48" />}
+          subtitle={<InlineValueSkeleton className="h-4 w-56" />}
+        >
+          <InlineRowsSkeleton rows={5} label="Carregando detalhes do evento…" />
+        </PortalShell>
+      }
+    >
+      <AdminEventContent admin={admin} eventId={eventId} tab={query.aba} ok={query.ok} erro={query.erro} />
+    </Suspense>
+  );
 }

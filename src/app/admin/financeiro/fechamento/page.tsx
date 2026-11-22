@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
-import { MetricCardsSkeleton, TableRowsSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import { requireProfile } from "@/lib/auth/session";
 import { MonthlyClosingContent } from "./closing-content";
 
@@ -19,9 +19,9 @@ export default async function AdminBillingClosingPage({ searchParams }: { search
       <div className="w-full min-w-0 space-y-6">
         <Suspense
           fallback={
-            <div className="space-y-6">
-              <TableRowsSkeleton columns={4} rows={3} />
-              <MetricCardsSkeleton count={4} />
+            <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+              <InlineRowsSkeleton rows={4} label="Carregando pendências do mês…" />
+              <InlineRowsSkeleton rows={4} label="Carregando resumo do fechamento…" />
             </div>
           }
         >

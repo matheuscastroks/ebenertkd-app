@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { MetricCardsSkeleton, TableRowsSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import { getAcademyIdentity, getPolicy } from "@/features/academy/config-service";
 import { professorSignature } from "@/features/academy/identity-rules";
@@ -94,10 +94,10 @@ export default async function AdminBillingAdjustmentPage() {
       <div className="w-full min-w-0 space-y-6">
         <Suspense
           fallback={
-            <div className="space-y-6">
-              <MetricCardsSkeleton count={4} />
-              <TableRowsSkeleton columns={4} rows={5} />
-            </div>
+            <section aria-labelledby="new-adjustment-heading" className="min-w-0 space-y-3">
+              <h2 id="new-adjustment-heading" className="text-base font-semibold">Nova campanha de reajuste</h2>
+              <InlineRowsSkeleton rows={5} label="Carregando simulação de reajuste…" />
+            </section>
           }
         >
           <AdjustmentContent adminName={admin.full_name} />

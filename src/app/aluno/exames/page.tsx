@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
-import { ListItemsSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import { StudentExamsView } from "@/features/exams/components/student-exams-view";
 import { getStudentExams } from "@/features/exams/student-exams-service";
 import type { Profile } from "@/features/auth/types";
@@ -32,7 +32,7 @@ export default async function StudentExamsPage() {
       subtitle="Acompanhe seus exames de faixa agendados e os resultados anteriores."
     >
       <div className="w-full min-w-0">
-        <Suspense fallback={<ListItemsSkeleton count={2} />}>
+        <Suspense fallback={<InlineRowsSkeleton rows={2} label="Carregando exames…" />}>
           <StudentExamsContent profile={profile} />
         </Suspense>
       </div>

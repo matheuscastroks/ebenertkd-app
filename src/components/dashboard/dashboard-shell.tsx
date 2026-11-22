@@ -16,8 +16,8 @@ import { MobileGestureDetector } from "@/components/dashboard/mobile-gesture-det
 import { PageTransition } from "@/components/dashboard/page-transition";
 
 type DashboardShellProps = {
-  title: string;
-  subtitle: string;
+  title: ReactNode;
+  subtitle: ReactNode;
   badge: string;
   /** Tela de detalhe (pilha): mostra "‹ label" acima do título e esconde os segmentos. */
   back?: BackTarget;
@@ -103,13 +103,13 @@ export function DashboardShell({
                 <BackLink {...back} />
               </div>
             ) : null}
-            <div key={title} className="t-text-reveal t-text-reveal--page space-y-0.5">
+            <div key={typeof title === "string" ? title : undefined} className="t-text-reveal t-text-reveal--page space-y-0.5">
               <h1 className="font-display text-2xl font-semibold tracking-tight text-sidebar-foreground">
                 {title}
               </h1>
               <p
                 className="text-sm text-muted-foreground md:max-w-5xl md:truncate"
-                title={subtitle}
+                title={typeof subtitle === "string" ? subtitle : undefined}
               >
                 {subtitle}
               </p>
@@ -125,13 +125,13 @@ export function DashboardShell({
 
       <main
         data-slot="dashboard-content"
-        className="relative flex min-h-0 flex-1 flex-col bg-background md:mb-2 md:mr-2 md:overflow-y-auto md:rounded-xl md:shadow-sm"
+        className="relative flex min-h-0 flex-1 flex-col bg-background md:mb-2 md:mr-2 md:overflow-y-auto md:rounded-xl md:shadow-inset-frame md:[box-shadow:var(--shadow-inset-frame)]"
       >
         <div className="min-w-0 flex-1 p-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:p-6 md:pb-8">
           <div className="flex w-full min-w-0 flex-col gap-6">
             {segments ? (
               <div className="min-w-0">
-                <ScreenSegments label={`Seções de ${title}`} segments={segments} />
+                <ScreenSegments label={typeof title === "string" ? `Seções de ${title}` : "Seções da tela"} segments={segments} />
               </div>
             ) : back ? null : (
               <div className="min-w-0 empty:hidden">

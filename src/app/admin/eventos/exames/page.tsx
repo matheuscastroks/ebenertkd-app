@@ -15,7 +15,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
+import { InlineCardsSkeleton, MetricStripSkeleton } from "@/components/skeletons";
 import { getPolicy } from "@/features/academy/config-service";
 import { examEventLabels, examEventTones, formatExamDate } from "@/features/exams/labels";
 import { getExamsOverview } from "@/features/exams/service";
@@ -154,36 +154,51 @@ async function ExamEventsContent() {
   );
 }
 
-function ExamsOverviewSkeleton() {
+async function NewExamAction() {
+  const [locations, examPolicy] = await Promise.all([listLocations(), getPolicy("exam")]);
   return (
-    <div aria-label="Carregando exames…" aria-busy="true" className="space-y-6">
-      <div className="grid grid-cols-1 divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-        {Array.from({ length: 3 }, (_, index) => (
-          <div key={index} className="space-y-2 p-4 sm:px-5">
-            <Skeleton className="h-4 w-28" />
-            <Skeleton className="h-7 w-32" />
-            <Skeleton className="h-4 w-40" />
+    <div className="flex flex-wrap items-center gap-2">
+      <ResponsiveDialog
+        size="xl"
+        trigger={
+          <Button className="min-h-11">
+            <PlusIcon className="size-4" aria-hidden="true" />
+            Novo exame
+          </Button>
+        }
+        title="Novo exame de faixa"
+        description="A taxa informada será o valor padrão das inscrições."
+      >
+        <form action={createExamEventAction} className="grid grid-cols-1 gap-4 pt-2 sm:grid-cols-2">
+          <Field className="sm:col-span-2">
+            <FieldLabel htmlFor="exam-name">Nome do evento</FieldLabel>
+            <Input id="exam-name" name="name" placeholder="Ex.: Exame de faixas do 2º semestre" required className="h-11" />
+          </Field>
+
+          <DateField id="exam-date" name="event_date" label="Data do exame" required />
+
+          <Field>
+            <FieldLabel htmlFor="exam-fee">Taxa padrão por aluno (R$)</FieldLabel>
+            <Input id="exam-fee" name="default_fee_reais" type="number" inputMode="decimal" min="0" step="0.01" placeholder="150,00" defaultValue={examPolicy.default_fee_cents != null ? centsToReaisInput(examPolicy.default_fee_cents) : undefined} required className="h-11 tabular-nums" />
+          </Field>
+
+          <Field className="sm:col-span-2">
+            <FieldLabel htmlFor="exam-location">Local da avaliação</FieldLabel>
+            <LocationSelect
+              id="exam-location"
+              name="location"
+              locations={locations}
+              placeholder="Selecione o dojang ou local do exame"
+            />
+          </Field>
+
+          <div className="pt-2 sm:col-span-2">
+            <FormSubmitButton className="min-h-11 w-full" pendingLabel="Criando exame…">
+              Cadastrar exame de faixa
+            </FormSubmitButton>
           </div>
-        ))}
-      </div>
-      <div className="space-y-3">
-        <Skeleton className="h-5 w-36" />
-        <div className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs">
-          {Array.from({ length: 3 }, (_, index) => (
-            <div key={index} className="flex flex-col gap-3 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-              <div className="space-y-2">
-                <Skeleton className="h-5 w-48" />
-                <Skeleton className="h-4 w-56" />
-              </div>
-              <div className="flex items-center gap-4">
-                <Skeleton className="h-9 w-24" />
-                <Skeleton className="h-9 w-28 rounded-lg" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      <span className="sr-only">Carregando exames…</span>
+        </form>
+      </ResponsiveDialog>
     </div>
   );
 }
@@ -193,11 +208,9 @@ export default async function ExamsPage({
 }: {
   searchParams: Promise<{ error?: string; cancelled?: string }>;
 }) {
-  const [admin, locations, query, examPolicy] = await Promise.all([
+  const [admin, query] = await Promise.all([
     requireProfile("admin"),
-    listLocations(),
     searchParams,
-    getPolicy("exam"),
   ]);
 
   return (
@@ -206,49 +219,16 @@ export default async function ExamsPage({
       title="Eventos"
       subtitle="Agende bancas, inscreva alunos e registre as novas graduações."
       headerActions={
-        <div className="flex flex-wrap items-center gap-2">
-          <ResponsiveDialog
-            size="xl"
-            trigger={
-              <Button className="min-h-11">
-                <PlusIcon className="size-4" aria-hidden="true" />
-                Novo exame
-              </Button>
-            }
-            title="Novo exame de faixa"
-            description="A taxa informada será o valor padrão das inscrições."
-          >
-          <form action={createExamEventAction} className="grid grid-cols-1 gap-4 pt-2 sm:grid-cols-2">
-            <Field className="sm:col-span-2">
-              <FieldLabel htmlFor="exam-name">Nome do evento</FieldLabel>
-              <Input id="exam-name" name="name" placeholder="Ex.: Exame de faixas do 2º semestre" required className="h-11" />
-            </Field>
-
-            <DateField id="exam-date" name="event_date" label="Data do exame" required />
-
-            <Field>
-              <FieldLabel htmlFor="exam-fee">Taxa padrão por aluno (R$)</FieldLabel>
-              <Input id="exam-fee" name="default_fee_reais" type="number" inputMode="decimal" min="0" step="0.01" placeholder="150,00" defaultValue={examPolicy.default_fee_cents != null ? centsToReaisInput(examPolicy.default_fee_cents) : undefined} required className="h-11 tabular-nums" />
-            </Field>
-
-            <Field className="sm:col-span-2">
-              <FieldLabel htmlFor="exam-location">Local da avaliação</FieldLabel>
-              <LocationSelect
-                id="exam-location"
-                name="location"
-                locations={locations}
-                placeholder="Selecione o dojang ou local do exame"
-              />
-            </Field>
-
-            <div className="pt-2 sm:col-span-2">
-              <FormSubmitButton className="min-h-11 w-full" pendingLabel="Criando exame…">
-                Cadastrar exame de faixa
-              </FormSubmitButton>
-            </div>
-          </form>
-        </ResponsiveDialog>
-        </div>
+        <Suspense
+          fallback={
+            <Button disabled className="min-h-11">
+              <PlusIcon className="size-4" aria-hidden="true" />
+              Novo exame
+            </Button>
+          }
+        >
+          <NewExamAction />
+        </Suspense>
       }
     >
       <div className="w-full min-w-0 space-y-6">
@@ -269,7 +249,24 @@ export default async function ExamsPage({
           />
         ) : null}
 
-        <Suspense fallback={<ExamsOverviewSkeleton />}>
+        <Suspense
+          fallback={
+            <div className="space-y-6">
+              <MetricStripSkeleton
+                items={[
+                  { label: "Próximo exame" },
+                  { label: "Candidatos inscritos", hint: "aguardando avaliação" },
+                  { label: "Receita prevista", hint: "em taxas de inscrição" },
+                ]}
+                label="Carregando resumo dos exames…"
+              />
+              <section className="space-y-3" aria-labelledby="exames-abertos">
+                <h2 id="exames-abertos" className="text-base font-semibold">Exames em aberto</h2>
+                <InlineCardsSkeleton count={2} columns={2} label="Carregando exames em aberto…" />
+              </section>
+            </div>
+          }
+        >
           <ExamEventsContent />
         </Suspense>
       </div>

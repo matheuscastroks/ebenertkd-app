@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
-import { MetricCardsSkeleton, TableRowsSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import { getPolicyForEdit } from "@/features/academy/config-service";
 import { PlanningCalculator } from "@/features/billing/components/planning-calculator";
 import { getPlanningBaseline, listFinanceScenarios } from "@/features/billing/planning-service";
@@ -22,14 +22,7 @@ export default async function AdminBillingCalculatorPage() {
       subtitle="Simule quanto cobrar e quantos alunos você precisa."
     >
       <div className="w-full min-w-0 space-y-6">
-        <Suspense
-          fallback={
-            <div className="space-y-6">
-              <MetricCardsSkeleton count={3} />
-              <TableRowsSkeleton columns={3} rows={4} />
-            </div>
-          }
-        >
+        <Suspense fallback={<InlineRowsSkeleton rows={5} label="Carregando calculadora…" />}>
           <CalculatorContent />
         </Suspense>
       </div>

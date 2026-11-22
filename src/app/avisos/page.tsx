@@ -7,7 +7,7 @@ import { OperationToast } from "@/components/shared/operation-toast";
 import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ListItemsSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import { AnnouncementForm } from "@/features/notifications/components/announcement-form";
 import { NotificationCenter } from "@/features/notifications/components/notification-center";
 import { PushPermissionCard } from "@/features/notifications/components/push-permission-card";
@@ -105,7 +105,7 @@ export default async function NotificationsPage({
             clearParams={["error"]}
           />
         ) : null}
-        <Suspense fallback={<ListItemsSkeleton count={4} />}>
+        <Suspense fallback={<InlineRowsSkeleton rows={4} label="Carregando avisos…" />}>
           <AsyncNotificationCenter profile={profile} />
         </Suspense>
       </div>

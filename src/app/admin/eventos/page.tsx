@@ -5,7 +5,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { FilterChips } from "@/components/shared/filter-chips";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@/components/ui/plus";
-import { Skeleton } from "@/components/ui/skeleton";
+import { InlineCardsSkeleton } from "@/components/skeletons";
 import { splitAgenda } from "@/features/events/agenda";
 import { EventCard } from "@/features/events/components/event-card";
 import { EventFeedback } from "@/features/events/components/event-feedback";
@@ -24,14 +24,7 @@ const FILTER_LABEL: Record<Exclude<EventType, "belt_exam">, string> = {
 
 const FILTER_TYPES = EVENT_TYPES.filter((item): item is Exclude<EventType, "belt_exam"> => item !== "belt_exam");
 
-function EventsSkeleton() {
-  return (
-    <div className="space-y-3">
-      <Skeleton className="h-20 w-full rounded-xl" />
-      <Skeleton className="h-20 w-full rounded-xl" />
-    </div>
-  );
-}
+// Sem skeleton paralelo: o título da seção monta imediatamente.
 
 async function EventsContent({ type }: { type?: EventType }) {
   const all = await getEventsOverview();
@@ -114,7 +107,16 @@ export default async function AdminEventsPage({ searchParams }: { searchParams: 
             ...FILTER_TYPES.map((item) => ({ label: FILTER_LABEL[item], href: `${ROUTES.adminEvents}?tipo=${item}`, active: type === item })),
           ]}
         />
-        <Suspense fallback={<EventsSkeleton />}>
+        <Suspense
+          fallback={
+            <section className="space-y-3" aria-labelledby="eventos-proximos">
+              <h2 id="eventos-proximos" className="text-base font-semibold">
+                Próximos
+              </h2>
+              <InlineCardsSkeleton count={2} columns={2} label="Carregando eventos…" />
+            </section>
+          }
+        >
           <EventsContent type={type} />
         </Suspense>
       </div>

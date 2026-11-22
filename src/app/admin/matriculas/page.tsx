@@ -12,7 +12,7 @@ import { listEnrollmentsForReview } from "@/features/students/service";
 import { requireProfile } from "@/lib/auth/session";
 import { toClientData } from "@/lib/client-data";
 import { ROUTES } from "@/lib/navigation/routes";
-import { TableRowsSkeleton } from "@/components/skeletons";
+import { InlineTableSkeleton } from "@/components/skeletons";
 
 type SearchParamsType = Promise<{
   q?: string;
@@ -67,14 +67,18 @@ async function EnrollmentListContent({ searchParams }: { searchParams: SearchPar
   );
 }
 
+async function EnrollmentFiltersLoader() {
+  const classes = await listTrainingClasses(true);
+  return <EnrollmentFilters classes={toClientData(classes)} />;
+}
+
 export default async function EnrollmentsPage({
   searchParams,
 }: {
   searchParams: SearchParamsType;
 }) {
-  const [admin, classes, query] = await Promise.all([
+  const [admin, query] = await Promise.all([
     requireProfile("admin"),
-    listTrainingClasses(true),
     searchParams,
   ]);
 
@@ -89,11 +93,19 @@ export default async function EnrollmentsPage({
         {query.error === "delete_student" ? (
           <OperationToast tone="error" title="Não foi possível excluir o aluno" description="Tente de novo. Se continuar, confira o Sistema." clearParams={["error"]} />
         ) : null}
-        <EnrollmentFilters classes={toClientData(classes)} />
+        <Suspense fallback={<EnrollmentFilters classes={[]} />}>
+          <EnrollmentFiltersLoader />
+        </Suspense>
 
         <Suspense
           key={`${query.q ?? ""}|${query.status ?? ""}|${query.rank ?? ""}|${query.turma ?? ""}|${query.page ?? ""}`}
-          fallback={<TableRowsSkeleton columns={6} rows={5} />}
+          fallback={
+            <InlineTableSkeleton
+              headers={["Aluno", "Graduação", "Turma", "Vencimento", "Status e pendência", "Ações"]}
+              rows={5}
+              label="Carregando matrículas…"
+            />
+          }
         >
           <EnrollmentListContent searchParams={searchParams} />
         </Suspense>

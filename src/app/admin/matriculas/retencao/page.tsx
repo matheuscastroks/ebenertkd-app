@@ -7,7 +7,7 @@ import { FilterChips } from "@/components/shared/filter-chips";
 import { FormSubmitButton } from "@/components/shared/form-submit-button";
 import { OperationToast } from "@/components/shared/operation-toast";
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge";
-import { MetricCardsSkeleton, TableRowsSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { RetentionCharts } from "@/features/classes/components/retention-chart";
@@ -251,14 +251,7 @@ export default async function AdminRetentionPage({
           <RetentionFiltersLoader />
         </Suspense>
 
-        <Suspense
-          fallback={
-            <div className="space-y-6">
-              <MetricCardsSkeleton count={4} />
-              <TableRowsSkeleton columns={4} rows={5} />
-            </div>
-          }
-        >
+        <Suspense fallback={<InlineRowsSkeleton rows={5} label="Carregando monitoramento de frequência…" />}>
           <RetentionContent searchParams={searchParams} />
         </Suspense>
       </div>

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
-import { ListItemsSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import { EventFeedback } from "@/features/events/components/event-feedback";
 import { requireProfile } from "@/lib/auth/session";
 import { HubContent } from "./hub-content";
@@ -11,7 +11,7 @@ export default async function EventRegistrationsHubPage({ searchParams }: { sear
     <PortalShell profile={admin} title="Eventos" subtitle="Inscrições que esperam uma ação sua.">
       <div className="w-full min-w-0 space-y-4">
         <EventFeedback ok={query.ok} erro={query.erro} />
-        <Suspense fallback={<ListItemsSkeleton count={4} />}>
+        <Suspense fallback={<InlineRowsSkeleton rows={4} label="Carregando inscrições…" />}>
           <HubContent />
         </Suspense>
       </div>

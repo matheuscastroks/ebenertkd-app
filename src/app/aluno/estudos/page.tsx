@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
-import { CardGridSkeleton } from "@/components/skeletons";
+import { InlineCardsSkeleton } from "@/components/skeletons";
 import type { Profile } from "@/features/auth/types";
 import { StudyGuideView } from "@/features/students/components/study-guide-view";
 import { resolveStudentRank } from "@/features/students/journey-rules";
@@ -25,7 +25,7 @@ export default async function StudentStudiesPage() {
       subtitle="Revise o Poomsae da sua faixa, comandos em coreano, princípios do Taekwondo e teste seus conhecimentos."
     >
       <div className="w-full min-w-0">
-        <Suspense fallback={<CardGridSkeleton count={2} columns={2} />}>
+        <Suspense fallback={<InlineCardsSkeleton count={2} columns={2} label="Carregando guia de estudos…" />}>
           <StudentStudiesContent profile={profile} />
         </Suspense>
       </div>

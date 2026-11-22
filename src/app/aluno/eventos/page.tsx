@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
-import { ListItemsSkeleton } from "@/components/skeletons";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import type { Profile } from "@/features/auth/types";
 import { EventFeedback } from "@/features/events/components/event-feedback";
 import { StudentEventsView } from "@/features/events/components/student-events-view";
@@ -35,7 +35,7 @@ export default async function StudentEventsPage({ searchParams }: { searchParams
     <PortalShell profile={profile} title="Eventos" subtitle="Campeonatos, aulões, seminários e confraternizações da academia.">
       <div className="w-full min-w-0">
         <EventFeedback ok={query.ok} erro={query.erro} />
-        <Suspense fallback={<ListItemsSkeleton count={3} />}>
+        <Suspense fallback={<InlineRowsSkeleton rows={3} label="Carregando eventos…" />}>
           <StudentEventsContent profile={profile} />
         </Suspense>
       </div>

@@ -25,7 +25,7 @@ export function EventCard({ data, compact = false }: { data: EventCardData; comp
   const deadline = event.registration_closes_at && !["completed", "cancelled"].includes(event.status) ? `Inscrições até ${formatEventDay(event.registration_closes_at)}` : null;
 
   return (
-    <li className="t-interactive-row flex min-w-0 flex-col gap-3 rounded-xl bg-card p-4 sm:p-5">
+    <li className="t-interactive-row flex min-w-0 flex-col gap-3 rounded-xl bg-card shadow-elevation-1 p-4 sm:p-5">
       <div className={`grid flex-1 content-start items-start gap-x-3 gap-y-2 sm:gap-x-4 ${compact ? "grid-cols-[4rem_minmax(0,1fr)]" : "grid-cols-[5rem_minmax(0,1fr)] sm:grid-cols-[7rem_minmax(0,1fr)]"}`}>
         <AppIllustration name={eventIllustration(event.event_type)} context={compact ? "recognition" : "event"} className="sm:row-span-2" />
         <div className="min-w-0 space-y-2 [overflow-wrap:anywhere]">

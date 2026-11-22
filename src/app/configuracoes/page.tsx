@@ -1,10 +1,12 @@
-import { getAcademyIdentity } from "@/features/academy/config-service";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import Link from "next/link";
-import { Bell, ChevronRight, Palette, Shield, User } from "@/components/ui/icons";
+import { Bell, ChevronRight, Shield, User } from "@/components/ui/icons";
+import { getAcademyIdentity } from "@/features/academy/config-service";
+import type { Profile } from "@/features/auth/types";
 import { isPushConfigured } from "@/features/notifications/push-config";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { LogoutButton } from "@/components/dashboard/logout-button";
+import { InlineRowsSkeleton } from "@/components/skeletons";
 import { NotificationPreferences } from "@/features/notifications/components/notification-preferences";
 import { PushPermissionCard } from "@/features/notifications/components/push-permission-card";
 import { getNotificationPreferences } from "@/features/notifications/preferences-service";
@@ -44,19 +46,47 @@ function SettingsGroup({
   );
 }
 
+async function ProfileEditorLoader({ profile, avatarUrl }: { profile: Profile; avatarUrl?: string }) {
+  const avatarSex = await getOwnStudentAvatarSex(profile).catch(() => null);
+  return <ProfileEditor profile={profile} currentAvatarUrl={avatarUrl} avatarSex={avatarSex} />;
+}
+
+async function PreferencesTabLoader({ profile, minor }: { profile: Profile; minor: boolean }) {
+  const [preferences, pushActive, identity] = await Promise.all([
+    getNotificationPreferences(profile.account_id),
+    hasActivePushSubscription(profile).catch(() => false),
+    getAcademyIdentity(),
+  ]);
+  const pushConfigured = isPushConfigured();
+
+  return (
+    <>
+      <SettingsGroup
+        id="settings-notifications"
+        title="Notificações"
+        description="Todos os comunicados continuam na central de Avisos. Escolha aqui quais alertas deseja receber."
+      >
+        <NotificationPreferences initial={preferences} showFinancial={!minor} />
+        <PushPermissionCard configured={pushConfigured} initiallyActive={pushActive} />
+      </SettingsGroup>
+
+      <SettingsGroup
+        id="settings-app"
+        title="Aplicativo no Celular"
+        description={`Instale o ${identity.short_name} no seu smartphone para acessar treinos e avisos direto da tela de início.`}
+      >
+        <InstallAppCard />
+      </SettingsGroup>
+    </>
+  );
+}
+
 export default async function SettingsPage({
   searchParams,
 }: {
   searchParams: Promise<{ tab?: string; saved?: string; error?: string }>;
 }) {
   const [profile, query] = await Promise.all([requireProfile(), searchParams]);
-  const [preferences, pushActive, identity, avatarSex] = await Promise.all([
-    getNotificationPreferences(profile.account_id),
-    hasActivePushSubscription(profile).catch(() => false),
-    getAcademyIdentity(),
-    getOwnStudentAvatarSex(profile).catch(() => null),
-  ]);
-  const pushConfigured = isPushConfigured();
   const minor = profile.role === "minor_student";
 
   let avatarUrl: string | undefined;
@@ -128,28 +158,17 @@ export default async function SettingsPage({
               title="Cadastro e Imagem do Usuário"
               description="Atualize sua foto de perfil, nome completo e informações de acesso."
             >
-              <ProfileEditor profile={profile} currentAvatarUrl={avatarUrl} avatarSex={avatarSex} />
+              <Suspense fallback={<InlineRowsSkeleton rows={3} label="Carregando dados do perfil…" />}>
+                <ProfileEditorLoader profile={profile} avatarUrl={avatarUrl} />
+              </Suspense>
             </SettingsGroup>
           </TabsContent>
 
           {/* ABA 2: Notificações & App (aparência segue o sistema) */}
           <TabsContent value="preferences" className="space-y-8">
-            <SettingsGroup
-              id="settings-notifications"
-              title="Notificações"
-              description="Todos os comunicados continuam na central de Avisos. Escolha aqui quais alertas deseja receber."
-            >
-              <NotificationPreferences initial={preferences} showFinancial={!minor} />
-              <PushPermissionCard configured={pushConfigured} initiallyActive={pushActive} />
-            </SettingsGroup>
-
-            <SettingsGroup
-              id="settings-app"
-              title="Aplicativo no Celular"
-              description={`Instale o ${identity.short_name} no seu smartphone para acessar treinos e avisos direto da tela de início.`}
-            >
-              <InstallAppCard />
-            </SettingsGroup>
+            <Suspense fallback={<InlineRowsSkeleton rows={4} label="Carregando preferências de notificação…" />}>
+              <PreferencesTabLoader profile={profile} minor={minor} />
+            </Suspense>
           </TabsContent>
 
           {/* ABA 3: Conta & Segurança */}
