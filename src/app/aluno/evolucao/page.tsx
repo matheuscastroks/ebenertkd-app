@@ -22,6 +22,7 @@ async function StudentEvolutionContent({ profile }: { profile: Profile }) {
   if (!snapshot.student) {
     return (
       <EmptyState
+        illustration="empty-journey"
         title="Preencha sua ficha para acompanhar a faixa"
         description="Depois que o professor aprovar a ficha, o progresso para o próximo exame aparece aqui."
         action={

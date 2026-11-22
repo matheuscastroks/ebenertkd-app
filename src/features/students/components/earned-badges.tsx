@@ -1,5 +1,7 @@
 import { StatusBadge } from "@/components/shared/status-badge";
-import { Award } from "@/components/ui/icons";
+import { EmptyState } from "@/components/shared/empty-state";
+import { AppIllustration } from "@/components/shared/app-illustration";
+import { earnedBadgeIllustrations } from "@/components/shared/illustration-catalog";
 import { BADGE_KIND_LABEL, summarizeBadges, type EarnedBadgeKind } from "@/features/students/badge-rules";
 import { formatBusinessDateBr } from "@/lib/dates";
 
@@ -30,20 +32,18 @@ export function EarnedBadges({ badges, heading = "Conquistas em eventos e exames
         ) : null}
       </div>
       {badges.length === 0 ? (
-        <p className="rounded-xl bg-card p-4 text-sm text-muted-foreground shadow-xs sm:px-5">Participe de campeonatos, aulões e exames para conquistar medalhas e marcos que aparecem aqui.</p>
+        <EmptyState illustration="empty-achievements" title="Sua história de conquistas começa aqui" description="Participe de campeonatos, aulões e exames para conquistar medalhas e marcos que aparecem aqui." />
       ) : (
-        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,16rem),1fr))] items-stretch gap-3">
           {badges.map((badge) => (
-            <li key={badge.$id} className="flex flex-col gap-1.5 rounded-xl bg-card p-4 shadow-xs">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-start gap-1.5 text-sm font-semibold text-foreground">
-                  <Award className="mt-0.5 size-4 shrink-0 text-primary-text" aria-hidden="true" />
-                  <span>{badge.title}</span>
-                </div>
-                <StatusBadge tone={TONE[badge.kind]}>{BADGE_KIND_LABEL[badge.kind]}</StatusBadge>
+            <li key={badge.$id} className="flex min-w-0 items-start gap-3 rounded-xl bg-card p-4 shadow-xs [overflow-wrap:anywhere]">
+              <AppIllustration name={earnedBadgeIllustrations[badge.kind]} context="recognition" />
+              <div className="flex min-w-0 flex-1 flex-col gap-2 self-stretch">
+                <h3 className="text-sm font-semibold leading-snug text-foreground">{badge.title}</h3>
+                <StatusBadge tone={TONE[badge.kind]} className="max-w-full whitespace-normal break-words">{BADGE_KIND_LABEL[badge.kind]}</StatusBadge>
+                {badge.description ? <p className="text-xs text-muted-foreground">{badge.description}</p> : null}
+                <p className="mt-auto text-xs tabular-nums text-muted-foreground">{formatBusinessDateBr(badge.awarded_at)}</p>
               </div>
-              {badge.description ? <p className="text-xs text-muted-foreground">{badge.description}</p> : null}
-              <p className="text-xs tabular-nums text-muted-foreground">{formatBusinessDateBr(badge.awarded_at)}</p>
             </li>
           ))}
         </ul>

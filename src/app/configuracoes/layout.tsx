@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { PortalFrame } from "@/components/dashboard/portal-shell";
+import { PortalFrame } from "@/components/dashboard/portal-frame";
 import { requireProfile } from "@/lib/auth/session";
 
 export default async function SettingsLayout({ children }: { children: ReactNode }) {

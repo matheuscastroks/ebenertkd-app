@@ -182,6 +182,7 @@ export function ClassManager({
       <section>
         {classes.length === 0 ? (
           <EmptyState
+            illustration="empty-classes"
             title="Nenhuma turma cadastrada"
             description="Use Nova turma para cadastrar o primeiro horário. Os alunos escolhem a turma no cadastro."
           />

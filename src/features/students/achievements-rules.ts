@@ -10,6 +10,7 @@ export type AchievementEntry = {
 
 export type StudentBadge = {
   id: string;
+  metric: BadgeDefinition["metric"];
   title: string;
   description: string;
   unlocked: boolean;
@@ -52,6 +53,7 @@ function addDaysUtc(isoDay: string, delta: number): string {
 
 function makeBadge(
   id: string,
+  metric: BadgeDefinition["metric"],
   title: string,
   description: string,
   currentValue: number,
@@ -61,6 +63,7 @@ function makeBadge(
   const progressPct = Math.min(100, Math.round((clamped / targetValue) * 100));
   return {
     id,
+    metric,
     title,
     description,
     unlocked: clamped >= targetValue,
@@ -163,7 +166,7 @@ export function buildStudentConsistencyReport(input: {
     medals: earnedTotals.medals,
   };
   const badges: StudentBadge[] = (input.badges ?? DEFAULT_BADGES).map((badge) =>
-    makeBadge(badge.id, badge.title, badge.description, metricValues[badge.metric], badge.target)
+    makeBadge(badge.id, badge.metric, badge.title, badge.description, metricValues[badge.metric], badge.target)
   );
 
   // Heatmap das últimas 20 semanas (segunda a domingo).

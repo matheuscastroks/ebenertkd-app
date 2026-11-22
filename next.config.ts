@@ -26,8 +26,13 @@ const nextConfig: NextConfig = {
     ]
   },
   devIndicators: false,
+  onDemandEntries: {
+    // Mantém rotas compiladas em memória no dev para evitar recompilação ao alternar telas.
+    maxInactiveAge: 10 * 60 * 1000,
+    pagesBufferLength: 30
+  },
   experimental: {
-    optimizePackageImports: ["lucide-react", "radix-ui", "date-fns"],
+    optimizePackageImports: ["lucide-react", "radix-ui", "date-fns", "motion", "motion/react", "recharts"],
     // Documentos de inscrição e matrícula chegam até 5 MB (mais o multipart).
     serverActions: { bodySizeLimit: "6mb" }
   }

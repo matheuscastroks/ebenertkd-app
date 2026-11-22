@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { AppIllustration } from "@/components/shared/app-illustration";
+import { eventIllustration } from "@/components/shared/illustration-catalog";
 import { confirmInterestAction } from "@/app/actions/events";
 import { Calendar, Clock, MapPin, Users } from "@/components/ui/icons";
 import { ReadableDate } from "@/components/shared/readable-date";
@@ -46,7 +48,7 @@ function priceText(item: StudentOpenEvent) {
 
 function When({ startsAt }: { startsAt: string }) {
   return (
-    <span className="inline-flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium"><span className="inline-flex items-center gap-2"><Calendar className="size-4 text-muted-foreground" aria-hidden="true" /><ReadableDate value={startsAt} /></span><span className="inline-flex items-center gap-2 tabular-nums"><Clock className="size-4 text-muted-foreground" aria-hidden="true" />{formatEventTime(startsAt)}</span></span>
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium"><div className="inline-flex items-center gap-2"><Calendar className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" /><ReadableDate value={startsAt} /></div><div className="inline-flex items-center gap-2 tabular-nums"><Clock className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />{formatEventTime(startsAt)}</div></div>
   );
 }
 
@@ -58,38 +60,52 @@ function OpenEventCard({ item, props }: { item: StudentOpenEvent; props: Props }
   const eligibilityReasons = [...new Set(item.options.filter((entry) => !entry.eligible).flatMap((entry) => entry.reasons))];
   const guestsAllowed = event.audience !== "students" && props.viewer.kind !== "minor" && !championship;
   return (
-    <li className="flex min-w-0 flex-col rounded-xl bg-card p-4 sm:p-5">
-      <div className="flex flex-1 flex-col gap-5">
-        <div className="min-w-0 space-y-3">
-          <div className="space-y-2">
+    <li className="flex min-w-0 flex-col gap-3 rounded-xl bg-card p-4 sm:p-5">
+      <div className="min-w-0 flex-1 space-y-3">
+        <div className="grid grid-cols-[5rem_minmax(0,1fr)] items-start gap-x-3 gap-y-2 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-x-4">
+          <AppIllustration name={eventIllustration(event.event_type)} context="event" className="sm:row-span-2" />
+          <div className="min-w-0 space-y-2 [overflow-wrap:anywhere]">
+            <h3 className="text-base font-semibold leading-snug text-foreground">{event.title}</h3>
             <EventTypeBadge type={event.event_type} />
-            <h3 className="text-lg font-semibold leading-snug text-foreground">{event.title}</h3>
           </div>
-          <dl className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+          <dl className="col-span-2 flex min-w-0 flex-wrap gap-x-3 gap-y-1.5 text-sm text-muted-foreground sm:col-span-1 sm:col-start-2 [overflow-wrap:anywhere]">
             <div>
               <dt className="sr-only">Data</dt>
-              <dd className="flex items-center gap-2 font-medium"><Calendar aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" /><ReadableDate value={event.starts_at} weekday /></dd>
+              <dd className="flex items-start gap-1.5"><Calendar aria-hidden="true" className="mt-0.5 size-4 shrink-0" /><ReadableDate value={event.starts_at} weekday /></dd>
             </div>
             <div>
               <dt className="sr-only">Horário</dt>
-              <dd className="flex items-center gap-2 font-medium tabular-nums"><Clock aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />{formatEventTime(event.starts_at)}</dd>
+              <dd className="flex items-center gap-1.5 tabular-nums"><Clock aria-hidden="true" className="size-4 shrink-0" />{formatEventTime(event.starts_at)}</dd>
             </div>
             <div className="w-full">
               <dt className="sr-only">Local</dt>
-              <dd className="flex items-start gap-2 text-muted-foreground"><MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0" /><span>{event.location_text || "Local a confirmar"}</span></dd>
+              <dd className="flex items-start gap-1.5"><MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0" /><span>{event.location_text || "Local a confirmar"}</span></dd>
             </div>
           </dl>
-          {event.description ? <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{event.description}</p> : null}
-          {championship ? <p className="pt-2 text-sm text-muted-foreground">{event.organizer_name ? `Organização: ${event.organizer_name}` : "A academia monta a equipe e envia à federação"}</p> : null}
-          {championship && item.deadlines ? <StudentDeadlineList deadlines={item.deadlines} /> : null}
         </div>
-        <div className="mt-auto space-y-4 pt-1">
-          <dl className="flex flex-wrap items-end justify-between gap-4">
-            {price ? <div><dt className="text-xs text-muted-foreground">Valor</dt><dd className="mt-1 text-lg font-semibold tabular-nums">{price}</dd></div> : null}
-            {!championship ? <div className="text-sm"><dt className="sr-only">Vagas</dt><dd className="flex items-center gap-2 text-muted-foreground"><Users aria-hidden="true" className="size-4 shrink-0" />{item.seatsLeft === null ? "Vagas ilimitadas" : item.seatsLeft === 0 ? "Lotado (lista de espera)" : `${item.seatsLeft} vagas restantes`}</dd></div> : null}
-          </dl>
-          {item.attendeeCount ? <div className="flex flex-wrap items-center gap-2"><AvatarGroup people={item.attendees ?? []} max={4} total={item.attendeeCount} size="sm" surface="card" label={`${item.attendeeCount} ${item.attendeeCount === 1 ? "aluno inscrito" : "alunos inscritos"}`} /><span className="text-sm text-muted-foreground">{item.attendeeCount} {item.attendeeCount === 1 ? "aluno inscrito" : "alunos inscritos"}</span><span className="sr-only">Inscrições</span></div> : null}
-          <div className="flex flex-wrap items-center gap-2">
+        {event.description ? <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{event.description}</p> : null}
+        {championship ? <p className="pt-2 text-sm text-muted-foreground">{event.organizer_name ? `Organização: ${event.organizer_name}` : "A academia monta a equipe e envia à federação"}</p> : null}
+        {championship && item.deadlines ? <StudentDeadlineList deadlines={item.deadlines} /> : null}
+        {item.attendeeCount ? <div className="flex flex-wrap items-center gap-2"><AvatarGroup people={item.attendees ?? []} max={4} total={item.attendeeCount} size="sm" surface="card" label={`${item.attendeeCount} ${item.attendeeCount === 1 ? "aluno inscrito" : "alunos inscritos"}`} /><span className="text-sm text-muted-foreground">{item.attendeeCount} {item.attendeeCount === 1 ? "aluno inscrito" : "alunos inscritos"}</span><span className="sr-only">Inscrições</span></div> : null}
+        {eligibilityReasons.length > 0 && item.registrationState === "open" ? eligibilityReasons.length === 1 && item.options.length === 1 ? (
+          <p className="text-sm leading-relaxed text-muted-foreground">{eligibilityReasons[0].charAt(0).toUpperCase() + eligibilityReasons[0].slice(1)}</p>
+        ) : (
+          <details className="text-sm text-muted-foreground">
+            <summary className="min-h-11 cursor-pointer py-3 font-medium text-foreground focus-visible:outline-2 focus-visible:outline-ring">Condições para participar</summary>
+            <ul className="space-y-2 pb-1 leading-relaxed">
+              {item.options.filter((entry) => !entry.eligible).map((entry) => (
+                <li key={entry.option.$id}><span className="font-medium">{entry.option.label}:</span> {entry.reasons.join("; ")}</li>
+              ))}
+            </ul>
+          </details>
+        ) : null}
+      </div>
+      <div className="flex flex-wrap items-end justify-between gap-3 border-t border-border pt-3">
+        <dl className="flex min-w-0 flex-wrap items-end gap-x-4 gap-y-2">
+          {price ? <div><dt className="text-xs text-muted-foreground">Valor</dt><dd className="mt-1 text-lg font-semibold tabular-nums">{price}</dd></div> : null}
+          {!championship ? <div className="text-sm"><dt className="sr-only">Vagas</dt><dd className="flex items-center gap-2 text-muted-foreground"><Users aria-hidden="true" className="size-4 shrink-0" />{item.seatsLeft === null ? "Vagas ilimitadas" : item.seatsLeft === 0 ? "Lotado (lista de espera)" : `${item.seatsLeft} vagas restantes`}</dd></div> : null}
+        </dl>
+        <div className="flex flex-wrap items-center gap-2">
 
           {item.registrationState === "open" ? (
             allMine ? (
@@ -103,21 +119,8 @@ function OpenEventCard({ item, props }: { item: StudentOpenEvent; props: Props }
           ) : (
             <StatusBadge tone="warning">{item.registrationState === "closed" ? "Inscrições encerradas" : "Inscrições ainda não abertas"}</StatusBadge>
           )}
-          </div>
         </div>
       </div>
-      {eligibilityReasons.length > 0 && item.registrationState === "open" ? eligibilityReasons.length === 1 && item.options.length === 1 ? (
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{eligibilityReasons[0].charAt(0).toUpperCase() + eligibilityReasons[0].slice(1)}</p>
-      ) : (
-        <details className="mt-4 text-sm text-muted-foreground">
-          <summary className="min-h-11 cursor-pointer py-3 font-medium text-foreground focus-visible:outline-2 focus-visible:outline-ring">Condições para participar</summary>
-          <ul className="space-y-2 pb-1 leading-relaxed">
-            {item.options.filter((entry) => !entry.eligible).map((entry) => (
-              <li key={entry.option.$id}><span className="font-medium">{entry.option.label}:</span> {entry.reasons.join("; ")}</li>
-            ))}
-          </ul>
-        </details>
-      ) : null}
     </li>
   );
 }
@@ -137,10 +140,10 @@ function RegistrationRow({ entry, props, canCancel }: { entry: StudentEventEntry
           <RegistrationStatusBadge status={registration.status} />
           {registration.status === "waitlisted" && registration.waitlist_position ? <StatusBadge tone="neutral">{registration.waitlist_position}º na fila</StatusBadge> : null}
         </div>
-        <p className="text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground">
           <When startsAt={event.starts_at} />
-        </p>
-        {event.location_text ? <p className="flex items-start gap-2 text-sm text-muted-foreground"><MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" />{event.location_text}</p> : null}
+        </div>
+        {event.location_text ? <div className="flex items-start gap-2 text-sm text-muted-foreground"><MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" />{event.location_text}</div> : null}
         <p className="text-sm text-muted-foreground">
           {option?.label}
           {registration.companions > 0 ? ` · +${registration.companions} acompanhante${registration.companions > 1 ? "s" : ""}` : ""}
@@ -186,7 +189,7 @@ function RegistrationRow({ entry, props, canCancel }: { entry: StudentEventEntry
 
 export function StudentEventsView(props: Props) {
   if (!props.hasStudent) {
-    return <EmptyState title="Cadastro de aluno não encontrado" description="Conclua a matrícula para ver e se inscrever nos eventos da academia." />;
+    return <EmptyState illustration="empty-journey" title="Cadastro de aluno não encontrado" description="Conclua a matrícula para ver e se inscrever nos eventos da academia." />;
   }
   return (
     <div className="space-y-8">
@@ -195,7 +198,7 @@ export function StudentEventsView(props: Props) {
           Próximos eventos
         </h2>
         {props.open.length === 0 ? (
-          <EmptyState title="Nenhum evento no momento" description="Campeonatos, aulões, seminários e confraternizações aparecem aqui assim que o professor publicar." />
+          <EmptyState illustration="empty-agenda" title="Nenhum evento no momento" description="Campeonatos, aulões, seminários e confraternizações aparecem aqui assim que o professor publicar." />
         ) : (
           <ul className="grid items-stretch gap-4 xl:grid-cols-2">
             {props.open.map((item) => (

@@ -1,6 +1,19 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
+
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
+function invokeSafely(callback: () => void) {
+  try {
+    callback();
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("controls.start() should only be called after a component has mounted")) {
+      return;
+    }
+    throw error;
+  }
+}
 
 export interface AnimatedIconHandle {
   startAnimation: () => void;
@@ -49,7 +62,7 @@ export function useParentHoverAnimation(
     onStopRef.current = onStop;
   }, [onStart, onStop]);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const element = containerRef.current;
     if (!element || typeof element.closest !== "function") {
       hasInteractiveParentRef.current = false;
@@ -62,17 +75,16 @@ export function useParentHoverAnimation(
       return;
     }
 
+    let active = true;
     hasInteractiveParentRef.current = true;
 
     const handleEnter = () => {
-      if (!isControlledRef.current) {
-        onStartRef.current();
-      }
+      if (!active || isControlledRef.current || !element.isConnected) return;
+      invokeSafely(onStartRef.current);
     };
     const handleLeave = () => {
-      if (!isControlledRef.current) {
-        onStopRef.current();
-      }
+      if (!active || isControlledRef.current || !element.isConnected) return;
+      invokeSafely(onStopRef.current);
     };
 
     parent.addEventListener("mouseenter", handleEnter);
@@ -80,6 +92,7 @@ export function useParentHoverAnimation(
     parent.addEventListener("focusin", handleEnter);
     parent.addEventListener("focusout", handleLeave);
     return () => {
+      active = false;
       hasInteractiveParentRef.current = false;
       parent.removeEventListener("mouseenter", handleEnter);
       parent.removeEventListener("mouseleave", handleLeave);

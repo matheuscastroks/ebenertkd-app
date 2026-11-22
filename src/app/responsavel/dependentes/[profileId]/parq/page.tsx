@@ -29,6 +29,7 @@ async function GuardianParqContent({
   if (!student) {
     return (
       <EmptyState
+        illustration="empty-journey"
         title="Preencha a ficha primeiro"
         description="Assim que a matrícula do dependente for iniciada, o questionário de saúde anual ficará disponível aqui."
         action={

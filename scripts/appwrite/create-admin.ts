@@ -1,9 +1,9 @@
-import { loadEnvConfig } from "@next/env";
+import { loadProjectEnv } from "../environment/load";
 import { Client, ID, Permission, Role, TablesDB, Users } from "node-appwrite";
 import { APPWRITE_IDS } from "../../src/lib/appwrite/ids";
 import { readServerAppwriteConfig } from "../../src/lib/appwrite/config";
 
-loadEnvConfig(process.cwd());
+loadProjectEnv();
 
 function argument(name: string) {
   const index = process.argv.indexOf(`--${name}`);

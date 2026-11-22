@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AppIllustration } from "@/components/shared/app-illustration";
 import { Award, CreditCard, History, MapPin } from "@/components/ui/icons";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -38,6 +39,7 @@ export function StudentExamsView({
   if (!hasStudent) {
     return (
       <EmptyState
+        illustration="empty-journey"
         icon={<Award className="size-5" aria-hidden="true" />}
         title="Matrícula ainda não concluída"
         description="Os exames de faixa aparecem aqui depois que a matrícula é aprovada pelo professor."
@@ -52,15 +54,7 @@ export function StudentExamsView({
           Próximos exames
         </h2>
         {upcoming.length === 0 ? (
-          <Card>
-            <CardContent className="flex items-start gap-3 text-sm text-muted-foreground">
-              <CalendarDaysIcon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-              <p>
-                Nenhum exame agendado. O professor faz a inscrição quando chegar a hora da próxima
-                faixa.
-              </p>
-            </CardContent>
-          </Card>
+          <EmptyState illustration="empty-agenda" title="Nenhum exame agendado" description="O professor faz a inscrição quando chegar a hora da próxima faixa." />
         ) : (
           <div className="space-y-3">
             {upcoming.map((entry) => (
@@ -112,15 +106,16 @@ function UpcomingExamCard({
 
   return (
     <Card>
-      <CardHeader className="gap-1.5">
-        <div className="flex flex-wrap items-center justify-between gap-2">
+      <CardHeader className="grid grid-cols-[5rem_minmax(0,1fr)] items-start gap-x-3 gap-y-2 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-x-4">
+        <AppIllustration name="event-belt-exam" context="event" className="sm:row-span-2" />
+        <div className="min-w-0 space-y-2 [overflow-wrap:anywhere]">
           <CardTitle className="text-base font-semibold">{event.name}</CardTitle>
           <StatusBadge tone={event.status === "confirmed" ? "info" : "neutral"}>
             {event.status === "confirmed" ? "Data confirmada" : "Data a confirmar"}
           </StatusBadge>
         </div>
-        <CardDescription className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:gap-x-4">
-          <span className="inline-flex items-center gap-1.5">
+        <CardDescription className="col-span-2 flex min-w-0 flex-col gap-1 sm:col-span-1 sm:col-start-2 sm:flex-row sm:flex-wrap sm:gap-x-4">
+          <div className="flex items-start gap-1.5">
             <CalendarDaysIcon className="size-4 shrink-0" aria-hidden="true" />
             {formatExamDate(event.event_date, {
               weekday: "long",
@@ -128,12 +123,12 @@ function UpcomingExamCard({
               month: "long",
               year: "numeric",
             })}
-          </span>
+          </div>
           {event.location ? (
-            <span className="inline-flex items-center gap-1.5">
+            <div className="flex items-start gap-1.5">
               <MapPin className="size-4 shrink-0" aria-hidden="true" />
               {event.location}
-            </span>
+            </div>
           ) : null}
         </CardDescription>
       </CardHeader>

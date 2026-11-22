@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { AppIllustration } from "@/components/shared/app-illustration";
+import { achievementIllustration } from "@/components/shared/illustration-catalog";
 import { Suspense } from "react";
 import { PortalShell } from "@/components/dashboard/portal-shell";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -24,6 +26,7 @@ async function StudentAchievementsContent({ profile }: { profile: Profile }) {
   if (!snapshot.student) {
     return (
       <EmptyState
+        illustration="empty-journey"
         title="Preencha sua ficha para começar"
         description="Depois que o professor aprovar a ficha, sua sequência, medalhas e presenças aparecem aqui."
         action={
@@ -50,7 +53,7 @@ async function StudentAchievementsContent({ profile }: { profile: Profile }) {
     <div className="space-y-6">
       <dl
         aria-label="Indicadores de constância"
-        className="grid grid-cols-2 divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs sm:grid-cols-4 sm:divide-x sm:divide-y-0"
+        className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,8rem),1fr))] divide-y divide-border overflow-hidden rounded-xl bg-card shadow-xs sm:divide-x sm:divide-y-0"
       >
         <div className="p-4 sm:px-5">
           <dt className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
@@ -117,23 +120,26 @@ async function StudentAchievementsContent({ profile }: { profile: Profile }) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,16rem),1fr))] items-stretch gap-4">
           {report.badges.map((badge) => (
             <div
               key={badge.id}
-              className="flex flex-col justify-between gap-3 rounded-xl bg-card p-4 shadow-xs"
+              className="flex min-w-0 flex-col gap-3 rounded-xl bg-card p-4 shadow-xs [overflow-wrap:anywhere]"
             >
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-sm font-semibold text-foreground">{badge.title}</h3>
-                  {badge.unlocked ? (
-                    <StatusBadge tone="success">
-                      <CheckCircle2 className="mr-1 size-3" aria-hidden="true" />
-                      Obtida
-                    </StatusBadge>
-                  ) : (
-                    <StatusBadge tone="neutral">{badge.progressPct}%</StatusBadge>
-                  )}
+              <div className="flex-1 space-y-3">
+                <div className="flex items-start gap-3">
+                  <AppIllustration name={achievementIllustration(badge)} context="recognition" subdued={!badge.unlocked} />
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground">{badge.title}</h3>
+                    {badge.unlocked ? (
+                      <StatusBadge tone="success" className="max-w-full whitespace-normal break-words">
+                        <CheckCircle2 className="mr-1 size-3" aria-hidden="true" />
+                        Obtida
+                      </StatusBadge>
+                    ) : (
+                      <StatusBadge tone="neutral" className="max-w-full whitespace-normal break-words">Em progresso · {badge.progressPct}%</StatusBadge>
+                    )}
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground">{badge.description}</p>
               </div>

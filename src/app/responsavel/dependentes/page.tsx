@@ -42,7 +42,7 @@ async function GuardianMinorsList({ minors, openId }: { minors: Profile[]; openI
   const photoIds = await listProfilePhotoDocumentIds(minors.map((minor) => minor.$id)).catch(() => new Map<string, string>());
 
   if (minors.length === 0) {
-    return <EmptyState title="Nenhum dependente cadastrado"
+    return <EmptyState illustration="empty-family" title="Nenhum dependente cadastrado"
       description="Cadastre seu filho para preencher a ficha de matrícula, assinar o contrato e acompanhar os treinos."
       action={<CreateMinorDialog idPrefix="minor-empty" trigger={<Button className="min-h-11"><UserPlusIcon aria-hidden="true" />Cadastrar dependente</Button>} />} />;
   }

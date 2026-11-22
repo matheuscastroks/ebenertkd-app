@@ -1,4 +1,4 @@
-import { loadEnvConfig } from "@next/env";
+import { loadProjectEnv } from "../environment/load";
 import { execFileSync } from "node:child_process";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -8,7 +8,7 @@ import { InputFile } from "node-appwrite/file";
 import { readServerAppwriteConfig } from "../../src/lib/appwrite/config";
 import { APPWRITE_IDS } from "../../src/lib/appwrite/ids";
 
-loadEnvConfig(process.cwd());
+loadProjectEnv();
 
 const requested = process.argv[2];
 if (requested !== APPWRITE_IDS.functions.dailyOperations && requested !== APPWRITE_IDS.functions.backup) {

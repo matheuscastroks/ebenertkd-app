@@ -1,11 +1,11 @@
-import { loadEnvConfig } from "@next/env";
+import { loadProjectEnv } from "../environment/load";
 import { Client, ID, Permission, Query, Role, TablesDB, Users, type Models } from "node-appwrite";
 import { APPWRITE_IDS } from "../../src/lib/appwrite/ids";
 import { readServerAppwriteConfig } from "../../src/lib/appwrite/config";
 import type { AppCapability, AppRole } from "../../src/lib/auth/auth-utils";
 import { testPersonas } from "./test-personas";
 
-loadEnvConfig(process.cwd());
+loadProjectEnv();
 
 type SeedAccount = {
   key: "admin" | "adult" | "guardian" | "minor";

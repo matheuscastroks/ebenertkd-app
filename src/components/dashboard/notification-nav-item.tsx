@@ -86,7 +86,16 @@ export function NotificationHeaderButton({
 
   useEffect(() => {
     let mounted = true;
-    const refresh = async () => {
+    let inFlight = false;
+    let lastFetchAt = 0;
+
+    const refresh = async (force = false) => {
+      if (inFlight) return;
+      const now = Date.now();
+      if (!force && now - lastFetchAt < 2000) return;
+
+      inFlight = true;
+      lastFetchAt = now;
       try {
         const response = await fetch("/api/notifications/unread-count", { cache: "no-store" });
         if (!response.ok) return;
@@ -98,22 +107,30 @@ export function NotificationHeaderButton({
         syncCount(payload.count);
       } catch {
         // Mantém a última contagem conhecida se o dispositivo estiver offline.
+      } finally {
+        inFlight = false;
       }
     };
+    const onFocus = () => {
+      void refresh(false);
+    };
     const onVisible = () => {
-      if (document.visibilityState === "visible") void refresh();
+      if (document.visibilityState === "visible") void refresh(false);
+    };
+    const onChanged = () => {
+      void refresh(true);
     };
     const interval = setInterval(() => {
-      if (document.visibilityState === "visible") void refresh();
+      if (document.visibilityState === "visible") void refresh(false);
     }, 60000);
-    window.addEventListener("focus", refresh);
-    window.addEventListener("notifications:changed", refresh);
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("notifications:changed", onChanged);
     document.addEventListener("visibilitychange", onVisible);
     return () => {
       mounted = false;
       clearInterval(interval);
-      window.removeEventListener("focus", refresh);
-      window.removeEventListener("notifications:changed", refresh);
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("notifications:changed", onChanged);
       document.removeEventListener("visibilitychange", onVisible);
     };
   }, [pulseBell, syncCount]);

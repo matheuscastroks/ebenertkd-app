@@ -1,11 +1,11 @@
-import { loadEnvConfig } from "@next/env";
+import { loadProjectEnv } from "../environment/load";
 import { Client, Query, Storage, TablesDB, type Models } from "node-appwrite";
 import { APPWRITE_IDS } from "../../src/lib/appwrite/ids";
 import { readServerAppwriteConfig } from "../../src/lib/appwrite/config";
 import { configurationChecks, isRecentSuccess, storageBelowCritical, type ReleaseCheck } from "../../src/lib/release/preflight-rules";
 import { safeErrorMessage } from "../../src/lib/security/safe-error";
 
-loadEnvConfig(process.cwd());
+loadProjectEnv();
 
 type Row = Models.Row & Record<string, unknown>;
 const knownDemoEmails = [

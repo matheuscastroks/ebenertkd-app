@@ -57,4 +57,52 @@ describe("useParentHoverAnimation", () => {
     expect(onStart).not.toHaveBeenCalled();
     expect(onStop).not.toHaveBeenCalled();
   });
+
+  it("does not invoke onStop when focusout or mouseleave fires after unmount or disconnection", () => {
+    const onStart = vi.fn();
+    const onStop = vi.fn();
+
+    const { rerender } = render(
+      <button type="button">
+        <TestIcon onStart={onStart} onStop={onStop} />
+        <span>Sair</span>
+      </button>
+    );
+
+    const button = screen.getByRole("button", { name: /Sair/i });
+    const icon = screen.getByTestId("animated-icon");
+
+    rerender(
+      <button type="button">
+        <span>Sair</span>
+      </button>
+    );
+
+    button.dispatchEvent(new FocusEvent("focusout", { bubbles: false }));
+    button.dispatchEvent(new MouseEvent("mouseleave", { bubbles: false }));
+
+    expect(icon.isConnected).toBe(false);
+    expect(onStop).not.toHaveBeenCalled();
+  });
+
+  it("swallows Motion unmount race error from controls.start during leave events", () => {
+    const onStart = vi.fn();
+    const onStop = vi.fn(() => {
+      throw new Error("controls.start() should only be called after a component has mounted. Consider calling within a useEffect hook.");
+    });
+
+    render(
+      <button type="button">
+        <TestIcon onStart={onStart} onStop={onStop} />
+        <span>Fechar</span>
+      </button>
+    );
+
+    const button = screen.getByRole("button", { name: /Fechar/i });
+    expect(() => {
+      button.dispatchEvent(new FocusEvent("focusout", { bubbles: false }));
+      button.dispatchEvent(new MouseEvent("mouseleave", { bubbles: false }));
+    }).not.toThrow();
+    expect(onStop).toHaveBeenCalledTimes(2);
+  });
 });

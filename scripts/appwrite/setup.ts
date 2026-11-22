@@ -1,4 +1,4 @@
-import { loadEnvConfig } from "@next/env";
+import { loadProjectEnv } from "../environment/load";
 import {
   AppwriteException,
   Client,
@@ -14,7 +14,7 @@ import type { ServerAppwriteConfig } from "../../src/lib/appwrite/config";
 import { APPWRITE_IDS } from "../../src/lib/appwrite/ids";
 import { bucket, functions, tables, type ColumnDefinition } from "./schema";
 
-loadEnvConfig(process.cwd());
+loadProjectEnv();
 
 const mode = process.argv[2];
 if (mode !== "plan" && mode !== "apply") {

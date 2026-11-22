@@ -42,6 +42,7 @@ async function EventsContent({ type }: { type?: EventType }) {
     const label = type ? EVENT_TYPE_LABEL[type].toLowerCase() : "evento";
     return (
       <EmptyState
+        illustration={type ? undefined : "empty-agenda"}
         title={type ? `Nenhum ${label} cadastrado` : "Nenhum evento cadastrado"}
         description={type ? `${EVENT_TYPE_HINT[type]} Use Novo evento para cadastrar o primeiro.` : "Cadastre exames, aulões, seminários e confraternizações para receber inscrições dos alunos."}
         action={
@@ -60,7 +61,7 @@ async function EventsContent({ type }: { type?: EventType }) {
           Próximos
         </h2>
         {upcoming.length ? (
-          <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <ul className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
             {upcoming.map((item) => (
               <EventCard key={item.event.$id} data={item} />
             ))}
@@ -74,9 +75,9 @@ async function EventsContent({ type }: { type?: EventType }) {
           <h2 id="eventos-passados" className="text-base font-semibold">
             Passados e cancelados
           </h2>
-          <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <ul className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
             {past.map((item) => (
-              <EventCard key={item.event.$id} data={item} />
+              <EventCard key={item.event.$id} data={item} compact />
             ))}
           </ul>
         </section>

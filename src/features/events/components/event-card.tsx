@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { AppIllustration } from "@/components/shared/app-illustration";
+import { eventIllustration } from "@/components/shared/illustration-catalog";
 import { ReadableDate } from "@/components/shared/readable-date";
 import { Calendar, Clock, MapPin, Users } from "@/components/ui/icons";
 import { AvatarGroup } from "@/components/shared/avatar-group";
@@ -10,7 +12,7 @@ import type { EventCardData } from "@/features/events/event-service";
 import { adminEventPath, adminExamPath } from "@/lib/navigation/routes";
 
 /** Cartão da agenda: tipo, data, local, ocupação e pendências. Exames abrem a banca; demais, o detalhe do evento. */
-export function EventCard({ data }: { data: EventCardData }) {
+export function EventCard({ data, compact = false }: { data: EventCardData; compact?: boolean }) {
   const { event } = data;
   const exam = event.event_type === "belt_exam";
   const href = exam ? adminExamPath(event.$id) : adminEventPath(event.$id);
@@ -23,32 +25,37 @@ export function EventCard({ data }: { data: EventCardData }) {
   const deadline = event.registration_closes_at && !["completed", "cancelled"].includes(event.status) ? `Inscrições até ${formatEventDay(event.registration_closes_at)}` : null;
 
   return (
-    <li className="t-interactive-row flex flex-col gap-4 rounded-xl bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
-      <div className="min-w-0 space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="break-words text-lg font-semibold leading-snug text-foreground">{event.title}</p>
-          <EventTypeBadge type={event.event_type} />
-          <EventStatusBadge status={event.status} />
+    <li className="t-interactive-row flex min-w-0 flex-col gap-3 rounded-xl bg-card p-4 sm:p-5">
+      <div className={`grid flex-1 content-start items-start gap-x-3 gap-y-2 sm:gap-x-4 ${compact ? "grid-cols-[4rem_minmax(0,1fr)]" : "grid-cols-[5rem_minmax(0,1fr)] sm:grid-cols-[7rem_minmax(0,1fr)]"}`}>
+        <AppIllustration name={eventIllustration(event.event_type)} context={compact ? "recognition" : "event"} className="sm:row-span-2" />
+        <div className="min-w-0 space-y-2 [overflow-wrap:anywhere]">
+          <h3 className="text-base font-semibold leading-snug text-foreground">{event.title}</h3>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <EventTypeBadge type={event.event_type} />
+            <EventStatusBadge status={event.status} />
+          </div>
         </div>
-        <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium">
-          <p className="flex items-center gap-2"><Calendar className="size-4 text-muted-foreground" aria-hidden="true" /><ReadableDate value={event.starts_at} weekday /></p>
-          {!exam ? <p className="flex items-center gap-2 tabular-nums"><Clock className="size-4 text-muted-foreground" aria-hidden="true" />{formatEventTime(event.starts_at)}</p> : null}
-        </div>
-        {event.location_text ? <p className="flex items-start gap-2 text-sm text-muted-foreground"><MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" />{event.location_text}</p> : null}
-        <div className="space-y-1 text-sm text-muted-foreground">
-          <p className="flex items-center gap-2"><Users className="size-4 shrink-0" aria-hidden="true" />{occupancy}</p>
+        <dl className="col-span-2 flex min-w-0 flex-wrap gap-x-3 gap-y-1.5 text-sm text-muted-foreground sm:col-span-1 sm:col-start-2 [overflow-wrap:anywhere]">
+          <div>
+            <dt className="sr-only">Data</dt>
+            <dd className="flex items-start gap-1.5"><Calendar className="mt-0.5 size-4 shrink-0" aria-hidden="true" /><ReadableDate value={event.starts_at} weekday /></dd>
+          </div>
+          {!exam ? <div><dt className="sr-only">Horário</dt><dd className="flex items-center gap-1.5 tabular-nums"><Clock className="size-4 shrink-0" aria-hidden="true" />{formatEventTime(event.starts_at)}</dd></div> : null}
+          {event.location_text ? <div className="w-full"><dt className="sr-only">Local</dt><dd className="flex items-start gap-1.5"><MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" /><span>{event.location_text}</span></dd></div> : null}
+        </dl>
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
+        <div className="min-w-0 space-y-1 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1.5"><Users className="size-4 shrink-0" aria-hidden="true" />{occupancy}</div>
           {extras.length ? <p className="font-medium text-foreground">{extras.join(" · ")}</p> : null}
           {deadline ? <p>{deadline}</p> : null}
         </div>
-      </div>
-      <div className="flex items-center justify-between gap-4 sm:shrink-0 sm:justify-end">
-        <AvatarGroup people={data.people} total={data.peopleTotal} max={4} size="sm" surface="card" />
-        <Button asChild variant="outline" size="sm" className="min-h-9">
-          <Link href={href}>
-            Abrir
-            <ArrowRightIcon className="size-3.5" aria-hidden="true" />
-          </Link>
-        </Button>
+        <div className="ml-auto flex items-center gap-3">
+          <AvatarGroup people={data.people} total={data.peopleTotal} max={4} size="sm" surface="card" />
+          <Button asChild variant="outline" size="sm" className="min-h-11 sm:min-h-9">
+            <Link href={href}>Abrir<ArrowRightIcon className="size-3.5" aria-hidden="true" /></Link>
+          </Button>
+        </div>
       </div>
     </li>
   );

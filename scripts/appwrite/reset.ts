@@ -1,4 +1,4 @@
-import { loadEnvConfig } from "@next/env";
+import { loadProjectEnv } from "../environment/load";
 import { AppwriteException, Client, Query, Storage, TablesDB, Users } from "node-appwrite";
 import { readServerAppwriteConfig } from "../../src/lib/appwrite/config";
 
@@ -12,7 +12,7 @@ import { readServerAppwriteConfig } from "../../src/lib/appwrite/config";
  *
  * Depois: `npm run infra:apply` e `npm run appwrite:seed-test-users` (recria as contas de teste).
  */
-loadEnvConfig(process.cwd());
+loadProjectEnv();
 
 const mode = process.argv[2];
 const confirmed = process.argv.includes("--yes");

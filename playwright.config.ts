@@ -1,8 +1,10 @@
-import { loadEnvConfig } from "@next/env";
+import { loadProjectEnv } from "./scripts/environment/load";
 import { defineConfig, devices } from "@playwright/test";
 import { assertIsolatedEnvironment } from "./scripts/testing/e2e-environment";
 
-loadEnvConfig(process.cwd());
+// Public CI smoke uses build/start; isolated authenticated checks use dev.
+process.env.APP_ENV ??= process.env.CI && !process.env.E2E_APPWRITE_PROJECT_ID ? "production" : "development";
+loadProjectEnv();
 
 const isolated = Boolean(process.env.E2E_APPWRITE_PROJECT_ID);
 if (isolated) assertIsolatedEnvironment();

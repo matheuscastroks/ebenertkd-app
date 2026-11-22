@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const state = vi.hoisted(() => ({ schedule: "15 3 * * *", cleaned: false, updates: [] as Array<Record<string, unknown>> }));
-vi.mock("@next/env", () => ({ loadEnvConfig: vi.fn() }));
+vi.mock("../environment/load", () => ({ loadProjectEnv: vi.fn() }));
 vi.mock("node:child_process", () => ({ execFileSync: vi.fn() }));
 vi.mock("node:fs/promises", () => ({
   mkdtemp: async (prefix: string) => `${prefix}test`,

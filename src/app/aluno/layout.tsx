@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { PortalFrame } from "@/components/dashboard/portal-shell";
+import { PortalFrame } from "@/components/dashboard/portal-frame";
 import { getPolicy } from "@/features/academy/config-service";
 import { getStudentAppAccessByProfileId } from "@/features/billing/access-lock-service";
 import { StudentAccessGate } from "@/features/billing/components/student-access-gate";

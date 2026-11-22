@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { PortalFrame } from "@/components/dashboard/portal-shell";
+import { PortalFrame } from "@/components/dashboard/portal-frame";
 import { requireCapability } from "@/lib/auth/session";
 
 export default async function GuardianLayout({ children }: { children: ReactNode }) {

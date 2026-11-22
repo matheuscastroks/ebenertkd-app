@@ -1,8 +1,8 @@
-import { loadEnvConfig } from "@next/env";
+import { loadProjectEnv } from "../environment/load";
 import { Client } from "appwrite";
 import { readPublicAppwriteConfig } from "../../src/lib/appwrite/config";
 
-loadEnvConfig(process.cwd());
+loadProjectEnv();
 
 async function run() {
   const config = readPublicAppwriteConfig();

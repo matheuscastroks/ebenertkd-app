@@ -1,0 +1,200 @@
+{
+  "generator": "built-in image_gen",
+  "userRevisions": [
+    {
+      "name": "event-seminar",
+      "reason": "Braços e poses naturais no aulão/seminário.",
+      "prompt": "REDRAW the Taekwondo group seminar illustration in image 1 from scratch with MUCH BETTER ARM ANATOMY and simpler natural poses. Images 2 and 3 are mandatory visual style and character references. Retain the exact friendly flat cartoon faces, hair, warm orange skin, white dobok with black V collar and sparse gray folds. Scene: male reference character as instructor on LEFT, female reference student on RIGHT, a smaller child student centered slightly forward. Instructor naturally holds a single small amber oval training paddle near his chest, with the holding arm clearly bent at elbow and the hand clearly gripping the handle; other arm rests relaxed at waist. Female and child students stand in relaxed beginner guard: each has two clearly separate natural arms, elbows pointing down, small closed fists near the lower chest, shoulders relaxed. NO lifted straight arms, NO open-palm salute, NO merged limbs, NO impossible wrist angles, NO extra fingers, no kicking or fighting. Keep gaps between arms and torso so shapes read well at 80px. Full figures on a tiny cream tatami ground shape, balanced compact square scene. Exact reference flat rounded illustration language; no photorealism, 3D, gradients or detailed textures. Actual transparent alpha background. No text, digits, logos or extra objects. Friendly and calm teaching moment.",
+      "original": "exec-facaa342-d329-4e28-9499-b6e3b66c76fd.png"
+    },
+    {
+      "name": "empty-journey",
+      "reason": "Trocar somente a roupa vestida por camiseta comum, mantendo o dobok nas mãos.",
+      "prompt": "Precise clothing edit to FIRST IMAGE. Change ONLY the top garment actually WORN by the seated male character: replace his white black-V-neck Taekwondo dobok jacket with a simple ordinary solid warm amber short-sleeve T-SHIRT, plain rounded crew neck, NO black V collar, NO belt on his torso, NO martial arts jacket details. The garment he is HOLDING on his lap must remain the same FOLDED WHITE DOBOK with its black V collar, untouched. Preserve his exact face, hairstyle, smile, seated cross-legged pose, hands holding the folded dobok, white trousers, bare feet, cream gym bag with amber handles, ground shape, framing and all other objects and colors. Do not change anything else. Images 2 and 3 are mandatory style references ONLY; do not add another character or copy their outfit onto his torso. Keep the exact flat friendly cartoon style. Preserve actual transparent background. No text, numbers or logos.",
+      "original": "exec-57026936-8630-435c-95b6-e857c84b5812.png"
+    },
+    {
+      "name": "achievement-first-graduation",
+      "reason": "Faixa de Taekwondo com nó compacto e pontas retas, sem laço de presente.",
+      "prompt": "Replace the FIRST illustration with an anatomically accurate MARTIAL ARTS BELT tied with a compact SQUARE KNOT, clearly recognizable as a TAEKWONDO belt, NOT a gift ribbon or bow tie. Object only, no person or body. Show a golden-yellow flat woven belt wrapped twice around an invisible waist, two parallel horizontal flat strap layers visible at the back. At the front a compact interlocking over-under square knot made of flat belt strips; two LONG STRAIGHT FLAT RECTANGULAR BELT ENDS hang down diagonally from that knot, equal width, clean square-cut tips, subtle parallel stitch lines along their edges. Thick sturdy cotton martial arts belt, no silky folds. ABSOLUTELY NO decorative bow loops, no rounded ribbon lobes, no flared ribbon tails, no scallops, no medallion, pendant, tag, gift wrapping, trophy, rosette or extra decoration. No text, digits or logos. Images 2 and 3 are mandatory STYLE REFERENCES ONLY: use their friendly flat rounded cartoon illustration language, charcoal dark edge details, simple flat amber/yellow and pale cream colors, no photorealism, gradients or 3D. Bold simple compact silhouette clearly readable at 96 pixels. Actual transparent alpha background. Focus all attention on the correct martial arts knot and straight belt ends.",
+      "original": "exec-24ce457d-2bdd-4e9e-8ace-800e3d01a665.png"
+    }
+  ],
+  "references": [
+    "public/avatar-placeholder.webp",
+    "public/avatar-placeholder-feminino.webp"
+  ],
+  "transparent_background": true,
+  "export": {
+    "format": "webp",
+    "width": 480,
+    "height": 480,
+    "quality": 85,
+    "alphaQuality": 100
+  },
+  "assets": [
+    {
+      "name": "event-championship",
+      "prompt": "Use case: illustration-story. Create ONE production illustration for a Taekwondo app championship event card. Both supplied images are mandatory STYLE AND CHARACTER references, not edit targets. Exactly match their simple friendly flat hand-drawn visual language: warm orange skin, charcoal black wavy hair, small line eyes and nose, rounded forms, white dobok with black V collar, sparse pale gray garment folds, flat color without 3D or gradients. Show the male and female reference athletes standing together with a small amber trophy and a simple low podium. Full figures, compact square balanced silhouette, readable at 80 pixels. No words, letters, digits, logos, photorealism, textures, detailed backdrop or shadows. Actual transparent background, optional tiny cream ground shape only. Keep the exact look of their faces and hairstyles. This is the championship pilot of a unified illustration family. Save generated output as usual and provide its local file path.",
+      "original": "exec-59d0cae3-754c-4277-b9c4-efe39cdc2b38.png"
+    },
+    {
+      "name": "achievement-first-lesson",
+      "prompt": "Use case illustration-story. Create ONE square transparent-background app achievement illustration: FIRST TAEKWONDO TRAINING. Both reference avatars are mandatory style references. Depict a neatly folded white dobok with black V collar, black belt loosely resting on it, at the edge of a tiny warm cream and amber tatami tile, with one small welcoming sparkle. OBJECTS ONLY, no people. Match the references' very simple flat colored shapes, rounded edges, charcoal hand-drawn details and sparse light gray fabric folds. Warm cream, amber, charcoal, white. Strong uncluttered silhouette readable at 80px. Absolutely no text, digits, lettering, gradients, 3D, photographic texture or backdrop. Actual alpha transparency. This belongs to the same friendly illustration family as the reference avatars.",
+      "original": "exec-c85152f5-290c-4f0b-840d-168648352ddd.png"
+    },
+    {
+      "name": "empty-agenda",
+      "prompt": "Use case illustration-story. Create ONE square transparent-background empty-state illustration for a Taekwondo app: NO EVENTS SCHEDULED. Both supplied avatars are mandatory STYLE and CHARACTER references. Show the exact female avatar, with same wavy dark hair, simple friendly face and pink earrings, wearing white dobok with black V collar, looking calmly at a small freestanding calendar. The calendar has blank squares only, absolutely no letters or digits. Relaxed welcoming expression, no sadness or celebration. Match the references' flat simple rounded shapes, warm orange skin, charcoal line details, sparse pale gray folds. Compact complete figure, clean silhouette legible at 100px, small cream ground shape optional. No gradients, realism, texture, detailed scenery, text or logos. Actual transparent background.",
+      "original": "exec-7448f8bf-2217-463d-9d64-a8e34158fcdf.png"
+    },
+    {
+      "name": "event-belt-exam",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. SCENE: the male reference character as teacher gently handing a neatly tied amber belt to the female reference athlete. Both wearing doboks. A warm respectful belt graduation moment. Two figures, clear visible belt, tiny cream ground only.",
+      "original": "exec-04a343b4-dae8-4f07-82a7-de823ba9a3b6.png"
+    },
+    {
+      "name": "event-seminar",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. SCENE: male teacher demonstrating a simple arm block, female reference athlete and one smaller student following the same movement in a short training group. White doboks, tiny cream tatami ground. No fighting or kick impacts.",
+      "original": "exec-006eaf36-4c02-4f0a-b63d-a73c300d21d7.png"
+    },
+    {
+      "name": "event-social",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. SCENE: both reference characters in doboks sitting together celebrating a friendly academy gathering, sharing a simple plate of snacks with one small amber pennant above. Relaxed community moment, not sporting victory.",
+      "original": "exec-9529dc50-b4b6-4ba6-b691-65a61b958406.png"
+    },
+    {
+      "name": "event-other",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. SCENE: male reference athlete standing next to a blank calendar and a small rolled tatami mat, gesturing welcomingly. Calendar squares only without markings or numbers.",
+      "original": "exec-ca0eff56-969c-484e-ace0-872d6eb4519e.png"
+    },
+    {
+      "name": "achievement-streak",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. OBJECTS ONLY: a rounded amber flame encircled at the base by three connected charcoal chain links, symbolizing continuous practice. Bold clean simple composition.",
+      "original": "exec-3948684b-9fbf-49e8-8a24-d8c407fbfe28.png",
+      "correction": {
+        "prompt": "REMOVE BOTH PEOPLE completely. Retain only a single rounded amber flame above three interlinked charcoal chain links, centered on transparency. NO people, faces, heads, body parts or animals. The two original avatars are style references ONLY. Flat simple rounded shapes, no gradients, no text, no digits. Actual transparent background.",
+        "original": "exec-ecffe72f-109f-4ea0-8419-437617c4659c.png"
+      }
+    },
+    {
+      "name": "achievement-perfect-month",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. OBJECTS ONLY: a small cream desk calendar with blank grid squares and a large amber star in front. No text, digits or checkmark lettering.",
+      "original": "exec-069863c7-1848-48ee-8203-6df2e2f6d5f1.png"
+    },
+    {
+      "name": "achievement-lessons-25",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. OBJECTS ONLY: one amber tatami tile supporting a simple circular cream training emblem with one small amber star. First of three progressive training milestones.",
+      "original": "exec-89e3d194-48f5-4233-8d37-f5efc15789b0.png",
+      "correction": {
+        "prompt": "Edit the FIRST image: remove both people completely from the circular emblem. Keep the amber tatami tile and cream circular training medallion. Center ONE amber five-pointed star in the empty medallion. OBJECTS ONLY, no faces, people or animals. The two avatar files are style references ONLY. Same flat rounded warm illustration style. Transparent background. No text, numbers, gradients or new decorations.",
+        "original": "exec-cbc6f3f4-723d-43ce-9b1c-116312638cb5.png"
+      }
+    },
+    {
+      "name": "achievement-lessons-50",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. OBJECTS ONLY: two overlapping amber and cream tatami tiles supporting a charcoal-edged shield emblem with two amber stars. Middle of three progressive training milestones.",
+      "original": "exec-99c1e1cf-a4c5-4acd-b7e6-9e2d2b13d116.png"
+    },
+    {
+      "name": "achievement-lessons-100",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. OBJECTS ONLY: three stacked amber and cream tatami tiles supporting a laurel-surrounded large shield with three stars. Highest of three training milestones. Simple strong silhouette.",
+      "original": "exec-57f22dd4-52a9-4859-a724-901e85b4a0b8.png"
+    },
+    {
+      "name": "achievement-first-graduation",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. OBJECTS ONLY: a neatly tied amber martial arts belt with flowing ends in a graceful bow, one small charcoal and cream seal at its base. No digits, text or people.",
+      "original": "exec-c8a831ac-37fc-4428-a3b4-759a1d19dada.png",
+      "correction": {
+        "prompt": "REMOVE THE ANIMAL entirely. Keep only the neatly tied amber martial-arts belt. Below the knot add a tiny plain cream circular medallion with a charcoal rim, no illustration or letters on it. NO animals, people or faces. The two original avatars are style references ONLY. Flat simple rounded shapes, no gradients, no text, no digits. Actual transparent background.",
+        "original": "exec-a0dd8d08-c1d2-4c3a-a36f-c66aeb24e5dc.png"
+      }
+    },
+    {
+      "name": "achievement-one-year",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. OBJECTS ONLY: neatly folded white dobok with black V collar encircled by two simple amber laurel branches, a small amber sun behind it. Time and dedication, no numbers.",
+      "original": "exec-135e7397-aaec-45fc-b883-f5030831cf68.png"
+    },
+    {
+      "name": "achievement-first-event",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. OBJECTS ONLY: a cream event credential on an amber lanyard with a blank circular emblem, with a small charcoal pole and amber pennant alongside. No letters, text or numbers.",
+      "original": "exec-91e2543e-a113-4c0f-8f2b-a86c96be4e6f.png"
+    },
+    {
+      "name": "achievement-first-medal",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. OBJECTS ONLY: single rounded amber medal on a charcoal and cream ribbon with a little celebratory amber sparkle and two small leaves. Medal has a plain sunburst emblem, no numbers.",
+      "original": "exec-54a32a0d-1de9-4da7-8a8a-aeb3d210978a.png",
+      "correction": {
+        "prompt": "EDIT FIRST IMAGE. REMOVE EVERY PERSON COMPLETELY, including heads, hair, hands, faces, bodies, skin and white clothing. Keep ONLY the round sunburst amber medal on its cream-and-charcoal ribbon, two small leaves and one sparkle. Enlarge these OBJECTS to fill the center of the square. NO PEOPLE, NO FACES, NO ANIMALS. Second and third images are STYLE REFERENCES ONLY and must NOT appear as characters in the result. Retain their flat rounded illustration language and warm colors. Transparent alpha background. No text, letters, digits, gradients or scenery.",
+        "original": "exec-c63eff5c-9f7d-48ee-8e77-8cbbb9fae854.png"
+      }
+    },
+    {
+      "name": "badge-participation",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. OBJECTS ONLY: two small crossed amber pennants behind a cream circular participation rosette, charcoal martial arts belt knot as center emblem. No text.",
+      "original": "exec-f103749f-11ae-4c2a-9583-2ae4d015fdf2.png"
+    },
+    {
+      "name": "badge-gold",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. OBJECTS ONLY: gold amber circular medal on a charcoal ribbon, embossed star motif, surrounded by a small open laurel wreath. Gold recognition, unique star silhouette. No numeral or lettering.",
+      "original": "exec-8838c824-1dcf-4692-8726-27bd7365e368.png"
+    },
+    {
+      "name": "badge-silver",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. OBJECTS ONLY: pale silver gray hexagonal medal on a charcoal and cream ribbon, single diamond motif and two short decorative silver rays. Different silhouette from round gold and bronze medals. No numeral or lettering.",
+      "original": "exec-2ee90453-f25f-4098-86d4-738a7a5da4fd.png",
+      "correction": {
+        "prompt": "EDIT FIRST IMAGE. REMOVE EVERY PERSON COMPLETELY, including heads, hair, hands, faces, bodies, skin and white clothing. Keep ONLY the hexagonal silver-gray medal with cream diamond emblem on its charcoal-and-cream ribbon, with two short silver rays. Enlarge these OBJECTS to fill the center of the square. NO PEOPLE, NO FACES, NO ANIMALS. Second and third images are STYLE REFERENCES ONLY and must NOT appear as characters in the result. Retain their flat rounded illustration language and warm colors. Transparent alpha background. No text, letters, digits, gradients or scenery.",
+        "original": "exec-9d579e93-45cf-4fd9-9b71-339c78e22898.png"
+      }
+    },
+    {
+      "name": "badge-bronze",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. OBJECTS ONLY: warm copper bronze scalloped medal on a charcoal ribbon, simple three-leaf branch motif at center. Different silhouette from circular gold and hexagonal silver. No numeral or lettering.",
+      "original": "exec-29b36470-43db-4509-9a58-45b9c47ce5a3.png",
+      "correction": {
+        "prompt": "EDIT FIRST IMAGE. REMOVE EVERY PERSON COMPLETELY, including heads, hair, hands, faces, bodies, skin and white clothing. Keep ONLY the scalloped copper-bronze medal with its three-leaf motif. Add a simple charcoal hanging ribbon so it clearly reads as a medal. Enlarge these OBJECTS to fill the center of the square. NO PEOPLE, NO FACES, NO ANIMALS. Second and third images are STYLE REFERENCES ONLY and must NOT appear as characters in the result. Retain their flat rounded illustration language and warm colors. Transparent alpha background. No text, letters, digits, gradients or scenery.",
+        "original": "exec-7aed36d8-ccdf-4fc2-9b71-5487cadc6c8a.png"
+      }
+    },
+    {
+      "name": "badge-exam-approved",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. OBJECTS ONLY: tied amber martial arts belt beside a small cream certificate with a large charcoal checkmark seal and blank horizontal decorative rules. No letters or text.",
+      "original": "exec-fa63ec7a-71b8-4d4a-894c-5893848f6eb9.png",
+      "correction": {
+        "prompt": "EDIT FIRST IMAGE. REMOVE EVERY PERSON COMPLETELY, including heads, hair, hands, faces, bodies, skin and white clothing. Keep ONLY the tied amber martial arts belt and small cream certificate with charcoal checkmark seal and blank decorative rules. Enlarge these OBJECTS to fill the center of the square. NO PEOPLE, NO FACES, NO ANIMALS. Second and third images are STYLE REFERENCES ONLY and must NOT appear as characters in the result. Retain their flat rounded illustration language and warm colors. Transparent alpha background. No text, letters, digits, gradients or scenery.",
+        "original": "exec-18d433e2-6e05-40ed-a68d-4a7cbc66b036.png"
+      }
+    },
+    {
+      "name": "badge-seminar-attendance",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. OBJECTS ONLY: white dobok with black V collar beside an amber training paddle and a small cream participation rosette. Bold simple grouping. No people or text.",
+      "original": "exec-304fdcd2-c9a8-4bf2-b8cc-e0b947154b5b.png"
+    },
+    {
+      "name": "empty-journey",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. SCENE: exact male reference athlete happily preparing and folding a white dobok with black V collar before first training, sitting calmly beside a small cream gym bag. No celebration, gentle welcoming smile.",
+      "original": "exec-2153da68-4a0d-4aaf-985c-fdff67e64411.png"
+    },
+    {
+      "name": "empty-achievements",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. SCENE: exact female reference athlete in white dobok standing beside a small empty two-tier cream trophy display shelf, gesturing with a relaxed open hand. Empty shelves, encouraging expression, no sadness, no trophies.",
+      "original": "exec-4470db59-66a6-4773-a179-d4e6156afabc.png"
+    },
+    {
+      "name": "empty-family",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. SCENE: both reference adult characters in white doboks standing with a smaller child in white dobok between them, warm friendly family group. No decorative hearts, no text, tiny cream ground.",
+      "original": "exec-690b3ac5-b8a1-4be8-ad5b-059c462a239d.png"
+    },
+    {
+      "name": "empty-documents",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. SCENE: exact female reference athlete in white dobok calmly organizing blank cream sheets into a single amber folder, seated. No text or numbers on papers.",
+      "original": "exec-f7b5ddfa-d224-46cc-ae8a-73976f9edabc.png"
+    },
+    {
+      "name": "empty-classes",
+      "prompt": "Use case: illustration-story. ONE standalone square illustration for the Ebener TKD app. BOTH attached avatar files are mandatory visual references for a unified family. Preserve their exact flat friendly cartoon style: rounded simple shapes, charcoal hair and sparing charcoal line details, orange warm skin, small simple eyes/nose/smile, white dobok with black V collar and a few pale gray folds. Amber and cream accent objects. No words, letters, digits, logos, text, textures, 3D, gradients or photographic effects. Actual alpha transparent background. Compact silhouette readable at 80 pixels, whole subject with generous padding. SCENE: exact male reference athlete as a teacher in white dobok standing beside a clean empty amber and cream tatami mat, welcoming gesture inviting first students. No other people, calm hopeful smile.",
+      "original": "exec-0ed9b81e-5b10-49e1-b4d7-c8215e3376ea.png"
+    }
+  ]
+}

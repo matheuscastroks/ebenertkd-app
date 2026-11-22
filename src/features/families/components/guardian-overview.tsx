@@ -20,7 +20,7 @@ import { ROUTES } from "@/lib/navigation/routes";
  * A única ação laranja vai para a pendência mais urgente da família inteira.
  */
 export async function GuardianMinorsOverview({ guardian, minors }: { guardian: Profile; minors: Profile[] }) {
-  if (!minors.length) return <EmptyState title="Nenhum dependente cadastrado" description="Cadastre um filho ou dependente para preencher a matrícula e acompanhar os treinos."
+  if (!minors.length) return <EmptyState illustration="empty-family" title="Nenhum dependente cadastrado" description="Cadastre um filho ou dependente para preencher a matrícula e acompanhar os treinos."
     action={<Button asChild className="min-h-11"><Link href={ROUTES.guardianDependents}>Cadastrar dependente</Link></Button>} />;
   const data = await loadDependentSnapshots(guardian, minors);
   const urgent = data.flatMap(({ minor, pendencies }) => pendencies.map((item) => ({ ...item, key: `${minor.$id}:${item.id}` })))

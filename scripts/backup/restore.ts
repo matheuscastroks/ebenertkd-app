@@ -3,6 +3,7 @@ import { randomBytes } from "node:crypto";
 import path from "node:path";
 import { Client, Query, Storage, TablesDB, Users } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
+import { loadProjectEnv } from "../environment/load";
 import type { BackupManifest, BackupObjectDescriptor } from "../../src/lib/backup/manifest";
 import { safeErrorMessage } from "../../src/lib/security/safe-error";
 import { tables as schemaTables } from "../appwrite/schema";
@@ -33,6 +34,8 @@ type RestoredUser = {
   labels?: string[];
   prefs?: Record<string, unknown>;
 };
+
+loadProjectEnv();
 
 const args = new Map(process.argv.slice(2).map((argument) => {
   const [key, ...parts] = argument.split("=");

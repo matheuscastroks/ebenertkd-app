@@ -56,6 +56,7 @@ async function StudentCardContent({ profile }: { profile: Profile }) {
   if (!snapshot.student || !snapshot.compliance) {
     return (
       <EmptyState
+        illustration="empty-journey"
         title="Preencha sua ficha para gerar a carteirinha"
         description="Com seus dados e foto, a carteirinha digital aparece aqui."
         action={

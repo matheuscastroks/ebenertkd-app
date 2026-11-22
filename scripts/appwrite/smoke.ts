@@ -1,10 +1,10 @@
-import { loadEnvConfig } from "@next/env";
+import { loadProjectEnv } from "../environment/load";
 import { Client, ID, Storage, TablesDB } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
 import { readServerAppwriteConfig } from "../../src/lib/appwrite/config";
 import { APPWRITE_IDS } from "../../src/lib/appwrite/ids";
 
-loadEnvConfig(process.cwd());
+loadProjectEnv();
 
 const config = readServerAppwriteConfig();
 const client = new Client()

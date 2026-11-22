@@ -1,9 +1,9 @@
 import { execFile } from "node:child_process";
-import { loadEnvConfig } from "@next/env";
+import { loadProjectEnv } from "../environment/load";
 import { buildAuthUrl, createPkce, createState } from "./drive-oauth";
 import { exchangeCode, hasDriveFileScope, revokeToken, waitForCode } from "./drive-oauth-flow";
 
-loadEnvConfig(process.cwd());
+loadProjectEnv();
 
 const TIMEOUT_MS = 5 * 60 * 1000;
 const FOLDER_NAME = "EbenerTKD Backups";

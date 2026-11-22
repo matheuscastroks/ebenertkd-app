@@ -1,11 +1,13 @@
 .next
 .next-validation
+.next-local
 node_modules
 .turbo
 coverage
 .env
 .env.local
 .env.*.local
+.local/
 dist
 *.log
 *.tsbuildinfo

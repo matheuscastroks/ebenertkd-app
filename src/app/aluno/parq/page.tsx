@@ -20,6 +20,7 @@ async function StudentParqContent({ profile }: { profile: Profile }) {
   if (!student) {
     return (
       <EmptyState
+        illustration="empty-journey"
         title="Preencha a ficha primeiro"
         description="Com a ficha preenchida, você pode responder o questionário de saúde."
         action={

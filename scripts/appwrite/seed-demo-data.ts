@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { loadEnvConfig } from "@next/env";
+import { loadProjectEnv } from "../environment/load";
 import { AppwriteException, Client, ID, Permission, Query, Role, Storage, TablesDB, Users, type Models } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
 import { DEFAULT_ACADEMY_IDENTITY, DEFAULT_CONTRACT_POLICY } from "../../src/features/academy/defaults";
@@ -20,7 +20,7 @@ import {
   type DemoStudentScenario
 } from "./demo-seed-data";
 
-loadEnvConfig(process.cwd());
+loadProjectEnv();
 
 type ProfileRow = Models.Row & {
   account_id: string;

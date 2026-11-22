@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { FileText } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -24,7 +23,7 @@ export function PortalContractList({ contracts, hrefFor, canSign, canOpen = true
   emptyDescription: string;
 }) {
   if (contracts === null) return <p role="alert" className="rounded-xl bg-card p-4 text-sm">Não foi possível carregar os contratos. Atualize a página para tentar de novo.</p>;
-  if (!contracts.length) return <EmptyState icon={<FileText className="size-5" aria-hidden="true" />} title="Nenhum contrato emitido" description={emptyDescription} />;
+  if (!contracts.length) return <EmptyState illustration="empty-documents" title="Nenhum contrato emitido" description={emptyDescription} />;
   const firstPending = canSign ? contracts.find((contract) => contract.status === "pending_signature")?.$id : undefined;
   return <Card><CardContent>
     <ul className="divide-y divide-border">

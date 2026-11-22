@@ -1,10 +1,10 @@
-import { loadEnvConfig } from "@next/env";
+import { loadProjectEnv } from "../environment/load";
 import { Account, Client, Query, TablesDB } from "node-appwrite";
 import { APPWRITE_IDS, APPWRITE_SESSION_COOKIE } from "../../src/lib/appwrite/ids";
 import { readServerAppwriteConfig } from "../../src/lib/appwrite/config";
 import { testPersonas } from "./test-personas";
 
-loadEnvConfig(process.cwd());
+loadProjectEnv();
 
 const cases = testPersonas().map((persona) => ({ ...persona, marker: persona.name }));
 
