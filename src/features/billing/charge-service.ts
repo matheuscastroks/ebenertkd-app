@@ -46,8 +46,8 @@ async function createCharge(input: {
     invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(input.studentId));
     await notifyStudentFinancial({
       studentId: input.studentId,
-      title: `Nova cobrança: ${input.description}`,
-      body: `Valor de ${formatBrl(input.amountCents)} com vencimento em ${formatBusinessDateBr(input.dueDate)}. Você pode pagar por PIX e enviar o comprovante no financeiro.`,
+      title: "Nova cobrança",
+      body: `${input.description} · ${formatBrl(input.amountCents)} (vence ${formatBusinessDateBr(input.dueDate)})`,
       dedupeKey: `charge-created:${created.$id}`
     }).catch(() => undefined);
     return created;
@@ -215,8 +215,8 @@ export async function adjustCharge(actor: Profile, raw: unknown) {
   await writeAuditEvent("billing.charge.adjusted", actor.account_id, "charge", charge.$id, { previous_amount_cents: charge.amount_cents, amount_cents: input.amountCents, reason: input.reason });
   await notifyStudentFinancial({
     studentId: charge.student_id,
-    title: `Cobrança atualizada: ${charge.description}`,
-    body: `O professor atualizou o valor para ${formatBrl(input.amountCents)} com vencimento em ${formatBusinessDateBr(input.dueDate)}.`,
+    title: "Cobrança atualizada",
+    body: `${charge.description} · ${formatBrl(input.amountCents)} (vence ${formatBusinessDateBr(input.dueDate)})`,
     dedupeKey: `charge-adjusted:${charge.$id}:${updated.updated_at}`
   }).catch(() => undefined);
   return updated;

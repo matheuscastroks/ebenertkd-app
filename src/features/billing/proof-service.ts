@@ -42,7 +42,7 @@ export async function uploadPaymentProof(actor: Profile, chargeId: string, file:
     await tables.updateRow({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.charges, rowId: charge.$id, data: { status: "proof_under_review", updated_at: now } });
     invalidateTags(CACHE_TAGS.billingCharges, CACHE_TAGS.charges(charge.student_id));
     await writeAuditEvent("billing.proof.uploaded", actor.account_id, "payment_proof", proof.$id, { charge_id: charge.$id, version });
-    await notifyAdmins({ title: "Comprovante aguardando análise", body: `${bundle.student.full_name} enviou um comprovante de pagamento.`, dedupeKey: `payment-proof-pending:${proof.$id}`, actionUrl: "/admin/financeiro" }).catch(() => undefined);
+    await notifyAdmins({ title: "Novo comprovante PIX", body: `${bundle.student.full_name} · ${charge.description}`, dedupeKey: `payment-proof-pending:${proof.$id}`, actionUrl: "/admin/financeiro" }).catch(() => undefined);
     return proof;
   } catch (error) {
     await storage.deleteFile({ bucketId: APPWRITE_IDS.bucket, fileId: fileRow.$id }).catch(() => undefined);

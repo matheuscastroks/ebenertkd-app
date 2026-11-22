@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ChevronRight, RefreshCw } from "@/components/ui/icons";
+import { CheckCheck, ChevronRight, RefreshCw } from "@/components/ui/icons";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,40 +17,38 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { NotificationInbox } from "./notification-inbox";
 import type { InboxItem } from "../types";
 
-function DrawerLoadingSkeleton() {
+function DropdownLoadingSkeleton() {
   return (
-    <div role="status" aria-busy="true" className="space-y-4">
-      <Skeleton className="h-12 w-full rounded-xl" />
-      <div className="divide-y divide-border/70 overflow-hidden rounded-2xl bg-card shadow-xs">
-        {Array.from({ length: 3 }, (_, idx) => (
-          <div key={idx} className="flex items-start gap-3 p-4">
-            <Skeleton className="size-9 shrink-0 rounded-xl" />
-            <div className="min-w-0 flex-1 space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <Skeleton className="h-3.5 w-24" />
-                <Skeleton className="h-3 w-16" />
-              </div>
-              <Skeleton className="h-4 w-48" />
-              <Skeleton className="h-3.5 w-full" />
+    <div role="status" aria-busy="true" className="divide-y divide-border/60">
+      {Array.from({ length: 3 }, (_, idx) => (
+        <div key={idx} className="flex items-start gap-2.5 px-3 py-2.5">
+          <Skeleton className="size-7 shrink-0 rounded-lg" />
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <div className="flex items-center justify-between gap-2">
+              <Skeleton className="h-3.5 w-32" />
+              <Skeleton className="h-3 w-10" />
             </div>
+            <Skeleton className="h-3 w-full" />
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
       <span className="sr-only">Carregando avisos…</span>
     </div>
   );
 }
 
-export function NotificationDrawer({
+export function NotificationPopoverContent({
   open,
-  onOpenChange,
+  onClose,
   initialItems,
+  onCountChange,
 }: {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;
   initialItems?: InboxItem[];
+  onCountChange?: (count: number) => void;
 }) {
-  const [items, setItems] = useState(initialItems ?? []);
+  const [items, setItems] = useState<InboxItem[]>(initialItems ?? []);
   const [loading, setLoading] = useState(!initialItems);
   const [error, setError] = useState(false);
   const [reloadToken, setReloadToken] = useState(0);
@@ -66,6 +65,7 @@ export function NotificationDrawer({
         if (mounted) {
           setItems(data.items);
           setError(false);
+          onCountChange?.(data.items.filter((item) => !item.recipient.read_at).length);
         }
       } catch {
         if (mounted) setError(true);
@@ -79,82 +79,138 @@ export function NotificationDrawer({
       mounted = false;
       window.removeEventListener("notifications:changed", load);
     };
-  }, [open, reloadToken]);
+  }, [open, reloadToken, onCountChange]);
 
   const unreadCount = items.filter((item) => !item.recipient.read_at).length;
 
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex h-full w-full flex-col gap-0 border-l border-border/70 bg-background p-0 sm:max-w-md">
-        <SheetHeader className="border-b border-border/70 bg-background/85 px-5 pb-3.5 pt-5 pr-12 text-left backdrop-blur-md">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2.5">
-              <SheetTitle className="font-display text-xl font-semibold tracking-tight text-foreground">
-                Avisos
-              </SheetTitle>
-              {!loading && !error ? (
-                unreadCount > 0 ? (
-                  <span className="inline-flex items-center rounded-full bg-primary/12 px-2.5 py-0.5 text-xs font-medium text-primary-text tabular-nums">
-                    {unreadCount} novo{unreadCount === 1 ? "" : "s"}
-                  </span>
-                ) : (
-                  <span className="text-xs font-medium text-muted-foreground">
-                    Tudo em dia
-                  </span>
-                )
-              ) : null}
-            </div>
-            <SheetDescription className="text-xs text-muted-foreground">
-              Comunicados, lembretes e atualizações da academia
-            </SheetDescription>
-          </div>
-        </SheetHeader>
+  const handleClearAll = async () => {
+    if (unreadCount === 0) return;
+    const previous = items;
+    const now = new Date().toISOString();
+    const cleared = items.map((item) => ({
+      ...item,
+      recipient: { ...item.recipient, read_at: item.recipient.read_at ?? now },
+    }));
+    setItems(cleared);
+    onCountChange?.(0);
 
-        <div className="min-h-0 flex-1 overflow-y-auto bg-muted/25 px-4 py-4">
-          {error ? (
-            <Alert role="alert" variant="destructive" className="rounded-2xl">
-              <AlertDescription className="space-y-3">
-                <p>
-                  Não foi possível atualizar os avisos. Tente novamente ao abrir este painel.
+    try {
+      const response = await fetch("/api/notifications/inbox", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ all: true }),
+        keepalive: true,
+      });
+      if (!response.ok) throw new Error("failed");
+      window.dispatchEvent(new Event("notifications:changed"));
+    } catch {
+      setItems(previous);
+      onCountChange?.(previous.filter((item) => !item.recipient.read_at).length);
+      toast.error("Não foi possível limpar os avisos.");
+    }
+  };
+
+  return (
+    <div className="flex flex-col bg-popover text-popover-foreground">
+      <div className="flex items-center justify-between gap-2 border-b border-border/60 px-3.5 py-2.5">
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-foreground">Avisos</h2>
+          {!loading && !error && unreadCount > 0 ? (
+            <span className="inline-flex items-center rounded-full bg-primary/12 px-2 py-0.5 text-xs font-medium text-primary-text tabular-nums">
+              {unreadCount}
+            </span>
+          ) : null}
+        </div>
+        {!loading && !error && unreadCount > 0 ? (
+          <button
+            type="button"
+            onClick={handleClearAll}
+            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-primary-text transition-colors duration-(--duration-quick) hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <CheckCheck className="size-3.5" aria-hidden="true" />
+            Limpar tudo
+          </button>
+        ) : null}
+      </div>
+
+      <div className="max-h-96 overflow-y-auto">
+        {error ? (
+          <div className="p-3">
+            <Alert role="alert" variant="destructive" className="rounded-xl">
+              <AlertDescription className="space-y-2.5">
+                <p className="text-xs">
+                  Não foi possível atualizar os avisos.
                 </p>
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
-                  className="min-h-10 rounded-xl"
+                  className="h-8 rounded-lg text-xs"
                   onClick={() => {
                     setLoading(true);
                     setError(false);
                     setReloadToken((value) => value + 1);
                   }}
                 >
-                  <RefreshCw className="size-3.5" aria-hidden="true" />
+                  <RefreshCw className="size-3" aria-hidden="true" />
                   Tentar novamente
                 </Button>
               </AlertDescription>
             </Alert>
-          ) : loading ? (
-            <DrawerLoadingSkeleton />
-          ) : (
-            <NotificationInbox
-              key={JSON.stringify(items)}
-              items={items}
-              compact
-              onNavigate={() => onOpenChange(false)}
-            />
-          )}
-        </div>
+          </div>
+        ) : loading ? (
+          <DropdownLoadingSkeleton />
+        ) : (
+          <NotificationInbox
+            key={JSON.stringify(items)}
+            items={items}
+            compact
+            hideHeaderAction
+            onNavigate={onClose}
+            onItemsChange={(next) => {
+              setItems(next);
+              onCountChange?.(next.filter((item) => !item.recipient.read_at).length);
+            }}
+          />
+        )}
+      </div>
 
-        <div className="border-t border-border/70 bg-background/90 px-3 py-2.5 backdrop-blur-md">
-          <Link
-            href="/avisos"
-            onClick={() => onOpenChange(false)}
-            className="flex min-h-11 w-full items-center justify-between rounded-xl px-3 text-sm font-medium text-primary-text transition-colors duration-(--duration-quick) hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <span>Abrir central completa</span>
-            <ChevronRight className="size-4 text-muted-foreground" aria-hidden="true" />
-          </Link>
-        </div>
+      <div className="border-t border-border/60 px-2 py-1.5">
+        <Link
+          href="/avisos"
+          onClick={onClose}
+          className="flex min-h-9 w-full items-center justify-between rounded-lg px-2.5 text-xs font-medium text-primary-text transition-colors duration-(--duration-quick) hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <span>Ver central de avisos</span>
+          <ChevronRight className="size-3.5 text-muted-foreground" aria-hidden="true" />
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/** Mantido para compatibilidade: renderiza o mesmo conteúdo compacto dentro de Sheet quando invocado diretamente. */
+export function NotificationDrawer({
+  open,
+  onOpenChange,
+  initialItems,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  initialItems?: InboxItem[];
+}) {
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="flex h-full w-full flex-col gap-0 border-l border-border/70 bg-background p-0 sm:max-w-sm">
+        <SheetHeader className="sr-only">
+          <SheetTitle>Avisos</SheetTitle>
+          <SheetDescription>Pendências e comunicados da academia</SheetDescription>
+        </SheetHeader>
+        <NotificationPopoverContent
+          open={open}
+          onClose={() => onOpenChange(false)}
+          initialItems={initialItems}
+        />
       </SheetContent>
     </Sheet>
   );

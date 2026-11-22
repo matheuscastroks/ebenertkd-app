@@ -135,9 +135,9 @@ export async function setStudentAccessOverride(
     await notifyStudentEvent({
       studentId,
       audience: "family",
-      title: "Acesso ao aplicativo liberado pelo professor",
-      body: `O professor liberou seu acesso temporário ao aplicativo até ${formatBusinessDateBr(normalized)}.`,
-      minorBody: "Seu acesso ao aplicativo foi liberado pelo professor.",
+      title: "Acesso liberado",
+      body: `Acesso temporário ativo até ${formatBusinessDateBr(normalized)}.`,
+      minorBody: "Seu acesso ao aplicativo foi liberado.",
       dedupeKey: `access-override:${enrollment.$id}:${normalized}`,
       studentActionUrl: ROUTES.student,
       guardianActionUrl: guardianBillingPath,

@@ -105,15 +105,38 @@ export async function publishAnnouncement(actor: Profile, raw: unknown) {
   return createNotification({ kind: "announcement", title: input.title, body: input.body, audience: input.audience, audienceId: input.audienceId, actionUrl: input.actionUrl || "/avisos", dedupeKey: `announcement:${randomUUID()}`, actorAccountId: actor.account_id, recipientProfiles: recipients });
 }
 
-export async function listInbox(profile: Profile): Promise<InboxItem[]> {
+export async function listInbox(
+  profile: Profile,
+  options: { unreadOnly?: boolean; limit?: number } = {}
+): Promise<InboxItem[]> {
+  const unreadOnly = options.unreadOnly ?? true;
+  const limit = Math.min(Math.max(options.limit ?? 50, 1), 200);
   const { tables, config } = createAppwriteAdminClient();
+  const baseQueries = [
+    Query.equal("profile_id", [profile.$id]),
+    ...(unreadOnly ? [Query.isNull("read_at")] : []),
+    Query.orderDesc("created_at"),
+  ];
   const recipients: NotificationRecipient[] = [];
-  let cursor: string | undefined;
-  do {
-    const page = await tables.listRows<NotificationRecipient>({ databaseId: config.databaseId, tableId: APPWRITE_IDS.tables.notificationRecipients, queries: [Query.equal("profile_id", [profile.$id]), Query.orderDesc("created_at"), Query.limit(500), ...(cursor ? [Query.cursorAfter(cursor)] : [])] });
+  if (unreadOnly) {
+    const page = await tables.listRows<NotificationRecipient>({
+      databaseId: config.databaseId,
+      tableId: APPWRITE_IDS.tables.notificationRecipients,
+      queries: [...baseQueries, Query.limit(limit)],
+    });
     recipients.push(...page.rows);
-    cursor = page.rows.length === 500 ? page.rows.at(-1)?.$id : undefined;
-  } while (cursor);
+  } else {
+    let cursor: string | undefined;
+    do {
+      const page = await tables.listRows<NotificationRecipient>({
+        databaseId: config.databaseId,
+        tableId: APPWRITE_IDS.tables.notificationRecipients,
+        queries: [...baseQueries, Query.limit(500), ...(cursor ? [Query.cursorAfter(cursor)] : [])],
+      });
+      recipients.push(...page.rows);
+      cursor = page.rows.length === 500 ? page.rows.at(-1)?.$id : undefined;
+    } while (cursor);
+  }
   const notifications = new Map<string, AppNotification>();
   const ids = [...new Set(recipients.map((recipient) => recipient.notification_id))];
   for (let index = 0; index < ids.length; index += 50) {

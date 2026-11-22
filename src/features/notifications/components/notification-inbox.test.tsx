@@ -25,6 +25,7 @@ describe("NotificationInbox", () => {
         title: "Treino de graduação",
         body: "Exame de faixa confirmado para o próximo mês.",
         audience: "all",
+        action_url: "/aluno/exames",
         published_at: "2026-09-26T10:00:00Z",
       },
     },
@@ -36,38 +37,41 @@ describe("NotificationInbox", () => {
       notification: {
         $id: "notif-2",
         kind: "payment_reminder",
-        title: "Mensalidade disponível",
-        body: "Sua mensalidade de setembro já está aberta para pagamento.",
+        title: "Mensalidade antiga",
+        body: "Já lida anteriormente.",
         audience: "system",
         published_at: "2026-09-20T10:00:00Z",
       },
     },
   ];
 
-  it("renders unread notices without accordion dropdown and with mark as read button", () => {
+  it("exibe apenas avisos pendentes (sem aba de histórico)", () => {
     render(<NotificationInbox items={dummyItems} />);
 
     expect(screen.getByText("Treino de graduação")).toBeInTheDocument();
-    expect(
-      screen.getByText("Exame de faixa confirmado para o próximo mês.")
-    ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Marcar como lido" })).toBeInTheDocument();
+    expect(screen.queryByText("Mensalidade antiga")).not.toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: /Histórico/i })).not.toBeInTheDocument();
   });
 
-  it("moves unread notice to history tab upon marking as read", async () => {
+  it("remove o aviso imediatamente ao marcar como lido e mostra estado em dia", async () => {
+    const user = userEvent.setup();
     render(<NotificationInbox items={dummyItems} />);
 
-    const markButton = screen.getByRole("button", { name: "Marcar como lido" });
-    const user = userEvent.setup();
-    await user.click(markButton);
+    await user.click(screen.getByRole("button", { name: "Marcar como lido" }));
 
     expect(screen.queryByText("Treino de graduação")).not.toBeInTheDocument();
-    expect(screen.getByText("Nenhum aviso novo")).toBeInTheDocument();
+    expect(screen.getByText("Tudo em dia")).toBeInTheDocument();
+  });
 
-    const historyTab = screen.getByRole("tab", { name: /^Histórico/i });
-    await user.click(historyTab);
+  it("marca como lido automaticamente ao clicar no link do aviso", async () => {
+    const user = userEvent.setup();
+    const onNavigate = vi.fn();
+    render(<NotificationInbox items={dummyItems} onNavigate={onNavigate} />);
 
-    expect(screen.getByText("Treino de graduação")).toBeInTheDocument();
-    expect(screen.getByText("Mensalidade disponível")).toBeInTheDocument();
+    await user.click(screen.getByRole("link", { name: /Treino de graduação/ }));
+
+    expect(onNavigate).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText("Treino de graduação")).not.toBeInTheDocument();
+    expect(screen.getByText("Tudo em dia")).toBeInTheDocument();
   });
 });

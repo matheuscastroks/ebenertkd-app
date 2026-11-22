@@ -78,9 +78,9 @@ export async function renewContract(actor: Profile, raw: unknown) {
   await notifyStudentEvent({
     studentId: input.studentId,
     audience: "signer",
-    title: "Renovação de contrato disponível para assinatura",
-    body: "O professor emitiu a renovação do contrato anual. Leia e assine pelo aplicativo para manter a matrícula em dia.",
-    dedupeKey: `contract-renewed:${contract.$id}`,
+    title: "Renovação disponível",
+    body: "Assine o novo contrato anual para manter a matrícula ativa.",
+    dedupeKey: `pending:contract-signature:${contract.$id}`,
     studentActionUrl: studentContractPath(contract.$id),
     guardianActionUrl: (profileId) => guardianContractPath(profileId, contract.$id),
     actorAccountId: actor.account_id

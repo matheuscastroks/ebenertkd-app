@@ -18,7 +18,7 @@ import { requireProfile } from "@/lib/auth/session";
 
 async function AsyncNotificationCenter({ profile }: { profile: Profile }) {
   const [items, sent] = await Promise.all([
-    listInbox(profile),
+    listInbox(profile, { unreadOnly: true, limit: 50 }),
     profile.role === "admin" ? listSentAnnouncements(profile) : Promise.resolve(undefined),
   ]);
 
@@ -81,7 +81,7 @@ export default async function NotificationsPage({
     <PortalShell
       profile={profile}
       title="Avisos"
-      subtitle="Comunicados e lembretes da academia."
+      subtitle="Pendências e comunicados da academia."
       headerActions={
         <Suspense fallback={<Skeleton className="h-9 w-28 rounded-lg" />}>
           <HeaderActionButtons profile={profile} />

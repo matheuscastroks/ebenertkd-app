@@ -243,8 +243,8 @@ export async function addExamParticipant(actor: Profile, raw: unknown) {
   await notifyStudentEvent({
     studentId: student.$id,
     audience: "family",
-    title: `Inscrição confirmada: ${event.name}`,
-    body: `O professor inscreveu ${student.full_name} no exame para ${isRankKey(participant.target_rank_key) ? rankShortLabel(participant.target_rank_key, levelLabel) : participant.target_rank_key} em ${formatBusinessDateBr(event.event_date)}.`,
+    title: "Inscrito no exame",
+    body: `${student.full_name} · ${isRankKey(participant.target_rank_key) ? rankShortLabel(participant.target_rank_key, levelLabel) : participant.target_rank_key} em ${formatBusinessDateBr(event.event_date)}.`,
     dedupeKey: `exam-registered:${participant.$id}`,
     studentActionUrl: ROUTES.studentExams,
     guardianActionUrl: guardianExamsPath,
@@ -322,14 +322,14 @@ export async function recordExamResult(actor: Profile, raw: unknown) {
   if (input.result === "approved") await awardBadges([badgeForExamApproval({ studentId: student.$id, participantId: participant.$id, eventId: event.$id, beltName: targetLabel })]);
   const resultTitle =
     input.result === "approved"
-      ? `Parabéns! Aprovado para ${targetLabel}`
-      : `Resultado disponível: ${event.name}`;
+      ? `Aprovado para ${targetLabel}`
+      : `Resultado do exame · ${event.name}`;
   const resultBody =
     input.result === "approved"
-      ? `O professor registrou sua aprovação no exame ${event.name} para ${targetLabel}.${input.notes ? ` Observação: ${input.notes}` : ""}`
+      ? `Aprovação confirmada em ${event.name}.${input.notes ? ` Obs.: ${input.notes}` : ""}`
       : input.result === "absent"
-        ? `Sua presença não foi registrada no exame ${event.name}.${input.notes ? ` Observação: ${input.notes}` : ""}`
-        : `O professor publicou o resultado do exame ${event.name}. Confira os detalhes no aplicativo.${input.notes ? ` Observação: ${input.notes}` : ""}`;
+        ? `Ausência registrada em ${event.name}.${input.notes ? ` Obs.: ${input.notes}` : ""}`
+        : `Resultado publicado em ${event.name}.${input.notes ? ` Obs.: ${input.notes}` : ""}`;
   await notifyStudentEvent({
     studentId: student.$id,
     audience: "family",

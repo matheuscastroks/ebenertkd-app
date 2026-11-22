@@ -9,10 +9,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { toast } from "sonner";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { NAV_ICONS } from "@/lib/navigation/nav-icons";
 import type { AnimatedIconHandle } from "@/lib/use-parent-hover-animation";
-import { NotificationDrawer } from "@/features/notifications/components/notification-drawer";
+import { NotificationPopoverContent } from "@/features/notifications/components/notification-drawer";
 import { cn } from "@/lib/utils";
 
 const BellIcon = NAV_ICONS.notifications;
@@ -45,7 +45,7 @@ export function NotificationHeaderButton({
 
   const [count, setCount] = useState(resolvedInitialCount);
   const [displayCount, setDisplayCount] = useState(Math.max(1, resolvedInitialCount));
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const countRef = useRef(count);
   const bellIconRef = useRef<AnimatedIconHandle>(null);
 
@@ -60,74 +60,26 @@ export function NotificationHeaderButton({
     }, 650);
   }, []);
 
-  const notifyUnreadToast = useCallback((unreadCount: number) => {
-    if (unreadCount <= 0) return;
-    const key = "ebener:unread-toast-shown";
-    const viewedKey = "ebener:notifications:last-viewed-count";
-    try {
-      const lastViewed = localStorage.getItem(viewedKey);
-      if (lastViewed && Number(lastViewed) >= unreadCount) return;
-      if (sessionStorage.getItem(key) === String(unreadCount)) return;
-      sessionStorage.setItem(key, String(unreadCount));
-    } catch {
-      // Ignore storage access errors in restricted browsing contexts.
-    }
-    toast(
-      unreadCount === 1
-        ? "Você tem 1 novo aviso"
-        : `Você tem ${unreadCount} avisos não lidos`,
-      {
-        id: "unread-notifications",
-        description: "Toque em Ver para abrir a central de comunicados.",
-        action: {
-          label: "Ver",
-          onClick: () => {
-            setDrawerOpen(true);
-            try {
-              localStorage.setItem("ebener:notifications:last-viewed-count", String(unreadCount));
-            } catch {
-              // Ignore
-            }
-          },
-        },
-      }
-    );
-  }, []);
-
-  const openDrawer = useCallback(() => {
-    setDrawerOpen(true);
-    try {
-      localStorage.setItem("ebener:notifications:last-viewed-count", String(countRef.current));
-      sessionStorage.setItem("ebener:unread-toast-shown", String(countRef.current));
-    } catch {
-      // Ignore
+  const syncCount = useCallback((nextCount: number) => {
+    countRef.current = nextCount;
+    setCount(nextCount);
+    if (nextCount > 0) {
+      setDisplayCount(nextCount);
     }
   }, []);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      setCount(resolvedInitialCount);
-      if (resolvedInitialCount > 0) {
-        setDisplayCount(resolvedInitialCount);
-        // Só dispara toast se a contagem for estritamente nova e ainda não visualizada
-        try {
-          const lastViewed = localStorage.getItem("ebener:notifications:last-viewed-count");
-          if (!lastViewed || Number(lastViewed) < resolvedInitialCount) {
-            pulseBell();
-            notifyUnreadToast(resolvedInitialCount);
-          }
-        } catch {
-          pulseBell();
-          notifyUnreadToast(resolvedInitialCount);
-        }
+      if (resolvedInitialCount > countRef.current && resolvedInitialCount > 0) {
+        pulseBell();
       }
-      countRef.current = resolvedInitialCount;
+      syncCount(resolvedInitialCount);
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [resolvedInitialCount, notifyUnreadToast, pulseBell]);
+  }, [resolvedInitialCount, pulseBell, syncCount]);
 
   useEffect(() => {
-    const handleOpen = () => setDrawerOpen(true);
+    const handleOpen = () => setPopoverOpen(true);
     window.addEventListener("notifications:open-drawer", handleOpen);
     return () => window.removeEventListener("notifications:open-drawer", handleOpen);
   }, []);
@@ -142,26 +94,10 @@ export function NotificationHeaderButton({
         if (!mounted || typeof payload.count !== "number") return;
         if (payload.count > countRef.current) {
           pulseBell();
-          notifyUnreadToast(payload.count);
-        } else if (payload.count < countRef.current) {
-          try {
-            const key = "ebener:unread-toast-shown";
-            if (payload.count <= 0) {
-              sessionStorage.removeItem(key);
-            } else {
-              sessionStorage.setItem(key, String(payload.count));
-            }
-          } catch {
-            // Ignore storage access errors.
-          }
         }
-        countRef.current = payload.count;
-        setCount(payload.count);
-        if (payload.count > 0) {
-          setDisplayCount(payload.count);
-        }
+        syncCount(payload.count);
       } catch {
-        // Keep the last known count if the device is offline.
+        // Mantém a última contagem conhecida se o dispositivo estiver offline.
       }
     };
     const onVisible = () => {
@@ -180,46 +116,57 @@ export function NotificationHeaderButton({
       window.removeEventListener("notifications:changed", refresh);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [notifyUnreadToast, pulseBell]);
+  }, [pulseBell, syncCount]);
 
   const hasUnread = count > 0;
   const formattedCount = displayCount > 99 ? "99+" : String(displayCount);
 
   return (
-    <>
-      <button
-        type="button"
-        onClick={openDrawer}
-        onMouseEnter={() => bellIconRef.current?.startAnimation()}
-        onMouseLeave={() => bellIconRef.current?.stopAnimation()}
-        aria-label={hasUnread ? `Avisos, ${count} não lidos` : "Avisos"}
-        aria-expanded={drawerOpen}
-        title={hasUnread ? `Avisos · ${count} não lidos` : "Avisos"}
-        className={cn(
-          "relative inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-sidebar-border/80 bg-background/80 text-sidebar-foreground shadow-xs transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none",
-          drawerOpen && "border-primary/40 bg-background text-primary-text",
-          className
-        )}
-      >
-        <BellIcon
-          ref={bellIconRef}
-          size={18}
-          strokeWidth={2}
-          aria-hidden="true"
-          className="flex size-4.5"
-        />
-        <span
-          className="t-badge pointer-events-none absolute -right-1 -top-1"
-          data-open={hasUnread ? "true" : "false"}
-          aria-hidden="true"
+    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          onMouseEnter={() => bellIconRef.current?.startAnimation()}
+          onMouseLeave={() => bellIconRef.current?.stopAnimation()}
+          aria-label={hasUnread ? `Avisos, ${count} não lidos` : "Avisos"}
+          aria-expanded={popoverOpen}
+          title={hasUnread ? `Avisos · ${count} não lidos` : "Avisos"}
+          className={cn(
+            "relative inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-sidebar-border/80 bg-background/80 text-sidebar-foreground shadow-xs transition-colors duration-(--duration-quick) ease-(--ease-smooth-out) hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none",
+            popoverOpen && "border-primary/40 bg-background text-primary-text",
+            className
+          )}
         >
-          <span className="t-badge-dot flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold leading-none text-primary-foreground tabular-nums shadow-xs ring-2 ring-sidebar select-none text-center">
-            {formattedCount}
+          <BellIcon
+            ref={bellIconRef}
+            size={18}
+            strokeWidth={2}
+            aria-hidden="true"
+            className="flex size-4.5"
+          />
+          <span
+            className="t-badge pointer-events-none absolute -right-1 -top-1"
+            data-open={hasUnread ? "true" : "false"}
+            aria-hidden="true"
+          >
+            <span className="t-badge-dot flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold leading-none text-primary-foreground tabular-nums shadow-xs ring-2 ring-sidebar select-none text-center">
+              {formattedCount}
+            </span>
           </span>
-        </span>
-      </button>
-      <NotificationDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />
-    </>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="end"
+        sideOffset={8}
+        className="w-80 overflow-hidden rounded-xl p-0 shadow-md ring-1 ring-border/70 sm:w-96"
+      >
+        <NotificationPopoverContent
+          open={popoverOpen}
+          onClose={() => setPopoverOpen(false)}
+          onCountChange={syncCount}
+        />
+      </PopoverContent>
+    </Popover>
   );
 }
 

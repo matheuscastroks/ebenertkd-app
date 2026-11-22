@@ -58,10 +58,10 @@ export function buildPendingNotificationSpecs(input: {
   if (!enrollment || enrollment.status === "draft") {
     specs.push({
       kind: "system",
-      title: `${subjectPrefix}Complete sua ficha de matrícula`,
+      title: `${subjectPrefix}Complete sua matrícula`,
       body: isGuardianView
-        ? `A ficha de matrícula de ${student.full_name} ainda está incompleta. Envie os dados para o professor liberar a matrícula.`
-        : "Sua ficha de matrícula ainda está em rascunho. Complete os dados e envie para análise do professor.",
+        ? `Finalize a ficha de ${student.full_name} para análise.`
+        : "Finalize e envie sua ficha de matrícula.",
       actionUrl: links.enrollment,
       dedupeKey: `pending:enrollment-draft:${student.$id}`,
     });
@@ -73,10 +73,10 @@ export function buildPendingNotificationSpecs(input: {
     if (pendingContract) {
       specs.push({
         kind: "system",
-        title: `${subjectPrefix}Contrato pronto para assinatura`,
+        title: `${subjectPrefix}Contrato pronto para assinar`,
         body: isGuardianView
-          ? `O contrato de matrícula de ${student.full_name} foi liberado pelo professor. Leia e assine para concluir.`
-          : "Seu contrato de matrícula foi liberado pelo professor. Leia e assine pelo aplicativo para ativar sua matrícula.",
+          ? `Assine o contrato de ${student.full_name} para concluir.`
+          : "Leia e assine seu contrato para ativar a matrícula.",
         actionUrl: links.contract(pendingContract.$id),
         dedupeKey: `pending:contract-signature:${pendingContract.$id}`,
       });
@@ -88,30 +88,30 @@ export function buildPendingNotificationSpecs(input: {
     if (parq.status === "missing") {
       specs.push({
         kind: "system",
-        title: `${subjectPrefix}Falta responder o questionário de saúde`,
+        title: `${subjectPrefix}Questionário de saúde pendente`,
         body: isGuardianView
-          ? `Responda as 10 perguntas anuais de saúde de ${student.full_name}. Leva menos de 2 minutos e ajuda o professor a cuidar dos treinos.`
-          : "Responda 10 perguntas rápidas sobre sua saúde uma vez por ano para treinar com segurança.",
+          ? `Responda o PAR-Q anual de ${student.full_name}.`
+          : "Responda o PAR-Q anual (menos de 2 min).",
         actionUrl: links.parq,
         dedupeKey: `pending:parq-missing:${student.$id}`,
       });
     } else if (parq.status === "expiring_soon" && parq.expiresAt) {
       specs.push({
         kind: "system",
-        title: `${subjectPrefix}Questionário de saúde vence em breve`,
+        title: `${subjectPrefix}PAR-Q vence em breve`,
         body: isGuardianView
-          ? `O questionário anual de saúde de ${student.full_name} vence em ${formatBusinessDateBr(parq.expiresAt)}. Renove agora pelo portal.`
-          : `Seu questionário de saúde anual vence em ${formatBusinessDateBr(parq.expiresAt)}. Responda novamente em menos de 2 minutos.`,
+          ? `Questionário de ${student.full_name} vence em ${formatBusinessDateBr(parq.expiresAt)}.`
+          : `Seu questionário de saúde vence em ${formatBusinessDateBr(parq.expiresAt)}.`,
         actionUrl: links.parq,
         dedupeKey: `pending:parq-expiring:${parq.submissionId ?? student.$id}:${parq.expiresAt}`,
       });
     } else if (parq.status === "expired") {
       specs.push({
         kind: "system",
-        title: `${subjectPrefix}Renove o questionário de saúde anual`,
+        title: `${subjectPrefix}Renove o questionário de saúde`,
         body: isGuardianView
-          ? `O questionário anual de saúde de ${student.full_name} venceu. Atualize as respostas para manter a ficha em dia.`
-          : "Seu questionário de saúde anual venceu. Atualize suas respostas para manter sua ficha em dia.",
+          ? `O PAR-Q anual de ${student.full_name} venceu.`
+          : "Seu PAR-Q anual venceu. Atualize suas respostas.",
         actionUrl: links.parq,
         dedupeKey: `pending:parq-expired:${parq.submissionId ?? student.$id}:${parq.expiresAt ?? "none"}`,
       });
@@ -123,20 +123,20 @@ export function buildPendingNotificationSpecs(input: {
     if (access?.locked) {
       specs.push({
         kind: "payment_reminder",
-        title: `${subjectPrefix}Acesso ao aplicativo pausado`,
+        title: `${subjectPrefix}Acesso ao app pausado`,
         body: isGuardianView
-          ? `O ciclo mensal de acesso de ${student.full_name} expirou. Envie o comprovante PIX no financeiro para liberar o app imediatamente.`
-          : `Seu ciclo de ${access.windowDays} dias após o último pagamento expirou. Envie o comprovante PIX no financeiro para liberar o aplicativo na hora.`,
+          ? `Envie o comprovante PIX de ${student.full_name} para reativar.`
+          : "Envie o comprovante PIX no financeiro para liberar o app.",
         actionUrl: links.billing,
         dedupeKey: `pending:access-locked:${student.$id}:${access.accessValidUntil ?? referenceDay}`,
       });
     } else if (access?.status === "expiring_soon" && access.accessValidUntil) {
       specs.push({
         kind: "payment_reminder",
-        title: `${subjectPrefix}Ciclo mensal de acesso vence em breve`,
+        title: `${subjectPrefix}Acesso vence em ${formatBusinessDateBr(access.accessValidUntil)}`,
         body: isGuardianView
-          ? `O acesso de ${student.full_name} ao aplicativo vale até ${formatBusinessDateBr(access.accessValidUntil)}. Envie o comprovante da mensalidade para evitar pausa.`
-          : `Seu acesso ao aplicativo vale até ${formatBusinessDateBr(access.accessValidUntil)}. Envie o comprovante da mensalidade para continuar sem pausas.`,
+          ? `Envie a mensalidade de ${student.full_name} para evitar pausa.`
+          : "Envie o comprovante da mensalidade para evitar pausa.",
         actionUrl: links.billing,
         dedupeKey: `pending:access-expiring:${student.$id}:${access.accessValidUntil}`,
       });
@@ -155,7 +155,7 @@ export function buildPendingNotificationSpecs(input: {
         specs.push({
           kind: "payment_reminder",
           title: `${subjectPrefix}${charge.description} em atraso`,
-          body: `${charge.description} (${formatBrl(charge.amount_cents)}) venceu em ${formatBusinessDateBr(dueDay)}. Copie a chave PIX e envie o comprovante no financeiro.`,
+          body: `${formatBrl(charge.amount_cents)} · venceu em ${formatBusinessDateBr(dueDay)}. Envie o comprovante PIX.`,
           actionUrl: links.billing,
           dedupeKey: `pending:charge-overdue:${charge.$id}`,
         });
@@ -165,7 +165,7 @@ export function buildPendingNotificationSpecs(input: {
           specs.push({
             kind: "payment_reminder",
             title: `${subjectPrefix}${charge.description} vence ${daysLeft <= 0 ? "hoje" : daysLeft === 1 ? "amanhã" : `em ${daysLeft} dias`}`,
-            body: `${charge.description} (${formatBrl(charge.amount_cents)}) tem vencimento em ${formatBusinessDateBr(dueDay)}. Você já pode enviar o comprovante PIX pelo financeiro.`,
+            body: `${formatBrl(charge.amount_cents)} · vencimento em ${formatBusinessDateBr(dueDay)}.`,
             actionUrl: links.billing,
             dedupeKey: `pending:charge-due-soon:${charge.$id}`,
           });

@@ -95,24 +95,12 @@ export async function saveEnrollmentDraft(target: Profile, actor: Profile, input
   invalidateTags(CACHE_TAGS.enrollments, CACHE_TAGS.studentsAll, CACHE_TAGS.student(student.$id), CACHE_TAGS.studentProfile(target.$id));
   await writeAuditEvent(auditAction, actor.account_id, "enrollment", enrollment.$id, { student_id: student.$id });
   if (isDraft && submit) {
-    await Promise.all([
-      notifyAdmins({
-        title: "Nova matrícula para análise",
-        body: `${student.full_name} concluiu o cadastro.`,
-        dedupeKey: `enrollment-submitted:${enrollment.$id}:${enrollment.revision}`,
-        actionUrl: `/admin/matriculas/${student.$id}`
-      }).catch(() => undefined),
-      notifyStudentEvent({
-        studentId: student.$id,
-        audience: "family",
-        title: "Ficha de matrícula enviada",
-        body: "Recebemos seus dados! O professor vai analisar sua matrícula e você será avisado assim que avançar.",
-        dedupeKey: `enrollment-received:${enrollment.$id}:${enrollment.revision}`,
-        studentActionUrl: ROUTES.studentEnrollment,
-        guardianActionUrl: guardianEnrollmentPath,
-        actorAccountId: actor.account_id
-      }).catch(() => undefined)
-    ]);
+    await notifyAdmins({
+      title: "Nova matrícula",
+      body: `${student.full_name} enviou a ficha para análise.`,
+      dedupeKey: `enrollment-submitted:${enrollment.$id}:${enrollment.revision}`,
+      actionUrl: `/admin/matriculas/${student.$id}`
+    }).catch(() => undefined);
   }
   return getEnrollmentBundleByStudentId(student.$id);
 }
@@ -177,14 +165,14 @@ export async function adminUpdateStudent(actor: Profile, studentId: string, inpu
       ? rankShortLabel(updatedStudent.rank_key, (await getBeltContext()).levelLabel)
       : "atualizada";
   const updateSummary = classChanged
-    ? `O professor atualizou sua ficha e definiu sua turma como ${trainingClass.name}.`
+    ? `Turma definida: ${trainingClass.name}.`
     : beltChanged
-      ? `O professor atualizou sua graduação na ficha para ${beltLabel}.`
-      : "O professor atualizou informações da sua ficha de matrícula.";
+      ? `Graduação atualizada para ${beltLabel}.`
+      : "Seus dados cadastrais foram atualizados.";
   await notifyStudentEvent({
     studentId,
     audience: "family",
-    title: "Sua ficha de matrícula foi atualizada",
+    title: "Ficha atualizada",
     body: updateSummary,
     dedupeKey: `student-updated-by-admin:${studentId}:${now}`,
     studentActionUrl: ROUTES.studentEnrollment,
@@ -258,11 +246,11 @@ export async function advanceToSignature(actor: Profile, studentId: string) {
   await notifyStudentEvent({
     studentId,
     audience: "family",
-    title: "Matrícula aprovada! Contrato pronto para assinar",
-    body: "O professor aprovou sua ficha e liberou o contrato. Leia e assine pelo aplicativo para ativar sua matrícula.",
-    minorTitle: "Sua matrícula avançou!",
-    minorBody: "O professor aprovou sua ficha e enviou o contrato para o seu responsável assinar.",
-    dedupeKey: `enrollment-awaiting-signature:${contract.$id}`,
+    title: "Contrato pronto para assinar",
+    body: "Matrícula aprovada. Assine o contrato para ativar.",
+    minorTitle: "Matrícula aprovada",
+    minorBody: "Contrato enviado para seu responsável assinar.",
+    dedupeKey: `pending:contract-signature:${contract.$id}`,
     studentActionUrl: studentContractPath(contract.$id),
     guardianActionUrl: (profileId) => guardianContractPath(profileId, contract.$id),
     actorAccountId: actor.account_id

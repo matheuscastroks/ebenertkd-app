@@ -37,8 +37,8 @@ export async function requestCancellation(actor: Profile, raw: unknown) {
   invalidateTags(CACHE_TAGS.cancellations);
   await writeAuditEvent("contract.cancellation_requested", actor.account_id, "cancellation_request", request.$id, { suggested_fee_cents: fee });
   await notifyAdmins({
-    title: `Pedido de cancelamento · ${contract.student_name}`,
-    body: `${actor.full_name} solicitou o cancelamento da matrícula para ${input.targetExitMonth}.`,
+    title: "Pedido de cancelamento",
+    body: `${contract.student_name} solicitou saída em ${input.targetExitMonth}.`,
     dedupeKey: `cancellation-requested:${request.$id}`,
     actionUrl: ROUTES.adminCancellations
   }).catch(() => undefined);
@@ -86,10 +86,10 @@ export async function decideCancellation(actor: Profile, raw: unknown) {
   await notifyStudentEvent({
     studentId: request.student_id,
     audience: "signer",
-    title: input.decision === "approved" ? "Pedido de cancelamento aprovado" : "Pedido de cancelamento não aprovado",
+    title: input.decision === "approved" ? "Cancelamento aprovado" : "Cancelamento recusado",
     body: input.decision === "approved"
-      ? `Seu pedido de cancelamento foi aprovado pelo professor.${input.notes ? ` Observação: ${input.notes}` : ""}`
-      : `O professor analisou seu pedido de cancelamento e não aprovou.${input.notes ? ` Motivo: ${input.notes}` : ""}`,
+      ? `Matrícula encerrada.${input.notes ? ` Obs.: ${input.notes}` : ""}`
+      : `Pedido não aprovado.${input.notes ? ` Motivo: ${input.notes}` : ""}`,
     dedupeKey: `cancellation-decided:${request.$id}:${input.decision}`,
     studentActionUrl: ROUTES.studentContracts,
     guardianActionUrl: guardianContractsPath,

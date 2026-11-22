@@ -88,7 +88,7 @@ export async function uploadStudentDocument(
       document_type: documentType
     });
     invalidateTags(CACHE_TAGS.enrollments, CACHE_TAGS.student(studentId), CACHE_TAGS.studentProfile(target.$id));
-    await notifyAdmins({ title: "Documento aguardando análise", body: `${bundle.student.full_name} enviou ${documentType === "profile_photo" ? "uma foto de perfil" : "um atestado médico"}.`, dedupeKey: `document-pending:${document.$id}:${document.updated_at}`, actionUrl: `/admin/matriculas/${studentId}` }).catch(() => undefined);
+    await notifyAdmins({ title: "Documento para revisar", body: `${bundle.student.full_name} enviou ${documentType === "profile_photo" ? "foto de perfil" : "atestado médico"}.`, dedupeKey: `document-pending:${document.$id}:${document.updated_at}`, actionUrl: `/admin/matriculas/${studentId}` }).catch(() => undefined);
     return document;
   } catch (error) {
     await storage.deleteFile({ bucketId: APPWRITE_IDS.bucket, fileId: createdFile.$id }).catch(() => undefined);
@@ -143,15 +143,17 @@ export async function reviewStudentDocument(
   });
   invalidateTags(CACHE_TAGS.enrollments, CACHE_TAGS.student(document.student_id), CACHE_TAGS.studentProfile(bundle.student.profile_id));
 
-  const docLabel = document.document_type === "profile_photo" ? "foto de perfil" : "atestado médico";
+  const isPhoto = document.document_type === "profile_photo";
   await notifyStudentEvent({
     studentId: document.student_id,
     audience: "family",
-    title: decision === "approved" ? `Seu ${docLabel} foi aprovado` : `Precisamos de um novo ${docLabel}`,
+    title: decision === "approved"
+      ? (isPhoto ? "Foto de perfil aprovada" : "Atestado médico aprovado")
+      : (isPhoto ? "Reenvie a foto de perfil" : "Reenvie o atestado médico"),
     body:
       decision === "approved"
-        ? `O professor conferiu e aprovou o envio do seu ${docLabel}.`
-        : `O professor pediu um novo envio do ${docLabel}. Motivo: ${reason?.trim()}.`,
+        ? "Documento conferido pela academia."
+        : `Motivo: ${reason?.trim()}.`,
     dedupeKey: `document-reviewed:${documentId}:${decision}:${Date.now()}`,
     studentActionUrl: ROUTES.studentEnrollment,
     guardianActionUrl: guardianEnrollmentPath,

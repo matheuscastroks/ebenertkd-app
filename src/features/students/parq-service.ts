@@ -221,29 +221,22 @@ export async function submitParq(
   if (validated.hasYesAnswer) {
     await Promise.all([
       notifyAdmins({
-        title: `Questionário de saúde com atenção · ${student.full_name}`,
-        body: `${student.full_name} respondeu "Sim" nas perguntas ${validated.yesQuestionNumbers.join(", ")} do questionário anual de saúde (PAR-Q). Confira se o atestado médico está atualizado.`,
+        title: "PAR-Q requer atenção",
+        body: `${student.full_name} marcou Sim nas perguntas ${validated.yesQuestionNumbers.join(", ")}.`,
         actionUrl: adminEnrollmentPath(student.$id),
         dedupeKey: `parq-yes:${created.$id}`,
       }).catch(() => undefined),
       notifyStudentEvent({
         studentId: student.$id,
         audience: "signer",
-        title: "Questionário de saúde salvo · lembrete de atestado",
-        body: "Como houve resposta \"Sim\" no questionário de saúde, recomendamos enviar um atestado médico atualizado na sua ficha de matrícula.",
+        title: "Atestado médico recomendado",
+        body: "Envie um atestado atualizado na ficha após o PAR-Q.",
         dedupeKey: `parq-medical-hint:${created.$id}`,
         studentActionUrl: ROUTES.studentEnrollment,
         guardianActionUrl: guardianEnrollmentPath,
         actorAccountId: actor.account_id,
       }).catch(() => undefined),
     ]);
-  } else {
-    await notifyAdmins({
-      title: `Questionário de saúde respondido · ${student.full_name}`,
-      body: `${student.full_name} preencheu e assinou o questionário anual de saúde sem restrições declaradas.`,
-      actionUrl: adminEnrollmentPath(student.$id),
-      dedupeKey: `parq-submitted:${created.$id}`,
-    }).catch(() => undefined);
   }
 
   return created;
