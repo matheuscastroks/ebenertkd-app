@@ -141,10 +141,7 @@ export function ReviewPanel({
   defaultMonthlyFeeCents?: number;
   /** Duração sugerida do contrato, em meses (política da academia). */
   contractDurationMonths?: number;
-  /**
-   * Configuração da academia lida no servidor pela página. O painel é componente de servidor
-   * (importa regras com `node:crypto`), então não pode usar os hooks do AcademyConfigProvider.
-   */
+  /** Configuração da academia lida no servidor pela página e repassada ao painel. */
   dueDayOptions?: number[];
   ranks?: readonly PublicRank[];
   levelLabel?: string;

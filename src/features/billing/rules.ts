@@ -1,6 +1,9 @@
 import { createHash } from "node:crypto";
 import { DEFAULT_BILLING_POLICY } from "@/features/academy/defaults";
+import { effectiveChargeStatus } from "@/features/billing/charge-status";
 import type { Charge, Payment } from "@/features/billing/types";
+
+export { effectiveChargeStatus };
 
 export function resolveDueDate(competence: string, dueDay: number) {
   const [year, month] = competence.split("-").map(Number);
@@ -21,9 +24,6 @@ export function shouldGenerateCompetence(competence: string, referenceDate: stri
   const start = Date.parse(`${competence}-01T00:00:00Z`);
   const reference = Date.parse(`${referenceDate.slice(0, 10)}T00:00:00Z`);
   return reference >= start - leadDays * 86400000;
-}
-export function effectiveChargeStatus(status: Charge["status"], dueDate: string, referenceDate: string): Charge["status"] {
-  return status === "pending" && dueDate.slice(0, 10) < referenceDate.slice(0, 10) ? "overdue" : status;
 }
 export function billingSummary(charges: Charge[], payments: Payment[], startDate: string, endDate: string) {
   const chargeIds = new Set(charges.map((charge) => charge.$id));

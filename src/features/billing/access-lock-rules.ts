@@ -1,4 +1,4 @@
-import { effectiveChargeStatus } from "@/features/billing/rules";
+import { effectiveChargeStatus } from "@/features/billing/charge-status";
 import type { Charge, Payment } from "@/features/billing/types";
 import type { Enrollment } from "@/features/students/types";
 import { DEFAULT_ACCESS_POLICY, type AccessPolicy } from "@/features/academy/defaults";
